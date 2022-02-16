@@ -8,4 +8,4 @@ COPY . /src
 RUN mkdir /build && cd /build && cmake /src && cmake --build .
 # RUN cd /src && make install
 
-CMD [ "/build/julia/julia_embed" ]
+CMD [ "/build/main/oif_main" ]

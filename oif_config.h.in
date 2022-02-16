@@ -1,0 +1,6 @@
+#ifndef JULIA_EMBED_OIF_CONFIG_H
+#define JULIA_EMBED_OIF_CONFIG_H
+
+#cmakedefine OIF_USE_JULIA
+
+#endif //JULIA_EMBED_OIF_CONFIG_H

@@ -53,7 +53,7 @@ test:
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     stage: run
     script:
-        - /build/julia/julia_embed
+        - /build/main/oif_main
 
 pre-commit:
     extends: .base

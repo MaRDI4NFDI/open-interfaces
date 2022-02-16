@@ -1,10 +1,15 @@
 
+find_package(Julia REQUIRED)
+add_library(oif_julia oif_julia.c)
 
-add_executable(julia_embed embed.c)
-
-target_include_directories(julia_embed PUBLIC
+target_include_directories(oif_julia PUBLIC
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   $<BUILD_INTERFACE:${JLCXX_INCLUDE_DIR}>
   "$<BUILD_INTERFACE:${Julia_INCLUDE_DIRS}>"
+                           ${CMAKE_CURRENT_BINARY_DIR}/..
 )
-target_link_libraries(julia_embed $<BUILD_INTERFACE:${Julia_LIBRARY}>)
+target_link_libraries(oif_julia $<BUILD_INTERFACE:${Julia_LIBRARY}>)
+
+target_include_directories(oif_julia
+                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+                           )
