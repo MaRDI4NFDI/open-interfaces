@@ -5,6 +5,7 @@ RUN apt update && apt install -y gcc g++ libjulia-dev cmake
 
 COPY . /src
 
-RUN cd /src && cmake . && make
+RUN mkdir /build && cd /build && cmake /src && cmake --build .
+# RUN cd /src && make install
 
-CMD [ "/src/julia_embed" ]
+CMD [ "/build/julia/julia_embed" ]
