@@ -45,12 +45,12 @@ build:
     stage: image
     needs: []
     script:
-        - docker buildx build --build-arg REGISTRY=harbor.uni-muenster.de/proxy-docker/library -t ${CI_REGISTRY_IMAGE} .
+        - docker buildx build --build-arg REGISTRY=harbor.uni-muenster.de/proxy-docker/library -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} .
         - docker push ${CI_REGISTRY_IMAGE}
 
 test:
     extends: .base
-    image: ${CI_REGISTRY_IMAGE}
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     stage: run
     script:
         - /src/julia_embed
