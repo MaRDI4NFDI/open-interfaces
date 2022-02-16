@@ -1,6 +1,6 @@
 FROM docker.io/julia:1.7-bullseye
 
-RUN apt update && apt install -y gcc g++ libjulia-dev cmake 
+RUN apt update && apt install -y gcc g++ libjulia-dev cmake
 
 COPY . /src
 
