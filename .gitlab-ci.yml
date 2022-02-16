@@ -1,0 +1,65 @@
+---
+stages:
+    - sanity
+    - image
+    - run
+
+#************ definition of base jobs *********************************************************************************#
+# https://docs.gitlab.com/ee/ci/yaml/README.html#workflowrules-templates
+include:
+    - template: Workflows/Branch-Pipelines.gitlab-ci.yml
+
+.base:
+    image: zivgitlab.wwu.io/ag-ohlberger/mardi/container/alpine-base:${IMAGE_TAG}
+    retry:
+        max: 2
+        when:
+            - always
+    tags:
+        - autoscaling
+    variables:
+        ENV_FILE: .ci/env
+        IMAGE_TAG: f02d74d27f40913956ed017197a53571a00f560c
+
+
+.dind:
+    extends: .base
+    retry:
+        max: 2
+        when:
+            - runner_system_failure
+            - stuck_or_timeout_failure
+            - api_failure
+    image: zivgitlab.wwu.io/ag-ohlberger/mardi/container/docker-in-docker@sha256:65346e590b841880fcb3e53e814780567d38f96c0e896360f0534014ecf6c1d5
+    variables:
+        DOCKER_HOST: tcp://docker:2375/
+        DOCKER_DRIVER: overlay2
+    before_script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    services:
+        - name: zivgitlab.wwu.io/ag-ohlberger/mardi/container/docker-in-docker@sha256:65346e590b841880fcb3e53e814780567d38f96c0e896360f0534014ecf6c1d5
+          alias: docker
+
+build:
+    extends: .dind
+    stage: image
+    script:
+        - docker buildx build --build-arg REGISTRY=harbor.uni-muenster.de/proxy-docker/library -t ${CI_REGISTRY_IMAGE} .
+        - docker push ${CI_REGISTRY_IMAGE}
+
+test:
+    extends: .base
+    image: ${CI_REGISTRY_IMAGE}
+    stage: run
+    script:
+        - /src/julia_embed
+
+pre-commit:
+    extends: .base
+    image: zivgitlab.wwu.io/ag-ohlberger/mardi/container/python-base:${IMAGE_TAG}
+    stage: sanity
+    before_script:
+        - python3 -m pip install pre-commit
+        - pre-commit install --install-hooks
+    script:
+        - pre-commit run -a
