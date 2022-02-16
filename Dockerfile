@@ -5,7 +5,10 @@ RUN apt update && apt install -y gcc g++ libjulia-dev cmake
 
 COPY . /src
 
-RUN mkdir /build && cd /build && cmake /src && cmake --build .
-# RUN cd /src && make install
+RUN mkdir /build \
+    && cd /build \
+    && cmake /src \
+    && cmake --build . \
+    && cmake --install .
 
-CMD [ "/build/main/oif_main" ]
+CMD [ "/usr/local/bin/oif_main" ]

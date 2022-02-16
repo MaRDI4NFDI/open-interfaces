@@ -5,3 +5,4 @@ endif()
 target_include_directories(oif_main
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/..
                            )
+install(TARGETS oif_main DESTINATION bin)

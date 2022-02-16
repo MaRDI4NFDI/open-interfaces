@@ -13,3 +13,5 @@ target_link_libraries(oif_julia $<BUILD_INTERFACE:${Julia_LIBRARY}>)
 target_include_directories(oif_julia
                            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
                            )
+install(TARGETS oif_julia DESTINATION lib)
+install(FILES oif_julia.h DESTINATION include)
