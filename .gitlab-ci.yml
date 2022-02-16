@@ -43,6 +43,7 @@ include:
 build:
     extends: .dind
     stage: image
+    needs: []
     script:
         - docker buildx build --build-arg REGISTRY=harbor.uni-muenster.de/proxy-docker/library -t ${CI_REGISTRY_IMAGE} .
         - docker push ${CI_REGISTRY_IMAGE}
