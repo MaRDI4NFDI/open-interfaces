@@ -46,7 +46,7 @@ build:
     needs: []
     script:
         - docker buildx build --build-arg REGISTRY=harbor.uni-muenster.de/proxy-docker/library -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} .
-        - docker push ${CI_REGISTRY_IMAGE}
+        - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
 
 test:
     extends: .base
