@@ -1,7 +1,4 @@
-ARG REGISTRY=docker.io
-FROM ${REGISTRY}/julia:1.7-bullseye
-
-RUN apt update && apt install -y gcc g++ libjulia-dev cmake
+FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:1f1286003e5ac4a466df0bcc8ce429a8284aac92
 
 COPY . /src
 
