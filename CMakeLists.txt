@@ -16,6 +16,7 @@ option(OIF_USE_JULIA "Use tutorial provided math implementation" ON)
 if(OIF_USE_JULIA)
   add_subdirectory(julia)
 endif()
+add_subdirectory(connector)
 
 configure_file(oif_config.h.in ${PROJECT_BINARY_DIR}/oif_config.h)
 
