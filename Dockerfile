@@ -1,4 +1,4 @@
-FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:1f1286003e5ac4a466df0bcc8ce429a8284aac92
+FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:f14ad416bb3a16d48c69206e335ed09fea83307d
 
 COPY . /src
 
