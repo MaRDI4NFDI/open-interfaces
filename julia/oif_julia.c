@@ -9,7 +9,7 @@ int oif_init_lang() {
   return 0;
 }
 
-void oif_eval_expression(const char *str) {
+int oif_eval_expression(const char *str) {
   if (str)
     jl_eval_string(str);
   else

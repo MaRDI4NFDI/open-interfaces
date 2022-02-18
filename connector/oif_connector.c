@@ -4,28 +4,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void *__oif_lib_handle;
+
 int oif_init_lang() {
-  void *handle;
+
   int (*init_lang)();
 
-  handle = dlopen("liboif_julia.so", RTLD_LAZY);
+  __oif_lib_handle = dlopen("liboif_julia.so", RTLD_LAZY);
 
-  if (!handle) {
+  if (!__oif_lib_handle) {
     fprintf(stderr, "Error: %s\n", dlerror());
-    return EXIT_FAILURE;
+    return OIF_LOAD_ERROR;
   }
 
-  *(int **)(&init_lang) = dlsym(handle, "oif_init_lang");
+  *(int **)(&init_lang) = dlsym(__oif_lib_handle, "oif_init_lang");
   if (!init_lang) {
     fprintf(stderr, "Error: %s\n", dlerror());
-    dlclose(handle);
-    return EXIT_FAILURE;
+    dlclose(__oif_lib_handle);
+    return OIF_SYMBOL_ERROR;
   }
 
   init_lang();
-  dlclose(handle);
 
   return EXIT_SUCCESS;
 }
-void oif_eval_expression(const char *str) {}
-void oif_deinit_lang() {}
+
+int oif_eval_expression(const char *str) {
+  int (*eval_expression)();
+  *(void **)(&eval_expression) = dlsym(__oif_lib_handle, "oif_eval_expression");
+  if (!eval_expression) {
+    fprintf(stderr, "Error: %s\n", dlerror());
+    dlclose(__oif_lib_handle);
+    return OIF_SYMBOL_ERROR;
+  }
+  eval_expression(str);
+}
+
+void oif_deinit_lang() { dlclose(__oif_lib_handle); }
