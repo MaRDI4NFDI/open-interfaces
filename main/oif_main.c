@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 
-int main(int argc, char *argv[]) {
+int main(OIF_UNUSED int argc, OIF_UNUSED char *argv[]) {
   if (oif_init_lang() != EXIT_SUCCESS)
     return EXIT_FAILURE;
   oif_eval_expression("print(6*7)");

@@ -1,6 +1,6 @@
 #include "oif_julia.h"
-
 #include <julia.h>
+#include <oif_config.h>
 // JULIA_DEFINE_FAST_TLS // only define this once, in an executable (not in a
 // shared library) if you want fast code.
 
@@ -14,6 +14,7 @@ int oif_eval_expression(const char *str) {
     jl_eval_string(str);
   else
     jl_eval_string("print(sqrt(2.0))");
+  return OIF_OK;
 }
 
 void oif_deinit_lang() { jl_atexit_hook(0); }

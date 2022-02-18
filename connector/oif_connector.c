@@ -1,4 +1,5 @@
 #include "oif_connector.h"
+#include <oif_config.h>
 
 #include <dlfcn.h>
 #include <stdio.h>
@@ -38,6 +39,7 @@ int oif_eval_expression(const char *str) {
     return OIF_SYMBOL_ERROR;
   }
   eval_expression(str);
+  return OIF_OK;
 }
 
 void oif_deinit_lang() { dlclose(__oif_lib_handle); }

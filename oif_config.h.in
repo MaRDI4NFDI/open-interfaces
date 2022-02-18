@@ -3,5 +3,12 @@
 
 #cmakedefine OIF_USE_JULIA
 
+/* Error codes */
+#define OIF_OK 0
+#define OIF_LOAD_ERROR 1
+#define OIF_SYMBOL_ERROR 2
+/* *********** */
+
 #define OIF_UNUSED __attribute__((unused))
+
 #endif //JULIA_EMBED_OIF_CONFIG_H
