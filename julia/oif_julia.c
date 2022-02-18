@@ -4,7 +4,10 @@
 // JULIA_DEFINE_FAST_TLS // only define this once, in an executable (not in a
 // shared library) if you want fast code.
 
-void oif_init_lang() { jl_init(); }
+int oif_init_lang() {
+  jl_init();
+  return 0;
+}
 
 void oif_eval_expression(const char *str) {
   if (str)

@@ -8,7 +8,7 @@ That means debian bullseye with julia 1.7.
 ### Container based
 #### CLion
 Using this with CLion means setting up a new docker toolchain
-with the base image from the `Dockerfile` and then selecting 
+with the base image from the `Dockerfile` and then selecting
 that toolchain when CLion configures cmake.
 [See also](https://www.jetbrains.com/help/clion/clion-toolchains-in-docker.html)
 
@@ -22,8 +22,19 @@ for a list of necessary (debian) packages to install.
 
 Then run
 ```shell
-mkdir build
-cd build
+BUILDDIR=/some/path
+mkdir ${BUILDDIR}
+cd ${BUILDDIR}
 cmake ..
 cmake --build .
+```
+
+## Execution
+
+If you want to run from the build dir
+setting `LD_LIBRARY_PATH` is necessary
+```shell
+cd ${BUILDDIR}
+export LD_LIBRARY_PATH=${BUILDDIR}/julia:${LD_LIBRARY_PATH}
+./main/oif_main
 ```
