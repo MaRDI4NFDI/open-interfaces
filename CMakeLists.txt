@@ -13,6 +13,17 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 option(OIF_USE_JULIA "Use tutorial provided math implementation" ON)
 
+macro(oif_enable_compile_warnings _target)
+  target_compile_options(
+    ${_target}
+    PRIVATE
+      $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:-Wall
+      -Werror
+      -pedantic-errors
+      -Wextra>
+      $<$<CXX_COMPILER_ID:MSVC>:/W4>)
+endmacro()
+
 if(OIF_USE_JULIA)
   add_subdirectory(julia)
 endif()

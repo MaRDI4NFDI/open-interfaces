@@ -3,4 +3,5 @@
 
 #cmakedefine OIF_USE_JULIA
 
+#define OIF_UNUSED __attribute__((unused))
 #endif //JULIA_EMBED_OIF_CONFIG_H

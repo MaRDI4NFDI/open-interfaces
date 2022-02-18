@@ -9,6 +9,8 @@ target_include_directories(
          $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
 target_link_libraries(oif_julia $<BUILD_INTERFACE:${Julia_LIBRARY}>)
 
+oif_enable_compile_warnings(oif_julia)
+
 # what consumers of this lib need
 target_include_directories(oif_julia INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
