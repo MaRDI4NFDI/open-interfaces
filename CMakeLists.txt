@@ -26,13 +26,13 @@ macro(oif_enable_compile_warnings _target)
 endmacro()
 
 if(OIF_USE_JULIA)
-  add_subdirectory(julia)
+  add_subdirectory(lang_julia)
 endif()
 if(OIF_USE_PYTHON)
-  add_subdirectory(python)
+  add_subdirectory(lang_python)
 endif()
 add_subdirectory(connector)
 
 configure_file(oif_config.h.in ${PROJECT_BINARY_DIR}/oif_config.h)
 
-add_subdirectory(main)
+add_subdirectory(lang_c)
