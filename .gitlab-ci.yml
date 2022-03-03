@@ -54,7 +54,7 @@ test:
     stage: run
     script:
         - oif_c
-        - python3 /src/lang_python/oif_python.py
+        - oif_python.py
 
 pre-commit:
     extends: .base

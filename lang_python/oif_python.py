@@ -1,11 +1,12 @@
+#!/usr/bin/env python3
+
 import ctypes
-import os
 
 
-def execute(oif: ctypes.CDLL):
-    oif.oif_init_lang()
-    oif.oif_eval_expression("print('python rocks')")
-    oif.oif_deinit_lang()
+def execute(lib: ctypes.CDLL):
+    lib.oif_init_lang()
+    lib.oif_eval_expression("print('python rocks')")
+    lib.oif_deinit_lang()
 
 
 def load():

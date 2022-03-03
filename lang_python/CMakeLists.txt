@@ -5,3 +5,5 @@ add_custom_target(
   ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/oif_python.py
   ${CMAKE_CURRENT_BINARY_DIR}/../connector/liboif_connector.so
   DEPENDS oif_connector oif_julia)
+
+install(PROGRAMS oif_python.py DESTINATION bin)
