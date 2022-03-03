@@ -1,4 +1,4 @@
-add_library(oif_connector oif_connector.c)
+add_library(oif_connector SHARED oif_connector.c)
 
 # what target itself needs
 target_include_directories(

@@ -6,6 +6,7 @@ RUN mkdir /build \
     && cd /build \
     && cmake /src \
     && cmake --build . \
-    && cmake --install .
+    && cmake --install . \
+    && ldconfig
 
-CMD [ "/usr/local/bin/oif_main" ]
+CMD [ "/usr/local/bin/oif_c" ]
