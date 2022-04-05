@@ -12,6 +12,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${Julia_LIBRARY_DIR}")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 option(OIF_USE_JULIA "Build Julia bindings" ON)
+option(OIF_USE_R "Build R bindings" ON)
 option(OIF_USE_PYTHON "Build Python bindings" ON)
 
 macro(oif_enable_compile_warnings _target)
@@ -27,6 +28,9 @@ endmacro()
 
 if(OIF_USE_JULIA)
   add_subdirectory(lang_julia)
+endif()
+if(OIF_USE_R)
+  add_subdirectory(lang_r)
 endif()
 if(OIF_USE_PYTHON)
   add_subdirectory(lang_python)
