@@ -40,5 +40,6 @@ endif()
 add_subdirectory(oif_connector)
 
 configure_file(oif_config.h.in ${PROJECT_BINARY_DIR}/oif_config.h)
+configure_file(oif_env.in ${PROJECT_BINARY_DIR}/oif_env)
 
 add_subdirectory(lang_c)
