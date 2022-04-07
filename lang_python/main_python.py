@@ -5,9 +5,12 @@ import os
 
 
 def execute(lib: ctypes.CDLL):
-    lib.oif_connector_init("julia")
-    lib.oif_connector_eval_expression("print('python rocks')")
-    lib.oif_connector_deinit()
+    err = lib.oif_connector_init("julia")
+    assert err == 0
+    err = lib.oif_connector_eval_expression("print('python rocks')")
+    assert err == 0
+    err = lib.oif_connector_deinit()
+    assert err == 0
 
 
 def load():
