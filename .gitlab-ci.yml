@@ -48,24 +48,11 @@ build:
         - docker buildx build -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} .
         - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
 
-.test-base:
+pytest:
     extends: .base
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
-    stage: run
-
-test c:
-    extends: .test-base
     script:
-        - main_c "r" "print(6*7)"
-        - main_c "julia" "print(6*7)"
-        - main_c "c" "print(6*7)"
-
-test python:
-    extends: .test-base
-    script:
-        - main_python.py "r" "print(6*7)"
-        - main_python.py "julia" "print(6*7)"
-        - main_python.py "c" "print(6*7)"
+        - pytest tests/
 
 pre-commit:
     extends: .base
