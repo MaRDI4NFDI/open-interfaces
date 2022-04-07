@@ -31,9 +31,7 @@ int oif_connector_init(const char *lang) {
     return OIF_SYMBOL_ERROR;
   }
 
-  init_lang();
-
-  return OIF_OK;
+  return init_lang();
 }
 
 int oif_connector_eval_expression(const char *str) {
