@@ -10,7 +10,7 @@
 
 int oif_lang_init() {
   int r_argc = 2;
-  char *r_argv[] = {"R", "--verbose"};
+  char *r_argv[] = {"R", "--vanilla"};
   return Rf_initEmbeddedR(r_argc, r_argv);
 }
 
