@@ -9,8 +9,8 @@
 #include <oif_config.h>
 
 int oif_lang_init() {
-  int r_argc = 2;
-  char *r_argv[] = {"R", "--vanilla"};
+  int r_argc = 3;
+  char *r_argv[] = {"R", "--vanilla", "--quiet"};
   return Rf_initEmbeddedR(r_argc, r_argv);
 }
 
