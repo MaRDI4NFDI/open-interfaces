@@ -53,7 +53,7 @@ test:
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     stage: run
     script:
-        - oif_c
+        - main_c
         - main_python.py
 
 pre-commit:
