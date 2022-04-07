@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import ctypes
+import os
 
 
 def execute(lib: ctypes.CDLL):
@@ -10,7 +11,13 @@ def execute(lib: ctypes.CDLL):
 
 
 def load():
-    return ctypes.CDLL("liboif_connector.so")
+    soname = "liboif_connector.so"
+    try:
+        return ctypes.CDLL(soname)
+    except OSError as e:
+        print(f"could not load {soname}")
+        print(f"LD_LIBRARY_PATH={os.environ.get('LD_LIBRARY_PATH')}")
+        raise e
 
 
 if __name__ == "__main__":
