@@ -1,17 +1,18 @@
-#include <oif_config.h>
+#include <oif_connector/oif_connector.h>
 
 #include <stdlib.h>
+#include <string.h>
 
-int main(OIF_UNUSED int argc, OIF_UNUSED char *argv[]) {
-  char *libname;
-  if (0 > asprintf(&libname, "liboif_%s.so", __oif_current_lang))
-    return OIF_LOAD_ERROR;
-  __oif_lib_handle = dlopen("liboif_r.so", RTLD_LAZY);
-  free(libname);
+int main(int argc, char *argv[]) {
+  char *lang = "julia";
+  char *expr = "print(42);";
+  if (argc > 2) {
+    lang = strdup(argv[1]);
+    expr = strdup(argv[2]);
+  }
 
-  if (oif_connector_init("python") != EXIT_SUCCESS)
-    return EXIT_FAILURE;
-  oif_connector_eval_expression("print(6*7)");
+  oif_connector_init(lang);
+  oif_connector_eval_expression(expr);
+
   oif_connector_deinit();
-  return EXIT_SUCCESS;
 }
