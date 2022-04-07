@@ -32,10 +32,12 @@ cmake --build .
 ## Execution
 
 If you want to run from the build dir
-setting `LD_LIBRARY_PATH` is necessary
+setting `LD_LIBRARY_PATH` is necessary.
 ```shell
 cd ${BUILDDIR}
-export LD_LIBRARY_PATH=${BUILDDIR}/lang_julia:${BUILDDIR}/oif_connector:${LD_LIBRARY_PATH}
-./lang_c/oif_c
-./lang_python/main_python.py
+make
+source oif_env # sets library path
+# ./lang_*/main_* <language> <qouted expression>
+./lang_c/main_c "python" "print(6*7)"
+./lang_python/main_python.py "r" "print(6*7)"
 ```
