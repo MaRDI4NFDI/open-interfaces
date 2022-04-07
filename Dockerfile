@@ -1,4 +1,4 @@
-FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:4e626b3e1ad850f9b2285c14b5bc7b691b51a549
+FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:1f829f4b013d00e6cbe05c38636f1de738daadcf
 
 COPY . /src
 
@@ -11,4 +11,4 @@ RUN mkdir /build \
 
 ENV R_HOME /usr/lib/R
 
-CMD [ "/usr/local/bin/oif_c" ]
+CMD [ "/usr/local/bin/main_c" ]
