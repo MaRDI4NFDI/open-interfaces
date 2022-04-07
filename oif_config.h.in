@@ -3,6 +3,9 @@
 
 #cmakedefine OIF_USE_JULIA
 
+//! TODO makes apsprintf available
+#define _GNU_SOURCE
+
 /* Error codes */
 #define OIF_OK 0
 #define OIF_LOAD_ERROR 1
