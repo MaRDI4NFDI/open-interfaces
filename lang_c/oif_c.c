@@ -1,12 +1,12 @@
-#include <oif_config.h>
-#include <oif_connector.h>
+#include "oif_config.h"
 
-#include <stdlib.h>
+#include <oif_connector/oif_interface.h>
 
-int main(OIF_UNUSED int argc, OIF_UNUSED char *argv[]) {
-  if (oif_connector_init("python") != EXIT_SUCCESS)
-    return EXIT_FAILURE;
-  oif_connector_eval_expression("print(6*7)");
-  oif_connector_deinit();
-  return EXIT_SUCCESS;
+int oif_lang_init() { return OIF_OK; }
+
+int oif_lang_eval_expression(__attribute__((unused)) const char *str) {
+
+  return OIF_OK;
 }
+
+void oif_lang_deinit() {}
