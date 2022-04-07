@@ -20,4 +20,5 @@ target_link_libraries(oif_python $<BUILD_INTERFACE:${Python3_LIBRARY}>)
 oif_enable_compile_warnings(oif_python)
 add_dependencies(all_lang oif_python)
 
+install(TARGETS oif_python DESTINATION lib)
 install(PROGRAMS main_python.py DESTINATION bin)

@@ -16,3 +16,4 @@ oif_enable_compile_warnings(oif_r)
 target_include_directories(oif_r INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 install(TARGETS oif_r DESTINATION lib)
+install(PROGRAMS main_r.r DESTINATION bin)
