@@ -4,10 +4,9 @@ import ctypes
 
 
 def execute(lib: ctypes.CDLL):
-    lib.oif_init_connector("julia")
-    lib.oif_init_lang()
-    lib.oif_eval_expression("print('python rocks')")
-    lib.oif_deinit_lang()
+    lib.oif_connector_init("julia")
+    lib.oif_connector_eval_expression("print('python rocks')")
+    lib.oif_connector_deinit()
 
 
 def load():

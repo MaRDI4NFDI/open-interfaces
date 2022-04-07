@@ -35,7 +35,7 @@ If you want to run from the build dir
 setting `LD_LIBRARY_PATH` is necessary
 ```shell
 cd ${BUILDDIR}
-export LD_LIBRARY_PATH=${BUILDDIR}/lang_julia:${BUILDDIR}/connector:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=${BUILDDIR}/lang_julia:${BUILDDIR}/oif_connector:${LD_LIBRARY_PATH}
 ./lang_c/oif_c
 ./lang_python/oif_python.py
 ```

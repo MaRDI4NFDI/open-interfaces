@@ -26,6 +26,8 @@ macro(oif_enable_compile_warnings _target)
       $<$<CXX_COMPILER_ID:MSVC>:/W4>)
 endmacro()
 
+add_custom_target(all_lang)
+
 if(OIF_USE_JULIA)
   add_subdirectory(lang_julia)
 endif()
@@ -35,7 +37,7 @@ endif()
 if(OIF_USE_PYTHON)
   add_subdirectory(lang_python)
 endif()
-add_subdirectory(connector)
+add_subdirectory(oif_connector)
 
 configure_file(oif_config.h.in ${PROJECT_BINARY_DIR}/oif_config.h)
 

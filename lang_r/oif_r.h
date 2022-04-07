@@ -1,8 +1,4 @@
-#ifndef OIF_JULIA_HH
-#define OIF_JULIA_HH
+#ifndef OIF_R_HH
+#define OIF_R_HH
 
-int oif_init_lang();
-int oif_eval_expression(const char *str);
-void oif_deinit_lang();
-
-#endif // OIF_JULIA_HH
+#endif // OIF_R_HH

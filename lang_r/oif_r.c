@@ -1,16 +1,18 @@
 #include "oif_r.h"
+
 #include <R_ext/Parse.h>
 #include <Rembedded.h>
 #include <Rinternals.h>
+
 #include <oif_config.h>
 
-int oif_init_lang() {
+int oif_lang_init() {
   int r_argc = 2;
   char *r_argv[] = {"R", "--verbose"};
   return Rf_initEmbeddedR(r_argc, r_argv);
 }
 
-int oif_eval_expression(const char *str) {
+int oif_lang_eval_expression(const char *str) {
   if (!str)
     str = "print(42)";
   SEXP cmdSexp, cmdexpr = R_NilValue;
@@ -30,4 +32,4 @@ int oif_eval_expression(const char *str) {
   return OIF_OK;
 }
 
-void oif_deinit_lang() { Rf_endEmbeddedR(0); }
+void oif_lang_deinit() { Rf_endEmbeddedR(0); }
