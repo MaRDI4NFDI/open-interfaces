@@ -9,4 +9,6 @@ RUN mkdir /build \
     && cmake --install . \
     && ldconfig
 
+ENV R_HOME /usr/lib/R
+
 CMD [ "/usr/local/bin/oif_c" ]
