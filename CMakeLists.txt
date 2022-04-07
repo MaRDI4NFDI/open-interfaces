@@ -39,7 +39,9 @@ if(OIF_USE_PYTHON)
 endif()
 add_subdirectory(oif_connector)
 
-configure_file(oif_config.h.in ${PROJECT_BINARY_DIR}/oif_config.h)
-configure_file(oif_env.in ${PROJECT_BINARY_DIR}/oif_env)
+configure_file(oif_config.h.in oif_config.h)
+configure_file(oif_env.in oif_env)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_config.h DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_env DESTINATION share)
 
 add_subdirectory(lang_c)
