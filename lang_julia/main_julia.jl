@@ -1,8 +1,13 @@
 #!/usr/bin/env julia
 
+if size(ARGS)[1] == 2
+    const lang = ARGS[1]
+    const expression = ARGS[2]
+else
+    const lang = "r"
+    const expression = "print(7*6)"
+end
 const oif = "liboif_connector"
-const lang = "julia"
-const expression = "print(7*6)"
 ok = @ccall oif.oif_connector_init(lang::Cstring)::Cint
 if ok != 0
     println("Cannot load connector")
