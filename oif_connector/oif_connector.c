@@ -9,7 +9,15 @@
 void *__oif_lib_handle;
 char *__oif_current_lang;
 
-int oif_connector_init(const char *lang) {
+#ifdef OIF_USE_R
+#include <Rinternals.h>
+int oif_connector_init_r(OIF_UNUSED SEXP lang) {
+  fprintf(stderr, "Error: Calling R variant \n");
+  return OIF_LOAD_ERROR;
+}
+#endif
+
+int oif_connector_init_c(const char *lang) {
   int (*init_lang)();
   __oif_current_lang = strdup(lang);
 
