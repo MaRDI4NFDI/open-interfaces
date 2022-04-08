@@ -19,7 +19,8 @@ int oif_lang_init() {
 
   const int res = Rf_initEmbeddedR(r_argc, r_argv);
   r_initialized = res == 0;
-  return res;
+  // the embedded setup apparently always returns 1
+  return res == 1 ? OIF_OK : OIF_LOAD_ERROR;
 }
 
 int oif_lang_eval_expression(const char *str) {
