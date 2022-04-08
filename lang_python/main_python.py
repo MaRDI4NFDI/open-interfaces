@@ -2,26 +2,32 @@
 
 import ctypes
 import os
+import sys
 
 
-def execute(lib: ctypes.CDLL):
-    err = lib.oif_connector_init("julia")
-    assert err == 0
-    err = lib.oif_connector_eval_expression("print('python rocks')")
-    assert err == 0
-    err = lib.oif_connector_deinit()
-    assert err == 0
-
-
-def load():
+def load() -> ctypes.CDLL:
     soname = "liboif_connector.so"
     try:
-        return ctypes.CDLL(soname)
+        lib = ctypes.CDLL(soname)
     except OSError as e:
         print(f"could not load {soname}")
         print(f"LD_LIBRARY_PATH={os.environ.get('LD_LIBRARY_PATH')}")
         raise e
+    lib.oif_connector_eval_expression.argtypes = [ctypes.c_char_p]
+    lib.oif_connector_init.argtypes = [ctypes.c_char_p]
+    return lib
 
 
 if __name__ == "__main__":
-    execute(load())
+    if len(sys.argv) != 3:
+        lang = "julia"
+        expression = "print(42)"
+    else:
+        lang = sys.argv[1]
+        expression = sys.argv[2]
+    lib = load()
+    err = lib.oif_connector_init(lang.encode())
+    assert err == 0
+    err = lib.oif_connector_eval_expression(expression.encode())
+    assert err == 0
+    lib.oif_connector_deinit()
