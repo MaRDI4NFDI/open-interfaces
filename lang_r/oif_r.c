@@ -6,12 +6,20 @@
 #include <R_ext/Parse.h>
 // clang-format on
 
+#include <Rinterface.h>
 #include <oif_config.h>
 
 int oif_lang_init() {
+  static int r_initialized = 0;
+  if (R_running_as_main_program || r_initialized)
+    return OIF_OK;
+
   int r_argc = 3;
   char *r_argv[] = {"R", "--vanilla", "--quiet"};
-  return Rf_initEmbeddedR(r_argc, r_argv);
+
+  const int res = Rf_initEmbeddedR(r_argc, r_argv);
+  r_initialized = res == 0;
+  return res;
 }
 
 int oif_lang_eval_expression(const char *str) {
