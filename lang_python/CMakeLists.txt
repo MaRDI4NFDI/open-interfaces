@@ -1,4 +1,4 @@
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
 add_custom_target(
   run_lang_python
@@ -12,10 +12,10 @@ add_library(oif_python SHARED oif_python.c ../oif_connector/oif_interface.h)
 target_include_directories(
   oif_python
   PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-         $<BUILD_INTERFACE:${Julia_INCLUDE_DIRS}>
+         $<BUILD_INTERFACE:${Python3_INCLUDE_DIRS}>
          $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
-target_link_libraries(oif_python $<BUILD_INTERFACE:${Python3_LIBRARY}>)
+target_link_libraries(oif_python $<BUILD_INTERFACE:${Python3_LIBRARIES}>)
 
 oif_enable_compile_warnings(oif_python)
 add_dependencies(all_lang oif_python)

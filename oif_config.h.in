@@ -14,6 +14,7 @@
 #define OIF_SYMBOL_ERROR 2
 #define OIF_TYPE_ERROR 3
 #define OIF_NOT_IMPLEMENTED 4
+#define OIF_RUNTIME_ERROR 5
 /* *********** */
 
 #define OIF_UNUSED __attribute__((unused))
