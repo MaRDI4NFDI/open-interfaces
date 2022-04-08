@@ -6,7 +6,8 @@ target_include_directories(
   PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
          $<BUILD_INTERFACE:${R_INCLUDE_DIRS}>
          $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>)
-target_link_libraries(oif_connector $<BUILD_INTERFACE:dl>)
+target_link_libraries(oif_connector $<BUILD_INTERFACE:dl>
+                      $<BUILD_INTERFACE:${R_LIBRARY}>)
 oif_enable_compile_warnings(oif_connector)
 
 # what consumers of this lib need

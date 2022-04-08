@@ -11,13 +11,39 @@ char *__oif_current_lang;
 
 #ifdef OIF_USE_R
 #include <Rinternals.h>
-int oif_connector_init_r(OIF_UNUSED SEXP lang) {
-  fprintf(stderr, "Error: Calling R variant \n");
+char *_R_convert_to_char(SEXP str) {
+  if (!isString(str) || length(str) != 1) {
+    return NULL;
+  }
+  return strdup(CHAR(STRING_ELT(str, 0)));
+}
+int oif_connector_init_r(SEXP lang) {
+  const char *c_lang = _R_convert_to_char(lang);
+  if (!c_lang)
+    return OIF_TYPE_ERROR;
+  return oif_connector_init(c_lang);
+}
+int oif_connector_eval_expression_r(SEXP str) {
+  const char *c_str = _R_convert_to_char(str);
+  if (!c_str)
+    return OIF_TYPE_ERROR;
+  return oif_connector_eval_expression(c_str);
+}
+void oif_connector_deinit_r() { oif_connector_deinit(); }
+#else
+
+int _no_R_error(const char *func) {
+  fprintf(stderr, "Error: Calling R variant for %s not supported\n", func);
   return OIF_LOAD_ERROR;
+}
+
+int oif_connector_init_r(OIF_UNUSED SEXP lang) { return _no_R_error("init"); }
+int oif_connector_eval_expression_r(OIF_UNUSED SEXP str) {
+  return _no_R_error("eval_expression");
 }
 #endif
 
-int oif_connector_init_c(const char *lang) {
+int oif_connector_init(const char *lang) {
   int (*init_lang)();
   __oif_current_lang = strdup(lang);
 
