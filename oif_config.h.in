@@ -2,6 +2,8 @@
 #define JULIA_EMBED_OIF_CONFIG_H
 
 #cmakedefine OIF_USE_JULIA
+#cmakedefine OIF_USE_PYTHON
+#cmakedefine OIF_USE_R
 
 //! TODO makes apsprintf available
 #define _GNU_SOURCE
