@@ -28,9 +28,11 @@ def languages() -> str:
         yield lang
 
 
-@pytest.mark.parametrize("driver_lang", itertools.product(drivers(), languages()))
-def test_print(driver_lang) -> None:
-    driver, lang = driver_lang
+@pytest.mark.parametrize(
+    "driver", drivers(), ids=(f if isinstance(f, str) else f.name for f in drivers())
+)
+@pytest.mark.parametrize("lang", languages())
+def test_print(driver, lang) -> None:
     if lang == "c":
         pytest.xfail("string eval not implemented")
     expression = "print(6*7)"
