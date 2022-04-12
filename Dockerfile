@@ -9,6 +9,7 @@ RUN mkdir /build \
     && cmake --install . \
     && ldconfig
 
-ENV R_HOME /usr/lib/R
+ENV R_HOME=/usr/lib/R \
+    R_LIBOIF_CONNECTOR=/usr/local/lib/liboif_connector.so
 
 CMD [ "/usr/local/bin/main_c" ]
