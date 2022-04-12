@@ -4,9 +4,12 @@
 #cmakedefine OIF_USE_JULIA
 #cmakedefine OIF_USE_PYTHON
 #cmakedefine OIF_USE_R
+#cmakedefine OIF_USE_CPP
 
 //! TODO makes apsprintf available
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 
 /* Error codes */
 #define OIF_OK 0
