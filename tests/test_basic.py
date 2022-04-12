@@ -5,13 +5,14 @@ import pytest
 
 THIS_DIR = Path(__file__).resolve().absolute().parent
 REPO_ROOT = THIS_DIR.parent
+SOURCE_EXTENSIONS = [".c", ".cpp", ".cc"]
 
 
 def drivers() -> Path:
     for lang_dir in REPO_ROOT.glob("lang_*"):
         lang = lang_dir.stem.replace("lang_", "")
         for driver in lang_dir.glob(f"main_{lang}*"):
-            if driver.suffix in [".c", ".cpp", ".cc"]:
+            if driver.suffix in SOURCE_EXTENSIONS:
                 # TODO assumes built binary in path
                 yield driver.stem
                 continue
@@ -22,9 +23,14 @@ def drivers() -> Path:
 def languages() -> str:
     for lang_dir in REPO_ROOT.glob("lang_*"):
         lang = lang_dir.stem.replace("lang_", "")
-        c_source = lang_dir / f"oif_{lang}.c"
-        assert c_source.exists() and c_source.is_file()
-        yield lang
+        for ext in SOURCE_EXTENSIONS:
+            source = lang_dir / f"oif_{lang}{ext}"
+            if source.exists() and source.is_file():
+                yield lang
+                break
+        else:
+            glob = list(lang_dir.glob("oif_*"))
+            pytest.fail(f"No source file for {lang_dir}:{glob}")
 
 
 @pytest.mark.parametrize(
