@@ -82,6 +82,13 @@ int oif_connector_eval_expression(const char *str) {
 }
 
 void oif_connector_deinit() {
+  int (*lang_deinit)();
+  *(void **)(&lang_deinit) = dlsym(__oif_lib_handle, "oif_lang_deinit");
+  if (!lang_deinit) {
+    fprintf(stderr, "Error: %s\n", dlerror());
+  } else {
+    lang_deinit();
+  }
   dlclose(__oif_lib_handle);
   free(__oif_current_lang);
 }
