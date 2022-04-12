@@ -6,9 +6,13 @@
 #include <oif_connector/oif_interface.h>
 #include <stdio.h>
 
+int __did_we_init_python = 0;
+
 int oif_lang_init() {
-  if (!Py_IsInitialized())
+  if (!Py_IsInitialized()) {
     Py_Initialize();
+    __did_we_init_python = 1;
+  }
   return OIF_OK;
 }
 
@@ -37,4 +41,7 @@ int oif_lang_eval_expression(const char *str) {
                                                         : OIF_OK;
 }
 
-void oif_lang_deinit() { Py_Finalize(); }
+void oif_lang_deinit() {
+  if (__did_we_init_python)
+    Py_Finalize();
+}
