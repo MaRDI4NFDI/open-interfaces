@@ -38,7 +38,7 @@ def languages() -> str:
 )
 @pytest.mark.parametrize("lang", languages())
 def test_print(driver, lang) -> None:
-    if lang == "c":
+    if lang in ["c", "cpp"]:
         pytest.xfail("string eval not implemented")
     expression = "print(6*7)"
     print(f"Execute {driver} {lang} {expression}")
