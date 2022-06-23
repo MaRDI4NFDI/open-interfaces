@@ -1,4 +1,5 @@
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -44,3 +45,11 @@ def test_print(driver, lang) -> None:
     print(f"Execute {driver} {lang} {expression}")
     out = subprocess.check_output([driver, lang, expression]).decode()
     assert "42" in out
+
+
+def runmodule(filename):
+    sys.exit(pytest.main(sys.argv[1:] + [filename]))
+
+
+if __name__ == "__main__":
+    runmodule(filename=__file__)
