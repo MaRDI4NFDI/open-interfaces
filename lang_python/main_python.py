@@ -5,10 +5,12 @@ import os
 import sys
 
 
-def load() -> ctypes.CDLL:
+def load(lang) -> ctypes.CDLL:
     soname = "liboif_connector.so"
+    # With PyDLL we do not release the GIL when calling into lib functions
+    dso_type = ctypes.PyDLL if lang == "python" else ctypes.CDLL
     try:
-        lib = ctypes.CDLL(soname)
+        lib = dso_type(soname)
     except OSError as e:
         print(f"could not load {soname}")
         print(f"LD_LIBRARY_PATH={os.environ.get('LD_LIBRARY_PATH')}")
@@ -25,7 +27,7 @@ if __name__ == "__main__":
     else:
         lang = sys.argv[1]
         expression = sys.argv[2]
-    lib = load()
+    lib = load(lang)
     err = lib.oif_connector_init(lang.encode())
     assert err == 0
     err = lib.oif_connector_eval_expression(expression.encode())

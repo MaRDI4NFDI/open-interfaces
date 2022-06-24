@@ -10,7 +10,7 @@ int __did_we_init_python = 0;
 
 int oif_lang_init() {
   if (!Py_IsInitialized()) {
-    Py_Initialize();
+    Py_InitializeEx(0);
     __did_we_init_python = 1;
   }
   return OIF_OK;
@@ -37,11 +37,13 @@ int oif_lang_eval_expression(const char *str) {
     PyErr_Print();
     return OIF_RUNTIME_ERROR;
   }
-  return PyEval_EvalCode(code, global_dict, local_dict) ? OIF_RUNTIME_ERROR
-                                                        : OIF_OK;
+  PyObject *eval = PyEval_EvalCode(code, global_dict, local_dict);
+
+  return eval ? OIF_RUNTIME_ERROR : OIF_OK;
 }
 
 void oif_lang_deinit() {
+  // TODO: use the _Ex version for sanity check
   if (__did_we_init_python)
     Py_Finalize();
 }
