@@ -53,7 +53,7 @@ pytest:
     stage: run
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     script:
-        - pytest tests/
+        - pytest -rA tests/
 
 pre-commit:
     extends: .base

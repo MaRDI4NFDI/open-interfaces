@@ -1,4 +1,7 @@
-FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:1f829f4b013d00e6cbe05c38636f1de738daadcf
+FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:894bbca696659263a79e11cafcf858ebb4723a06
+
+ENV R_HOME=/usr/lib/R \
+    R_LIBOIF_CONNECTOR=/usr/local/lib/liboif_connector.so
 
 COPY . /src
 
@@ -9,6 +12,4 @@ RUN mkdir /build \
     && cmake --install . \
     && ldconfig
 
-ENV R_HOME /usr/lib/R
-
-CMD [ "/usr/local/bin/main_c" ]
+CMD [ "pytest", "-rA", "/src" ]

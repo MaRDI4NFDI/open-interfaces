@@ -14,6 +14,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 option(OIF_USE_JULIA "Build Julia bindings" ON)
 option(OIF_USE_R "Build R bindings" ON)
 option(OIF_USE_PYTHON "Build Python bindings" ON)
+option(OIF_USE_CPP "Build Cpp bindings" ON)
 
 macro(oif_enable_compile_warnings _target)
   target_compile_options(
@@ -37,6 +38,9 @@ if(OIF_USE_R)
 endif()
 if(OIF_USE_PYTHON)
   add_subdirectory(lang_python)
+endif()
+if(OIF_USE_CPP)
+  add_subdirectory(lang_cpp)
 endif()
 add_subdirectory(oif_connector)
 
