@@ -1,7 +1,3 @@
-//
-// Created by rene on 07.04.22.
-//
-
 #ifndef OIF_EXPERIMENTS_OIF_INTERFACE_H
 #define OIF_EXPERIMENTS_OIF_INTERFACE_H
 
