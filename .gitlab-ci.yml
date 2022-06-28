@@ -45,8 +45,8 @@ build clang:
     stage: image
     needs: []
     script:
-        - docker buildx build --build-arg M2_CXX=clang++ --build-arg M2_CC=clang -t ${CI_REGISTRY_IMAGE}_clang:${CI_COMMIT_SHA} .
-        - docker push ${CI_REGISTRY_IMAGE}_clang:${CI_COMMIT_SHA}
+        - docker buildx build --build-arg M2_CXX=clang++ --build-arg M2_CC=clang -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_clang .
+        - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_clang
 build gcc:
     extends: .dind
     stage: image
@@ -58,7 +58,7 @@ build gcc:
 pytest clang:
     extends: .base
     stage: run
-    image: ${CI_REGISTRY_IMAGE}_clang:${CI_COMMIT_SHA}
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_clang
     script:
         - pytest -rA tests/
 
