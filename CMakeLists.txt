@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.18)
 project(oif_experiments)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# necessary for clang tools
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs)
 
