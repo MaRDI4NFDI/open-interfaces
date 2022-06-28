@@ -5,6 +5,11 @@ ENV R_HOME=/usr/lib/R \
 
 COPY . /src
 
+ARG M2_CXX=g++
+ARG M2_CC=gcc
+
+ENV CXX=${M2_CXX} CC=${M2_CC}
+
 RUN mkdir /build \
     && cd /build \
     && cmake /src \
