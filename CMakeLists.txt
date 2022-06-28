@@ -4,11 +4,14 @@ cmake_minimum_required(VERSION 3.18)
 project(oif_experiments)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# necessary for clang tools
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs)
 
 # make sure installed binaries/libraries still find julia
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${Julia_LIBRARY_DIR}")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 option(OIF_USE_JULIA "Build Julia bindings" ON)

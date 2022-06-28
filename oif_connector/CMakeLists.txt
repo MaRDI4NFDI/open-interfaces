@@ -12,7 +12,9 @@ oif_enable_compile_warnings(oif_connector)
 
 # what consumers of this lib need
 target_include_directories(oif_connector INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/)
-target_compile_features(oif_connector PUBLIC c_std_11)
+# TODO This feature is missing for clang
+target_compile_features(oif_connector
+                        PUBLIC $<$<OR:$<CXX_COMPILER_ID:GNU>>:c_std_11>)
 
 install(TARGETS oif_connector DESTINATION lib)
 install(FILES oif_connector.h oif_interface.h

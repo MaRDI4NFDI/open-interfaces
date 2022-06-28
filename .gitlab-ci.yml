@@ -40,7 +40,14 @@ include:
         - name: zivgitlab.wwu.io/ag-ohlberger/mardi/container/docker-in-docker@sha256:65346e590b841880fcb3e53e814780567d38f96c0e896360f0534014ecf6c1d5
           alias: docker
 
-build:
+build clang:
+    extends: .dind
+    stage: image
+    needs: []
+    script:
+        - docker buildx build --build-arg M2_CXX=clang++ --build-arg M2_CC=clang -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_clang .
+        - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_clang
+build gcc:
     extends: .dind
     stage: image
     needs: []
@@ -48,7 +55,14 @@ build:
         - docker buildx build -t ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} .
         - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
 
-pytest:
+pytest clang:
+    extends: .base
+    stage: run
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_clang
+    script:
+        - pytest -rA tests/
+
+pytest gcc:
     extends: .base
     stage: run
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
