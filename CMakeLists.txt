@@ -11,7 +11,7 @@ include(CheckCXXCompilerFlag)
 include(GNUInstallDirs)
 
 # make sure installed binaries/libraries still find julia
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${Julia_LIBRARY_DIR}")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 option(OIF_USE_JULIA "Build Julia bindings" ON)
