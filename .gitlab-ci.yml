@@ -62,6 +62,16 @@ pytest clang:
     script:
         - pytest -rA tests/
 
+pages:
+    extends: .base
+    stage: run
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+    script:
+        - make -C docs html
+    artifacts:
+        paths:
+            - docs/_build/html
+
 pytest gcc:
     extends: .base
     stage: run

@@ -1,9 +1,10 @@
-FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:e0ddebc994e54351661b6710e74fd989e92ea021
+FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:ce30e51b8114a92cd8b93c51614b46fadf563671
 
 ENV R_HOME=/usr/lib/R \
     R_LIBOIF_CONNECTOR=/usr/local/lib/liboif_connector.so
 
 COPY . /src
+RUN pip install --no-cache -r /src/requirements.txt
 
 ARG M2_CXX=g++
 ARG M2_CC=gcc
