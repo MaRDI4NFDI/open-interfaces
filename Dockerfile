@@ -4,6 +4,7 @@ ENV R_HOME=/usr/lib/R \
     R_LIBOIF_CONNECTOR=/usr/local/lib/liboif_connector.so
 
 COPY . /src
+RUN pip install --no-cache -r /src/requirements.txt
 
 ARG M2_CXX=g++
 ARG M2_CC=gcc
