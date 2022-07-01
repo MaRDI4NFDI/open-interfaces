@@ -20,6 +20,18 @@ int oif_connector_init(const char *lang);
  */
 int oif_connector_eval_expression(const char *str);
 
+/** Solve Ax=b
+ *
+ * @param N system size, integer > 0
+ * @param A a square `N`x`N` Matrix
+ * @param b righthand-side of `N` values
+ * @param x output array
+ * @return `OIF_OK` or a fitting error code
+ *
+ * \note All arrays must be pre-allocated
+ */
+int oif_connector_solve(int N, double *A, double *b, double *x);
+
 /** Unload Implementor, free acquired resources
  *
  */

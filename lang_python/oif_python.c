@@ -48,3 +48,11 @@ void oif_lang_deinit() {
   if (__did_we_init_python)
     Py_Finalize();
 }
+
+int oif_lang_solve(int N, double *A, double *b, double *x) {
+  (void)N;
+  (void)A;
+  (void)b;
+  (void)x;
+  return OIF_RUNTIME_ERROR;
+}
