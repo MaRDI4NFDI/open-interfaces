@@ -4,6 +4,8 @@
 #include <oif_connector/oif_interface.h>
 #include <stdio.h>
 
+#include <cblas.h>
+
 int oif_lang_init() { return OIF_OK; }
 
 int oif_lang_eval_expression(const char *str) {
