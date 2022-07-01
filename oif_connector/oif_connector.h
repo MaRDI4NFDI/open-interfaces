@@ -1,5 +1,10 @@
-#ifndef JULIA_EMBED_OIF_CONNECTOR_H
-#define JULIA_EMBED_OIF_CONNECTOR_H
+#ifndef OIF_CONNECTOR_H
+#define OIF_CONNECTOR_H
+
+/* This is the Interface that Language-specific Implementors must fullfil
+ *
+ *
+ */
 
 /** Special functions that act on R data structs
  *
@@ -14,4 +19,4 @@ int oif_connector_init(const char *lang);
 int oif_connector_eval_expression(const char *str);
 void oif_connector_deinit();
 
-#endif // JULIA_EMBED_OIF_CONNECTOR_H
+#endif // OIF_CONNECTOR_H
