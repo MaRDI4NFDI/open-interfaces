@@ -6,6 +6,7 @@
 #include <R_ext/Parse.h>
 // clang-format on
 
+#include "oif_connector/oif_constants.h"
 #include <Rinterface.h>
 #include <oif_config.h>
 

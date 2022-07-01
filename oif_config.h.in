@@ -11,4 +11,6 @@
 #define _GNU_SOURCE
 #endif
 
+#define OIF_UNUSED __attribute__((unused))
+
 #endif //OIF_CONFIG_H

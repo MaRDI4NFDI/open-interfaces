@@ -1,4 +1,5 @@
 #include "oif_config.h"
+#include "oif_connector/oif_constants.h"
 
 #include <oif_connector/oif_interface.h>
 #include <stdio.h>

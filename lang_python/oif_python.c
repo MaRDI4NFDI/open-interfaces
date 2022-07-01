@@ -1,4 +1,5 @@
 #include "oif_config.h"
+#include "oif_connector/oif_constants.h"
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
