@@ -1,5 +1,6 @@
 #include <oif_connector/oif_connector.h>
 
+#include "oif_constants.h"
 #include <string.h>
 
 int main(int argc, char *argv[]) {
@@ -13,5 +14,13 @@ int main(int argc, char *argv[]) {
   oif_connector_init(lang);
   oif_connector_eval_expression(expr);
 
+  const int N = 2;
+  double A[] = {1, 0, 1, 0};
+  double b[] = {1, 1};
+  double x[2];
+
+  if (oif_connector_solve(N, A, b, x) != OIF_OK) {
+    return -1;
+  }
   oif_connector_deinit();
 }

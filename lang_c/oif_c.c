@@ -23,5 +23,6 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
   (void)A;
   (void)b;
   (void)x;
+  cblas_dscal(N, 2, b, 1);
   return OIF_RUNTIME_ERROR;
 }
