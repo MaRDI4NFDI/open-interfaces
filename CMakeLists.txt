@@ -47,9 +47,21 @@ if(OIF_USE_CPP)
 endif()
 add_subdirectory(oif_connector)
 
+set(M2_LIBRARY_PATH
+    "${Julia_LIBRARY_DIR}:${PROJECT_BINARY_DIR}/oif_connector:${PROJECT_BINARY_DIR}/lang_c:${PROJECT_BINARY_DIR}/lang_cpp:${PROJECT_BINARY_DIR}/lang_python:${PROJECT_BINARY_DIR}/lang_julia:${PROJECT_BINARY_DIR}/lang_r"
+)
 configure_file(oif_config.h.in oif_config.h)
 configure_file(oif_env.in oif_env)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_config.h DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_env DESTINATION share)
 
+add_custom_target(
+  test
+  COMMAND
+    ${CMAKE_COMMAND} -E env "M2_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+    "LD_LIBRARY_PATH=${M2_LIBRARY_PATH}"
+    "R_LIBOIF_CONNECTOR=${PROJECT_BINARY_DIR}/oif_connector/liboif_connector.so"
+    "ENV R_HOME=/usr/lib/R" pytest -c ${PROJECT_SOURCE_DIR}/setup.cfg
+    ${PROJECT_SOURCE_DIR}/tests
+  DEPENDS all_lang)
 add_subdirectory(lang_c)

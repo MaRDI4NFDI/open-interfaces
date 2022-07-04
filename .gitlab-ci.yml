@@ -60,7 +60,7 @@ pytest clang:
     stage: run
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_clang
     script:
-        - pytest -rA tests/
+        - pytest tests/
 
 pages:
     extends: .base
@@ -77,7 +77,7 @@ pytest gcc:
     stage: run
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     script:
-        - pytest -rA tests/
+        - pytest tests/
 
 pre-commit:
     extends: .base
