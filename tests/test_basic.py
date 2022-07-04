@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -14,8 +15,12 @@ def drivers() -> Path:
         lang = lang_dir.stem.replace("lang_", "")
         for driver in lang_dir.glob(f"main_{lang}*"):
             if driver.suffix in SOURCE_EXTENSIONS:
-                # TODO assumes built binary in path
-                yield driver.stem
+                build_dir = os.environ.get("M2_BUILD_DIR", None)
+                if build_dir:
+                    yield Path(build_dir).resolve() / f"lang_{lang}" / driver.stem
+                else:
+                    # assume binary in path
+                    yield driver.stem
                 continue
             if driver.exists() and driver.is_file():
                 yield driver
