@@ -19,7 +19,6 @@ int main(int argc, char *argv[]) {
   }
 
   oif_connector_init(lang.c_str());
-  oif_connector_eval_expression(expr.c_str());
 
   constexpr int N{2};
   array<double, N * N> A{1, 0, 1, 0};
@@ -31,6 +30,8 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   print_vector(x);
+
+  oif_connector_eval_expression(expr.c_str());
   oif_connector_deinit();
 }
 

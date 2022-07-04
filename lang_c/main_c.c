@@ -15,7 +15,6 @@ int main(int argc, char *argv[]) {
   }
 
   oif_connector_init(lang);
-  oif_connector_eval_expression(expr);
 
   const int N = 2;
   double A[] = {1, 0, 1, 0};
@@ -27,6 +26,8 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   print_vector(N, x);
+
+  oif_connector_eval_expression(expr);
   oif_connector_deinit();
 }
 
