@@ -2,7 +2,8 @@
 stages:
     - sanity
     - image
-    - run
+    - test
+    - deploy
 
 #************ definition of base jobs *********************************************************************************#
 # https://docs.gitlab.com/ee/ci/yaml/README.html#workflowrules-templates
@@ -57,27 +58,27 @@ build gcc:
 
 pytest clang:
     extends: .base
-    stage: run
+    stage: test
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_clang
     script:
-        - pytest tests/
+        - cmake --build /build --target test
+
+pytest gcc:
+    extends: .base
+    stage: test
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+    script:
+        - cmake --build /build --target test
 
 pages:
     extends: .base
-    stage: run
+    stage: deploy
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     script:
         - make -C docs html
     artifacts:
         paths:
             - docs/_build/html
-
-pytest gcc:
-    extends: .base
-    stage: run
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
-    script:
-        - pytest tests/
 
 pre-commit:
     extends: .base
