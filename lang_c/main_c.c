@@ -14,8 +14,11 @@ int main(int argc, char *argv[]) {
     expr = strdup(argv[2]);
   }
 
-  oif_connector_init(lang);
-
+  int init = oif_connector_init(lang);
+  if (init != OIF_OK) {
+    printf("failed to init for lang %s", lang);
+    return init;
+  }
   const int N = 2;
   double A[] = {1, 0, 1, 0};
   double b[] = {1, 1};
