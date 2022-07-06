@@ -69,5 +69,5 @@ add_custom_target(
     "LD_LIBRARY_PATH=${M2_LIBRARY_PATH}"
     "R_LIBOIF_CONNECTOR=${PROJECT_BINARY_DIR}/oif_connector/liboif_connector.so"
     "ENV R_HOME=/usr/lib/R" ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg
-    ${PROJECT_SOURCE_DIR}/tests
-  DEPENDS all_lang)
+    ${PROJECT_SOURCE_DIR}/tests)
+add_dependencies(test all_lang)
