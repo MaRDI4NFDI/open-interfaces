@@ -36,16 +36,22 @@ add_custom_target(all_lang)
 if(OIF_USE_JULIA)
   add_subdirectory(lang_julia)
 endif()
+
 if(OIF_USE_R)
   find_package(R REQUIRED)
   add_subdirectory(lang_r)
 endif()
+
 if(OIF_USE_PYTHON)
   add_subdirectory(lang_python)
 endif()
+
 if(OIF_USE_CPP)
   add_subdirectory(lang_cpp)
 endif()
+
+add_subdirectory(lang_c)
+
 add_subdirectory(oif_connector)
 
 set(M2_LIBRARY_PATH
@@ -65,4 +71,3 @@ add_custom_target(
     "ENV R_HOME=/usr/lib/R" ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg
     ${PROJECT_SOURCE_DIR}/tests
   DEPENDS all_lang)
-add_subdirectory(lang_c)
