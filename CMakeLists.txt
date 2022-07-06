@@ -62,12 +62,13 @@ configure_file(oif_env.in oif_env)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_config.h DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_env DESTINATION share)
 
-add_custom_target(
-  test
+enable_testing()
+add_test(
+  NAME pytest
   COMMAND
     ${CMAKE_COMMAND} -E env "M2_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}"
     "LD_LIBRARY_PATH=${M2_LIBRARY_PATH}"
     "R_LIBOIF_CONNECTOR=${PROJECT_BINARY_DIR}/oif_connector/liboif_connector.so"
     "ENV R_HOME=/usr/lib/R" ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg
     ${PROJECT_SOURCE_DIR}/tests)
-add_dependencies(test all_lang)
+set_tests_properties(pytest PROPERTIES DEPENDS "all_lang")
