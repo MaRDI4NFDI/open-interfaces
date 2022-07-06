@@ -9,6 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(CheckCXXCompilerFlag)
 include(GNUInstallDirs)
+include(SetupPythonVirtualenv)
 
 # make sure installed binaries/libraries still find julia
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
@@ -61,7 +62,7 @@ add_custom_target(
     ${CMAKE_COMMAND} -E env "M2_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}"
     "LD_LIBRARY_PATH=${M2_LIBRARY_PATH}"
     "R_LIBOIF_CONNECTOR=${PROJECT_BINARY_DIR}/oif_connector/liboif_connector.so"
-    "ENV R_HOME=/usr/lib/R" pytest -c ${PROJECT_SOURCE_DIR}/setup.cfg
+    "ENV R_HOME=/usr/lib/R" ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg
     ${PROJECT_SOURCE_DIR}/tests
   DEPENDS all_lang)
 add_subdirectory(lang_c)
