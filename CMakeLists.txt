@@ -72,3 +72,4 @@ add_test(
     "ENV R_HOME=/usr/lib/R" ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg
     ${PROJECT_SOURCE_DIR}/tests)
 set_tests_properties(pytest PROPERTIES DEPENDS "all_lang")
+list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
