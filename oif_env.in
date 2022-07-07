@@ -1,3 +1,7 @@
-export LD_LIBRARY_PATH=${M2_LIBRARY_PATH}
-export R_LIBOIF_CONNECTOR=${PROJECT_BINARY_DIR}/oif_connector/liboif_connector.so
-export ENV R_HOME=/usr/lib/R
+LD_LIBRARY_PATH=${M2_LIBRARY_PATH}
+R_LIBOIF_CONNECTOR=${PROJECT_BINARY_DIR}/oif_connector/liboif_connector.so
+ENV R_HOME=/usr/lib/R
+
+export LD_LIBRARY_PATH
+export R_LIBOIF_CONNECTOR
+export ENV R_HOME
