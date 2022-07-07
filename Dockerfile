@@ -1,4 +1,4 @@
-FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:090996bc494b9cc17d7248f821dc494b49be2181
+FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:042fcab2da31cfd2a1508d8d1c0d72dae74df80f
 
 ENV R_HOME=/usr/lib/R \
     R_LIBOIF_CONNECTOR=/usr/local/lib/liboif_connector.so
@@ -13,9 +13,9 @@ ENV CXX=${M2_CXX} CC=${M2_CC}
 
 RUN mkdir /build \
     && cd /build \
-    && cmake /src \
+    && cmake -GNinja /src \
     && cmake --build . \
     && cmake --install . \
     && ldconfig
 
-CMD [ "pytest", "-rA", "/src" ]
+CMD [ "ninja", "-c", "/build", "test" ]
