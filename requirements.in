@@ -1,0 +1,17 @@
+# Run this after any change here
+#   pip-compile requirements.in
+alabaster
+attrs
+breathe
+exhale
+Jinja2
+myst-nb
+myst-parser
+pre-commit
+pytest
+pytest-datadir
+pytest-pycharm
+pytest-regressions
+Sphinx
+python-dotenv
+pip-tools
