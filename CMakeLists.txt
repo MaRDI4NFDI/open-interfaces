@@ -55,21 +55,21 @@ add_subdirectory(lang_c)
 add_subdirectory(oif_connector)
 
 set(M2_LIBRARY_PATH
-    "${Julia_LIBRARY_DIR}:${PROJECT_BINARY_DIR}/oif_connector:${PROJECT_BINARY_DIR}/lang_c:${PROJECT_BINARY_DIR}/lang_cpp:${PROJECT_BINARY_DIR}/lang_python:${PROJECT_BINARY_DIR}/lang_julia:${PROJECT_BINARY_DIR}/lang_r"
+    "${PROJECT_BINARY_DIR}/oif_connector:${PROJECT_BINARY_DIR}/lang_c:${PROJECT_BINARY_DIR}/lang_cpp:${PROJECT_BINARY_DIR}/lang_python:${PROJECT_BINARY_DIR}/lang_julia:${PROJECT_BINARY_DIR}/lang_r:${Julia_LIBRARY_DIR}"
 )
 configure_file(oif_config.h.in oif_config.h)
-configure_file(oif_env.in oif_env)
+configure_file(oif_env.in oif.env)
+configure_file(oif_env_pytest.in oif_pytest.env)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_config.h DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_env DESTINATION share)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif.env DESTINATION share)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env DESTINATION share)
 
 enable_testing()
 add_test(
   NAME pytest
-  COMMAND
-    ${CMAKE_COMMAND} -E env "M2_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}"
-    "LD_LIBRARY_PATH=${M2_LIBRARY_PATH}"
-    "R_LIBOIF_CONNECTOR=${PROJECT_BINARY_DIR}/oif_connector/liboif_connector.so"
-    "ENV R_HOME=/usr/lib/R" ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg
-    ${PROJECT_SOURCE_DIR}/tests)
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  COMMAND ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg -x
+          ${PROJECT_SOURCE_DIR}/tests)
 set_tests_properties(pytest PROPERTIES DEPENDS "all_lang")
 list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
+list(APPEND CMAKE_CTEST_ARGUMENTS "-V")

@@ -36,7 +36,7 @@ setting `LD_LIBRARY_PATH` is necessary.
 ```shell
 cd ${BUILDDIR}
 make
-source oif_env # sets library path
+source oif.env # sets library path
 # ./lang_*/main_* <language> <qouted expression>
 ./lang_c/main_c "python" "print(6*7)"
 ./lang_python/main_python.py "r" "print(6*7)"

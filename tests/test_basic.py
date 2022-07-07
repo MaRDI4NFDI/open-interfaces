@@ -1,29 +1,42 @@
+import functools
 import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Callable, Tuple
 
 import pytest
 
 THIS_DIR = Path(__file__).resolve().absolute().parent
 REPO_ROOT = THIS_DIR.parent
 SOURCE_EXTENSIONS = [".c", ".cpp", ".cc"]
+DRIVER_TYPE = Tuple[str, Callable]
 
 
-def drivers() -> Path:
+def drivers() -> DRIVER_TYPE:
     for lang_dir in REPO_ROOT.glob("lang_*"):
         lang = lang_dir.stem.replace("lang_", "")
         for driver in lang_dir.glob(f"main_{lang}*"):
             if driver.suffix in SOURCE_EXTENSIONS:
-                build_dir = os.environ.get("M2_BUILD_DIR", None)
-                if build_dir:
-                    yield Path(build_dir).resolve() / f"lang_{lang}" / driver.stem
-                else:
-                    # assume binary in path
-                    yield driver.stem
+                # env eval needs to be deferred to runtime
+                def _callable(_driver, _lang, build_dir):
+                    binary = Path(build_dir).resolve() / f"lang_{_lang}" / _driver.stem
+                    if binary.exists() and binary.is_file():
+                        return binary
+                    else:
+                        # assume binary in path
+                        return _driver.stem
+
+                yield driver.stem, functools.partial(_callable, driver, lang)
                 continue
-            if driver.exists() and driver.is_file():
-                yield driver
+            elif driver.exists() and driver.is_file():
+
+                def _callable(_driver, build_dir):
+                    return _driver
+
+                yield driver.name, functools.partial(_callable, driver)
+                continue
+            assert False, driver
 
 
 def languages() -> str:
@@ -40,11 +53,12 @@ def languages() -> str:
 
 
 @pytest.mark.parametrize(
-    "driver", drivers(), ids=(f if isinstance(f, str) else f.name for f in drivers())
+    "driver", [d for _, d in drivers()], ids=[f for f, _ in drivers()]
 )
 @pytest.mark.parametrize("lang", languages())
-def test_print(driver, lang) -> None:
+def test_print(driver: Callable, lang: str) -> None:
     expression = "print(6*7)"
+    driver = driver(build_dir=os.environ["M2_BINARY_DIR"])
     print(f"Execute {driver} {lang} {expression}")
     out = subprocess.check_output([driver, lang, expression]).decode()
     # string eval not implemented
