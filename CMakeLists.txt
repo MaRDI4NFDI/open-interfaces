@@ -70,9 +70,14 @@ enable_testing()
 add_test(
   NAME pytest
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg -x
+  COMMAND ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg
           ${PROJECT_SOURCE_DIR}/tests)
-set_tests_properties(pytest PROPERTIES DEPENDS "all_lang")
+
+add_test(NAME build_all_lang
+         COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target
+                 all_lang --config $<CONFIGURATION>)
+set_tests_properties(pytest PROPERTIES DEPENDS build_all_lang)
+
 list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
 list(APPEND CMAKE_CTEST_ARGUMENTS "-V")
 
