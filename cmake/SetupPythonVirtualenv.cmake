@@ -13,6 +13,9 @@ unset(Python3_EXECUTABLE)
 # Launch a new search
 find_package(Python3 COMPONENTS Interpreter Development)
 
-execute_process(COMMAND "${Python3_EXECUTABLE}" -m pip install -r
-                        ${PROJECT_SOURCE_DIR}/requirements.txt)
+execute_process(
+  COMMAND
+    "${Python3_EXECUTABLE}" -m pip install -r
+    ${PROJECT_SOURCE_DIR}/requirements.txt --cache-dir
+    ${CMAKE_CURRENT_BINARY_DIR}/pip_cache)
 set(OIF_PYTEST ${OIF_VENV_PATH}/bin/pytest)

@@ -73,3 +73,5 @@ add_test(
 set_tests_properties(pytest PROPERTIES DEPENDS "all_lang")
 list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
 list(APPEND CMAKE_CTEST_ARGUMENTS "-V")
+
+add_subdirectory(docs)
