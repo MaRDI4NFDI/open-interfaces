@@ -15,3 +15,4 @@ pytest-regressions
 Sphinx
 python-dotenv
 pip-tools
+numpy
