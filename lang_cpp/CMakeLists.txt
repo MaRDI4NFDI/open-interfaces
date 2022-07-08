@@ -9,6 +9,7 @@ target_include_directories(
          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
 
 oif_enable_compile_warnings(oif_cpp)
+target_link_libraries(oif_cpp $<BUILD_INTERFACE:flexiblas>)
 add_dependencies(all_lang oif_cpp)
 
 add_executable(main_cpp main_cpp.cc)

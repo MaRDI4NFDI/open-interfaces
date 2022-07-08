@@ -20,6 +20,8 @@ option(OIF_USE_R "Build R bindings" ON)
 option(OIF_USE_PYTHON "Build Python bindings" ON)
 option(OIF_USE_CPP "Build Cpp bindings" ON)
 
+find_library(flexiblas REQUIRED NAMES flexiblas)
+
 macro(oif_enable_compile_warnings _target)
   target_compile_options(
     ${_target}
@@ -31,7 +33,7 @@ macro(oif_enable_compile_warnings _target)
       $<$<CXX_COMPILER_ID:MSVC>:/W4>)
 endmacro()
 
-add_custom_target(all_lang)
+add_custom_target(all_lang ALL)
 
 if(OIF_USE_JULIA)
   add_subdirectory(lang_julia)

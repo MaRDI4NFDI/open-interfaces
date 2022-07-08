@@ -6,10 +6,10 @@ target_include_directories(
   PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
          $<BUILD_INTERFACE:${Julia_INCLUDE_DIRS}>
          $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
-         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>/flexiblas_src/include
          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
 
 oif_enable_compile_warnings(oif_c)
+target_link_libraries(oif_c $<BUILD_INTERFACE:flexiblas>)
 add_dependencies(all_lang oif_c)
 
 add_executable(main_c main_c.c)

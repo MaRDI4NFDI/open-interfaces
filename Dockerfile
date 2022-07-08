@@ -1,4 +1,4 @@
-FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:090a3ce6bc53eb87edb753378ed4ac0cd382b787
+FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:26f935e2ed251808719dbb3bc44dfc08eafd6bd5
 
 ENV R_HOME=/usr/lib/R \
     R_LIBOIF_CONNECTOR=/usr/local/lib/liboif_connector.so
