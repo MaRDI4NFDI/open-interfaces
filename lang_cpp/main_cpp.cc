@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   oif_connector_init(lang.c_str());
 
   constexpr int N{2};
-  array<double, N * N> A{1, 0, 1, 0};
+  array<double, N * N> A{2, 0, 1, 0};
   array<double, N> b{1, 1};
   array<double, N> x;
 
