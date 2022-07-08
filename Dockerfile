@@ -1,10 +1,9 @@
-FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:ce30e51b8114a92cd8b93c51614b46fadf563671
+FROM zivgitlab.wwu.io/ag-ohlberger/mardi/container/m2-dev:042fcab2da31cfd2a1508d8d1c0d72dae74df80f
 
 ENV R_HOME=/usr/lib/R \
     R_LIBOIF_CONNECTOR=/usr/local/lib/liboif_connector.so
 
 COPY . /src
-RUN pip install --no-cache -r /src/requirements.txt
 
 ARG M2_CXX=g++
 ARG M2_CC=gcc
@@ -13,9 +12,9 @@ ENV CXX=${M2_CXX} CC=${M2_CC}
 
 RUN mkdir /build \
     && cd /build \
-    && cmake /src \
+    && cmake -GNinja /src \
     && cmake --build . \
     && cmake --install . \
     && ldconfig
 
-CMD [ "pytest", "-rA", "/src" ]
+CMD [ "ninja", "-C", "/build", "test" ]

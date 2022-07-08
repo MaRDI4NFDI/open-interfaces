@@ -1,5 +1,6 @@
 build
 .vscode
 cmake-*-debug*/
+cmake-build-*/
 .idea
 doxygen_xml

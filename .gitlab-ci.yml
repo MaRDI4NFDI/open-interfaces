@@ -2,7 +2,8 @@
 stages:
     - sanity
     - image
-    - run
+    - test
+    - deploy
 
 #************ definition of base jobs *********************************************************************************#
 # https://docs.gitlab.com/ee/ci/yaml/README.html#workflowrules-templates
@@ -57,27 +58,31 @@ build gcc:
 
 pytest clang:
     extends: .base
-    stage: run
+    stage: test
+    needs: [build clang]
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}_clang
     script:
-        - pytest -rA tests/
-
-pages:
-    extends: .base
-    stage: run
-    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
-    script:
-        - make -C docs html
-    artifacts:
-        paths:
-            - docs/_build/html
+        - cmake --build /build --target test
 
 pytest gcc:
     extends: .base
-    stage: run
+    stage: test
+    needs: [build gcc]
     image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
     script:
-        - pytest -rA tests/
+        - cmake --build /build --target test
+
+pages:
+    extends: .base
+    stage: deploy
+    image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+    needs: [build gcc]
+    script:
+        - cmake -GNinja -B build -S /src
+        - cmake --build build --target docs
+    artifacts:
+        paths:
+            - build/docs/sphinx_html/
 
 pre-commit:
     extends: .base

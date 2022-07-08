@@ -1,9 +1,5 @@
+# this file cannot contain exports
 M2_BINARY_DIR=${PROJECT_BINARY_DIR}
 LD_LIBRARY_PATH=${M2_LIBRARY_PATH}
 R_LIBOIF_CONNECTOR=${PROJECT_BINARY_DIR}/oif_connector/liboif_connector.so
 R_HOME=/usr/lib/R
-
-export M2_BINARY_DIR
-export LD_LIBRARY_PATH
-export R_LIBOIF_CONNECTOR
-export R_HOME

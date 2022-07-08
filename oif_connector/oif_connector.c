@@ -12,6 +12,8 @@ char *__oif_current_lang;
 
 #ifdef OIF_USE_R
 #include <Rinternals.h>
+#include <assert.h>
+
 char *_R_convert_to_char(SEXP str) {
   if (!isString(str) || length(str) != 1) {
     return NULL;
@@ -40,7 +42,7 @@ int _no_R_error(const char *func) {
 
 int oif_connector_init_r(OIF_UNUSED SEXP lang) { return _no_R_error("init"); }
 int oif_connector_eval_expression_r(OIF_UNUSED SEXP str) {
-  return _no_R_error("eval_expression");
+  return _no_R_error("lang_solve");
 }
 #endif
 
@@ -50,7 +52,7 @@ int oif_connector_init(const char *lang) {
 
   char *libname;
   if (0 > asprintf(&libname, "liboif_%s.so", __oif_current_lang))
-    return OIF_LOAD_ERROR;
+    return OIF_RUNTIME_ERROR;
   __oif_lib_handle = dlopen(libname, RTLD_LAZY);
   free(libname);
 
@@ -92,4 +94,20 @@ void oif_connector_deinit() {
   }
   dlclose(__oif_lib_handle);
   free(__oif_current_lang);
+}
+
+int oif_connector_solve(int N, double *A, double *b, double *x) {
+  assert(N > 0);
+  assert(A);
+  assert(b);
+  assert(x);
+  int (*lang_solve)();
+  *(void **)(&lang_solve) = dlsym(__oif_lib_handle, "oif_lang_solve");
+  if (!lang_solve) {
+    fprintf(stderr, "Error: %s\n", dlerror());
+    dlclose(__oif_lib_handle);
+    return OIF_SYMBOL_ERROR;
+  }
+  lang_solve(N, A, b, x);
+  return OIF_OK;
 }

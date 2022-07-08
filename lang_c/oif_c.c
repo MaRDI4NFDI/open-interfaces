@@ -4,6 +4,8 @@
 #include <oif_connector/oif_interface.h>
 #include <stdio.h>
 
+#include <cblas.h>
+
 int oif_lang_init() { return OIF_OK; }
 
 int oif_lang_eval_expression(const char *str) {
@@ -15,3 +17,12 @@ int oif_lang_eval_expression(const char *str) {
 }
 
 void oif_lang_deinit() {}
+
+int oif_lang_solve(int N, double *A, double *b, double *x) {
+  (void)N;
+  (void)A;
+  (void)b;
+  (void)x;
+  cblas_dscal(N, 2, b, 1);
+  return OIF_RUNTIME_ERROR;
+}
