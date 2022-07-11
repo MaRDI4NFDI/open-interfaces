@@ -85,16 +85,18 @@ int oif_connector_eval_expression(const char *str) {
   return OIF_OK;
 }
 
-void oif_connector_deinit() {
+int oif_connector_deinit() {
+  int ret = OIF_LOAD_ERROR;
   int (*lang_deinit)();
   *(void **)(&lang_deinit) = dlsym(__oif_lib_handle, "oif_lang_deinit");
   if (!lang_deinit) {
     fprintf(stderr, "Error: %s\n", dlerror());
   } else {
-    lang_deinit();
+    ret = lang_deinit();
   }
   dlclose(__oif_lib_handle);
   free(__oif_current_lang);
+  return ret;
 }
 
 int oif_connector_solve(int N, double *A, double *b, double *x) {

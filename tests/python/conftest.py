@@ -74,4 +74,4 @@ def oif_lib(request, oif_env) -> ctypes.CDLL:
         DOUBLE_STAR,
     ]
     yield lib, lang
-    lib.oif_connector_deinit()
+    assert lib.oif_connector_deinit() == 0
