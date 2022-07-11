@@ -12,14 +12,11 @@ def test_print(oif_lib: Tuple[ctypes.CDLL, str], capsys) -> None:
     expression = "print(6*7)".encode()
 
     ret: int = lib.oif_connector_eval_expression(expression)
-    out = capsys.readouterr()
-    # string eval not implemented
-    if lang not in ["c", "cpp"]:
-        assert "42" in out.out or "42" in out.err
-        assert ret == 0
+    out, err = capsys.readouterr()
+    if ret != 0:
+        assert ret == 4  # not implemented
     else:
-        if ret != 0:
-            assert ret == 4  # not implemented
+        assert "42" in out or "42" in err
 
 
 def runmodule(filename):
