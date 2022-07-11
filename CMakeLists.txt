@@ -74,6 +74,12 @@ add_test(
   COMMAND ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg
           ${PROJECT_SOURCE_DIR}/tests)
 
+add_test(
+  NAME requirements
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  COMMAND ${OIF_VENV_PATH}/bin/check_reqs
+          ${PROJECT_SOURCE_DIR}/requirements.txt)
+
 add_test(NAME build_all_lang
          COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR} --target
                  all_lang --config $<CONFIGURATION>)

@@ -16,3 +16,4 @@ Sphinx
 python-dotenv
 pip-tools
 numpy
+check-reqs
