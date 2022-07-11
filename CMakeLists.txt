@@ -68,6 +68,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif.env DESTINATION share)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env DESTINATION share)
 
 add_subdirectory(docs)
+add_subdirectory(examples)
 
 # TODO everything below should be moved into a dedicated lists file in ./tests
 # however, if I do that, the 'test' target disappears
