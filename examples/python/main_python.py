@@ -11,7 +11,7 @@ DOUBLE_STAR = ctypes.POINTER(ctypes.c_double)
 
 
 def load(lang) -> ctypes.CDLL:
-    soname = "liboif_connector.so"
+    soname = "./oif_connector/liboif_connector.so"
     # With PyDLL we do not release the GIL when calling into lib functions
     dso_type = ctypes.PyDLL if lang == "python" else ctypes.CDLL
     try:

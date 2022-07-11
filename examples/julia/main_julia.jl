@@ -14,7 +14,7 @@ else
     const lang = "r"
     const expression = "print(7*6)"
 end
-const oif = "liboif_connector"
+const oif = "./oif_connector/liboif_connector"
 ret = @ccall oif.oif_connector_init(lang::Cstring)::Cint
 check_call(ret)
 
