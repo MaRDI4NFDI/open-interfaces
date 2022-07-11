@@ -9,9 +9,9 @@ def test_print(oif_lib: Tuple[ctypes.CDLL, str], capsys) -> None:
     lib, lang = oif_lib
     err = lib.oif_connector_init(lang.encode())
     assert err == 0
-    expression = "print(6*7)"
+    expression = "print(6*7)".encode()
 
-    ret: int = lib.oif_connector_eval_string(expression)
+    ret: int = lib.oif_connector_eval_expression(expression)
     out = capsys.readouterr()
     # string eval not implemented
     if lang not in ["c", "cpp"]:
