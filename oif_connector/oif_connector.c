@@ -81,8 +81,7 @@ int oif_connector_eval_expression(const char *str) {
     dlclose(__oif_lib_handle);
     return OIF_SYMBOL_ERROR;
   }
-  eval_expression(str);
-  return OIF_OK;
+  return eval_expression(str);
 }
 
 int oif_connector_deinit() {
