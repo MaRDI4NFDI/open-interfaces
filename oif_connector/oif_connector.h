@@ -8,6 +8,9 @@
 
 /** Try to load the Implementor DSO
  *
+ * The connector expects all Implementor DSOs residing in subdirectories:
+ *      lang_c/liboif_c.so
+ *      lang_LANG/liboif_LANG.so
  * @param lang specifies which implementor to load
  * @return `OIF_OK` or a fitting error code
  */

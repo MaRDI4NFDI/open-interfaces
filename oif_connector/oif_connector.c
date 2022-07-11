@@ -51,7 +51,8 @@ int oif_connector_init(const char *lang) {
   __oif_current_lang = strdup(lang);
 
   char *libname;
-  if (0 > asprintf(&libname, "liboif_%s.so", __oif_current_lang))
+  if (0 > asprintf(&libname, "lang_%s/liboif_%s.so", __oif_current_lang,
+                   __oif_current_lang))
     return OIF_RUNTIME_ERROR;
   __oif_lib_handle = dlopen(libname, RTLD_LAZY);
   free(libname);

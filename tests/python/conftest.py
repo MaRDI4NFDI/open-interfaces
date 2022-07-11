@@ -31,6 +31,13 @@ def oif_env() -> bool:
     return False
 
 
+@pytest.fixture(autouse=True)
+def change_test_dir(request, oif_env):
+    os.chdir(os.environ.get("M2_BINARY_DIR"))
+    yield
+    os.chdir(request.config.invocation_dir)
+
+
 def languages() -> str:
     for lang_dir in REPO_ROOT.glob("lang_*"):
         lang = lang_dir.stem.replace("lang_", "")
@@ -48,7 +55,7 @@ def languages() -> str:
 def oif_lib(request, oif_env) -> ctypes.CDLL:
     assert oif_env
     lang = request.param
-    soname = os.environ.get("R_LIBOIF_CONNECTOR")
+    soname = "./oif_connector/liboif_connector.so"
     # With PyDLL we do not release the GIL when calling into lib functions
     dso_type = ctypes.PyDLL if lang == "python" else ctypes.CDLL
     try:
