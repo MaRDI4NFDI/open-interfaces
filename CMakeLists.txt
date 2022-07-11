@@ -71,8 +71,8 @@ enable_testing()
 add_test(
   NAME pytest
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg
-          ${PROJECT_SOURCE_DIR}/tests)
+  COMMAND ${OIF_PYTEST} -c ${PROJECT_SOURCE_DIR}/setup.cfg -x
+          ${PROJECT_SOURCE_DIR}/tests/python)
 
 add_test(
   NAME requirements
