@@ -60,10 +60,15 @@ def test_print(driver: Callable, lang: str) -> None:
     expression = "print(6*7)"
     driver = driver(build_dir=os.environ["M2_BINARY_DIR"])
     print(f"Execute {driver} {lang} {expression}")
-    out = subprocess.check_output([driver, lang, expression]).decode()
+    result = subprocess.run([driver, lang, expression], capture_output=True)
     # string eval not implemented
     if lang not in ["c", "cpp"]:
+        out = result.stdout.decode() + result.stderr.decode()
         assert "42" in out
+        assert result.returncode == 0
+    else:
+        if result.returncode != 0:
+            assert result.returncode == 4  # not implemented
 
 
 def runmodule(filename):

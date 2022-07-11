@@ -23,5 +23,5 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
   (void)A;
   (void)b;
   (void)x;
-  return OIF_RUNTIME_ERROR;
+  return OIF_NOT_IMPLEMENTED;
 }
