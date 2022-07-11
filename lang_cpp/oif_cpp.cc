@@ -10,7 +10,7 @@ extern "C" {
 #include <limits>
 #include <vector>
 
-#include <cblas.h>
+#include <flexiblas/cblas.h>
 
 int oif_lang_init() { return OIF_OK; }
 

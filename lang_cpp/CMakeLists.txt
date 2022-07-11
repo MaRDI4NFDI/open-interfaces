@@ -5,6 +5,7 @@ target_include_directories(
   oif_cpp
   PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
          $<BUILD_INTERFACE:${Julia_INCLUDE_DIRS}>
+         $<BUILD_INTERFACE:${flexiblas_INCLUDE_DIR}>
          $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
 

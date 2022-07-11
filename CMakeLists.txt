@@ -21,6 +21,7 @@ option(OIF_USE_PYTHON "Build Python bindings" ON)
 option(OIF_USE_CPP "Build Cpp bindings" ON)
 
 find_library(flexiblas REQUIRED NAMES flexiblas)
+find_path(flexiblas_INCLUDE_DIR flexiblas/cblas.h REQUIRED)
 
 macro(oif_enable_compile_warnings _target)
   target_compile_options(

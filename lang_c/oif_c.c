@@ -1,10 +1,13 @@
 #include "oif_config.h"
 #include "oif_connector/oif_constants.h"
 
+#include <malloc.h>
+#include <math.h>
+#include <memory.h>
 #include <oif_connector/oif_interface.h>
 #include <stdio.h>
 
-#include <cblas.h>
+#include <flexiblas/cblas.h>
 
 int oif_lang_init() { return OIF_OK; }
 
