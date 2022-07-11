@@ -25,8 +25,6 @@ int oif_lang_init() {
 }
 
 int oif_lang_eval_expression(const char *str) {
-  if (!str)
-    str = "print(42)";
   SEXP cmdSexp, cmdexpr = R_NilValue;
   ParseStatus status;
   cmdSexp = PROTECT(allocVector(STRSXP, 1));

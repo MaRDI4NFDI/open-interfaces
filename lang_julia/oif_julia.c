@@ -5,14 +5,12 @@
 
 int oif_lang_init() {
   jl_init();
-  return 0;
+  return OIF_OK;
 }
 
 int oif_lang_eval_expression(const char *str) {
-  if (str)
-    jl_eval_string(str);
-  else
-    jl_eval_string("print(sqrt(2.0))");
+  jl_eval_string(str);
+  jl_flush_cstdio();
   return OIF_OK;
 }
 
