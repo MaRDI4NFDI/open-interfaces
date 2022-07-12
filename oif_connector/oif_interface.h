@@ -10,7 +10,7 @@ int oif_lang_init();
 /// language-specific implementation of \link oif_connector_eval_expression
 int oif_lang_eval_expression(const char *str);
 /// language-specific implementation of \link oif_connector_deinit
-void oif_lang_deinit();
+int oif_lang_deinit();
 /// language-specific implementation of \link oif_connector_solve
 int oif_lang_solve(int N, const double *const A, const double *const b,
                    double *x);

@@ -14,7 +14,10 @@ int oif_lang_eval_expression(const char *str) {
   return OIF_OK;
 }
 
-void oif_lang_deinit() { jl_atexit_hook(0); }
+int oif_lang_deinit() {
+  jl_atexit_hook(0);
+  return OIF_OK;
+}
 
 int oif_lang_solve(int N, const double *const A, const double *const b,
                    double *x) {

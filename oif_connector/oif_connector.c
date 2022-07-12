@@ -87,7 +87,7 @@ int oif_connector_eval_expression(const char *str) {
 int oif_connector_deinit() {
   int ret = OIF_LOAD_ERROR;
   int (*lang_deinit)();
-  *(void **)(&lang_deinit) = dlsym(__oif_lib_handle, "oif_lang_deinit");
+  *(int **)(&lang_deinit) = dlsym(__oif_lib_handle, "oif_lang_deinit");
   if (!lang_deinit) {
     fprintf(stderr, "Error: %s\n", dlerror());
   } else {

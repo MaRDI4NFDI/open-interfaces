@@ -19,7 +19,7 @@ int oif_lang_eval_expression(const char *str) {
   return OIF_NOT_IMPLEMENTED;
 }
 
-void oif_lang_deinit() {}
+int oif_lang_deinit() { return OIF_OK; }
 
 int oif_lang_solve(int N, const double *const A, const double *const b,
                    double *x) {
