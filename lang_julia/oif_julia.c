@@ -10,7 +10,20 @@ int oif_lang_init() {
 
 int oif_lang_eval_expression(const char *str) {
   jl_eval_string(str);
-  jl_flush_cstdio();
+  jl_value_t *errs = jl_stderr_obj();
+  if (errs) {
+    jl_printf((JL_STREAM *)stderr, "\nString eval threw an error: ");
+    jl_static_show((JL_STREAM *)stderr, jl_current_exception());
+    jl_printf((JL_STREAM *)stderr, "\n");
+    jlbacktrace(); // written to STDERR_FILENO
+    jl_value_t *showf = jl_get_function(jl_base_module, "show");
+    if (showf != NULL) {
+      jl_call2(showf, errs, jl_current_exception());
+      jl_printf((JL_STREAM *)stderr, "\n");
+    }
+    return OIF_RUNTIME_ERROR;
+  }
+
   return OIF_OK;
 }
 
