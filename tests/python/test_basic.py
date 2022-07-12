@@ -19,6 +19,16 @@ def test_print(oif_lib: Tuple[ctypes.CDLL, str], capsys) -> None:
         assert "42" in out or "42" in err
 
 
+def test_fail_eval(oif_lib: Tuple[ctypes.CDLL, str]) -> None:
+    lib, lang = oif_lib
+    err = lib.oif_connector_init(lang.encode())
+    assert err == 0
+
+    expression = 'blbla("foobar")'.encode()
+    ret: int = lib.oif_connector_eval_expression(expression)
+    assert ret != 0
+
+
 def runmodule(filename):
     sys.exit(pytest.main(sys.argv[1:] + [filename]))
 
