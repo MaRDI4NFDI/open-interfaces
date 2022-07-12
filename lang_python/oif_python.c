@@ -18,29 +18,8 @@ int oif_lang_init() {
 }
 
 int oif_lang_eval_expression(const char *str) {
-  PyObject *code = Py_CompileString(str, "test", Py_file_input);
-  if (!code) {
-    PyErr_Print();
-    return OIF_RUNTIME_ERROR;
-  }
-  PyObject *main_module = PyImport_AddModule("__main__");
-  if (!main_module) {
-    PyErr_Print();
-    return OIF_RUNTIME_ERROR;
-  }
-  PyObject *global_dict = PyModule_GetDict(main_module);
-  if (!global_dict) {
-    PyErr_Print();
-    return OIF_RUNTIME_ERROR;
-  }
-  PyObject *local_dict = PyDict_New();
-  if (!local_dict) {
-    PyErr_Print();
-    return OIF_RUNTIME_ERROR;
-  }
-  PyObject *eval = PyEval_EvalCode(code, global_dict, local_dict);
-
-  return eval ? OIF_RUNTIME_ERROR : OIF_OK;
+  int ret = PyRun_SimpleString(str);
+  return ret != 0 ? OIF_RUNTIME_ERROR : OIF_OK;
 }
 
 int oif_lang_deinit() {
