@@ -10,4 +10,10 @@
 #define OIF_RUNTIME_ERROR 5
 /* *********** */
 
+#define OIF_SEGFAULT                                                           \
+  {                                                                            \
+    int *oif_segfault = 0;                                                     \
+    *oif_segfault = 1;                                                         \
+  }
+
 #endif // OIF_CONSTANTS_H
