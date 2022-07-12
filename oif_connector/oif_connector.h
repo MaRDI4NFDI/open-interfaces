@@ -33,7 +33,8 @@ int oif_connector_eval_expression(const char *str);
  *
  * \note All arrays must be pre-allocated
  */
-int oif_connector_solve(int N, double *A, double *b, double *x);
+int oif_connector_solve(int N, const double *const A, const double *const b,
+                        double *x);
 
 /** Unload Implementor, free acquired resources
  *
