@@ -10,17 +10,19 @@
 #include <Rinterface.h>
 #include <oif_config.h>
 
+int r_initialized = 0;
+
 int oif_lang_init() {
-  static int r_initialized = 0;
-  if (R_running_as_main_program || r_initialized)
+  if (r_initialized > 0 || R_running_as_main_program) {
     return OIF_OK;
+  }
 
-  int r_argc = 3;
   char *r_argv[] = {"R", "--vanilla", "--quiet"};
+  const int r_argc = sizeof(r_argv) / sizeof(r_argv[0]);
 
+  fprintf(stderr, "\ninitializaing R %d\n", r_initialized);
   const int res = Rf_initEmbeddedR(r_argc, r_argv);
-  r_initialized = TRUE;
-  R_Interactive = FALSE;
+  r_initialized += 1;
   // the embedded setup apparently always returns 1
   return res == 1 ? OIF_OK : OIF_LOAD_ERROR;
 }
@@ -45,6 +47,7 @@ int oif_lang_eval_expression(const char *str) {
 
 int oif_lang_deinit() {
   Rf_endEmbeddedR(0);
+  r_initialized -= 1;
   return OIF_OK;
 }
 
