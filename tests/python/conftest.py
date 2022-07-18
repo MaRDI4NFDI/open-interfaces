@@ -51,8 +51,16 @@ def languages() -> str:
             pytest.fail(f"No source file for {lang_dir}:{glob}")
 
 
-@pytest.fixture(params=languages())
+@pytest.fixture(params=languages(), scope="session")
 def oif_lib(request, oif_env) -> ctypes.CDLL:
+    """yield (dlopened so, language string)
+
+    It's important that this fixture has session scope.
+    Since ctypes unloading (after yield) is unreliable,
+    function scope leads to R already being intialized
+    DSO unloading via https://stackoverflow.com/a/64483246/2290151
+    does not work, R lib's state is not fresh.
+    """
     assert oif_env
     lang = request.param
     soname = "./oif_connector/liboif_connector.so"
