@@ -80,9 +80,10 @@ pages:
     script:
         - cmake -GNinja -B build -S /src
         - cmake --build build --target docs
+        - mv build/docs/sphinx_html/ public
     artifacts:
         paths:
-            - build/docs/sphinx_html/
+            - public
 
 pre-commit:
     extends: .base
