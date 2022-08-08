@@ -24,6 +24,8 @@ def test_fail_eval(oif_lib: Tuple[ctypes.CDLL, str]) -> None:
     err = lib.oif_connector_init(lang.encode())
     assert err == 0
 
+    if lang == "r":
+        pytest.skip("unrecoverable fatal error produced by undefined function")
     expression = 'blbla("foobar")'.encode()
     ret: int = lib.oif_connector_eval_expression(expression)
     assert ret != 0
