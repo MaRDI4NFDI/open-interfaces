@@ -1,5 +1,8 @@
 # C to multiple experiments
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/MaRDI4NFDI/open-interfaces/main.svg)](https://results.pre-commit.ci/latest/github/MaRDI4NFDI/open-interfaces/main)
+[![build and test](https://github.com/MaRDI4NFDI/open-interfaces/actions/workflows/build.yml/badge.svg)](https://github.com/MaRDI4NFDI/open-interfaces/actions/workflows/build.yml)
+
 ## Setup
 
 Only tested setup is based on the shipped `Dockerfile`.
