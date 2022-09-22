@@ -1,0 +1,24 @@
+---
+on: pull_request
+
+name: Git
+
+jobs:
+    message-check:
+        name: Block Autosquash Commits
+        runs-on: ubuntu-22.04
+        steps:
+            - name: Block Autosquash Commits
+              uses: xt0rted/block-autosquash-commits-action@v2
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+    merge_conflict_job:
+        runs-on: ubuntu-22.04
+        name: Find merge conflicts
+        steps:
+      # Checkout the source code so we have some files to look at.
+            - uses: actions/checkout@v3
+      # Run the actual merge conflict finder
+            - name: Merge Conflict finder
+              uses: olivernybroe/action-conflict-finder@v3.0
