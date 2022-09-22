@@ -74,4 +74,34 @@ jobs:
             - name: Test
               run: |
                   docker run --rm ${{ needs.metadata.outputs.tags }}_${{matrix.CC}}
+    docs:
+        runs-on: ubuntu-22.04
+        needs: [metadata, matrix-setup, build]
+        container:
+            credentials:
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
             image: ${{ needs.metadata.outputs.tags }}_gcc
+        steps:
+            - name: build_docs
+              run: |
+                  cmake -GNinja -B build -S /src
+                  cmake --build build --target docs
+            - name: upload
+              uses: actions/upload-pages-artifact@v1
+              with:
+                  path: build/docs/sphinx_html/
+    deploy_docs:
+        if: github.repository == 'MaRDI4NFDI/open-interfaces' && github.branch == 'main'
+        runs-on: ubuntu-22.04
+        needs: [docs]
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        permissions:
+            pages: write    # to deploy to Pages
+            id-token: write # to verify the deployment originates from an appropriate source
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v1
