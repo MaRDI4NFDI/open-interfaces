@@ -51,7 +51,8 @@ int oif_connector_init(const char *lang) {
   __oif_current_lang = strdup(lang);
 
   char *libname;
-  if (0 > asprintf(&libname, "liboif_%s.so", __oif_current_lang))
+  if (0 > asprintf(&libname, "lang_%s/liboif_%s.so", __oif_current_lang,
+                   __oif_current_lang))
     return OIF_RUNTIME_ERROR;
   __oif_lib_handle = dlopen(libname, RTLD_LAZY);
   free(libname);
@@ -80,23 +81,25 @@ int oif_connector_eval_expression(const char *str) {
     dlclose(__oif_lib_handle);
     return OIF_SYMBOL_ERROR;
   }
-  eval_expression(str);
-  return OIF_OK;
+  return eval_expression(str);
 }
 
-void oif_connector_deinit() {
+int oif_connector_deinit() {
+  int ret = OIF_LOAD_ERROR;
   int (*lang_deinit)();
-  *(void **)(&lang_deinit) = dlsym(__oif_lib_handle, "oif_lang_deinit");
+  *(int **)(&lang_deinit) = dlsym(__oif_lib_handle, "oif_lang_deinit");
   if (!lang_deinit) {
     fprintf(stderr, "Error: %s\n", dlerror());
   } else {
-    lang_deinit();
+    ret = lang_deinit();
   }
   dlclose(__oif_lib_handle);
   free(__oif_current_lang);
+  return ret;
 }
 
-int oif_connector_solve(int N, double *A, double *b, double *x) {
+int oif_connector_solve(int N, const double *const A, const double *const b,
+                        double *x) {
   assert(N > 0);
   assert(A);
   assert(b);

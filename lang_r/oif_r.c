@@ -10,23 +10,24 @@
 #include <Rinterface.h>
 #include <oif_config.h>
 
+int r_initialized = 0;
+
 int oif_lang_init() {
-  static int r_initialized = 0;
-  if (R_running_as_main_program || r_initialized)
+  if (r_initialized > 0 || R_running_as_main_program) {
     return OIF_OK;
+  }
 
-  int r_argc = 3;
   char *r_argv[] = {"R", "--vanilla", "--quiet"};
+  const int r_argc = sizeof(r_argv) / sizeof(r_argv[0]);
 
+  fprintf(stderr, "\ninitializaing R %d\n", r_initialized);
   const int res = Rf_initEmbeddedR(r_argc, r_argv);
-  r_initialized = res == 0;
+  r_initialized += 1;
   // the embedded setup apparently always returns 1
   return res == 1 ? OIF_OK : OIF_LOAD_ERROR;
 }
 
 int oif_lang_eval_expression(const char *str) {
-  if (!str)
-    str = "print(42)";
   SEXP cmdSexp, cmdexpr = R_NilValue;
   ParseStatus status;
   cmdSexp = PROTECT(allocVector(STRSXP, 1));
@@ -44,12 +45,17 @@ int oif_lang_eval_expression(const char *str) {
   return OIF_OK;
 }
 
-void oif_lang_deinit() { Rf_endEmbeddedR(0); }
+int oif_lang_deinit() {
+  Rf_endEmbeddedR(0);
+  r_initialized -= 1;
+  return OIF_OK;
+}
 
-int oif_lang_solve(int N, double *A, double *b, double *x) {
+int oif_lang_solve(int N, const double *const A, const double *const b,
+                   double *x) {
   (void)N;
   (void)A;
   (void)b;
   (void)x;
-  return OIF_RUNTIME_ERROR;
+  return OIF_NOT_IMPLEMENTED;
 }

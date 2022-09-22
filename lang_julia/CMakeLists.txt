@@ -17,4 +17,3 @@ add_dependencies(all_lang oif_julia)
 target_include_directories(oif_julia INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 install(TARGETS oif_julia DESTINATION lib)
-install(PROGRAMS main_julia.jl DESTINATION bin)

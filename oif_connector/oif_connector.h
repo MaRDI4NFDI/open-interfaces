@@ -8,6 +8,9 @@
 
 /** Try to load the Implementor DSO
  *
+ * The connector expects all Implementor DSOs residing in subdirectories:
+ *      lang_c/liboif_c.so
+ *      lang_LANG/liboif_LANG.so
  * @param lang specifies which implementor to load
  * @return `OIF_OK` or a fitting error code
  */
@@ -30,12 +33,14 @@ int oif_connector_eval_expression(const char *str);
  *
  * \note All arrays must be pre-allocated
  */
-int oif_connector_solve(int N, double *A, double *b, double *x);
+int oif_connector_solve(int N, const double *const A, const double *const b,
+                        double *x);
 
 /** Unload Implementor, free acquired resources
  *
+ * @return `OIF_OK` or a fitting error code
  */
-void oif_connector_deinit();
+int oif_connector_deinit();
 
 /** Special functions that act on R data structs
  * \todo move

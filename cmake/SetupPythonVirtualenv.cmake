@@ -18,4 +18,4 @@ execute_process(
     "${Python3_EXECUTABLE}" -m pip install -r
     ${PROJECT_SOURCE_DIR}/requirements.txt --cache-dir
     ${CMAKE_CURRENT_BINARY_DIR}/pip_cache)
-set(OIF_PYTEST ${OIF_VENV_PATH}/bin/pytest)
+set(OIF_PYTEST ${OIF_VENV_PATH}/bin/python -m pytest)

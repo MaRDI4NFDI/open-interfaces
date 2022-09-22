@@ -5,23 +5,35 @@
 
 int oif_lang_init() {
   jl_init();
-  return 0;
-}
-
-int oif_lang_eval_expression(const char *str) {
-  if (str)
-    jl_eval_string(str);
-  else
-    jl_eval_string("print(sqrt(2.0))");
   return OIF_OK;
 }
 
-void oif_lang_deinit() { jl_atexit_hook(0); }
+int oif_lang_eval_expression(const char *str) {
+  jl_eval_string(str);
+  if (jl_exception_occurred()) {
+    fprintf(stderr, "Julia String evaluation failed\n");
+    jl_static_show((JL_STREAM *)stderr, jl_stderr_obj());
+    fprintf(stderr, "\n");
+    jl_static_show((JL_STREAM *)stderr, jl_exception_occurred());
+    fprintf(stderr, "\n");
+    jl_exception_clear();
+    return OIF_RUNTIME_ERROR;
+  }
+  jl_flush_cstdio();
+  jl_atexit_hook(0);
+  return OIF_OK;
+}
 
-int oif_lang_solve(int N, double *A, double *b, double *x) {
+int oif_lang_deinit() {
+  jl_atexit_hook(0);
+  return OIF_OK;
+}
+
+int oif_lang_solve(int N, const double *const A, const double *const b,
+                   double *x) {
   (void)N;
   (void)A;
   (void)b;
   (void)x;
-  return OIF_RUNTIME_ERROR;
+  return OIF_NOT_IMPLEMENTED;
 }
