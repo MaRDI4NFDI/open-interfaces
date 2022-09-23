@@ -291,7 +291,7 @@ typing-extensions==4.3.0
     # via
     #   myst-nb
     #   myst-parser
-urllib3==1.26.10
+urllib3==1.26.12
     # via requests
 virtualenv==20.15.1
     # via pre-commit
