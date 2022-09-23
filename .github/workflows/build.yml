@@ -35,7 +35,7 @@ jobs:
               id: meta
               uses: docker/metadata-action@v4
               with:
-                  images: ghcr.io/mardi4nfdi/open-interfaces/ci_test
+                  images: ghcr.io/${{github.repository}}/ci_test
                   flavor: |
                       latest=false
                   tags: |
