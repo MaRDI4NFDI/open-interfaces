@@ -47,6 +47,8 @@ jobs:
         needs: [metadata, matrix-setup]
         strategy:
             matrix: ${{ fromJson(needs.matrix-setup.outputs.matrix-combinations) }}
+        permissions:
+            packages: write
         steps:
             - uses: actions/checkout@v3
             - name: Set up Docker Buildx
