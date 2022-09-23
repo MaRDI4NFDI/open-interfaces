@@ -215,7 +215,7 @@ pyyaml==6.0
     #   myst-parser
     #   pre-commit
     #   pytest-regressions
-pyzmq==23.2.0
+pyzmq==24.0.1
     # via
     #   ipykernel
     #   jupyter-client
