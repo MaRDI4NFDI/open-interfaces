@@ -232,7 +232,6 @@ six==1.16.0
     #   asttokens
     #   exhale
     #   python-dateutil
-    #   virtualenv
 snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.3.2.post1
@@ -293,7 +292,7 @@ typing-extensions==4.3.0
     #   myst-parser
 urllib3==1.26.12
     # via requests
-virtualenv==20.15.1
+virtualenv==20.16.5
     # via pre-commit
 wcwidth==0.2.5
     # via prompt-toolkit
