@@ -66,7 +66,7 @@ exhale==0.3.4
     # via -r requirements.in
 fastjsonschema==2.15.3
     # via nbformat
-filelock==3.7.1
+filelock==3.8.0
     # via virtualenv
 greenlet==1.1.2
     # via sqlalchemy
