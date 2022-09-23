@@ -245,7 +245,7 @@ sphinx==4.5.0
     #   myst-nb
     #   myst-parser
     #   sphinx-togglebutton
-sphinx-togglebutton==0.3.1
+sphinx-togglebutton==0.3.2
     # via myst-nb
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
