@@ -60,7 +60,7 @@ docutils==0.17.1
     #   sphinx-togglebutton
 entrypoints==0.4
     # via jupyter-client
-executing==1.0.0
+executing==1.1.0
     # via stack-data
 exhale==0.3.5
     # via -r requirements.in
