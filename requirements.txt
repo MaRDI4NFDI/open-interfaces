@@ -57,7 +57,6 @@ docutils==0.17.1
     #   exhale
     #   myst-parser
     #   sphinx
-    #   sphinx-togglebutton
 entrypoints==0.4
     # via jupyter-client
 executing==1.1.0
@@ -123,7 +122,7 @@ mdit-py-plugins==0.3.0
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-myst-nb==0.16.0
+myst-nb==0.17.1
     # via -r requirements.in
 myst-parser==0.18.0
     # via
@@ -243,9 +242,6 @@ sphinx==4.5.0
     #   exhale
     #   myst-nb
     #   myst-parser
-    #   sphinx-togglebutton
-sphinx-togglebutton==0.3.2
-    # via myst-nb
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
@@ -297,9 +293,7 @@ virtualenv==20.16.5
 wcwidth==0.2.5
     # via prompt-toolkit
 wheel==0.37.1
-    # via
-    #   pip-tools
-    #   sphinx-togglebutton
+    # via pip-tools
 zipp==3.8.1
     # via importlib-metadata
 
