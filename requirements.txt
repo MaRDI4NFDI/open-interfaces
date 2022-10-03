@@ -61,7 +61,7 @@ entrypoints==0.4
     # via jupyter-client
 executing==1.1.0
     # via stack-data
-exhale==0.3.5
+exhale==0.3.6
     # via -r requirements.in
 fastjsonschema==2.16.2
     # via nbformat
