@@ -6,6 +6,12 @@
 
 #include <oif_connector/oif_interface.h>
 #include <stdio.h>
+// clang-format off
+#include <oif_connector/disable_warnings.h>
+#include <numpy/arrayobject.h>
+#include <numpy/ndarraytypes.h>
+#include <oif_connector/reenable_warnings.h>
+// clang-format on
 
 int __did_we_init_python = 0;
 
