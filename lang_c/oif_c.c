@@ -46,7 +46,7 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
     cblas_dscal(N, 0.0, AP, 1);
     cblas_dgemv(CblasRowMajor, CblasNoTrans, N, N, 1.0, A, N, P, 1, 0.0, AP, 1);
 
-    double alpha =
+    const double alpha =
         cblas_ddot(N, R, 1, R, 1) / fmax(cblas_ddot(N, R, 1, AP, 1), eps);
 
     // Next estimate of solution
@@ -57,7 +57,7 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
     if (cblas_dnrm2(N, R, 1) < max_residual)
       break;
 
-    double beta =
+    const double beta =
         cblas_ddot(N, R, 1, R, 1) / fmax(cblas_ddot(N, Rold, 1, Rold, 1), eps);
     // Next gradient
     cblas_dscal(N, beta, P, 1);

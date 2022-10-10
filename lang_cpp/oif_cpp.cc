@@ -43,8 +43,8 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
     cblas_dgemv(CblasRowMajor, CblasNoTrans, N, N, 1.0, A, N, P.data(), 1, 0.0,
                 AP.data(), 1);
 
-    double alpha = cblas_ddot(N, R.data(), 1, R.data(), 1) /
-                   max(cblas_ddot(N, R.data(), 1, AP.data(), 1), eps);
+    const double alpha = cblas_ddot(N, R.data(), 1, R.data(), 1) /
+                         max(cblas_ddot(N, R.data(), 1, AP.data(), 1), eps);
 
     // Next estimate of solution
     cblas_daxpy(N, alpha, P.data(), 1, x, 1);
@@ -54,8 +54,8 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
     if (cblas_dnrm2(N, R.data(), 1) < max_residual)
       return OIF_OK;
 
-    double beta = cblas_ddot(N, R.data(), 1, R.data(), 1) /
-                  max(cblas_ddot(N, Rold.data(), 1, Rold.data(), 1), eps);
+    const double beta = cblas_ddot(N, R.data(), 1, R.data(), 1) /
+                        max(cblas_ddot(N, Rold.data(), 1, Rold.data(), 1), eps);
     // Next gradient
     cblas_dscal(N, beta, P.data(), 1);
     cblas_daxpy(N, 1.0, R.data(), 1, P.data(), 1);
