@@ -31,8 +31,8 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
   double *Rold = calloc(N, sizeof(double));
   double *P = calloc(N, sizeof(double));
 
-  memcpy(P, R, N * sizeof(double));
   memcpy(R, b, N * sizeof(double));
+  memcpy(P, R, N * sizeof(double));
 
   for (int in = 0; in < N; ++in) {
     x[in] = 0;
@@ -41,7 +41,7 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
   int k = 0;
 
   while (k < N) {
-    memcpy(R, Rold, N * sizeof(double));
+    memcpy(Rold, R, N * sizeof(double));
 
     cblas_dscal(N, 0.0, AP, 1);
     cblas_dgemv(CblasRowMajor, CblasNoTrans, N, N, 1.0, A, N, P, 1, 0.0, AP, 1);
