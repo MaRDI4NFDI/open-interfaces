@@ -59,7 +59,7 @@ docutils==0.17.1
     #   sphinx
 entrypoints==0.4
     # via jupyter-client
-executing==1.1.0
+executing==1.1.1
     # via stack-data
 exhale==0.3.6
     # via -r requirements.in
