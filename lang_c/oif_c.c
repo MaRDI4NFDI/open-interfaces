@@ -34,6 +34,10 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
   memcpy(P, R, N * sizeof(double));
   memcpy(R, b, N * sizeof(double));
 
+  for (int in = 0; in < N; ++in) {
+    x[in] = 0;
+  }
+
   int k = 0;
 
   while (k < N) {

@@ -34,6 +34,8 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
   auto P = R;
   int k = 0;
 
+  std::fill(x, x + N, 0.0);
+
   while (k < N) {
     auto Rold = R; // Store previous residual
 
