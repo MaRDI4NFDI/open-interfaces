@@ -22,8 +22,7 @@ int oif_lang_eval_expression(const char *str) {
 
 int oif_lang_deinit() { return OIF_OK; }
 
-int oif_lang_solve(int N, const double *const A, const double *const b,
-                   double *x) {
+int oif_lang_solve(int N, double *A, double *b, double *x) {
   //! adjusted from https://cplusplus.com/forum/general/222617/
   using namespace std;
   constexpr double max_residual = 1.0e-6;

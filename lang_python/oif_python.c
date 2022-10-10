@@ -29,8 +29,7 @@ int oif_lang_deinit() {
   return OIF_OK;
 }
 
-int oif_lang_solve(int N, const double *const A, const double *const b,
-                   double *x) {
+int oif_lang_solve(int N, double *A, double *b, double *x) {
   (void)N;
   (void)A;
   (void)b;
