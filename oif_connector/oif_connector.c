@@ -110,6 +110,5 @@ int oif_connector_solve(int N, double *A, double *b, double *x) {
     dlclose(__oif_lib_handle);
     return OIF_SYMBOL_ERROR;
   }
-  lang_solve(N, A, b, x);
-  return OIF_OK;
+  return lang_solve(N, A, b, x);
 }
