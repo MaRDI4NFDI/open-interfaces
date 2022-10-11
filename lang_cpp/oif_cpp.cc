@@ -22,8 +22,7 @@ int oif_lang_eval_expression(const char *str) {
 
 int oif_lang_deinit() { return OIF_OK; }
 
-int oif_lang_solve(int N, const double *const A, const double *const b,
-                   double *x) {
+int oif_lang_solve(int N, double *A, double *b, double *x) {
   //! adjusted from https://cplusplus.com/forum/general/222617/
   using namespace std;
   constexpr double max_residual = 1.0e-6;
@@ -35,6 +34,8 @@ int oif_lang_solve(int N, const double *const A, const double *const b,
   auto P = R;
   int k = 0;
 
+  std::fill(x, x + N, 0.0);
+
   while (k < N) {
     auto Rold = R; // Store previous residual
 
@@ -42,8 +43,8 @@ int oif_lang_solve(int N, const double *const A, const double *const b,
     cblas_dgemv(CblasRowMajor, CblasNoTrans, N, N, 1.0, A, N, P.data(), 1, 0.0,
                 AP.data(), 1);
 
-    double alpha = cblas_ddot(N, R.data(), 1, R.data(), 1) /
-                   max(cblas_ddot(N, R.data(), 1, AP.data(), 1), eps);
+    const double alpha = cblas_ddot(N, R.data(), 1, R.data(), 1) /
+                         max(cblas_ddot(N, R.data(), 1, AP.data(), 1), eps);
 
     // Next estimate of solution
     cblas_daxpy(N, alpha, P.data(), 1, x, 1);
@@ -53,8 +54,8 @@ int oif_lang_solve(int N, const double *const A, const double *const b,
     if (cblas_dnrm2(N, R.data(), 1) < max_residual)
       return OIF_OK;
 
-    double beta = cblas_ddot(N, R.data(), 1, R.data(), 1) /
-                  max(cblas_ddot(N, Rold.data(), 1, Rold.data(), 1), eps);
+    const double beta = cblas_ddot(N, R.data(), 1, R.data(), 1) /
+                        max(cblas_ddot(N, Rold.data(), 1, Rold.data(), 1), eps);
     // Next gradient
     cblas_dscal(N, beta, P.data(), 1);
     cblas_daxpy(N, 1.0, R.data(), 1, P.data(), 1);

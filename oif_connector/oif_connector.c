@@ -98,8 +98,7 @@ int oif_connector_deinit() {
   return ret;
 }
 
-int oif_connector_solve(int N, const double *const A, const double *const b,
-                        double *x) {
+int oif_connector_solve(int N, double *A, double *b, double *x) {
   assert(N > 0);
   assert(A);
   assert(b);
