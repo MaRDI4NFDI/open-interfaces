@@ -13,4 +13,6 @@
 
 #define OIF_UNUSED __attribute__((unused))
 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+
 #endif //OIF_CONFIG_H
