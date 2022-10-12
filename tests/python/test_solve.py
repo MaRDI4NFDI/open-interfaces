@@ -24,7 +24,7 @@ def test_solve(oif_lib: Tuple[ctypes.CDLL, str]):
         x.ctypes.data_as(DOUBLE_STAR),
     )
 
-    if lang in ["c", "cpp", "python"]:
+    if lang in ["c", "cpp", "python", "julia"]:
         assert ret == 0
     else:
         if ret != 0:

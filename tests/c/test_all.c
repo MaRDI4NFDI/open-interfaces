@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     return init;
   }
   const int N = 2;
-  double A[] = {2, 0, 1, 0};
+  double A[] = {2, 0, 0, 1};
   double b[] = {1, 1};
   double x[2];
 
