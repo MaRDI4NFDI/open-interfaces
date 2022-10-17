@@ -39,7 +39,7 @@ int oif_connector_solve(int N, double *A, double *b, double *x);
  *
  * @return `OIF_OK` or a fitting error code
  */
-int oif_connector_deinit();
+int oif_connector_deinit(void);
 
 /** Special functions that act on R data structs
  * \todo move

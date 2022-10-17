@@ -47,7 +47,7 @@ int oif_connector_eval_expression_r(OIF_UNUSED SEXP str) {
 #endif
 
 int oif_connector_init(const char *lang) {
-  int (*init_lang)();
+  int (*init_lang)(void);
   __oif_current_lang = strdup(lang);
 
   char *libname;
@@ -73,7 +73,7 @@ int oif_connector_init(const char *lang) {
 }
 
 int oif_connector_eval_expression(const char *str) {
-  int (*eval_expression)();
+  int (*eval_expression)(const char *);
   *(void **)(&eval_expression) =
       dlsym(__oif_lib_handle, "oif_lang_eval_expression");
   if (!eval_expression) {
@@ -84,9 +84,9 @@ int oif_connector_eval_expression(const char *str) {
   return eval_expression(str);
 }
 
-int oif_connector_deinit() {
+int oif_connector_deinit(void) {
   int ret = OIF_LOAD_ERROR;
-  int (*lang_deinit)();
+  int (*lang_deinit)(void);
   *(int **)(&lang_deinit) = dlsym(__oif_lib_handle, "oif_lang_deinit");
   if (!lang_deinit) {
     fprintf(stderr, "Error: %s\n", dlerror());
@@ -103,7 +103,7 @@ int oif_connector_solve(int N, double *A, double *b, double *x) {
   assert(A);
   assert(b);
   assert(x);
-  int (*lang_solve)();
+  int (*lang_solve)(int, double *, double *, double *);
   *(void **)(&lang_solve) = dlsym(__oif_lib_handle, "oif_lang_solve");
   if (!lang_solve) {
     fprintf(stderr, "Error: %s\n", dlerror());
