@@ -15,7 +15,7 @@
 
 int __did_we_init_python = 0;
 
-int oif_lang_init() {
+int oif_lang_init(void) {
   if (!Py_IsInitialized()) {
     Py_InitializeEx(0);
     __did_we_init_python = 1;
@@ -30,7 +30,7 @@ int oif_lang_eval_expression(const char *str) {
   return ret != 0 ? OIF_RUNTIME_ERROR : OIF_OK;
 }
 
-int oif_lang_deinit() {
+int oif_lang_deinit(void) {
   // TODO: use the _Ex version for sanity check
   if (__did_we_init_python)
     Py_Finalize();

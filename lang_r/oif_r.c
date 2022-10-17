@@ -12,7 +12,7 @@
 
 int r_initialized = 0;
 
-int oif_lang_init() {
+int oif_lang_init(void) {
   if (r_initialized > 0 || R_running_as_main_program) {
     return OIF_OK;
   }
@@ -45,7 +45,7 @@ int oif_lang_eval_expression(const char *str) {
   return OIF_OK;
 }
 
-int oif_lang_deinit() {
+int oif_lang_deinit(void) {
   Rf_endEmbeddedR(0);
   r_initialized -= 1;
   return OIF_OK;

@@ -6,7 +6,7 @@
 
 jl_value_t *get_matrix_dims(int N);
 
-int oif_lang_init() {
+int oif_lang_init(void) {
   jl_init();
   return OIF_OK;
 }
@@ -27,7 +27,7 @@ int oif_lang_eval_expression(const char *str) {
   return OIF_OK;
 }
 
-int oif_lang_deinit() {
+int oif_lang_deinit(void) {
   jl_atexit_hook(0);
   return OIF_OK;
 }
