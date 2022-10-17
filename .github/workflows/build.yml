@@ -102,7 +102,7 @@ jobs:
               with:
                   path: build/docs/sphinx_html/
     deploy_docs:
-        if: github.repository == 'MaRDI4NFDI/open-interfaces' && github.branch == 'main'
+        if: ${{ github.ref == 'refs/heads/main' }}
         runs-on: ubuntu-22.04
         needs: [docs]
         environment:
