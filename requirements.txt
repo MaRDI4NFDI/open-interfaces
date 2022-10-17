@@ -254,7 +254,7 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlalchemy==1.4.41
+sqlalchemy==1.4.42
     # via jupyter-cache
 stack-data==0.5.1
     # via ipython
