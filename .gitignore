@@ -4,3 +4,4 @@ cmake-*-debug*/
 cmake-build-*/
 .idea
 doxygen_xml
+build-cmake

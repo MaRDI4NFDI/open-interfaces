@@ -17,14 +17,16 @@ set(SPHINX_SOURCE_DIR ${DOCS_OUTPUT_ROOT_DIR}/sphinx_src)
 set(SPHINX_HTML_DIR ${DOCS_OUTPUT_ROOT_DIR}/sphinx_html)
 set(SPHINX_HTML ${SPHINX_HTML_DIR}/index.html)
 set(SPHINX_SOURCE_INDEX ${SPHINX_SOURCE_DIR}/index.md)
-
+file(GLOB_RECURSE DOXYGEN_INPUTS ${PROJECT_SOURCE_DIR}/*.c
+     ${PROJECT_SOURCE_DIR}/*.cc ${PROJECT_SOURCE_DIR}/*.h
+     ${PROJECT_SOURCE_DIR}/*.hh)
 configure_file(conf.py.in conf.py @ONLY)
 configure_file(Doxyfile.in Doxyfile @ONLY)
 add_custom_target(docs)
 
 add_custom_command(
   OUTPUT ${DOXYGEN_XML}
-  DEPENDS Doxyfile
+  DEPENDS Doxyfile ${DOXYGEN_INPUTS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMAND ${DOXYGEN}
   COMMENT "Creating doxygen xml.")
