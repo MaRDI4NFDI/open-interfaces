@@ -1,7 +1,3 @@
-# This file is part of the pyMOR project (https://www.pymor.org).
-# Copyright pyMOR developers and contributors. All rights reserved.
-# License: BSD 2-Clause License (https://opensource.org/licenses/BSD-2-Clause)
-
 import sys
 import os
 import glob
@@ -18,7 +14,8 @@ needs_sphinx = "4.0"
 # General configuration
 # -----------------------------------------------------------------------------
 
-src_dir = Path("@SPHINX_SOURCE_DIR@").resolve().parent
+SPHINX_SOURCE_DIR = Path("@SPHINX_SOURCE_DIR@").resolve()
+PROJECT_ROOT_DIR = SPHINX_SOURCE_DIR.parent.parent
 
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
@@ -232,8 +229,6 @@ intersphinx_mapping = {
     "Sphinx": (" https://www.sphinx-doc.org/en/stable/", None),
 }
 
-# modindex_common_prefix = ["pymor."]
-
 branch = os.environ.get("CI_COMMIT_REF_NAME", "main")
 
 
@@ -242,11 +237,11 @@ def linkcode_resolve(domain, info):
         if not info["module"]:
             return None
         filename = info["module"].replace(".", "/")
-        return f"https://github.com/pymor/pymor/tree/{branch}/src/{filename}.py"
+        return f"https://github.com/MaRDI4NFDI/open-interfaces/tree/{branch}/{filename}.py"
     return None
 
 
-autoapi_dirs = [src_dir / "lang_python"]
+autoapi_dirs = [PROJECT_ROOT_DIR / "lang_python"]
 autoapi_type = "python"
 # allows incremental build
 autoapi_keep_files = True
