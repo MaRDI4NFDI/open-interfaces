@@ -49,7 +49,7 @@ int oif_connector_deinit(void);
 typedef struct SEXPREC *SEXP;
 int oif_connector_init_r(SEXP lang);
 int oif_connector_eval_expression_r(SEXP str);
-void oif_connector_deinit_r();
+void oif_connector_deinit_r(void);
 /** @}*/
 
 #endif // OIF_CONNECTOR_H

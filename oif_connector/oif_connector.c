@@ -32,7 +32,7 @@ int oif_connector_eval_expression_r(SEXP str) {
     return OIF_TYPE_ERROR;
   return oif_connector_eval_expression(c_str);
 }
-void oif_connector_deinit_r() { oif_connector_deinit(); }
+void oif_connector_deinit_r(void) { oif_connector_deinit(); }
 #else
 
 int _no_R_error(const char *func) {
