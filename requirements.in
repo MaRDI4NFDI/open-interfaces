@@ -4,6 +4,7 @@ alabaster
 attrs
 breathe
 exhale
+sphinx-autoapi
 Jinja2
 myst-nb
 myst-parser
