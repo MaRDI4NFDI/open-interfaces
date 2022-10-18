@@ -15,7 +15,7 @@ find_package(Python3 COMPONENTS Interpreter Development)
 
 execute_process(
   COMMAND
-    "${Python3_EXECUTABLE}" -m pip install -r
+    "${Python3_EXECUTABLE}" -m pip install -qr
     ${PROJECT_SOURCE_DIR}/requirements.txt --cache-dir
     ${CMAKE_CURRENT_BINARY_DIR}/pip_cache)
 set(OIF_PYTEST ${OIF_VENV_PATH}/bin/python -m pytest)

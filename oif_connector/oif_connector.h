@@ -39,7 +39,7 @@ int oif_connector_solve(int N, double *A, double *b, double *x);
  *
  * @return `OIF_OK` or a fitting error code
  */
-int oif_connector_deinit();
+int oif_connector_deinit(void);
 
 /** Special functions that act on R data structs
  * \todo move
@@ -49,7 +49,7 @@ int oif_connector_deinit();
 typedef struct SEXPREC *SEXP;
 int oif_connector_init_r(SEXP lang);
 int oif_connector_eval_expression_r(SEXP str);
-void oif_connector_deinit_r();
+void oif_connector_deinit_r(void);
 /** @}*/
 
 #endif // OIF_CONNECTOR_H
