@@ -12,7 +12,8 @@ on:
                 value: ${{ jobs.metadata.outputs.tags }}
 
 concurrency:
-    group: ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
+    # resolves to the caller workflow: ${{ github.workflow }}
+    group: build_images_${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
     cancel-in-progress: false
 
 jobs:
