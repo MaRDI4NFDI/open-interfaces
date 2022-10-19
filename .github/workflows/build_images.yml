@@ -23,11 +23,10 @@ jobs:
             - name: Setup matrix combinations
               id: setup-matrix-combinations
               run: |
-                  MATRIX_PARAMS_COMBINATIONS='
-                      {"CC": "clang", "CXX": "clang++"},
-                      {"CC": "gcc", "CXX": "g++"},
-                  '
-                  echo ::set-output name=matrix-combinations::{\"include\":[$MATRIX_PARAMS_COMBINATIONS]}
+                  echo 'matrix-combinations<<EOF' >> $GITHUB_OUTPUT
+                  echo '{"include":[{"CC": "clang", "CXX": "clang++"},
+                      {"CC": "gcc", "CXX": "g++"},]}' >> $GITHUB_OUTPUT
+                  echo 'EOF' >> $GITHUB_OUTPUT
         outputs:
             matrix-combinations: ${{ steps.setup-matrix-combinations.outputs.matrix-combinations }}
 
