@@ -6,10 +6,10 @@ on:
         outputs:
             matrix-combinations:
                 description: json data describing the build matrix
-                value: ${{ jobs.matrix-setup.matrix-combinations }}
+                value: ${{ jobs.matrix-setup.outputs.matrix-combinations }}
             image_tag:
                 description: a string to identify the generated docker image, needs to postfixxed with ${CC}
-                value: ${{ jobs.metadata.tags }}
+                value: ${{ jobs.metadata.outputs.tags }}
 
 concurrency:
     group: ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
