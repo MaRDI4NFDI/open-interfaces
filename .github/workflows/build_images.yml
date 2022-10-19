@@ -69,6 +69,8 @@ jobs:
               with:
                   context: .
                   push: true
+                  cache-from: type=registry,ref=${{ needs.metadata.outputs.tags }}_${{matrix.CC}}_buildcache
+                  cache-to: type=registry,ref=${{ needs.metadata.outputs.tags }}_${{matrix.CC}}_buildcache,mode=max
                   tags: ${{ needs.metadata.outputs.tags }}_${{matrix.CC}}
                   build-args: |
                       M2_CC=${{matrix.CC}}
