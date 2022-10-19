@@ -1,15 +1,19 @@
 ---
-name: build and test
+name: Build Images
 
 on:
-    push:
-        branches:
-            - main
-    pull_request:
+    workflow_call:
+        outputs:
+            matrix-combinations:
+                description: json data describing the build matrix
+                value: ${{ jobs.matrix-setup.matrix-combinations }}
+            image_tag:
+                description: a string to identify the generated docker image, needs to postfixxed with ${CC}
+                value: ${{ jobs.metadata.tags }}
 
 concurrency:
     group: ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
-    cancel-in-progress: true
+    cancel-in-progress: false
 
 jobs:
     matrix-setup:
@@ -69,49 +73,3 @@ jobs:
                   build-args: |
                       M2_CC=${{matrix.CC}}
                       M2_CXX=${{matrix.CXX}}
-    test:
-        runs-on: ubuntu-22.04
-        needs: [metadata, matrix-setup, build]
-        strategy:
-            matrix: ${{ fromJson(needs.matrix-setup.outputs.matrix-combinations) }}
-        steps:
-            - name: Login to Github Packages
-              uses: docker/login-action@v2
-              with:
-                  registry: ghcr.io
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
-            - name: Test
-              run: |
-                  docker run --rm ${{ needs.metadata.outputs.tags }}_${{matrix.CC}}
-    docs:
-        runs-on: ubuntu-22.04
-        needs: [metadata, matrix-setup, build]
-        container:
-            credentials:
-                username: ${{ github.actor }}
-                password: ${{ secrets.GITHUB_TOKEN }}
-            image: ${{ needs.metadata.outputs.tags }}_gcc
-        steps:
-            - name: build_docs
-              run: |
-                  cmake -GNinja -B build -S /src
-                  cmake --build build --target docs
-            - name: upload
-              uses: actions/upload-pages-artifact@v1
-              with:
-                  path: build/docs/sphinx_html/
-    deploy_docs:
-        if: ${{ github.ref == 'refs/heads/main' }}
-        runs-on: ubuntu-22.04
-        needs: [docs]
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
-        permissions:
-            pages: write    # to deploy to Pages
-            id-token: write # to verify the deployment originates from an appropriate source
-        steps:
-            - name: Deploy to GitHub Pages
-              id: deployment
-              uses: actions/deploy-pages@v1
