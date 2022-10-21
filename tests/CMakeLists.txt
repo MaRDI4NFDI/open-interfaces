@@ -16,7 +16,7 @@ add_test(NAME build_all_lang
                  all_lang --config $<CONFIGURATION>)
 set_tests_properties(pytest PROPERTIES DEPENDS build_all_lang)
 
-add_executable(test_all_cpp cpp/test_all.cc)
+add_executable(test_all_cpp cpp/test_all.cc cpp/catch2/catch_amalgamated.cpp)
 add_test(NAME all_cpp COMMAND test_all_cpp)
 oif_enable_compile_warnings(test_all_cpp)
 target_include_directories(
