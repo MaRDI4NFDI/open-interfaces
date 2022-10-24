@@ -34,4 +34,5 @@ add_subdirectory(python)
 add_subdirectory(cpp)
 add_subdirectory(c)
 add_subdirectory(julia)
-add_subdirectory(r)
+# disabled due to https://github.com/MaRDI4NFDI/open-interfaces/issues/89
+# add_subdirectory(r)
