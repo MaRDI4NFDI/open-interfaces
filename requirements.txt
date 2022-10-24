@@ -280,7 +280,7 @@ tornado==6.2
     # via
     #   ipykernel
     #   jupyter-client
-traitlets==5.4.0
+traitlets==5.5.0
     # via
     #   ipykernel
     #   ipython
