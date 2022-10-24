@@ -8,7 +8,7 @@ alabaster==0.7.12
     # via
     #   -r requirements.in
     #   sphinx
-astroid==2.12.11
+astroid==2.12.12
     # via sphinx-autoapi
 asttokens==2.0.8
     # via stack-data
@@ -234,6 +234,7 @@ shellingham==1.5.0
     # via typer
 six==1.16.0
     # via
+    #   asttokens
     #   exhale
     #   python-dateutil
 snowballstemmer==2.2.0
