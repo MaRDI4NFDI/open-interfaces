@@ -175,7 +175,7 @@ pre-commit==2.20.0
     # via -r requirements.in
 prompt-toolkit==3.0.31
     # via ipython
-psutil==5.9.2
+psutil==5.9.3
     # via ipykernel
 ptyprocess==0.7.0
     # via pexpect
