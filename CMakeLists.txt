@@ -66,7 +66,6 @@ set(M2_LIBRARY_PATH
 )
 configure_file(oif_config.h.in oif_config.h)
 configure_file(oif_env.in oif.env)
-configure_file(oif_env_pytest.in oif_pytest.env)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_config.h DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif.env DESTINATION share)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env DESTINATION share)

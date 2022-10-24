@@ -5,3 +5,4 @@ cmake-build-*/
 .idea
 doxygen_xml
 build-cmake
+__pycache__

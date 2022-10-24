@@ -12,5 +12,5 @@ if (length(args)!=2) {
 connector_path = Sys.getenv("R_LIBOIF_CONNECTOR")
 dyn.load(connector_path)
 .Call("oif_connector_init_r", lang)
-.Call("oif_connector_eval_expression_r", expr)
-.Call("oif_connector_deinit")
+# .Call("oif_connector_eval_expression_r", expr)
+# .Call("oif_connector_deinit")

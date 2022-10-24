@@ -16,7 +16,7 @@ TEST_CASE("Convert cpp main", "[convert]") {
   string lang{"julia"};
   string expr{"print(42);"};
 
-  oif_connector_init(lang.c_str());
+  REQUIRE(oif_connector_init(lang.c_str()) == OIF_OK);
 
   constexpr int N{2};
   array<double, N * N> A{2, 0, 0, 1};
@@ -26,7 +26,7 @@ TEST_CASE("Convert cpp main", "[convert]") {
   REQUIRE(oif_connector_solve(N, A.data(), b.data(), x.data()) == OIF_OK);
   REQUIRE(oif_connector_eval_expression(expr.c_str()) == OIF_OK);
 
-  oif_connector_deinit();
+  REQUIRE(oif_connector_deinit() == OIF_OK);
 }
 
 template <std::size_t N> void print_vector(std::array<double, N> &x) {
