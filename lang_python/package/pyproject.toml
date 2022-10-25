@@ -1,0 +1,19 @@
+[project]
+name = "openInterfaces"
+description = "openInterfaces prototype demonstrator"
+version = "0.0.1"
+authors = [
+    { name = "René Fritze", email = "rene.fritze@wwu.de" }
+]
+dependencies = [
+    "numpy",
+]
+
+[project.optional-dependencies]
+ci = [
+    "pytest",
+]
+
+[build-system]
+requires = ['setuptools', 'wheel', 'pytest-runner>=2.9', 'packaging']
+build-backend = "setuptools.build_meta"
