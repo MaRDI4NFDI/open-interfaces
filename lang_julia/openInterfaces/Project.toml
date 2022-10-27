@@ -1,0 +1,13 @@
+name = "openInterfaces"
+uuid = "07e4ff7f-07bb-45cd-9e58-8fac98767c00"
+authors = ["René Fritze <rene.fritze@wwu.de> and contributors"]
+version = "0.0.1"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
