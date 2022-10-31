@@ -61,6 +61,8 @@ docutils==0.17.1
     #   sphinx
 entrypoints==0.4
     # via jupyter-client
+exceptiongroup==1.0.0
+    # via pytest
 executing==1.1.1
     # via stack-data
 exhale==0.3.6
@@ -181,8 +183,6 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.2
     # via stack-data
-py==1.11.0
-    # via pytest
 pygments==2.13.0
     # via
     #   ipython
@@ -192,7 +192,7 @@ pyparsing==3.0.9
     # via packaging
 pyrsistent==0.19.1
     # via jsonschema
-pytest==7.1.3
+pytest==7.2.0
     # via
     #   -r requirements.in
     #   pytest-datadir
