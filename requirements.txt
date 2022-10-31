@@ -198,7 +198,7 @@ pytest==7.1.3
     #   pytest-datadir
     #   pytest-pycharm
     #   pytest-regressions
-pytest-datadir==1.3.1
+pytest-datadir==1.4.1
     # via
     #   -r requirements.in
     #   pytest-regressions
@@ -234,6 +234,7 @@ shellingham==1.5.0
     # via typer
 six==1.16.0
     # via
+    #   asttokens
     #   exhale
     #   python-dateutil
 snowballstemmer==2.2.0
