@@ -10,7 +10,7 @@ alabaster==0.7.12
     #   sphinx
 astroid==2.12.12
     # via sphinx-autoapi
-asttokens==2.0.8
+asttokens==2.1.0
     # via stack-data
 attrs==22.1.0
     # via
