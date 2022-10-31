@@ -63,7 +63,7 @@ entrypoints==0.4
     # via jupyter-client
 exceptiongroup==1.0.0
     # via pytest
-executing==1.1.1
+executing==1.2.0
     # via stack-data
 exhale==0.3.6
     # via -r requirements.in
