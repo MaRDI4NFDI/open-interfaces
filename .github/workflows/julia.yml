@@ -1,0 +1,52 @@
+---
+name: Julia Test
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+
+
+jobs:
+    test:
+        name: Julia Native Tests
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                version:
+                    - '1.8'
+                    - nightly
+                os:
+                    - ubuntu-22.04
+                    - windows-2022
+                arch:
+                    - x64
+
+        steps:
+            - uses: actions/checkout@v2
+            - uses: julia-actions/setup-julia@v1
+              with:
+                  version: ${{ matrix.version }}
+            - run: julia -e 'using InteractiveUtils; versioninfo(verbose=true)'
+            - uses: julia-actions/cache@v1
+            - uses: julia-actions/julia-buildpkg@v1
+              with:
+                  project: lang_julia/package/
+#    - name: Run tests
+#      uses: julia-actions/julia-runtest@v1
+#      with:
+#        coverage: true
+#    - uses: julia-actions/julia-processcoverage@v1
+#      with:
+#        directories: src,examples
+#    - uses: codecov/codecov-action@v1
+#      with:
+#        file: ./lcov.info
+#        flags: unittests
+#        name: codecov-umbrella
+#        fail_ci_if_error: false
+#    - uses: actions/upload-artifact@v2
+#      with:
+#        path: ./lcov-info
