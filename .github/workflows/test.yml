@@ -17,6 +17,7 @@ jobs:
     test:
         runs-on: ubuntu-22.04
         needs: [build_images]
+        name: Run Containerized Tests
         strategy:
             matrix: ${{ fromJson(needs.build_images.outputs.matrix-combinations) }}
         steps:
