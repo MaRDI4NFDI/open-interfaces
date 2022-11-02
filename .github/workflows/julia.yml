@@ -23,6 +23,9 @@ jobs:
                     - windows-2022
                 arch:
                     - x64
+                flags:
+                    # TODO not necessary for linux
+                    - -DOIF_USE_R=0
 
         steps:
             - uses: actions/checkout@v2
@@ -36,13 +39,14 @@ jobs:
                   # 3.9 current max for which bin wheel on windows exist
                   # https://pypi.org/project/lxml/#files
                   python-version: '3.9'
-            - name: Install R
-              if: matrix.os == 'windows-2022'
-              uses: r-lib/actions/setup-r@v2
-              with:
-                  r-version: release
+# currently disabled via matrix.flags
+#            - name: Install R
+#              if: matrix.os == 'windows-2022'
+#              uses: r-lib/actions/setup-r@v2
+#              with:
+#                  r-version: release
             - name: Configure
-              run: cmake -B ${{github.workspace}}/cmake-build -DOIF_USE_C=0 -DOIF_USE_CPP=0
+              run: cmake -B ${{github.workspace}}/cmake-build -DOIF_USE_C=0 -DOIF_USE_CPP=0 ${{matrix.flags}}
             - name: Build
               run: cmake --build ${{github.workspace}}/cmake-build
             - name: Install
