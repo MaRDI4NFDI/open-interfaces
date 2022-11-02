@@ -34,7 +34,12 @@ jobs:
             - uses: actions/setup-python@v4
               with:
                   python-version: '3.11'
-            - run: python -m pip install -r requirements.txt
+            - name: Install Python deps
+              if: matrix.os == 'ubuntu-22.04'
+              run: python -m pip install -r requirements.txt
+            - name: Install Python deps
+              if: matrix.os == 'windows-2022'
+              run: python -m pip install numpy
             - name: Configure
               run: cmake -B ${{github.workspace}}/cmake-build -DOIF_USE_C=0 -DOIF_USE_CPP=0
             - name: Build
