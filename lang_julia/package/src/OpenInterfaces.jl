@@ -1,4 +1,4 @@
-module openInterfaces
+module OpenInterfaces
 
 # Write your package code here.
 

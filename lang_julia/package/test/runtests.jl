@@ -1,6 +1,6 @@
-using openInterfaces
+using OpenInterfaces
 using Test
 
-@testset "openInterfaces.jl" begin
+@testset "OpenInterfaces.jl" begin
     # Write your tests here.
 end
