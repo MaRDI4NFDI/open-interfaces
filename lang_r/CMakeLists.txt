@@ -1,3 +1,5 @@
+find_package(R REQUIRED)
+
 add_library(oif_r SHARED oif_r.c)
 
 # what target itself needs

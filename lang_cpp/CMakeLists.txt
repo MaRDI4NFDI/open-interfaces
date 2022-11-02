@@ -1,3 +1,6 @@
+find_library(flexiblas REQUIRED NAMES flexiblas)
+find_path(flexiblas_INCLUDE_DIR flexiblas/cblas.h REQUIRED)
+
 add_library(oif_cpp SHARED oif_cpp.cc)
 
 # what target itself needs

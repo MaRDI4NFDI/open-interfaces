@@ -19,9 +19,7 @@ option(OIF_USE_JULIA "Build Julia bindings" ON)
 option(OIF_USE_R "Build R bindings" ON)
 option(OIF_USE_PYTHON "Build Python bindings" ON)
 option(OIF_USE_CPP "Build Cpp bindings" ON)
-
-find_library(flexiblas REQUIRED NAMES flexiblas)
-find_path(flexiblas_INCLUDE_DIR flexiblas/cblas.h REQUIRED)
+option(OIF_USE_C "Build C bindings" ON)
 
 macro(oif_enable_compile_warnings _target)
   target_compile_options(
@@ -41,7 +39,6 @@ if(OIF_USE_JULIA)
 endif()
 
 if(OIF_USE_R)
-  find_package(R REQUIRED)
   add_subdirectory(lang_r)
 endif()
 
@@ -53,7 +50,9 @@ if(OIF_USE_CPP)
   add_subdirectory(lang_cpp)
 endif()
 
-add_subdirectory(lang_c)
+if(OIF_USE_C)
+  add_subdirectory(lang_c)
+endif()
 
 add_subdirectory(oif_connector)
 
