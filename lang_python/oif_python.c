@@ -1,8 +1,9 @@
+#define PY_SSIZE_T_CLEAN
+// has to come before our own config since it unconditionally defines things
+#include <Python.h>
+
 #include "oif_config.h"
 #include "oif_connector/oif_constants.h"
-
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
 
 #include <oif_connector/oif_interface.h>
 #include <stdio.h>
