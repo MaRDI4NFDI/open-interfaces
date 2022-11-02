@@ -8,6 +8,7 @@ sphinx-autoapi
 Jinja2
 myst-nb
 myst-parser
+numpy
 pre-commit
 pytest
 pytest-datadir

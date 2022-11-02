@@ -1,4 +1,4 @@
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development NumPy)
 
 add_custom_target(
   run_lang_python
@@ -13,6 +13,7 @@ target_include_directories(
   oif_python
   PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
          $<BUILD_INTERFACE:${Python3_INCLUDE_DIRS}>
+         $<BUILD_INTERFACE:${Python3_NumPy_INCLUDE_DIRS}>
          $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
 target_link_libraries(oif_python $<BUILD_INTERFACE:${Python3_LIBRARIES}>)
