@@ -32,7 +32,7 @@ jobs:
             - run: julia -e 'using InteractiveUtils; versioninfo(verbose=true)'
             - uses: julia-actions/cache@v1
             - name: Configure
-              run: cmake -B ${{github.workspace}}/cmake-build
+              run: cmake -B ${{github.workspace}}/cmake-build -DOIF_USE_C=0 -DOIF_USE_CPP=0
             - name: Build
               run: cmake --build ${{github.workspace}}/cmake-build
             - name: Install
