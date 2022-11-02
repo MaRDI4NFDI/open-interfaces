@@ -31,13 +31,21 @@ jobs:
                   version: ${{ matrix.version }}
             - run: julia -e 'using InteractiveUtils; versioninfo(verbose=true)'
             - uses: julia-actions/cache@v1
+            - name: Configure
+              run: cmake -B ${{github.workspace}}/cmake-build
+            - name: Build
+              run: cmake --build ${{github.workspace}}/cmake-build
+            - name: Install
+              run: cmake --build ${{github.workspace}}/cmake-build
             - uses: julia-actions/julia-buildpkg@v1
+              name: Build Julia
               with:
                   project: lang_julia/package/
-#    - name: Run tests
-#      uses: julia-actions/julia-runtest@v1
-#      with:
-#        coverage: true
+            - name: Run tests
+              uses: julia-actions/julia-runtest@v1
+              with:
+                  coverage: true
+                  project: lang_julia/package/
 #    - uses: julia-actions/julia-processcoverage@v1
 #      with:
 #        directories: src,examples
