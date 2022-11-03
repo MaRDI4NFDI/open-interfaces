@@ -20,7 +20,8 @@ jobs:
                     - nightly
                 os:
                     - ubuntu-22.04
-                    - windows-2022
+# needs cross-platform library loading
+#                    - windows-2022
                 arch:
                     - x64
                 flags:
