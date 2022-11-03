@@ -2,6 +2,7 @@
 #include "oif_constants.h"
 #include <oif_config.h>
 
+#include <assert.h>
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +13,6 @@ char *__oif_current_lang;
 
 #ifdef OIF_USE_R
 #include <Rinternals.h>
-#include <assert.h>
 
 char *_R_convert_to_char(SEXP str) {
   if (!isString(str) || length(str) != 1) {
