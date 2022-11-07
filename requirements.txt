@@ -296,7 +296,7 @@ virtualenv==20.16.6
     # via pre-commit
 wcwidth==0.2.5
     # via prompt-toolkit
-wheel==0.37.1
+wheel==0.38.2
     # via pip-tools
 wrapt==1.14.1
     # via astroid
