@@ -5,6 +5,9 @@ configure_file(${PROJECT_SOURCE_DIR}/oif_env_pytest.in
 file(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env OIF_STRING_ENV
      REGEX "^[a-zA-Z]")
 
+include(FindPkgConfig)
+pkg_search_module(CHECK check)
+
 function(oif_add_test)
   include(CMakeParseArguments)
   set(OPTIONS)
@@ -32,7 +35,12 @@ add_test(NAME build_all_lang
 
 add_subdirectory(python)
 add_subdirectory(cpp)
-add_subdirectory(c)
+
+if(CHECK_FOUND)
+  add_subdirectory(c)
+else()
+  message(WARNING "not adding C tests due to missing `check` library")
+endif()
 add_subdirectory(julia)
 # disabled due to https://github.com/MaRDI4NFDI/open-interfaces/issues/89
 # add_subdirectory(r)

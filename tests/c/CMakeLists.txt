@@ -1,5 +1,3 @@
-include(FindPkgConfig)
-pkg_search_module(CHECK check REQUIRED)
 add_executable(test_all_c test_all.c)
 oif_add_test(NAME all_c COMMAND test_all_c)
 oif_enable_compile_warnings(test_all_c)
