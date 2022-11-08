@@ -6,8 +6,8 @@ target_include_directories(
   PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
          $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
          $<BUILD_INTERFACE:${CHECK_INCLUDE_DIRS}>)
-target_link_libraries(test_all_c $<BUILD_INTERFACE:oif_connector>
-                      $<BUILD_INTERFACE:${CHECK_LIBRARIES}>)
+target_link_libraries(test_all_c PUBLIC $<BUILD_INTERFACE:oif_connector>
+                                        PkgConfig::CHECK)
 
 add_dependencies(test_all_c all_lang)
 set_tests_properties(all_c PROPERTIES DEPENDS build_all_lang)

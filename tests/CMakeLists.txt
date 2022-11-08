@@ -5,8 +5,10 @@ configure_file(${PROJECT_SOURCE_DIR}/oif_env_pytest.in
 file(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env OIF_STRING_ENV
      REGEX "^[a-zA-Z]")
 
-include(FindPkgConfig)
-pkg_search_module(CHECK check)
+find_package(PkgConfig)
+if(PKGCONFIG_FOUND)
+  pkg_search_module(CHECK IMPORTED_TARGET check)
+endif()
 
 function(oif_add_test)
   include(CMakeParseArguments)
