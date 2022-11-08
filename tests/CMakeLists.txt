@@ -2,6 +2,7 @@ enable_testing()
 
 configure_file(${PROJECT_SOURCE_DIR}/oif_env_pytest.in
                ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env DESTINATION share)
 file(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env OIF_STRING_ENV
      REGEX "^[a-zA-Z]")
 
