@@ -7,32 +7,26 @@ extern "C" {
 #include <iostream>
 #include <string>
 
+#include "catch2/catch_amalgamated.hpp"
+
 template <std::size_t N> void print_vector(std::array<double, N> &x);
 
-int main(int argc, char *argv[]) {
+TEST_CASE("Convert cpp main", "[convert]") {
   using namespace std;
   string lang{"julia"};
   string expr{"print(42);"};
-  if (argc > 2) {
-    lang = string{argv[1]};
-    expr = string{argv[2]};
-  }
 
-  oif_connector_init(lang.c_str());
+  REQUIRE(oif_connector_init(lang.c_str()) == OIF_OK);
 
   constexpr int N{2};
   array<double, N * N> A{2, 0, 0, 1};
   array<double, N> b{1, 1};
   array<double, N> x;
 
-  if (oif_connector_solve(N, A.data(), b.data(), x.data()) != OIF_OK) {
-    print_vector(x);
-    return -1;
-  }
-  print_vector(x);
+  REQUIRE(oif_connector_solve(N, A.data(), b.data(), x.data()) == OIF_OK);
+  REQUIRE(oif_connector_eval_expression(expr.c_str()) == OIF_OK);
 
-  oif_connector_eval_expression(expr.c_str());
-  oif_connector_deinit();
+  REQUIRE(oif_connector_deinit() == OIF_OK);
 }
 
 template <std::size_t N> void print_vector(std::array<double, N> &x) {

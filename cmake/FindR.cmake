@@ -14,6 +14,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 find_program(R_EXECUTABLE NAMES R R.exe)
+find_program(R_SCRIPT NAMES Rscript Rscript.exe)
 
 # ---searching R installtion unsing R executable
 if(R_EXECUTABLE)

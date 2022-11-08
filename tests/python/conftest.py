@@ -18,7 +18,7 @@ DOUBLE_STAR = ctypes.POINTER(ctypes.c_double)
 @pytest.fixture(scope="session", autouse=True)
 def oif_env() -> bool:
     for fn in itertools.chain(
-        [Path("oif_pytest.env")], REPO_ROOT.glob("cmake-*/oif_pytest.env")
+        [Path("../oif_pytest.env")], REPO_ROOT.glob("cmake-*/oif_pytest.env")
     ):
         try:
             if not (fn.exists() and fn.is_file()):
@@ -63,7 +63,7 @@ def oif_lib(request, oif_env) -> ctypes.CDLL:
     """
     assert oif_env
     lang = request.param
-    soname = "./oif_connector/liboif_connector.so"
+    soname = "liboif_connector.so"
     # With PyDLL we do not release the GIL when calling into lib functions
     dso_type = ctypes.PyDLL if lang == "python" else ctypes.CDLL
     try:

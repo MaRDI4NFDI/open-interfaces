@@ -1,4 +1,5 @@
 # this file cannot contain exports
+# also edit oif_env.in
 M2_BINARY_DIR=${PROJECT_BINARY_DIR}
 LD_LIBRARY_PATH=${M2_LIBRARY_PATH}
 R_LIBOIF_CONNECTOR=${PROJECT_BINARY_DIR}/oif_connector/liboif_connector.so
