@@ -2,5 +2,5 @@ using OpenInterfaces
 using Test
 
 @testset "OpenInterfaces.jl" begin
-    # Write your tests here.
+    include "test_all.jl"
 end
