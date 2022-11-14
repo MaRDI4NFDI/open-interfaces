@@ -83,7 +83,7 @@ importlib-metadata==5.0.0
     #   myst-nb
 iniconfig==1.1.1
     # via pytest
-ipykernel==6.17.0
+ipykernel==6.17.1
     # via myst-nb
 ipython==8.6.0
     # via
@@ -234,7 +234,6 @@ shellingham==1.5.0
     # via typer
 six==1.16.0
     # via
-    #   asttokens
     #   exhale
     #   python-dateutil
 snowballstemmer==2.2.0
