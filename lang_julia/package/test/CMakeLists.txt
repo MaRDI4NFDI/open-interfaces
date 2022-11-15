@@ -5,6 +5,6 @@ oif_add_test(
   ${Julia_EXECUTABLE}
   --project
   ${PROJECT_SOURCE_DIR}/lang_julia/package
-  ${CMAKE_CURRENT_SOURCE_DIR}/test_all.jl)
+  ${CMAKE_CURRENT_SOURCE_DIR}/runtests.jl)
 
 set_tests_properties(test_julia PROPERTIES DEPENDS build_all_lang)
