@@ -1,7 +1,7 @@
 enable_testing()
 
 configure_file(${PROJECT_SOURCE_DIR}/oif_env_pytest.in
-               ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env)
+               ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env DESTINATION share)
 file(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/oif_pytest.env OIF_STRING_ENV
      REGEX "^[a-zA-Z]")
@@ -25,8 +25,13 @@ function(oif_add_test)
         "Unrecognized arguments for oif_add_test: '${OIF_ADD_TEST_UNPARSED_ARGUMENTS}'"
     )
   endif()
-
-  add_test(NAME "${OIF_ADD_TEST_NAME}" COMMAND ${OIF_ADD_TEST_COMMAND})
+  add_custom_target(
+    ${OIF_ADD_TEST_NAME}
+    COMMAND ${OIF_ADD_TEST_COMMAND}
+    VERBATIM USES_TERMINAL)
+  add_test(NAME "${OIF_ADD_TEST_NAME}"
+           COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}" --config
+                   "$<CONFIG>" --target ${OIF_ADD_TEST_NAME})
   set_property(TEST "${OIF_ADD_TEST_NAME}" PROPERTY ENVIRONMENT
                                                     "${OIF_STRING_ENV}")
   set_tests_properties("${OIF_ADD_TEST_NAME}" PROPERTIES DEPENDS build_all_lang)

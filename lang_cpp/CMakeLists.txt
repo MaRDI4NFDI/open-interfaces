@@ -15,3 +15,5 @@ target_include_directories(
 oif_enable_compile_warnings(oif_cpp)
 target_link_libraries(oif_cpp $<BUILD_INTERFACE:flexiblas>)
 add_dependencies(all_lang oif_cpp)
+
+install(TARGETS oif_cpp DESTINATION lib)

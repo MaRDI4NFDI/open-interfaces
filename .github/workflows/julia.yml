@@ -46,12 +46,24 @@ jobs:
 #              uses: r-lib/actions/setup-r@v2
 #              with:
 #                  r-version: release
+            - name: Install Flexiblas
+              run: |
+                  cd /tmp
+                  wget https://rene.fritze.me/flexiblas//releases/3.2.1/flexiblas_ubuntu-kinetic.zip -O debs.zip
+                  unzip -j debs.zip
+                  sudo apt install -y --no-install-recommends ./libflexiblas_3.2.1_amd64.deb ./libflexiblas-dev_3.2.1_amd64.deb ./libflexiblas-openblas-pthread_3.2.1_amd64.deb ./libflexiblas_3.2.1_amd64.deb ./libflexiblas-bin_3.2.1_amd64.deb
             - name: Configure
-              run: cmake -B ${{github.workspace}}/cmake-build -DOIF_USE_C=0 -DOIF_USE_CPP=0 ${{matrix.flags}}
+              run: cmake -B ${{github.workspace}}/cmake-build ${{matrix.flags}}
             - name: Build
               run: cmake --build ${{github.workspace}}/cmake-build
             - name: Install
-              run: cmake --build ${{github.workspace}}/cmake-build
+              run: sudo cmake --build ${{github.workspace}}/cmake-build --target install
+            - name: Setup Environment 1/2
+              run: grep -v "#" /usr/local/share/oif_pytest.env > oif_pytest.env
+            - name: Setup Environment 2/2
+              uses: krisalay/export-env@v1.0.1
+              with:
+                  filename: oif_pytest.env
             - uses: julia-actions/julia-buildpkg@v1
               name: Build Julia
               with:
@@ -61,6 +73,7 @@ jobs:
               with:
                   coverage: true
                   project: lang_julia/package/
+                  annotate: true
 #    - uses: julia-actions/julia-processcoverage@v1
 #      with:
 #        directories: src,examples

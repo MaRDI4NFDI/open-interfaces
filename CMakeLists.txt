@@ -65,7 +65,7 @@ set(M2_LIBRARY_PATH
     "${PROJECT_BINARY_DIR}/oif_connector:${PROJECT_BINARY_DIR}/lang_c:${PROJECT_BINARY_DIR}/lang_cpp:${PROJECT_BINARY_DIR}/lang_python:${PROJECT_BINARY_DIR}/lang_julia:${PROJECT_BINARY_DIR}/lang_r:${Julia_LIBRARY_DIR}"
 )
 configure_file(oif_config.h.in oif_config.h)
-configure_file(oif_env.in oif.env)
+configure_file(oif_env.in oif.env @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif_config.h DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oif.env DESTINATION share)
 

@@ -1,6 +1,9 @@
 using OpenInterfaces
 using Test
 
-@testset "OpenInterfaces.jl" begin
-    # Write your tests here.
+print("TEST RUN")
+
+@testset "OpenInterfaces.jl tests" begin
+    include("test_solve.jl")
+    include("test_expression.jl")
 end
