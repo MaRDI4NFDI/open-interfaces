@@ -51,7 +51,13 @@ jobs:
             - name: Build
               run: cmake --build ${{github.workspace}}/cmake-build
             - name: Install
-              run: cmake --build ${{github.workspace}}/cmake-build
+              run: sudo cmake --build ${{github.workspace}}/cmake-build --target install
+            - name: Setup Environment 1/2
+              run: grep -v "#" /usr/local/share/oif_pytest.env > oif_pytest.env
+            - name: Setup Environment 2/2
+              uses: krisalay/export-env@v1.0.1
+              with:
+                  filename: oif_pytest.env
             - uses: julia-actions/julia-buildpkg@v1
               name: Build Julia
               with:
