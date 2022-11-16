@@ -46,8 +46,14 @@ jobs:
 #              uses: r-lib/actions/setup-r@v2
 #              with:
 #                  r-version: release
+            - name: Install Flexiblas
+              run: |
+                  cd /tmp
+                  wget https://rene.fritze.me/flexiblas//releases/3.2.1/flexiblas_ubuntu-kinetic.zip -O debs.zip
+                  unzip -j debs.zip
+                  sudo apt install -y --no-install-recommends ./libflexiblas_3.2.1_amd64.deb ./libflexiblas-dev_3.2.1_amd64.deb ./libflexiblas-openblas-pthread_3.2.1_amd64.deb ./libflexiblas_3.2.1_amd64.deb ./libflexiblas-bin_3.2.1_amd64.deb
             - name: Configure
-              run: cmake -B ${{github.workspace}}/cmake-build -DOIF_USE_C=0 -DOIF_USE_CPP=0 ${{matrix.flags}}
+              run: cmake -B ${{github.workspace}}/cmake-build ${{matrix.flags}}
             - name: Build
               run: cmake --build ${{github.workspace}}/cmake-build
             - name: Install
