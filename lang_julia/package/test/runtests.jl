@@ -1,6 +1,8 @@
 using OpenInterfaces
 using Test
 
-@testset "OpenInterfaces.jl" begin
-    include "test_all.jl"
+print("TEST RUN")
+
+@testset "OpenInterfaces.jl tests" begin
+    include("test_all.jl")
 end

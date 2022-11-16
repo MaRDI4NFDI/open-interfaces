@@ -10,7 +10,7 @@ else
     const expression = "print(7*6)"
 end
 
-oif = OpenInterfaces.init()
+oif = OpenInterfaces.init(lang)
 const N = 2
 A = [2., 0., 1., 0.];
 b = [1., 1.]
