@@ -1,7 +1,7 @@
 name = "OpenInterfaces"
 uuid = "07e4ff7f-07bb-45cd-9e58-8fac98767c00"
 authors = ["René Fritze <rene.fritze@wwu.de> and contributors"]
-version = "0.0.1"
+version = "0.1.0"
 
 [compat]
 julia = "1"
