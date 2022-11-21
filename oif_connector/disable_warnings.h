@@ -40,9 +40,9 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wused-but-marked-unused"
 // c++ only
-//#  pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-//#  pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
-//#  pragma GCC diagnostic ignored "-Woverloaded-virtual"
+// #  pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+// #  pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
+// #  pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #elif defined(__GNUC__) && __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
@@ -71,10 +71,10 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
 // c++ only
-//#  pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-//#  pragma GCC diagnostic ignored "-Woverloaded-virtual"
-//#  pragma GCC diagnostic ignored "-Wreorder"
+// #  pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+// #  pragma GCC diagnostic ignored "-Woverloaded-virtual"
+// #  pragma GCC diagnostic ignored "-Wreorder"
 #if (__GNUC__ > 8)
-//#    pragma GCC diagnostic ignored "-Wdeprecated-copy"
+// #    pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #endif
 #endif

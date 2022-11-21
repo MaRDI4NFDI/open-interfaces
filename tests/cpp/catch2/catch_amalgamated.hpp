@@ -1770,7 +1770,9 @@ std::string translateActiveException();
 namespace Catch {
 namespace Benchmark {
 namespace Detail {
-template <typename T> struct CompleteType { using type = T; };
+template <typename T> struct CompleteType {
+  using type = T;
+};
 template <> struct CompleteType<void> {
   struct type {};
 };
@@ -2825,7 +2827,9 @@ public:
 namespace Catch {
 namespace Detail {
 
-template <typename...> struct make_void { using type = void; };
+template <typename...> struct make_void {
+  using type = void;
+};
 
 template <typename... Ts> using void_t = typename make_void<Ts...>::type;
 
@@ -3080,7 +3084,9 @@ template <> struct StringMaker<std::byte> {
   static std::string convert(std::byte value);
 };
 #endif // defined(CATCH_CONFIG_CPP17_BYTE)
-template <> struct StringMaker<int> { static std::string convert(int value); };
+template <> struct StringMaker<int> {
+  static std::string convert(int value);
+};
 template <> struct StringMaker<long> {
   static std::string convert(long value);
 };
@@ -3104,7 +3110,9 @@ template <> struct StringMaker<bool> {
   }
 };
 
-template <> struct StringMaker<char> { static std::string convert(char c); };
+template <> struct StringMaker<char> {
+  static std::string convert(char c);
+};
 template <> struct StringMaker<signed char> {
   static std::string convert(signed char c);
 };
@@ -3288,7 +3296,9 @@ struct is_range_impl<T, void_t<decltype(begin(std::declval<T>()))>>
 template <typename T> struct is_range : Detail::is_range_impl<T> {};
 
 #if defined(_MANAGED) // Managed types are never ranges
-template <typename T> struct is_range<T ^> { static const bool value = false; };
+template <typename T> struct is_range<T ^> {
+  static const bool value = false;
+};
 #endif
 
 template <typename Range> std::string rangeToString(Range const &range) {
@@ -3728,9 +3738,9 @@ namespace Catch {
 template <typename T> class Optional {
 public:
   Optional() : nullableValue(nullptr) {}
-  Optional(T const &_value) : nullableValue(new (storage) T(_value)) {}
+  Optional(T const &_value) : nullableValue(new(storage) T(_value)) {}
   Optional(Optional const &_other)
-      : nullableValue(_other ? new (storage) T(*_other) : nullptr) {}
+      : nullableValue(_other ? new(storage) T(*_other) : nullptr) {}
 
   ~Optional() { reset(); }
 
@@ -6331,12 +6341,12 @@ struct AutoReg : Detail::NonCopyable {
 #define INTERNAL_CATCH_TYPE_GEN                                                \
   template <typename...> struct TypeList {};                                   \
   template <typename... Ts>                                                    \
-  constexpr auto get_wrapper() noexcept->TypeList<Ts...> {                     \
+  constexpr auto get_wrapper() noexcept -> TypeList<Ts...> {                   \
     return {};                                                                 \
   }                                                                            \
   template <template <typename...> class...> struct TemplateTypeList {};       \
   template <template <typename...> class... Cs>                                \
-  constexpr auto get_wrapper() noexcept->TemplateTypeList<Cs...> {             \
+  constexpr auto get_wrapper() noexcept -> TemplateTypeList<Cs...> {           \
     return {};                                                                 \
   }                                                                            \
   template <typename...> struct append;                                        \
@@ -6344,7 +6354,9 @@ struct AutoReg : Detail::NonCopyable {
   template <template <typename...> class, typename...> struct create;          \
   template <template <typename...> class, typename> struct convert;            \
                                                                                \
-  template <typename T> struct append<T> { using type = T; };                  \
+  template <typename T> struct append<T> {                                     \
+    using type = T;                                                            \
+  };                                                                           \
   template <template <typename...> class L1, typename... E1,                   \
             template <typename...> class L2, typename... E2, typename... Rest> \
   struct append<L1<E1...>, L2<E2...>, Rest...> {                               \
@@ -6385,13 +6397,13 @@ struct AutoReg : Detail::NonCopyable {
 #define INTERNAL_CATCH_NTTP_1(signature, ...)                                  \
   template <INTERNAL_CATCH_REMOVE_PARENS(signature)> struct Nttp {};           \
   template <INTERNAL_CATCH_REMOVE_PARENS(signature)>                           \
-  constexpr auto get_wrapper() noexcept->Nttp<__VA_ARGS__> {                   \
+  constexpr auto get_wrapper() noexcept -> Nttp<__VA_ARGS__> {                 \
     return {};                                                                 \
   }                                                                            \
   template <template <INTERNAL_CATCH_REMOVE_PARENS(signature)> class...>       \
   struct NttpTemplateTypeList {};                                              \
   template <template <INTERNAL_CATCH_REMOVE_PARENS(signature)> class... Cs>    \
-  constexpr auto get_wrapper() noexcept->NttpTemplateTypeList<Cs...> {         \
+  constexpr auto get_wrapper() noexcept -> NttpTemplateTypeList<Cs...> {       \
     return {};                                                                 \
   }                                                                            \
                                                                                \
@@ -6683,8 +6695,8 @@ struct AutoReg : Detail::NonCopyable {
     TestNameClass, TestName, ClassName, Name, Tags, Signature, ...)            \
   namespace {                                                                  \
   namespace INTERNAL_CATCH_MAKE_NAMESPACE(TestName) {                          \
-    INTERNAL_CATCH_DECLARE_SIG_TEST_METHOD(                                    \
-        TestName, ClassName, INTERNAL_CATCH_REMOVE_PARENS(Signature));         \
+  INTERNAL_CATCH_DECLARE_SIG_TEST_METHOD(                                      \
+      TestName, ClassName, INTERNAL_CATCH_REMOVE_PARENS(Signature));           \
   }                                                                            \
   }                                                                            \
   INTERNAL_CATCH_DEFINE_SIG_TEST_METHOD(                                       \
@@ -6758,46 +6770,46 @@ struct AutoReg : Detail::NonCopyable {
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-#define INTERNAL_CATCH_TEMPLATE_TEST_CASE_2(TestName, TestFunc, Name, Tags,                                          \
-                                            Signature, ...)                                                          \
-  CATCH_INTERNAL_START_WARNINGS_SUPPRESSION                                                                          \
-  CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS                                                                           \
-  CATCH_INTERNAL_SUPPRESS_ZERO_VARIADIC_WARNINGS                                                                     \
-  CATCH_INTERNAL_SUPPRESS_UNUSED_TEMPLATE_WARNINGS                                                                   \
-  CATCH_INTERNAL_SUPPRESS_UNUSED_VARIABLE_WARNINGS                                                                   \
-  INTERNAL_CATCH_DECLARE_SIG_TEST(TestFunc,                                                                          \
-                                  INTERNAL_CATCH_REMOVE_PARENS(Signature));                                          \
-  namespace {                                                                                                        \
-  namespace INTERNAL_CATCH_MAKE_NAMESPACE(TestName) {                                                                \
-    INTERNAL_CATCH_TYPE_GEN                                                                                          \
-    INTERNAL_CATCH_NTTP_GEN(INTERNAL_CATCH_REMOVE_PARENS(Signature))                                                 \
-    INTERNAL_CATCH_NTTP_REG_GEN(TestFunc,                                                                            \
-                                INTERNAL_CATCH_REMOVE_PARENS(Signature))                                             \
-    template <typename... Types> struct TestName {                                                                   \
-      TestName() {                                                                                                   \
-        size_t index = 0;                                                                                            \
-        constexpr char const *tmpl_types[] = {CATCH_REC_LIST(                                                        \
-            INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,                                                                 \
-            __VA_ARGS__)}; /* NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays,hicpp-avoid-c-arrays) \
-                            */                                                                                       \
-        using expander = size_t                                                                                      \
-            []; /* NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays,hicpp-avoid-c-arrays)            \
-                 */                                                                                                  \
-        (void)expander{                                                                                              \
-            (reg_test(Types{},                                                                                       \
-                      Catch::NameAndTags{                                                                            \
-                          Name " - " + std::string(tmpl_types[index]), Tags}),                                       \
-             index++)...}; /* NOLINT */                                                                              \
-      }                                                                                                              \
-    };                                                                                                               \
-    static const int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {                                            \
-      TestName<INTERNAL_CATCH_MAKE_TYPE_LISTS_FROM_TYPES(__VA_ARGS__)>();                                            \
-      return 0;                                                                                                      \
-    }();                                                                                                             \
-  }                                                                                                                  \
-  }                                                                                                                  \
-  CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION                                                                           \
-  INTERNAL_CATCH_DEFINE_SIG_TEST(TestFunc,                                                                           \
+#define INTERNAL_CATCH_TEMPLATE_TEST_CASE_2(TestName, TestFunc, Name, Tags,                                        \
+                                            Signature, ...)                                                        \
+  CATCH_INTERNAL_START_WARNINGS_SUPPRESSION                                                                        \
+  CATCH_INTERNAL_SUPPRESS_GLOBALS_WARNINGS                                                                         \
+  CATCH_INTERNAL_SUPPRESS_ZERO_VARIADIC_WARNINGS                                                                   \
+  CATCH_INTERNAL_SUPPRESS_UNUSED_TEMPLATE_WARNINGS                                                                 \
+  CATCH_INTERNAL_SUPPRESS_UNUSED_VARIABLE_WARNINGS                                                                 \
+  INTERNAL_CATCH_DECLARE_SIG_TEST(TestFunc,                                                                        \
+                                  INTERNAL_CATCH_REMOVE_PARENS(Signature));                                        \
+  namespace {                                                                                                      \
+  namespace INTERNAL_CATCH_MAKE_NAMESPACE(TestName) {                                                              \
+  INTERNAL_CATCH_TYPE_GEN                                                                                          \
+  INTERNAL_CATCH_NTTP_GEN(INTERNAL_CATCH_REMOVE_PARENS(Signature))                                                 \
+  INTERNAL_CATCH_NTTP_REG_GEN(TestFunc,                                                                            \
+                              INTERNAL_CATCH_REMOVE_PARENS(Signature))                                             \
+  template <typename... Types> struct TestName {                                                                   \
+    TestName() {                                                                                                   \
+      size_t index = 0;                                                                                            \
+      constexpr char const *tmpl_types[] = {CATCH_REC_LIST(                                                        \
+          INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,                                                                 \
+          __VA_ARGS__)}; /* NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays,hicpp-avoid-c-arrays) \
+                          */                                                                                       \
+      using expander = size_t                                                                                      \
+          []; /* NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays,hicpp-avoid-c-arrays)            \
+               */                                                                                                  \
+      (void)expander{                                                                                              \
+          (reg_test(Types{},                                                                                       \
+                    Catch::NameAndTags{                                                                            \
+                        Name " - " + std::string(tmpl_types[index]), Tags}),                                       \
+           index++)...}; /* NOLINT */                                                                              \
+    }                                                                                                              \
+  };                                                                                                               \
+  static const int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {                                            \
+    TestName<INTERNAL_CATCH_MAKE_TYPE_LISTS_FROM_TYPES(__VA_ARGS__)>();                                            \
+    return 0;                                                                                                      \
+  }();                                                                                                             \
+  }                                                                                                                \
+  }                                                                                                                \
+  CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION                                                                         \
+  INTERNAL_CATCH_DEFINE_SIG_TEST(TestFunc,                                                                         \
                                  INTERNAL_CATCH_REMOVE_PARENS(Signature))
 
 #ifndef CATCH_CONFIG_TRADITIONAL_MSVC_PREPROCESSOR
@@ -6838,41 +6850,40 @@ struct AutoReg : Detail::NonCopyable {
   template <typename TestType> static void TestFuncName();                     \
   namespace {                                                                  \
   namespace INTERNAL_CATCH_MAKE_NAMESPACE(TestName) {                          \
-    INTERNAL_CATCH_TYPE_GEN                                                    \
-    INTERNAL_CATCH_NTTP_GEN(INTERNAL_CATCH_REMOVE_PARENS(Signature))           \
-    template <typename... Types> struct TestName {                             \
-      void reg_tests() {                                                       \
-        size_t index = 0;                                                      \
-        using expander = size_t[];                                             \
-        constexpr char const *tmpl_types[] = {                                 \
-            CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,            \
-                           INTERNAL_CATCH_REMOVE_PARENS(TmplTypes))};          \
-        constexpr char const *types_list[] = {                                 \
-            CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,            \
-                           INTERNAL_CATCH_REMOVE_PARENS(TypesList))};          \
-        constexpr auto num_types = sizeof(types_list) / sizeof(types_list[0]); \
-        (void)expander{                                                        \
-            (Catch::AutoReg(                                                   \
-                 Catch::makeTestInvoker(&TestFuncName<Types>),                 \
-                 CATCH_INTERNAL_LINEINFO, Catch::StringRef(),                  \
-                 Catch::NameAndTags{                                           \
-                     Name " - " + std::string(tmpl_types[index / num_types]) + \
-                         '<' + std::string(types_list[index % num_types]) +    \
-                         '>',                                                  \
-                     Tags}),                                                   \
-             index++)...}; /* NOLINT */                                        \
-      }                                                                        \
-    };                                                                         \
-    static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {            \
-      using TestInit = typename create<                                        \
-          TestName,                                                            \
-          decltype(get_wrapper<INTERNAL_CATCH_REMOVE_PARENS(TmplTypes)>()),    \
-          TypeList<INTERNAL_CATCH_MAKE_TYPE_LISTS_FROM_TYPES(                  \
-              INTERNAL_CATCH_REMOVE_PARENS(TypesList))>>::type;                \
-      TestInit t;                                                              \
-      t.reg_tests();                                                           \
-      return 0;                                                                \
-    }();                                                                       \
+  INTERNAL_CATCH_TYPE_GEN                                                      \
+  INTERNAL_CATCH_NTTP_GEN(INTERNAL_CATCH_REMOVE_PARENS(Signature))             \
+  template <typename... Types> struct TestName {                               \
+    void reg_tests() {                                                         \
+      size_t index = 0;                                                        \
+      using expander = size_t[];                                               \
+      constexpr char const *tmpl_types[] = {                                   \
+          CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,              \
+                         INTERNAL_CATCH_REMOVE_PARENS(TmplTypes))};            \
+      constexpr char const *types_list[] = {                                   \
+          CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,              \
+                         INTERNAL_CATCH_REMOVE_PARENS(TypesList))};            \
+      constexpr auto num_types = sizeof(types_list) / sizeof(types_list[0]);   \
+      (void)expander{                                                          \
+          (Catch::AutoReg(                                                     \
+               Catch::makeTestInvoker(&TestFuncName<Types>),                   \
+               CATCH_INTERNAL_LINEINFO, Catch::StringRef(),                    \
+               Catch::NameAndTags{                                             \
+                   Name " - " + std::string(tmpl_types[index / num_types]) +   \
+                       '<' + std::string(types_list[index % num_types]) + '>', \
+                   Tags}),                                                     \
+           index++)...}; /* NOLINT */                                          \
+    }                                                                          \
+  };                                                                           \
+  static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {              \
+    using TestInit = typename create<                                          \
+        TestName,                                                              \
+        decltype(get_wrapper<INTERNAL_CATCH_REMOVE_PARENS(TmplTypes)>()),      \
+        TypeList<INTERNAL_CATCH_MAKE_TYPE_LISTS_FROM_TYPES(                    \
+            INTERNAL_CATCH_REMOVE_PARENS(TypesList))>>::type;                  \
+    TestInit t;                                                                \
+    t.reg_tests();                                                             \
+    return 0;                                                                  \
+  }();                                                                         \
   }                                                                            \
   }                                                                            \
   CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION                                     \
@@ -6917,29 +6928,29 @@ struct AutoReg : Detail::NonCopyable {
   template <typename TestType> static void TestFunc();                         \
   namespace {                                                                  \
   namespace INTERNAL_CATCH_MAKE_NAMESPACE(TestName) {                          \
-    INTERNAL_CATCH_TYPE_GEN                                                    \
-    template <typename... Types> struct TestName {                             \
-      void reg_tests() {                                                       \
-        size_t index = 0;                                                      \
-        using expander = size_t[];                                             \
-        (void)expander{                                                        \
-            (Catch::AutoReg(                                                   \
-                 Catch::makeTestInvoker(&TestFunc<Types>),                     \
-                 CATCH_INTERNAL_LINEINFO, Catch::StringRef(),                  \
-                 Catch::NameAndTags{                                           \
-                     Name " - " +                                              \
-                         std::string(INTERNAL_CATCH_STRINGIZE(TmplList)) +     \
-                         " - " + std::to_string(index),                        \
-                     Tags}),                                                   \
-             index++)...}; /* NOLINT */                                        \
-      }                                                                        \
-    };                                                                         \
-    static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {            \
-      using TestInit = typename convert<TestName, TmplList>::type;             \
-      TestInit t;                                                              \
-      t.reg_tests();                                                           \
-      return 0;                                                                \
-    }();                                                                       \
+  INTERNAL_CATCH_TYPE_GEN                                                      \
+  template <typename... Types> struct TestName {                               \
+    void reg_tests() {                                                         \
+      size_t index = 0;                                                        \
+      using expander = size_t[];                                               \
+      (void)expander{                                                          \
+          (Catch::AutoReg(                                                     \
+               Catch::makeTestInvoker(&TestFunc<Types>),                       \
+               CATCH_INTERNAL_LINEINFO, Catch::StringRef(),                    \
+               Catch::NameAndTags{                                             \
+                   Name " - " +                                                \
+                       std::string(INTERNAL_CATCH_STRINGIZE(TmplList)) +       \
+                       " - " + std::to_string(index),                          \
+                   Tags}),                                                     \
+           index++)...}; /* NOLINT */                                          \
+    }                                                                          \
+  };                                                                           \
+  static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {              \
+    using TestInit = typename convert<TestName, TmplList>::type;               \
+    TestInit t;                                                                \
+    t.reg_tests();                                                             \
+    return 0;                                                                  \
+  }();                                                                         \
   }                                                                            \
   }                                                                            \
   CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION                                     \
@@ -6960,29 +6971,29 @@ struct AutoReg : Detail::NonCopyable {
   CATCH_INTERNAL_SUPPRESS_UNUSED_VARIABLE_WARNINGS                             \
   namespace {                                                                  \
   namespace INTERNAL_CATCH_MAKE_NAMESPACE(TestName) {                          \
-    INTERNAL_CATCH_TYPE_GEN                                                    \
-    INTERNAL_CATCH_NTTP_GEN(INTERNAL_CATCH_REMOVE_PARENS(Signature))           \
-    INTERNAL_CATCH_DECLARE_SIG_TEST_METHOD(                                    \
-        TestName, ClassName, INTERNAL_CATCH_REMOVE_PARENS(Signature));         \
-    INTERNAL_CATCH_NTTP_REG_METHOD_GEN(                                        \
-        TestName, INTERNAL_CATCH_REMOVE_PARENS(Signature))                     \
-    template <typename... Types> struct TestNameClass {                        \
-      TestNameClass() {                                                        \
-        size_t index = 0;                                                      \
-        constexpr char const *tmpl_types[] = {CATCH_REC_LIST(                  \
-            INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS, __VA_ARGS__)};            \
-        using expander = size_t[];                                             \
-        (void)expander{                                                        \
-            (reg_test(Types{}, #ClassName,                                     \
-                      Catch::NameAndTags{                                      \
-                          Name " - " + std::string(tmpl_types[index]), Tags}), \
-             index++)...}; /* NOLINT */                                        \
-      }                                                                        \
-    };                                                                         \
-    static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {            \
-      TestNameClass<INTERNAL_CATCH_MAKE_TYPE_LISTS_FROM_TYPES(__VA_ARGS__)>(); \
-      return 0;                                                                \
-    }();                                                                       \
+  INTERNAL_CATCH_TYPE_GEN                                                      \
+  INTERNAL_CATCH_NTTP_GEN(INTERNAL_CATCH_REMOVE_PARENS(Signature))             \
+  INTERNAL_CATCH_DECLARE_SIG_TEST_METHOD(                                      \
+      TestName, ClassName, INTERNAL_CATCH_REMOVE_PARENS(Signature));           \
+  INTERNAL_CATCH_NTTP_REG_METHOD_GEN(TestName,                                 \
+                                     INTERNAL_CATCH_REMOVE_PARENS(Signature))  \
+  template <typename... Types> struct TestNameClass {                          \
+    TestNameClass() {                                                          \
+      size_t index = 0;                                                        \
+      constexpr char const *tmpl_types[] = {CATCH_REC_LIST(                    \
+          INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS, __VA_ARGS__)};              \
+      using expander = size_t[];                                               \
+      (void)expander{                                                          \
+          (reg_test(Types{}, #ClassName,                                       \
+                    Catch::NameAndTags{                                        \
+                        Name " - " + std::string(tmpl_types[index]), Tags}),   \
+           index++)...}; /* NOLINT */                                          \
+    }                                                                          \
+  };                                                                           \
+  static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {              \
+    TestNameClass<INTERNAL_CATCH_MAKE_TYPE_LISTS_FROM_TYPES(__VA_ARGS__)>();   \
+    return 0;                                                                  \
+  }();                                                                         \
   }                                                                            \
   }                                                                            \
   CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION                                     \
@@ -7033,41 +7044,40 @@ struct AutoReg : Detail::NonCopyable {
   };                                                                           \
   namespace {                                                                  \
   namespace INTERNAL_CATCH_MAKE_NAMESPACE(TestNameClass) {                     \
-    INTERNAL_CATCH_TYPE_GEN                                                    \
-    INTERNAL_CATCH_NTTP_GEN(INTERNAL_CATCH_REMOVE_PARENS(Signature))           \
-    template <typename... Types> struct TestNameClass {                        \
-      void reg_tests() {                                                       \
-        std::size_t index = 0;                                                 \
-        using expander = std::size_t[];                                        \
-        constexpr char const *tmpl_types[] = {                                 \
-            CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,            \
-                           INTERNAL_CATCH_REMOVE_PARENS(TmplTypes))};          \
-        constexpr char const *types_list[] = {                                 \
-            CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,            \
-                           INTERNAL_CATCH_REMOVE_PARENS(TypesList))};          \
-        constexpr auto num_types = sizeof(types_list) / sizeof(types_list[0]); \
-        (void)expander{                                                        \
-            (Catch::AutoReg(                                                   \
-                 Catch::makeTestInvoker(&TestName<Types>::test),               \
-                 CATCH_INTERNAL_LINEINFO, #ClassName,                          \
-                 Catch::NameAndTags{                                           \
-                     Name " - " + std::string(tmpl_types[index / num_types]) + \
-                         '<' + std::string(types_list[index % num_types]) +    \
-                         '>',                                                  \
-                     Tags}),                                                   \
-             index++)...}; /* NOLINT */                                        \
-      }                                                                        \
-    };                                                                         \
-    static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {            \
-      using TestInit = typename create<                                        \
-          TestNameClass,                                                       \
-          decltype(get_wrapper<INTERNAL_CATCH_REMOVE_PARENS(TmplTypes)>()),    \
-          TypeList<INTERNAL_CATCH_MAKE_TYPE_LISTS_FROM_TYPES(                  \
-              INTERNAL_CATCH_REMOVE_PARENS(TypesList))>>::type;                \
-      TestInit t;                                                              \
-      t.reg_tests();                                                           \
-      return 0;                                                                \
-    }();                                                                       \
+  INTERNAL_CATCH_TYPE_GEN                                                      \
+  INTERNAL_CATCH_NTTP_GEN(INTERNAL_CATCH_REMOVE_PARENS(Signature))             \
+  template <typename... Types> struct TestNameClass {                          \
+    void reg_tests() {                                                         \
+      std::size_t index = 0;                                                   \
+      using expander = std::size_t[];                                          \
+      constexpr char const *tmpl_types[] = {                                   \
+          CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,              \
+                         INTERNAL_CATCH_REMOVE_PARENS(TmplTypes))};            \
+      constexpr char const *types_list[] = {                                   \
+          CATCH_REC_LIST(INTERNAL_CATCH_STRINGIZE_WITHOUT_PARENS,              \
+                         INTERNAL_CATCH_REMOVE_PARENS(TypesList))};            \
+      constexpr auto num_types = sizeof(types_list) / sizeof(types_list[0]);   \
+      (void)expander{                                                          \
+          (Catch::AutoReg(                                                     \
+               Catch::makeTestInvoker(&TestName<Types>::test),                 \
+               CATCH_INTERNAL_LINEINFO, #ClassName,                            \
+               Catch::NameAndTags{                                             \
+                   Name " - " + std::string(tmpl_types[index / num_types]) +   \
+                       '<' + std::string(types_list[index % num_types]) + '>', \
+                   Tags}),                                                     \
+           index++)...}; /* NOLINT */                                          \
+    }                                                                          \
+  };                                                                           \
+  static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {              \
+    using TestInit = typename create<                                          \
+        TestNameClass,                                                         \
+        decltype(get_wrapper<INTERNAL_CATCH_REMOVE_PARENS(TmplTypes)>()),      \
+        TypeList<INTERNAL_CATCH_MAKE_TYPE_LISTS_FROM_TYPES(                    \
+            INTERNAL_CATCH_REMOVE_PARENS(TypesList))>>::type;                  \
+    TestInit t;                                                                \
+    t.reg_tests();                                                             \
+    return 0;                                                                  \
+  }();                                                                         \
   }                                                                            \
   }                                                                            \
   CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION                                     \
@@ -7119,29 +7129,29 @@ struct AutoReg : Detail::NonCopyable {
   };                                                                           \
   namespace {                                                                  \
   namespace INTERNAL_CATCH_MAKE_NAMESPACE(TestName) {                          \
-    INTERNAL_CATCH_TYPE_GEN                                                    \
-    template <typename... Types> struct TestNameClass {                        \
-      void reg_tests() {                                                       \
-        size_t index = 0;                                                      \
-        using expander = size_t[];                                             \
-        (void)expander{                                                        \
-            (Catch::AutoReg(                                                   \
-                 Catch::makeTestInvoker(&TestName<Types>::test),               \
-                 CATCH_INTERNAL_LINEINFO, #ClassName,                          \
-                 Catch::NameAndTags{                                           \
-                     Name " - " +                                              \
-                         std::string(INTERNAL_CATCH_STRINGIZE(TmplList)) +     \
-                         " - " + std::to_string(index),                        \
-                     Tags}),                                                   \
-             index++)...}; /* NOLINT */                                        \
-      }                                                                        \
-    };                                                                         \
-    static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {            \
-      using TestInit = typename convert<TestNameClass, TmplList>::type;        \
-      TestInit t;                                                              \
-      t.reg_tests();                                                           \
-      return 0;                                                                \
-    }();                                                                       \
+  INTERNAL_CATCH_TYPE_GEN                                                      \
+  template <typename... Types> struct TestNameClass {                          \
+    void reg_tests() {                                                         \
+      size_t index = 0;                                                        \
+      using expander = size_t[];                                               \
+      (void)expander{                                                          \
+          (Catch::AutoReg(                                                     \
+               Catch::makeTestInvoker(&TestName<Types>::test),                 \
+               CATCH_INTERNAL_LINEINFO, #ClassName,                            \
+               Catch::NameAndTags{                                             \
+                   Name " - " +                                                \
+                       std::string(INTERNAL_CATCH_STRINGIZE(TmplList)) +       \
+                       " - " + std::to_string(index),                          \
+                   Tags}),                                                     \
+           index++)...}; /* NOLINT */                                          \
+    }                                                                          \
+  };                                                                           \
+  static int INTERNAL_CATCH_UNIQUE_NAME(globalRegistrar) = []() {              \
+    using TestInit = typename convert<TestNameClass, TmplList>::type;          \
+    TestInit t;                                                                \
+    t.reg_tests();                                                             \
+    return 0;                                                                  \
+  }();                                                                         \
   }                                                                            \
   }                                                                            \
   CATCH_INTERNAL_STOP_WARNINGS_SUPPRESSION                                     \
