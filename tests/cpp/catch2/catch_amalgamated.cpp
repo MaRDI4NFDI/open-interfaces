@@ -2521,7 +2521,7 @@ Help::Help(bool &showHelpFlag)
         showHelpFlag = flag;
         return ParserResult::ok(ParseResultType::ShortCircuitAll);
       }) {
-  static_cast<Opt &> (*this)("display usage information")["-?"]["-h"]["--help"]
+  static_cast<Opt &>(*this)("display usage information")["-?"]["-h"]["--help"]
       .optional();
 }
 
