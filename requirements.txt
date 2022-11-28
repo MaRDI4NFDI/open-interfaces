@@ -149,7 +149,7 @@ nest-asyncio==1.5.6
     #   nbclient
 nodeenv==1.7.0
     # via pre-commit
-numpy==1.23.4
+numpy==1.23.5
     # via -r requirements.in
 packaging==21.3
     # via
