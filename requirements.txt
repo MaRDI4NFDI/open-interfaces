@@ -89,7 +89,7 @@ ipython==8.6.0
     # via
     #   ipykernel
     #   myst-nb
-jedi==0.18.1
+jedi==0.18.2
     # via ipython
 jinja2==3.1.2
     # via
