@@ -105,7 +105,7 @@ jupyter-client==7.4.8
     # via
     #   ipykernel
     #   nbclient
-jupyter-core==5.0.0
+jupyter-core==5.1.0
     # via
     #   jupyter-client
     #   nbformat
@@ -234,6 +234,7 @@ shellingham==1.5.0
     # via typer
 six==1.16.0
     # via
+    #   asttokens
     #   exhale
     #   python-dateutil
 snowballstemmer==2.2.0
