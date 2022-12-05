@@ -97,7 +97,7 @@ jinja2==3.1.2
     #   myst-parser
     #   sphinx
     #   sphinx-autoapi
-jsonschema==4.17.1
+jsonschema==4.17.3
     # via nbformat
 jupyter-cache==0.5.0
     # via myst-nb
