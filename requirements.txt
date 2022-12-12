@@ -151,7 +151,7 @@ nodeenv==1.7.0
     # via pre-commit
 numpy==1.23.5
     # via -r requirements.in
-packaging==21.3
+packaging==22.0
     # via
     #   build
     #   ipykernel
@@ -188,8 +188,6 @@ pygments==2.13.0
     #   ipython
     #   rich
     #   sphinx
-pyparsing==3.0.9
-    # via packaging
 pyrsistent==0.19.2
     # via jsonschema
 pytest==7.2.0
