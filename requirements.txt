@@ -123,7 +123,7 @@ matplotlib-inline==0.1.6
     # via
     #   ipykernel
     #   ipython
-mdit-py-plugins==0.3.1
+mdit-py-plugins==0.3.3
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
