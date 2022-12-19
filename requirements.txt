@@ -139,7 +139,7 @@ nbclient==0.5.13
     # via
     #   jupyter-cache
     #   myst-nb
-nbformat==5.7.0
+nbformat==5.7.1
     # via
     #   jupyter-cache
     #   myst-nb
@@ -234,6 +234,7 @@ shellingham==1.5.0
     # via typer
 six==1.16.0
     # via
+    #   asttokens
     #   exhale
     #   python-dateutil
 snowballstemmer==2.2.0
