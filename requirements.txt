@@ -12,7 +12,7 @@ astroid==2.12.13
     # via sphinx-autoapi
 asttokens==2.2.1
     # via stack-data
-attrs==22.1.0
+attrs==22.2.0
     # via
     #   -r requirements.in
     #   jsonschema
