@@ -190,7 +190,7 @@ pygments==2.13.0
     #   ipython
     #   rich
     #   sphinx
-pyrsistent==0.19.2
+pyrsistent==0.19.3
     # via jsonschema
 pytest==7.2.0
     # via
