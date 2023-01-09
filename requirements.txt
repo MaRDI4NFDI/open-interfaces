@@ -230,7 +230,7 @@ rich==12.6.0
     # via
     #   check-reqs
     #   typer
-shellingham==1.5.0
+shellingham==1.5.0.post1
     # via typer
 six==1.16.0
     # via
