@@ -83,7 +83,7 @@ importlib-metadata==6.0.0
     # via
     #   jupyter-cache
     #   myst-nb
-iniconfig==1.1.1
+iniconfig==2.0.0
     # via pytest
 ipykernel==6.19.4
     # via myst-nb
