@@ -210,7 +210,7 @@ python-dateutil==2.8.2
     # via jupyter-client
 python-dotenv==0.21.0
     # via -r requirements.in
-pytz==2022.7
+pytz==2022.7.1
     # via babel
 pyyaml==6.0
     # via
