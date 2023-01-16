@@ -204,7 +204,7 @@ pytest-datadir==1.4.1
     #   pytest-regressions
 pytest-pycharm==0.7.0
     # via -r requirements.in
-pytest-regressions==2.4.1
+pytest-regressions==2.4.2
     # via -r requirements.in
 python-dateutil==2.8.2
     # via jupyter-client
