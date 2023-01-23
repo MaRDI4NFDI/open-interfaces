@@ -249,7 +249,7 @@ sphinx==4.5.0
     #   myst-nb
     #   myst-parser
     #   sphinx-autoapi
-sphinx-autoapi==2.0.0
+sphinx-autoapi==2.0.1
     # via -r requirements.in
 sphinxcontrib-applehelp==1.0.3
     # via sphinx
