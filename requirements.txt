@@ -73,7 +73,7 @@ filelock==3.9.0
     # via virtualenv
 greenlet==2.0.1
     # via sqlalchemy
-identify==2.5.12
+identify==2.5.13
     # via pre-commit
 idna==3.4
     # via requests
