@@ -251,7 +251,7 @@ sphinx==4.5.0
     #   sphinx-autoapi
 sphinx-autoapi==2.0.1
     # via -r requirements.in
-sphinxcontrib-applehelp==1.0.3
+sphinxcontrib-applehelp==1.0.4
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
     # via sphinx
