@@ -34,7 +34,7 @@ certifi==2022.12.7
     # via requests
 cfgv==3.3.1
     # via pre-commit
-charset-normalizer==2.1.1
+charset-normalizer==3.0.1
     # via requests
 check-reqs==1.0.0
     # via -r requirements.in
