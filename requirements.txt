@@ -71,7 +71,7 @@ fastjsonschema==2.16.2
     # via nbformat
 filelock==3.9.0
     # via virtualenv
-greenlet==2.0.1
+greenlet==2.0.2
     # via sqlalchemy
 identify==2.5.13
     # via pre-commit
