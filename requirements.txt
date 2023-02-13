@@ -85,7 +85,7 @@ iniconfig==2.0.0
     # via pytest
 ipykernel==6.21.1
     # via myst-nb
-ipython==8.10.0
+ipython==8.8.0
     # via
     #   ipykernel
     #   myst-nb
@@ -165,7 +165,7 @@ pickleshare==0.7.5
     # via ipython
 pip-tools==6.12.2
     # via -r requirements.in
-platformdirs==2.6.2
+platformdirs==3.0.0
     # via
     #   jupyter-core
     #   virtualenv
@@ -299,7 +299,7 @@ wheel==0.38.4
     # via pip-tools
 wrapt==1.14.1
     # via astroid
-zipp==3.13.0
+zipp==3.12.1
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
