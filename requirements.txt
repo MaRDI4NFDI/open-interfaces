@@ -65,7 +65,7 @@ executing==1.2.0
     # via stack-data
 exhale==0.3.6
     # via -r requirements.in
-fastjsonschema==2.16.2
+fastjsonschema==2.16.3
     # via nbformat
 filelock==3.9.0
     # via virtualenv
