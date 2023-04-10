@@ -17,7 +17,6 @@ attrs==22.2.0
     #   -r requirements.in
     #   jsonschema
     #   jupyter-cache
-    #   pytest
 babel==2.12.1
     # via sphinx
 backcall==0.2.0
@@ -190,7 +189,7 @@ pyproject-hooks==1.0.0
     # via build
 pyrsistent==0.19.3
     # via jsonschema
-pytest==7.2.2
+pytest==7.3.0
     # via
     #   -r requirements.in
     #   pytest-datadir
