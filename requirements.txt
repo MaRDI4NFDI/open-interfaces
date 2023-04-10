@@ -22,7 +22,7 @@ babel==2.12.1
     # via sphinx
 backcall==0.2.0
     # via ipython
-beautifulsoup4==4.12.0
+beautifulsoup4==4.12.2
     # via exhale
 breathe==4.35.0
     # via
