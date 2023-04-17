@@ -234,7 +234,7 @@ six==1.16.0
     #   python-dateutil
 snowballstemmer==2.2.0
     # via sphinx
-soupsieve==2.4
+soupsieve==2.4.1
     # via beautifulsoup4
 sphinx==4.5.0
     # via
