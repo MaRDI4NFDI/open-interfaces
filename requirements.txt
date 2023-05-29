@@ -215,7 +215,7 @@ pyyaml==6.0
     #   pre-commit
     #   pytest-regressions
     #   sphinx-autoapi
-pyzmq==25.0.2
+pyzmq==25.1.0
     # via
     #   ipykernel
     #   jupyter-client
