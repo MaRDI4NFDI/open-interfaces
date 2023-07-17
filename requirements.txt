@@ -37,7 +37,7 @@ charset-normalizer==3.1.0
     # via requests
 check-reqs==1.0.0
     # via -r requirements.in
-click==8.1.3
+click==8.1.5
     # via
     #   jupyter-cache
     #   pip-tools
