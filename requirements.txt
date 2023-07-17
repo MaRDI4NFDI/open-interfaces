@@ -52,7 +52,7 @@ debugpy==1.6.7
     # via ipykernel
 decorator==5.1.1
     # via ipython
-distlib==0.3.6
+distlib==0.3.7
     # via virtualenv
 docutils==0.17.1
     # via
