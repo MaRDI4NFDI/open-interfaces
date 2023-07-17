@@ -28,7 +28,7 @@ jobs:
                   cmake -GNinja -B build -S /src
                   cmake --build build --target docs
             - name: upload
-              uses: actions/upload-pages-artifact@v1
+              uses: actions/upload-pages-artifact@v2
               with:
                   path: build/docs/sphinx_html/
     deploy_docs:
