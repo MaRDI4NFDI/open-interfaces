@@ -1,0 +1,17 @@
+name: open-interfaces
+
+channels:
+    - conda-forge
+
+dependencies:
+    - python=3.10
+    - cmake=3.18
+    - pip
+    - cxx-compiler=1.3.0
+    - fortran-compiler
+    - julia=1.7.3
+    - r-base=3.6.3
+    - mkl
+    - openblas
+    - pytest
+    - python-dotenv
