@@ -924,9 +924,8 @@ IEventListenerPtr prepareReporters(Config const *config) {
 class TestGroup {
 public:
   explicit TestGroup(IEventListenerPtr &&reporter, Config const *config)
-      : m_reporter(reporter.get()), m_config{config}, m_context{config,
-                                                                CATCH_MOVE(
-                                                                    reporter)} {
+      : m_reporter(reporter.get()), m_config{config},
+        m_context{config, CATCH_MOVE(reporter)} {
 
     assert(m_config->testSpec().getInvalidSpecs().empty() &&
            "Invalid test specs should be handled before running tests");
@@ -7590,7 +7589,7 @@ CompactReporter::~CompactReporter() {}
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(                                                               \
-    disable : 4061) // Not all labels are EXPLICITLY handled in switch
+        disable : 4061) // Not all labels are EXPLICITLY handled in switch
   // Note that 4062 (not all labels are handled and default is missing) is
   // enabled
 #endif
