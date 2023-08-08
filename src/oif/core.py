@@ -14,7 +14,7 @@ class OIFArgType(ctypes.c_int):
     pass
 
 
-class OIFArgTypes(ctypes.Structure):
+class OIFArgs(ctypes.Structure):
     _fields_ = [
         ("arg_types", ctypes.POINTER(OIFArgType)),
         ("args", ctypes.c_void_p),
@@ -41,10 +41,7 @@ class OIFBackend:
                 arg_p = ctypes.pointer(ctypes.c_double(arg))
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
                 args.append(arg_void_p)
-                arg_types.append(OIF_FLOAT32)
-            elif isinstance(arg, float):
-                args.append(ctypes.c_void_p(arg))
-                arg_types.append(OIFArgType.OIF_FLOAT64)
+                arg_types.append(OIF_FLOAT64)
             else:
                 raise ValueError("Cannot handle argument type")
 
@@ -52,7 +49,7 @@ class OIFBackend:
             (ctypes.c_int * len(arg_types))(*arg_types), ctypes.POINTER(OIFArgType)
         )
         args = ctypes.cast((ctypes.c_void_p * len(args))(*args), ctypes.c_void_p)
-        args_packed = OIFArgTypes(arg_types, args, num_args)
+        args_packed = OIFArgs(arg_types, args, num_args)
 
         out_arg_types = []
         out_args = []
@@ -65,10 +62,7 @@ class OIFBackend:
                 arg_p = ctypes.pointer(ctypes.c_double(arg))
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
                 out_args.append(arg_void_p)
-                out_arg_types.append(OIF_FLOAT32)
-            elif isinstance(arg, float):
-                out_args.append(ctypes.c_void_p(arg))
-                out_arg_types.append(OIFArgType.OIF_FLOAT64)
+                out_arg_types.append(OIF_FLOAT64)
             else:
                 raise ValueError("Cannot handle argument type")
 
@@ -76,9 +70,9 @@ class OIFBackend:
             (ctypes.c_int * len(out_arg_types))(*out_arg_types), ctypes.POINTER(OIFArgType)
         )
         out_args = ctypes.cast((ctypes.c_void_p * len(out_args))(*out_args), ctypes.c_void_p)
-        out_packed = OIFArgTypes(out_arg_types, out_args, num_out_args)
+        out_packed = OIFArgs(out_arg_types, out_args, num_out_args)
 
-        self.dispatch.call_interface_method(
+        _lib_dispatch.call_interface_method(
            self.handle,
            method,
            args_packed,
