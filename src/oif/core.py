@@ -29,7 +29,7 @@ class OIFBackend:
     def __init__(self, handle):
         self.handle = handle
 
-    def call(self, method, user_args, out_args):
+    def call(self, method, user_args, out_user_args):
         arg_types = []
         args = []
         num_args = len(user_args)
@@ -52,14 +52,38 @@ class OIFBackend:
             (ctypes.c_int * len(arg_types))(*arg_types), ctypes.POINTER(OIFArgType)
         )
         args = ctypes.cast((ctypes.c_void_p * len(args))(*args), ctypes.c_void_p)
-
         args_packed = OIFArgTypes(arg_types, args, num_args)
-        # self.dispatch.call_interface_method(
-        #    self.handle,
-        #    method,
-        #    args_packed,
-        #    out_packed
-        # )
+
+        out_arg_types = []
+        out_args = []
+        num_out_args = len(out_user_args)
+        for arg in out_user_args:
+            if isinstance(arg, int):
+                out_args.append(ctypes.c_void_p(ctypes.c_int(arg)))
+                out_arg_types.append(OIF_INT)
+            elif isinstance(arg, float):
+                arg_p = ctypes.pointer(ctypes.c_double(arg))
+                arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
+                out_args.append(arg_void_p)
+                out_arg_types.append(OIF_FLOAT32)
+            elif isinstance(arg, float):
+                out_args.append(ctypes.c_void_p(arg))
+                out_arg_types.append(OIFArgType.OIF_FLOAT64)
+            else:
+                raise ValueError("Cannot handle argument type")
+
+        out_arg_types = ctypes.cast(
+            (ctypes.c_int * len(out_arg_types))(*out_arg_types), ctypes.POINTER(OIFArgType)
+        )
+        out_args = ctypes.cast((ctypes.c_void_p * len(out_args))(*out_args), ctypes.c_void_p)
+        out_packed = OIFArgTypes(out_arg_types, out_args, num_out_args)
+
+        self.dispatch.call_interface_method(
+           self.handle,
+           method,
+           args_packed,
+           out_packed,
+        )
 
         return 42
 
