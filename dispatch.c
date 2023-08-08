@@ -78,8 +78,10 @@ int call_interface_method(
 
 int
 run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *retvals) {
-    
+       //void *handle = dlopen("oif_c") 
+       return 0;
 }
 
-
-int run_interface_method_python(const char *method, OIFArgs *args, OIFArgs *retvals);
+int run_interface_method_python(const char *method, OIFArgs *args, OIFArgs *retvals) {
+    return 1;
+}
