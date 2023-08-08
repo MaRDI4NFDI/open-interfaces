@@ -1,0 +1,6 @@
+[tool.mypy]
+ignore_missing_imports = True
+
+[tool.isort]
+profile = black
+
