@@ -1,5 +1,4 @@
 import ctypes
-
 from typing import NewType
 
 UInt = NewType("UInt", int)
@@ -67,16 +66,25 @@ class OIFBackend:
                 raise ValueError("Cannot handle argument type")
 
         out_arg_types = ctypes.cast(
-            (ctypes.c_int * len(out_arg_types))(*out_arg_types), ctypes.POINTER(OIFArgType)
+            (ctypes.c_int * len(out_arg_types))(*out_arg_types),
+            ctypes.POINTER(OIFArgType),
         )
-        out_args = ctypes.cast((ctypes.c_void_p * len(out_args))(*out_args), ctypes.c_void_p)
-        out_packed = OIFArgs(out_arg_types, out_args, num_out_args)
+        out_args = ctypes.cast(
+            (ctypes.c_void_p * len(out_args))(*out_args), ctypes.c_void_p
+        )
+        out_packed = OIFArgs(num_out_args, out_arg_types, out_args)
 
-        _lib_dispatch.call_interface_method(
-           self.handle,
-           method,
-           args_packed,
-           out_packed,
+        call_interface_method = wrap_c_function(
+            _lib_dispatch,
+            "call_interface_method",
+            ctypes.c_int,
+            [ctypes.c_int, ctypes.c_char_p, OIFArgs, OIFArgs],
+        )
+        call_interface_method(
+            self.handle,
+            method.encode(),
+            args_packed,
+            out_packed,
         )
 
         return 42
