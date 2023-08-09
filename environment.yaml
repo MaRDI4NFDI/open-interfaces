@@ -15,3 +15,7 @@ dependencies:
     - openblas
     - pytest
     - python-dotenv
+    - flake8
+    - black
+    - mypy
+    - isort
