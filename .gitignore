@@ -97,3 +97,9 @@ venv.bak/
 # Additional artifacts
 autoenv-enter.zsh
 autoenv-leave.zsh
+
+# clangd cache
+.cache
+
+# compile_commands.json
+compile_commands.json
