@@ -28,8 +28,8 @@ BackendHandle load_backend(
     } else if (strcmp(backend_name, "python") == 0) {
         bh = load_backend_python(operation, version_major, version_minor);
     } else {
-        perror("Unknown backend");
-        bh = 0;
+        fprintf(stderr, "[dispatch] Cannot load backend: %s\n", backend_name);
+        exit(EXIT_FAILURE);
     }
 
     return bh;
@@ -50,7 +50,8 @@ BackendHandle load_backend_python(
         size_t version_major,
         size_t version_minor
 ) {
-    perror("This is not yet implemented correctly");
+    // Start Python interpreter here.
+    fprintf(stderr, "This is not yet implemented correctly");
     exit(EXIT_FAILURE);
     return BACKEND_PYTHON;
 }
@@ -71,7 +72,7 @@ int call_interface_method(
         status = run_interface_method_python(method, args, retvals);
         break;
     default:
-        perror("Unknown backend");
+        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%d'", bh);
         exit(EXIT_FAILURE);
     }
     return status;
@@ -108,7 +109,8 @@ run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
     }
 
     if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_args, &ffi_type_uint, arg_types) != FFI_OK) {
-        perror("ffi_prep_cif was not OK");
+        fflush(stdout);
+        fprintf(stderr, "[dispatch] ffi_prep_cif was not OK");
         exit(EXIT_FAILURE);
     }
 
