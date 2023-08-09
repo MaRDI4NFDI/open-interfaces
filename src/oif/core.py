@@ -16,9 +16,9 @@ class OIFArgType(ctypes.c_int):
 
 class OIFArgs(ctypes.Structure):
     _fields_ = [
+        ("num_args", ctypes.c_size_t),
         ("arg_types", ctypes.POINTER(OIFArgType)),
         ("args", ctypes.c_void_p),
-        ("num_args", ctypes.c_size_t),
     ]
 
 
@@ -49,7 +49,7 @@ class OIFBackend:
             (ctypes.c_int * len(arg_types))(*arg_types), ctypes.POINTER(OIFArgType)
         )
         args = ctypes.cast((ctypes.c_void_p * len(args))(*args), ctypes.c_void_p)
-        args_packed = OIFArgs(arg_types, args, num_args)
+        args_packed = OIFArgs(num_args, arg_types, args)
 
         out_arg_types = []
         out_args = []

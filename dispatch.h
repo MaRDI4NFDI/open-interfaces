@@ -16,9 +16,9 @@ typedef enum {
 
 
 typedef struct {
+    size_t num_args;
     OIFArgType *arg_types;
     void **args;
-    size_t num_args;
 } OIFArgs;
 
 
