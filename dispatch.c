@@ -53,7 +53,7 @@ BackendHandle load_backend_python(
         size_t version_minor
 ) {
     // Start Python interpreter here.
-    fprintf(stderr, "This is not yet implemented correctly");
+    fprintf(stderr, "[dispatch] This is not yet implemented correctly");
     exit(EXIT_FAILURE);
     return BACKEND_PYTHON;
 }
@@ -85,12 +85,12 @@ int
 run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
     void *lib_handle = dlopen(OIF_BACKEND_C_SO, RTLD_LOCAL | RTLD_LAZY); 
     if (lib_handle == NULL) {
-        fprintf(stderr, "Cannot load shared library %s\n", OIF_BACKEND_C_SO);
+        fprintf(stderr, "[dispatch] Cannot load shared library %s\n", OIF_BACKEND_C_SO);
         exit(EXIT_FAILURE);
     }
     void *func = dlsym(lib_handle, method);
     if (func == NULL) {
-        fprintf(stderr, "Cannot load interface '%s'\n", method);
+        fprintf(stderr, "[dispatch] Cannot load interface '%s'\n", method);
         exit(EXIT_FAILURE);
     }
 
@@ -112,7 +112,7 @@ run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
             arg_types[i] = &ffi_type_double;
         } else {
             fflush(stdout);
-            fprintf(stderr, "Unknown arg type: %d", args->arg_types[i]);
+            fprintf(stderr, "[dispatch] Unknown arg type: %d", args->arg_types[i]);
             fflush(stderr);
             exit(EXIT_FAILURE);
         }
