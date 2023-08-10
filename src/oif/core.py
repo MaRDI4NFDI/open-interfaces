@@ -17,7 +17,7 @@ class OIFArgs(ctypes.Structure):
     _fields_ = [
         ("num_args", ctypes.c_size_t),
         ("arg_types", ctypes.POINTER(OIFArgType)),
-        ("args", ctypes.c_void_p),
+        ("args", ctypes.POINTER(ctypes.c_void_p)),
     ]
 
 
@@ -47,7 +47,9 @@ class OIFBackend:
         arg_types = ctypes.cast(
             (ctypes.c_int * len(arg_types))(*arg_types), ctypes.POINTER(OIFArgType)
         )
-        args = ctypes.cast((ctypes.c_void_p * len(args))(*args), ctypes.c_void_p)
+        args = ctypes.cast(
+            (ctypes.c_void_p * len(args))(*args), ctypes.POINTER(ctypes.c_void_p)
+        )
         args_packed = OIFArgs(num_args, arg_types, args)
 
         out_arg_types = []
@@ -70,7 +72,8 @@ class OIFBackend:
             ctypes.POINTER(OIFArgType),
         )
         out_args = ctypes.cast(
-            (ctypes.c_void_p * len(out_args))(*out_args), ctypes.c_void_p
+            (ctypes.c_void_p * len(out_args))(*out_args),
+            ctypes.POINTER(ctypes.c_void_p),
         )
         out_packed = OIFArgs(num_out_args, out_arg_types, out_args)
 
@@ -78,13 +81,18 @@ class OIFBackend:
             _lib_dispatch,
             "call_interface_method",
             ctypes.c_int,
-            [ctypes.c_int, ctypes.c_char_p, OIFArgs, OIFArgs],
+            [
+                ctypes.c_int,
+                ctypes.c_char_p,
+                ctypes.POINTER(OIFArgs),
+                ctypes.POINTER(OIFArgs),
+            ],
         )
         call_interface_method(
             self.handle,
             method.encode(),
-            args_packed,
-            out_packed,
+            ctypes.byref(args_packed),
+            ctypes.byref(out_packed),
         )
 
         return 42
