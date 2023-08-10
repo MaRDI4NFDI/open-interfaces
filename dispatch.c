@@ -15,6 +15,8 @@ enum {
     BACKEND_R,
 };
 
+char OIF_BACKEND_C_SO[] = "./liboif_backend_c.so";
+
 
 BackendHandle load_backend(
         const char *backend_name,
@@ -81,8 +83,16 @@ int call_interface_method(
 
 int
 run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
-    void *lib_handle = dlopen("./liboif_backend_c.so", RTLD_LOCAL | RTLD_LAZY); 
+    void *lib_handle = dlopen(OIF_BACKEND_C_SO, RTLD_LOCAL | RTLD_LAZY); 
+    if (lib_handle == NULL) {
+        fprintf(stderr, "Cannot load shared library %s\n", OIF_BACKEND_C_SO);
+        exit(EXIT_FAILURE);
+    }
     void *func = dlsym(lib_handle, method);
+    if (func == NULL) {
+        fprintf(stderr, "Cannot load interface '%s'\n", method);
+        exit(EXIT_FAILURE);
+    }
 
     fprintf(stderr, "I am definitely here\n");
 
