@@ -8,10 +8,10 @@ typedef size_t BackendHandle;
 
 
 typedef enum {
-    OIF_INT,
-    OIF_FLOAT32,
-    OIF_FLOAT64,
-    OIF_STR,
+    OIF_INT = 1,
+    OIF_FLOAT32 = 2,
+    OIF_FLOAT64 = 3,
+    OIF_STR = 4,
 } OIFArgType;
 
 

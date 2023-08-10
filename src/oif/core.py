@@ -7,6 +7,7 @@ UInt = NewType("UInt", int)
 OIF_INT = 1
 OIF_FLOAT32 = 2
 OIF_FLOAT64 = 3
+OIF_STR = 4
 
 
 class OIFArgType(ctypes.c_int):
