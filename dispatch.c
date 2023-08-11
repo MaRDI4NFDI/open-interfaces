@@ -74,7 +74,7 @@ int call_interface_method(
         status = run_interface_method_python(method, args, retvals);
         break;
     default:
-        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%d'", bh);
+        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%zu'", bh);
         exit(EXIT_FAILURE);
     }
     return status;
