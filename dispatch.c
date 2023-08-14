@@ -74,7 +74,7 @@ int call_interface_method(
         status = run_interface_method_python(method, args, retvals);
         break;
     default:
-        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%d'\n", bh);
+        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%zu'", bh);
         exit(EXIT_FAILURE);
     }
     return status;
@@ -130,7 +130,7 @@ run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
         }
     }
 
-    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_args_all, &ffi_type_uint, arg_types) != FFI_OK)     {
+    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_args_all, &ffi_type_uint, arg_types) != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[dispatch] ffi_prep_cif was not OK");
         exit(EXIT_FAILURE);
