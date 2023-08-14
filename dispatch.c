@@ -82,7 +82,7 @@ int call_interface_method(
 
 
 int
-run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
+run_interface_method_c(const char *method, OIFArgs *in_args, OIFArgs *out_args) {
     void *lib_handle = dlopen(OIF_BACKEND_C_SO, RTLD_LOCAL | RTLD_LAZY); 
     if (lib_handle == NULL) {
         fprintf(stderr, "[dispatch] Cannot load shared library %s\n", OIF_BACKEND_C_SO);
@@ -96,29 +96,29 @@ run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
 
     fprintf(stderr, "I am definitely here\n");
 
-    int num_args = args->num_args;
+    int num_in_args = in_args->num_args;
     int num_out_args = out_args->num_args;
-    int num_args_all = num_args + num_out_args;
+    int num_total_args = num_in_args + num_out_args;
 
     ffi_cif cif;
-    ffi_type **arg_types = malloc(num_args_all * sizeof(ffi_type));
-    void **arg_values = malloc(num_args_all * sizeof(void *));
+    ffi_type **arg_types = malloc(num_total_args * sizeof(ffi_type));
+    void **arg_values = malloc(num_total_args * sizeof(void *));
 
     // Merge input and output argument types together in `arg_types` array.
-    for (size_t i = 0; i < num_args; ++i) {
+    for (size_t i = 0; i < num_in_args; ++i) {
         fprintf(stderr, "In a loop\n");
-        if (args->arg_types[i] == OIF_FLOAT64) {
+        if (in_args->arg_types[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
         } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
             arg_types[i] = &ffi_type_pointer;
         } else {
             fflush(stdout);
-            fprintf(stderr, "[dispatch] Unknown input arg type: %d\n", args->arg_types[i]);
+            fprintf(stderr, "[dispatch] Unknown input arg type: %d\n", in_args->arg_types[i]);
             exit(EXIT_FAILURE);
         }
     }
-    for (size_t i = num_args; i < num_args_all; ++i) {
-        printf("Processing out_args[%zu] = %zu\n", i - num_args, out_args->arg_types[i]);
+    for (size_t i = num_in_args; i < num_total_args; ++i) {
+        printf("Processing out_args[%zu] = %zu\n", i - num_in_args, out_args->arg_types[i]);
         if (out_args->arg_types[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
         } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
@@ -130,7 +130,7 @@ run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
         }
     }
 
-    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_args_all, &ffi_type_uint, arg_types) != FFI_OK) {
+    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_uint, arg_types) != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[dispatch] ffi_prep_cif was not OK");
         exit(EXIT_FAILURE);
@@ -138,10 +138,10 @@ run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
 
     // Merge input and output argument values together in `arg_values` array.
     for (size_t i = 0; i < num_args; ++i) {
-        arg_values[i] = args->args[i];
+        arg_values[i] = in_args->arg_values[i];
     }
     for (size_t i = num_args; i < num_args_all; ++i) {
-        arg_values[i] = out_args->args[i];
+        arg_values[i] = out_args->arg_values[i];
     }
 
     ffi_arg result;
@@ -153,6 +153,6 @@ run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
     return 0;
 }
 
-int run_interface_method_python(const char *method, OIFArgs *args, OIFArgs *retvals) {
+int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *out_args) {
     return 1;
 }

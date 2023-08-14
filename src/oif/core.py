@@ -18,7 +18,7 @@ class OIFArgs(ctypes.Structure):
     _fields_ = [
         ("num_args", ctypes.c_size_t),
         ("arg_types", ctypes.POINTER(OIFArgType)),
-        ("args", ctypes.POINTER(ctypes.c_void_p)),
+        ("arg_values", ctypes.POINTER(ctypes.c_void_p)),
     ]
 
 
@@ -30,53 +30,56 @@ class OIFBackend:
         self.handle = handle
 
     def call(self, method, user_args, out_user_args):
-        arg_types = []
-        args = []
         num_args = len(user_args)
+        arg_types = []
+        arg_values = []
         for arg in user_args:
             if isinstance(arg, int):
-                args.append(ctypes.c_void_p(ctypes.c_int(arg)))
+                arg_values.append(ctypes.c_void_p(ctypes.c_int(arg)))
                 arg_types.append(OIF_INT)
             elif isinstance(arg, float):
                 arg_p = ctypes.pointer(ctypes.c_double(arg))
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
-                args.append(arg_void_p)
+                arg_values.append(arg_void_p)
                 arg_types.append(OIF_FLOAT64)
             else:
                 raise ValueError("Cannot handle argument type")
 
-        arg_types = ctypes.cast(
+        arg_types_ctypes = ctypes.cast(
             (ctypes.c_int * len(arg_types))(*arg_types), ctypes.POINTER(OIFArgType)
         )
-        args = ctypes.cast(
-            (ctypes.c_void_p * len(args))(*args), ctypes.POINTER(ctypes.c_void_p)
+        arg_values_ctypes = ctypes.cast(
+            (ctypes.c_void_p * len(arg_values))(*arg_values),
+            ctypes.POINTER(ctypes.c_void_p),
         )
-        args_packed = OIFArgs(num_args, arg_types, args)
+        args_packed = OIFArgs(num_args, arg_types_ctypes, arg_values_ctypes)
 
-        out_arg_types = []
-        out_args = []
         num_out_args = len(out_user_args)
+        out_arg_types = []
+        out_arg_values = []
         for arg in out_user_args:
             if isinstance(arg, int):
-                out_args.append(ctypes.c_void_p(ctypes.c_int(arg)))
+                out_arg_values.append(ctypes.c_void_p(ctypes.c_int(arg)))
                 out_arg_types.append(OIF_INT)
             elif isinstance(arg, float):
                 arg_p = ctypes.pointer(ctypes.c_double(arg))
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
-                out_args.append(arg_void_p)
+                out_arg_values.append(arg_void_p)
                 out_arg_types.append(OIF_FLOAT64)
             else:
                 raise ValueError("Cannot handle argument type")
 
-        out_arg_types = ctypes.cast(
+        print("out_arg_types = ", out_arg_types)
+
+        out_arg_types_ctypes = ctypes.cast(
             (ctypes.c_int * len(out_arg_types))(*out_arg_types),
             ctypes.POINTER(OIFArgType),
         )
-        out_args = ctypes.cast(
-            (ctypes.c_void_p * len(out_args))(*out_args),
+        out_arg_values_ctypes = ctypes.cast(
+            (ctypes.c_void_p * len(out_arg_values))(*out_arg_values),
             ctypes.POINTER(ctypes.c_void_p),
         )
-        out_packed = OIFArgs(num_out_args, out_arg_types, out_args)
+        out_packed = OIFArgs(num_out_args, out_arg_types_ctypes, out_arg_values_ctypes)
 
         call_interface_method = wrap_c_function(
             _lib_dispatch,
