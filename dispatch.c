@@ -53,7 +53,7 @@ BackendHandle load_backend_python(
         size_t version_minor
 ) {
     // Start Python interpreter here.
-    fprintf(stderr, "[dispatch] This is not yet implemented correctly");
+    fprintf(stderr, "[dispatch] This is not yet implemented correctly\n");
     exit(EXIT_FAILURE);
     return BACKEND_PYTHON;
 }
@@ -74,7 +74,7 @@ int call_interface_method(
         status = run_interface_method_python(method, args, retvals);
         break;
     default:
-        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%d'", bh);
+        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%d'\n", bh);
         exit(EXIT_FAILURE);
     }
     return status;
@@ -97,35 +97,51 @@ run_interface_method_c(const char *method, OIFArgs *args, OIFArgs *out_args) {
     fprintf(stderr, "I am definitely here\n");
 
     int num_args = args->num_args;
-    fprintf(stderr, "num_args = %d\n", num_args);
-    fflush(stderr);
+    int num_out_args = out_args->num_args;
+    int num_args_all = num_args + num_out_args;
 
     ffi_cif cif;
-    ffi_type **arg_types = malloc(sizeof(ffi_type) * num_args);
-    fprintf(stderr, "Ready to malloc\n");
-    void **arg_values = malloc(num_args * sizeof(void *));
-    fprintf(stderr, "Malloced\n");
+    ffi_type **arg_types = malloc(num_args_all * sizeof(ffi_type));
+    void **arg_values = malloc(num_args_all * sizeof(void *));
 
+    // Merge input and output argument types together in `arg_types` array.
     for (size_t i = 0; i < num_args; ++i) {
         fprintf(stderr, "In a loop\n");
         if (args->arg_types[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
+        } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
+            arg_types[i] = &ffi_type_pointer;
         } else {
             fflush(stdout);
-            fprintf(stderr, "[dispatch] Unknown arg type: %d", args->arg_types[i]);
-            fflush(stderr);
+            fprintf(stderr, "[dispatch] Unknown input arg type: %d\n", args->arg_types[i]);
+            exit(EXIT_FAILURE);
+        }
+    }
+    for (size_t i = num_args; i < num_args_all; ++i) {
+        printf("Processing out_args[%zu] = %zu\n", i - num_args, out_args->arg_types[i]);
+        if (out_args->arg_types[i] == OIF_FLOAT64) {
+            arg_types[i] = &ffi_type_double;
+        } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
+            arg_types[i] = &ffi_type_pointer;
+        } else {
+            fflush(stdout);
+            fprintf(stderr, "[dispatch] Unknown output arg type: %d\n", out_args->arg_types[i]);
             exit(EXIT_FAILURE);
         }
     }
 
-    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_args, &ffi_type_uint, arg_types) != FFI_OK) {
+    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_args_all, &ffi_type_uint, arg_types) != FFI_OK)     {
         fflush(stdout);
         fprintf(stderr, "[dispatch] ffi_prep_cif was not OK");
         exit(EXIT_FAILURE);
     }
 
+    // Merge input and output argument values together in `arg_values` array.
     for (size_t i = 0; i < num_args; ++i) {
         arg_values[i] = args->args[i];
+    }
+    for (size_t i = num_args; i < num_args_all; ++i) {
+        arg_values[i] = out_args->args[i];
     }
 
     ffi_arg result;
