@@ -1,13 +1,17 @@
 import ctypes
 from typing import NewType
 
+import numpy as np
+
 UInt = NewType("UInt", int)
 
 
 OIF_INT = 1
 OIF_FLOAT32 = 2
 OIF_FLOAT64 = 3
-OIF_STR = 4
+OIF_FLOAT32_P = 4
+OIF_FLOAT64_P = 5
+OIF_STR = 6
 
 
 class OIFArgType(ctypes.c_int):
@@ -42,6 +46,10 @@ class OIFBackend:
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
                 arg_values.append(arg_void_p)
                 arg_types.append(OIF_FLOAT64)
+            elif isinstance(arg, np.ndarray):
+                print("Warning: we assume that dtype is np.float64")
+                arg_values.append(arg.data.as_type(ctypes.c_double_p))
+                arg_types.append(OIF_FLOAT64_P)
             else:
                 raise ValueError("Cannot handle argument type")
 
@@ -66,6 +74,10 @@ class OIFBackend:
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
                 out_arg_values.append(arg_void_p)
                 out_arg_types.append(OIF_FLOAT64)
+            elif isinstance(arg, np.ndarray):
+                print("Warning: we assume that dtype is np.float64")
+                out_arg_values.append(arg.ctypes.data_as(ctypes.c_void_p))
+                out_arg_types.append(OIF_FLOAT64_P)
             else:
                 raise ValueError("Cannot handle argument type")
 

@@ -94,8 +94,6 @@ run_interface_method_c(const char *method, OIFArgs *in_args, OIFArgs *out_args) 
         exit(EXIT_FAILURE);
     }
 
-    fprintf(stderr, "I am definitely here\n");
-
     int num_in_args = in_args->num_args;
     int num_out_args = out_args->num_args;
     int num_total_args = num_in_args + num_out_args;
@@ -106,10 +104,10 @@ run_interface_method_c(const char *method, OIFArgs *in_args, OIFArgs *out_args) 
 
     // Merge input and output argument types together in `arg_types` array.
     for (size_t i = 0; i < num_in_args; ++i) {
-        fprintf(stderr, "In a loop\n");
+        printf("Processing in_args[%zu] = %u\n", i, in_args->arg_types[i]);
         if (in_args->arg_types[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
-        } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
+        } else if (in_args->arg_types[i] == OIF_FLOAT64_P) {
             arg_types[i] = &ffi_type_pointer;
         } else {
             fflush(stdout);
@@ -118,37 +116,65 @@ run_interface_method_c(const char *method, OIFArgs *in_args, OIFArgs *out_args) 
         }
     }
     for (size_t i = num_in_args; i < num_total_args; ++i) {
-        printf("Processing out_args[%zu] = %zu\n", i - num_in_args, out_args->arg_types[i]);
-        if (out_args->arg_types[i] == OIF_FLOAT64) {
+        printf("Processing out_args[%zu] = %u\n", i - num_in_args, out_args->arg_types[i - num_in_args]);
+        if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
-        } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
+        } else if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64_P) {
             arg_types[i] = &ffi_type_pointer;
         } else {
             fflush(stdout);
-            fprintf(stderr, "[dispatch] Unknown output arg type: %d\n", out_args->arg_types[i]);
+            fprintf(stderr, "[dispatch] Unknown output arg type: %d\n", out_args->arg_types[i - num_in_args]);
             exit(EXIT_FAILURE);
         }
     }
 
-    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_uint, arg_types) != FFI_OK) {
+    ffi_status status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_uint, arg_types);
+    if (status == FFI_OK) {
+        printf("[backend_c] ffi_prep_cif returned FFI_OK\n");
+    } else {
         fflush(stdout);
         fprintf(stderr, "[dispatch] ffi_prep_cif was not OK");
         exit(EXIT_FAILURE);
     }
 
     // Merge input and output argument values together in `arg_values` array.
-    for (size_t i = 0; i < num_args; ++i) {
-        arg_values[i] = in_args->arg_values[i];
+    for (size_t i = 0; i < num_in_args; ++i) {
+        if (in_args->arg_types[i] == OIF_FLOAT64_P) {
+            arg_values[i] = &in_args->arg_values[i];
+        } else {
+            arg_values[i] = in_args->arg_values[i];
+        }
     }
-    for (size_t i = num_args; i < num_args_all; ++i) {
-        arg_values[i] = out_args->arg_values[i];
+    for (size_t i = num_in_args; i < num_total_args; ++i) {
+        if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64_P) {
+            arg_values[i] = &out_args->arg_values[i - num_in_args];
+        } else {
+            arg_values[i] = out_args->arg_values[i - num_in_args];
+        }
     }
 
-    ffi_arg result;
+    for (size_t i = 0; i < num_total_args; ++i) {
+        printf("Pointer arg_values[%zu] = %p, with value", i, arg_values[i]);
+        if (arg_types[i] == &ffi_type_double) {
+            printf(" = %f\n", *((double *) arg_values[i]));
+        } else if (arg_types[i] == &ffi_type_pointer) {
+            printf("s [0] = %f, [1] = %f\n",
+                    ((double *) arg_values[i])[0],
+                    ((double *) arg_values[i])[1]);
+        }
 
+        if (arg_types[i] == &ffi_type_pointer) {
+            if (arg_values[i] == NULL) {
+                fprintf(stderr, "[backend_c] Output argument has a null pointer\n");
+            }
+        }
+    }
+
+    unsigned result;
     ffi_call(&cif, FFI_FN(func), &result, arg_values);
 
-    printf("Result is %ld\n", result);
+    printf("Result is %u\n", result);
+    fflush(stdout);
 
     return 0;
 }

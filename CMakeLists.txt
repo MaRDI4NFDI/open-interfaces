@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.18)
 
 project(oif-toy-example LANGUAGES C CXX)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message("Disable optimizations for Debug build type")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+endif()
+
 add_library(oif_dispatch SHARED dispatch.c)
 target_include_directories(oif_dispatch PUBLIC .)
 target_link_libraries(oif_dispatch PUBLIC ffi)
