@@ -104,7 +104,6 @@ run_interface_method_c(const char *method, OIFArgs *in_args, OIFArgs *out_args) 
 
     // Merge input and output argument types together in `arg_types` array.
     for (size_t i = 0; i < num_in_args; ++i) {
-        printf("Processing in_args[%zu] = %u\n", i, in_args->arg_types[i]);
         if (in_args->arg_types[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
         } else if (in_args->arg_types[i] == OIF_FLOAT64_P) {
@@ -150,23 +149,6 @@ run_interface_method_c(const char *method, OIFArgs *in_args, OIFArgs *out_args) 
             arg_values[i] = &out_args->arg_values[i - num_in_args];
         } else {
             arg_values[i] = out_args->arg_values[i - num_in_args];
-        }
-    }
-
-    for (size_t i = 0; i < num_total_args; ++i) {
-        printf("Pointer arg_values[%zu] = %p, with value", i, arg_values[i]);
-        if (arg_types[i] == &ffi_type_double) {
-            printf(" = %f\n", *((double *) arg_values[i]));
-        } else if (arg_types[i] == &ffi_type_pointer) {
-            printf("s [0] = %f, [1] = %f\n",
-                    ((double *) arg_values[i])[0],
-                    ((double *) arg_values[i])[1]);
-        }
-
-        if (arg_types[i] == &ffi_type_pointer) {
-            if (arg_values[i] == NULL) {
-                fprintf(stderr, "[backend_c] Output argument has a null pointer\n");
-            }
         }
     }
 

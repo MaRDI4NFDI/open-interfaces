@@ -81,8 +81,6 @@ class OIFBackend:
             else:
                 raise ValueError("Cannot handle argument type")
 
-        print("out_arg_types = ", out_arg_types)
-
         out_arg_types_ctypes = ctypes.cast(
             (ctypes.c_int * len(out_arg_types))(*out_arg_types),
             ctypes.POINTER(OIFArgType),
@@ -111,7 +109,13 @@ class OIFBackend:
             ctypes.byref(out_packed),
         )
 
-        return 42
+        # result = []
+        # print("Output arguments after call_interface_method")
+        # for typ, val in zip(out_arg_types, out_arg_values):
+        #     if typ == OIF_FLOAT64_P:
+        #         result.append(out_arg_values)
+
+        return 0
 
 
 def init_backend(backend: str, interface: str, major: UInt, minor: UInt):
