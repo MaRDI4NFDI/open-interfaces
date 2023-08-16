@@ -13,3 +13,6 @@ all :
 	cp build/liboif_dispatch.$(DSO_EXT) . && \
 	cp build/src/oif/backend_c/liboif_backend_c.$(DSO_EXT) .
 
+.PHONY : test
+test :
+	cd build && ctest
