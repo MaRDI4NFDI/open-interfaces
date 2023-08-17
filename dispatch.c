@@ -138,18 +138,10 @@ run_interface_method_c(const char *method, OIFArgs *in_args, OIFArgs *out_args) 
 
     // Merge input and output argument values together in `arg_values` array.
     for (size_t i = 0; i < num_in_args; ++i) {
-        if (in_args->arg_types[i] == OIF_FLOAT64_P) {
-            arg_values[i] = &in_args->arg_values[i];
-        } else {
-            arg_values[i] = in_args->arg_values[i];
-        }
+        arg_values[i] = in_args->arg_values[i];
     }
     for (size_t i = num_in_args; i < num_total_args; ++i) {
-        if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64_P) {
-            arg_values[i] = &out_args->arg_values[i - num_in_args];
-        } else {
-            arg_values[i] = out_args->arg_values[i - num_in_args];
-        }
+        arg_values[i] = out_args->arg_values[i - num_in_args];
     }
 
     unsigned result;

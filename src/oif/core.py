@@ -48,7 +48,9 @@ class OIFBackend:
                 arg_types.append(OIF_FLOAT64)
             elif isinstance(arg, np.ndarray):
                 print("Warning: we assume that dtype is np.float64")
-                arg_values.append(arg.data.as_type(ctypes.c_double_p))
+                arg_p = ctypes.pointer(arg.data.as_type(ctypes.c_void_p))
+                arg_p_void = ctypes.cast(arg_p, ctypes.c_void_p)
+                arg_values.append(arg_p_void)
                 arg_types.append(OIF_FLOAT64_P)
             else:
                 raise ValueError("Cannot handle argument type")
@@ -76,7 +78,9 @@ class OIFBackend:
                 out_arg_types.append(OIF_FLOAT64)
             elif isinstance(arg, np.ndarray):
                 print("Warning: we assume that dtype is np.float64")
-                out_arg_values.append(arg.ctypes.data_as(ctypes.c_void_p))
+                arg_p = ctypes.pointer(arg.ctypes.data_as(ctypes.c_void_p))
+                arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
+                out_arg_values.append(arg_void_p)
                 out_arg_types.append(OIF_FLOAT64_P)
             else:
                 raise ValueError("Cannot handle argument type")
