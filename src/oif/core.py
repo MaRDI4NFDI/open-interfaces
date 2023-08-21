@@ -26,7 +26,7 @@ class OIFArgs(ctypes.Structure):
     ]
 
 
-_lib_dispatch = ctypes.CDLL("./liboif_dispatch.so")
+_lib_dispatch = ctypes.PyDLL("./liboif_dispatch.so")
 
 
 class OIFBackend:
