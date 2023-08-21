@@ -59,5 +59,4 @@ int call_interface_method(
 
 int run_interface_method_c(const char *method, OIFArgs *in_args, OIFArgs *out_args);
 
-
 int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *out_args);

@@ -7,15 +7,15 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 endif()
 
-find_package(Python REQUIRED Interpreter Development)
-
 add_library(oif_dispatch SHARED dispatch.c)
 target_compile_features(oif_dispatch PUBLIC c_std_11)
 target_include_directories(oif_dispatch PUBLIC .)
 target_link_libraries(oif_dispatch PUBLIC ffi)
-target_link_libraries(oif_dispatch PUBLIC Python::Python)
+target_link_libraries(oif_dispatch PRIVATE oif_backend_python)
 
 add_subdirectory(src/oif)
+
+
 
 # -----------------------------------------------------------------------------
 include(FetchContent)

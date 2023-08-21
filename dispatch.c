@@ -9,11 +9,11 @@
 
 enum
 {
-    BACKEND_C,
-    BACKEND_CXX,
-    BACKEND_PYTHON,
-    BACKEND_JULIA,
-    BACKEND_R,
+    BACKEND_C = 0,
+    BACKEND_CXX = 1,
+    BACKEND_PYTHON = 2,
+    BACKEND_JULIA = 3,
+    BACKEND_R = 4,
 };
 
 char OIF_BACKEND_C_SO[] = "./liboif_backend_c.so";
@@ -56,8 +56,8 @@ BackendHandle load_backend_python(
     size_t version_minor)
 {
     // Start Python interpreter here.
-    fprintf(stderr, "[dispatch] This is not yet implemented correctly\n");
-    exit(EXIT_FAILURE);
+    //fprintf(stderr, "[dispatch] This is not yet implemented correctly\n");
+    //exit(EXIT_FAILURE);
     return BACKEND_PYTHON;
 }
 
