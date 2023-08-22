@@ -5,6 +5,7 @@
 #include <ffi.h>
 
 #include "dispatch.h"
+#include "globals.h"
 
 #include <numpy/arrayobject.h>
 
@@ -37,8 +38,14 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
         return EXIT_FAILURE;
     }
 
+    import_array2(
+        "Failed to initialize NumPy C API",
+        OIF_ERROR
+    );
+
     pFunc = PyObject_GetAttrString(pModule, method);
     /* pFunc is a new reference */
+    double *data;
 
     if (pFunc && PyCallable_Check(pFunc)) {
         int num_args = in_args->num_args + out_args->num_args;
@@ -66,8 +73,11 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
                 pValue = PyFloat_FromDouble(*(double *)out_args->arg_values[i]);
             } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
                 fprintf(stderr, "Oh Gott! Remove hardcoded values ASAP\n");
-                const long shape[] = {2};
-                pValue = PyArray_SimpleNewFromData(1, shape, NPY_DOUBLE, out_args->arg_values[i]);
+                npy_intp shape[] = {2};
+                void **p = out_args->arg_values[i];
+                data = *p;
+                Py_INCREF(data);
+                pValue = PyArray_SimpleNewFromData(1, shape, NPY_FLOAT64, data);
             }
             if (!pValue) {
                 Py_DECREF(pArgs);
