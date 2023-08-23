@@ -1,5 +1,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
+#include <numpy/arrayobject.h>
+
 #include <stdlib.h>
 #include <dlfcn.h>
 #include <ffi.h>
@@ -7,20 +9,33 @@
 #include "dispatch.h"
 #include "globals.h"
 
-#include <numpy/arrayobject.h>
+
+BackendHandle load_backend_python(
+    const char *operation,
+    size_t version_major,
+    size_t version_minor)
+{
+    if (Py_IsInitialized()) {
+        fprintf(stderr, "[backend_python] Backend is already initialized\n");
+    } else {
+        PyConfig py_config;
+        PyConfig_InitPythonConfig(&py_config);
+    }
+
+
+    import_array2(
+        "Failed to initialize NumPy C API",
+        OIF_ERROR
+    );
+
+    return BACKEND_PYTHON;
+}
 
 
 int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
     PyObject *pFileName, *pModule, *pFunc;
     PyObject *pArgs, *pValue;
-    
-    if (Py_IsInitialized()) {
-        fprintf(stderr, "already initialized\n");
-    }
-
-    PyConfig py_config;
-    PyConfig_InitPythonConfig(&py_config);
 
     system("which python");
     PyRun_SimpleString("import sys; sys.__version__");
@@ -37,11 +52,6 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
         fprintf(stderr, "Failed to load \"%s\"\n", method);
         return EXIT_FAILURE;
     }
-
-    import_array2(
-        "Failed to initialize NumPy C API",
-        OIF_ERROR
-    );
 
     pFunc = PyObject_GetAttrString(pModule, method);
     /* pFunc is a new reference */

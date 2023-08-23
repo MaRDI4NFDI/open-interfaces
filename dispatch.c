@@ -39,17 +39,6 @@ BackendHandle load_backend_c(
     return BACKEND_C;
 }
 
-BackendHandle load_backend_python(
-    const char *operation,
-    size_t version_major,
-    size_t version_minor)
-{
-    // Start Python interpreter here.
-    //fprintf(stderr, "[dispatch] This is not yet implemented correctly\n");
-    //exit(EXIT_FAILURE);
-    return BACKEND_PYTHON;
-}
-
 int call_interface_method(
     BackendHandle bh,
     const char *method,
