@@ -23,6 +23,17 @@ typedef struct {
     void **arg_values;
 } OIFArgs;
 
+enum
+{
+    BACKEND_C = 0,
+    BACKEND_CXX = 1,
+    BACKEND_PYTHON = 2,
+    BACKEND_JULIA = 3,
+    BACKEND_R = 4,
+};
+
+char OIF_BACKEND_C_SO[] = "./liboif_backend_c.so";
+
 
 /**
  * Load backend by its name and version information.
