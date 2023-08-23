@@ -57,8 +57,6 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
     }
 
     pFunc = PyObject_GetAttrString(pModule, method);
-    /* pFunc is a new reference */
-    double *data;
 
     if (pFunc && PyCallable_Check(pFunc)) {
         int num_args = in_args->num_args + out_args->num_args;
@@ -88,7 +86,7 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
                 fprintf(stderr, "Oh Gott! Remove hardcoded values ASAP\n");
                 npy_intp shape[] = {2};
                 void **p = out_args->arg_values[i];
-                data = *p;
+                double *data = *p;
                 Py_INCREF(data);
                 pValue = PyArray_SimpleNewFromData(1, shape, NPY_FLOAT64, data);
             }
