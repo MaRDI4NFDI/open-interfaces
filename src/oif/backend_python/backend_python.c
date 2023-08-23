@@ -123,6 +123,14 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
     Py_XDECREF(pFunc);
     Py_DECREF(pModule);
 
+    return 0;
+}
+
+int unload_backend_python() {
+    if (!Py_IsInitialized()) {
+        return 0;
+    }
+
     if (Py_FinalizeEx() < 0) {
         return 120;
     }
