@@ -22,6 +22,11 @@ BackendHandle load_backend_python(
         PyConfig_InitPythonConfig(&py_config);
     }
 
+    PyRun_SimpleString(
+        "import sys; "
+        "print('[backend_python]', sys.executable); "
+        "print('[backend_python]', sys.version)"
+    );
 
     import_array2(
         "Failed to initialize NumPy C API",
@@ -37,8 +42,6 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
     PyObject *pFileName, *pModule, *pFunc;
     PyObject *pArgs, *pValue;
 
-    system("which python");
-    PyRun_SimpleString("import sys; sys.__version__");
     printf("Provided module name: %s\n", method);
     pFileName = PyUnicode_FromString(method);
     printf("PyUnicode_FromString module name: %s\n", PyUnicode_AsUTF8(pFileName));
