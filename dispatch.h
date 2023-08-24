@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 
-
 // Identifier of the used backend.
 typedef size_t BackendHandle;
 
@@ -22,6 +21,16 @@ typedef struct {
     OIFArgType *arg_types;
     void **arg_values;
 } OIFArgs;
+
+// This structure closely follows PyArray_Object that describes NumPy arrays.
+typedef struct {
+    // Number of dimensions in the array.
+    int nd;
+    // Size of each axis, i = 0, .., nd-1.
+    int *dimensions;
+    // Pointer to actual data.
+    char *data;
+} OIFArray;
 
 enum
 {

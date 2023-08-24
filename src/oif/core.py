@@ -26,6 +26,14 @@ class OIFArgs(ctypes.Structure):
     ]
 
 
+class OIFArray(ctypes.Structure):
+    _fields_ = [
+        ("nd", ctypes.c_int),
+        ("dimensions", ctypes.POINTER(ctypes.c_int)),
+        ("data", ctypes.POINTER(ctypes.c_char)),
+    ]
+
+
 _lib_dispatch = ctypes.PyDLL("./liboif_dispatch.so")
 
 
@@ -78,9 +86,14 @@ class OIFBackend:
                 out_arg_types.append(OIF_FLOAT64)
             elif isinstance(arg, np.ndarray):
                 print("Warning: we assume that dtype is np.float64")
+                nd = arg.ndim
+                shape = (ctypes.c_int * len(arg.shape))(*arg.shape)
                 arg_p = ctypes.pointer(arg.ctypes.data_as(ctypes.c_void_p))
-                arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
-                out_arg_values.append(arg_void_p)
+                data = ctypes.cast(arg_p, ctypes.POINTER(ctypes.c_char))
+
+                oif_array = OIFArray(nd, shape, data)
+                oif_array_p = ctypes.cast(ctypes.byref(oif_array), ctypes.c_void_p)
+                out_arg_values.append(oif_array_p)
                 out_arg_types.append(OIF_FLOAT64_P)
             else:
                 raise ValueError("Cannot handle argument type")
