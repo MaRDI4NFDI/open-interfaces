@@ -67,8 +67,10 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
             if (in_args->arg_types[i] == OIF_FLOAT64) {
                 pValue = PyFloat_FromDouble(*(double *)in_args->arg_values[i]);
             } else if (in_args->arg_types[i] == OIF_FLOAT64_P) {
-                const long shape[] = {2};
-                pValue = PyArray_SimpleNewFromData(1, shape, NPY_DOUBLE, in_args->arg_values[i]);
+                OIFArray *arr = (OIFArray *) in_args->arg_values[i];
+                pValue = PyArray_SimpleNewFromData(
+                    arr->nd, arr->dimensions, NPY_FLOAT64, *(double **) arr->data
+                );
             }
             if (!pValue) {
                 Py_DECREF(pArgs);
@@ -83,12 +85,10 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
             if (out_args->arg_types[i] == OIF_FLOAT64) {
                 pValue = PyFloat_FromDouble(*(double *)out_args->arg_values[i]);
             } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
-                fprintf(stderr, "Oh Gott! Remove hardcoded values ASAP\n");
-                npy_intp shape[] = {2};
-                void **p = out_args->arg_values[i];
-                double *data = *p;
-                Py_INCREF(data);
-                pValue = PyArray_SimpleNewFromData(1, shape, NPY_FLOAT64, data);
+                OIFArray *arr = (OIFArray *) out_args->arg_values[i];
+                pValue = PyArray_SimpleNewFromData(
+                    arr->nd, arr->dimensions, NPY_FLOAT64, *(double **) arr->data
+                );
             }
             if (!pValue) {
                 Py_DECREF(pArgs);

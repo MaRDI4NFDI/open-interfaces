@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 #include <stdlib.h>
 
 
@@ -27,7 +28,7 @@ typedef struct {
     // Number of dimensions in the array.
     int nd;
     // Size of each axis, i = 0, .., nd-1.
-    int *dimensions;
+    intptr_t *dimensions;
     // Pointer to actual data.
     char *data;
 } OIFArray;
