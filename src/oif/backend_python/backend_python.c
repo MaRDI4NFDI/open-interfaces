@@ -42,9 +42,8 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
     PyObject *pFileName, *pModule, *pFunc;
     PyObject *pArgs, *pValue;
 
-    printf("Provided module name: %s\n", method);
+    printf("[backend_python] Provided module name: %s\n", method);
     pFileName = PyUnicode_FromString(method);
-    printf("PyUnicode_FromString module name: %s\n", PyUnicode_AsUTF8(pFileName));
 
     pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
@@ -52,7 +51,7 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
     if (pModule == NULL)
     {
         PyErr_Print();
-        fprintf(stderr, "Failed to load \"%s\"\n", method);
+        fprintf(stderr, "[backend_python] Failed to load \"%s\"\n", method);
         return EXIT_FAILURE;
     }
 
@@ -75,7 +74,7 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
             if (!pValue) {
                 Py_DECREF(pArgs);
                 Py_DECREF(pModule);
-                fprintf(stderr, "Cannot convert argument\n");
+                fprintf(stderr, "[backend_python] Cannot convert argument\n");
                 return 1;
             }
             PyTuple_SetItem(pArgs, i, pValue);
