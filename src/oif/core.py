@@ -119,12 +119,15 @@ class OIFBackend:
                 ctypes.POINTER(OIFArgs),
             ],
         )
-        call_interface_method(
+        status = call_interface_method(
             self.handle,
             method.encode(),
             ctypes.byref(args_packed),
             ctypes.byref(out_packed),
         )
+
+        if status != 0:
+            raise RuntimeError("Could not execute interface method")
 
         # result = []
         # print("Output arguments after call_interface_method")

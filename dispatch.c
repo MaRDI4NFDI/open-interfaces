@@ -58,6 +58,14 @@ int call_interface_method(
         fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%zu'", bh);
         exit(EXIT_FAILURE);
     }
+
+    if (status) {
+        fprintf(
+            stderr,
+            "[dispatch] ERROR: during execution of open interface "
+            "an error occurred\n"
+        );
+    }
     return status;
 }
 
