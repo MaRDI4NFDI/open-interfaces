@@ -84,9 +84,9 @@ int run_interface_method_python(const char *method, OIFArgs *in_args, OIFArgs *o
             if (out_args->arg_types[i] == OIF_FLOAT64) {
                 pValue = PyFloat_FromDouble(*(double *)out_args->arg_values[i]);
             } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
-                OIFArray *arr = (OIFArray *) out_args->arg_values[i];
+                OIFArray *arr = *(OIFArray **) out_args->arg_values[i];
                 pValue = PyArray_SimpleNewFromData(
-                    arr->nd, arr->dimensions, NPY_FLOAT64, *(double **) arr->data
+                    arr->nd, arr->dimensions, NPY_FLOAT64, (double *) arr->data
                 );
             }
             if (!pValue) {

@@ -87,13 +87,13 @@ class OIFBackend:
             elif isinstance(arg, np.ndarray):
                 print("Warning: we assume that dtype is np.float64")
                 nd = arg.ndim
-                shape = (ctypes.c_int * len(arg.shape))(*arg.shape)
-                arg_p = ctypes.pointer(arg.ctypes.data_as(ctypes.c_void_p))
-                data = ctypes.cast(arg_p, ctypes.POINTER(ctypes.c_char))
+                dimensions = (ctypes.c_int * len(arg.shape))(*arg.shape)
+                data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_char))
 
-                oif_array = OIFArray(nd, shape, data)
+                oif_array = OIFArray(nd, dimensions, data)
                 oif_array_p = ctypes.cast(ctypes.byref(oif_array), ctypes.c_void_p)
-                out_arg_values.append(oif_array_p)
+                oif_array_p_p = ctypes.cast(ctypes.byref(oif_array_p), ctypes.c_void_p)
+                out_arg_values.append(oif_array_p_p)
                 out_arg_types.append(OIF_FLOAT64_P)
             else:
                 raise ValueError("Cannot handle argument type")
