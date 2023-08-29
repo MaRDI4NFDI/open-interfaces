@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 void *__oif_lib_handle;
 char *__oif_current_lang;
@@ -61,7 +62,10 @@ int oif_connector_init(const char *lang) {
     return OIF_LOAD_ERROR;
   }
 
-  *(int **)(&init_lang) = dlsym(__oif_lib_handle, "oif_lang_init");
+  typedef int (*funcptr_t)(void);
+  //*(void **)(&init_lang) = dlsym(__oif_lib_handle, "oif_lang_init");
+  init_lang = (funcptr_t)(intptr_t)dlsym(__oif_lib_handle, "oif_lang_init");
+
   if (!init_lang) {
     fprintf(stderr, "Error: %s\n", dlerror());
     dlclose(__oif_lib_handle);
@@ -86,7 +90,9 @@ int oif_connector_eval_expression(const char *str) {
 int oif_connector_deinit(void) {
   int ret = OIF_LOAD_ERROR;
   int (*lang_deinit)(void);
-  *(int **)(&lang_deinit) = dlsym(__oif_lib_handle, "oif_lang_deinit");
+  typedef int (*funcptr_t)(void);
+  // *(int **)(&lang_deinit) = dlsym(__oif_lib_handle, "oif_lang_deinit");
+  lang_deinit = (funcptr_t)(intptr_t)dlsym(__oif_lib_handle, "oif_lang_deinit");
   if (!lang_deinit) {
     fprintf(stderr, "Error: %s\n", dlerror());
   } else {
