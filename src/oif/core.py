@@ -141,7 +141,7 @@ class OIFBackend:
 def init_backend(backend: str, interface: str, major: UInt, minor: UInt):
     load_backend = wrap_c_function(
         _lib_dispatch,
-        "load_backend",
+        "load_backend_by_name",
         ctypes.c_uint,
         [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint, ctypes.c_uint],
     )

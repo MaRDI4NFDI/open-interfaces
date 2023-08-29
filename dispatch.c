@@ -5,22 +5,32 @@
 #include <dlfcn.h>
 #include <ffi.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-BackendHandle load_backend(
+
+char OIF_BACKEND_C_SO[] = "./liboif_backend_c.so";
+char OIF_BACKEND_PYTHON_SO[] = "./liboif_backend_python.so";
+
+
+BackendHandle load_backend_by_name(
     const char *backend_name,
     const char *operation,
     size_t version_major,
     size_t version_minor)
 {
     BackendHandle bh;
+    const char *backend_so;
+
     if (strcmp(backend_name, "c") == 0)
     {
-        bh = load_backend_c(operation, version_major, version_minor);
+        bh = BACKEND_C;
+        backend_so = OIF_BACKEND_C_SO;
     }
     else if (strcmp(backend_name, "python") == 0)
     {
-        bh = load_backend_python(operation, version_major, version_minor);
+        bh = BACKEND_PYTHON;
+        backend_so = OIF_BACKEND_PYTHON_SO;
     }
     else
     {
@@ -28,15 +38,30 @@ BackendHandle load_backend(
         exit(EXIT_FAILURE);
     }
 
-    return bh;
-}
+    void *lib_handle = dlopen(backend_so, RTLD_LOCAL | RTLD_LAZY);
+    if (lib_handle == NULL)
+    {
+        fprintf(stderr, "[dispatch] Cannot load shared library %s\n", backend_so);
+        exit(EXIT_FAILURE);
+    }
 
-BackendHandle load_backend_c(
-    const char *operation,
-    size_t version_major,
-    size_t version_minor)
-{
-    return BACKEND_C;
+    if (OIF_BACKEND_HANDLES[bh] != NULL) {
+        fprintf(stderr, "[dispatch] Backend handle was already set\n");
+        exit(EXIT_FAILURE);
+    }
+
+    OIF_BACKEND_HANDLES[bh] = lib_handle;
+
+    BackendHandle (*load_backend_fn)(const char *, size_t, size_t);
+    load_backend_fn = dlsym(lib_handle, "load_backend");
+
+    if (load_backend_fn == NULL) {
+        fprintf(stderr, "[dispatch] Could not load function %s: %s\n",
+            "load_backend", dlerror());
+    }
+
+    bh = load_backend_fn(operation, version_major, version_minor);
+    return bh;
 }
 
 int call_interface_method(
@@ -46,18 +71,17 @@ int call_interface_method(
     OIFArgs *retvals)
 {
     int status;
-    switch (bh)
-    {
-    case BACKEND_C:
-        status = run_interface_method_c(method, args, retvals);
-        break;
-    case BACKEND_PYTHON:
-        status = run_interface_method_python(method, args, retvals);
-        break;
-    default:
+    
+    if (OIF_BACKEND_HANDLES[bh] == NULL) {
         fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%zu'", bh);
         exit(EXIT_FAILURE);
     }
+
+    void *lib_handle = OIF_BACKEND_HANDLES[bh];
+
+    int (*run_interface_method_fn)(const char *, OIFArgs *, OIFArgs *);
+    run_interface_method_fn = dlsym(lib_handle, "run_interface_method");
+    status = run_interface_method_fn(method, args, retvals);
 
     if (status) {
         fprintf(
@@ -67,95 +91,4 @@ int call_interface_method(
         );
     }
     return status;
-}
-
-int run_interface_method_c(const char *method, OIFArgs *in_args, OIFArgs *out_args)
-{
-    void *lib_handle = dlopen(OIF_BACKEND_C_SO, RTLD_LOCAL | RTLD_LAZY);
-    if (lib_handle == NULL)
-    {
-        fprintf(stderr, "[dispatch] Cannot load shared library %s\n", OIF_BACKEND_C_SO);
-        exit(EXIT_FAILURE);
-    }
-    void *func = dlsym(lib_handle, method);
-    if (func == NULL)
-    {
-        fprintf(stderr, "[dispatch] Cannot load interface '%s'\n", method);
-        exit(EXIT_FAILURE);
-    }
-
-    int num_in_args = in_args->num_args;
-    int num_out_args = out_args->num_args;
-    int num_total_args = num_in_args + num_out_args;
-
-    ffi_cif cif;
-    ffi_type **arg_types = malloc(num_total_args * sizeof(ffi_type));
-    void **arg_values = malloc(num_total_args * sizeof(void *));
-
-    // Merge input and output argument types together in `arg_types` array.
-    for (size_t i = 0; i < num_in_args; ++i)
-    {
-        if (in_args->arg_types[i] == OIF_FLOAT64)
-        {
-            arg_types[i] = &ffi_type_double;
-        }
-        else if (in_args->arg_types[i] == OIF_FLOAT64_P)
-        {
-            arg_types[i] = &ffi_type_pointer;
-        }
-        else
-        {
-            fflush(stdout);
-            fprintf(stderr, "[dispatch] Unknown input arg type: %d\n", in_args->arg_types[i]);
-            exit(EXIT_FAILURE);
-        }
-    }
-    for (size_t i = num_in_args; i < num_total_args; ++i)
-    {
-        printf("Processing out_args[%zu] = %u\n", i - num_in_args, out_args->arg_types[i - num_in_args]);
-        if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64)
-        {
-            arg_types[i] = &ffi_type_double;
-        }
-        else if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64_P)
-        {
-            arg_types[i] = &ffi_type_pointer;
-        }
-        else
-        {
-            fflush(stdout);
-            fprintf(stderr, "[dispatch] Unknown output arg type: %d\n", out_args->arg_types[i - num_in_args]);
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    ffi_status status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_uint, arg_types);
-    if (status == FFI_OK)
-    {
-        printf("[backend_c] ffi_prep_cif returned FFI_OK\n");
-    }
-    else
-    {
-        fflush(stdout);
-        fprintf(stderr, "[dispatch] ffi_prep_cif was not OK");
-        exit(EXIT_FAILURE);
-    }
-
-    // Merge input and output argument values together in `arg_values` array.
-    for (size_t i = 0; i < num_in_args; ++i)
-    {
-        arg_values[i] = in_args->arg_values[i];
-    }
-    for (size_t i = num_in_args; i < num_total_args; ++i)
-    {
-        arg_values[i] = out_args->arg_values[i - num_in_args];
-    }
-
-    unsigned result;
-    ffi_call(&cif, FFI_FN(func), &result, arg_values);
-
-    printf("Result is %u\n", result);
-    fflush(stdout);
-
-    return 0;
 }
