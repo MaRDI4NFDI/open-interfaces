@@ -15,9 +15,9 @@ function init(lang)
     check_call(ret, "cannot load connector for $lang")
 end
 
-function eval(expression)
+function evaluate(expression)
     ret = @ccall "liboif_connector".oif_connector_eval_expression(expression::Cstring)::Cint
-    check_call(ret, "cannot eval $expression")
+    check_call(ret, "cannot evaluate '$expression'")
 end
 
 function solve(N, A, b, x)
