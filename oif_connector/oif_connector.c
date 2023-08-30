@@ -4,10 +4,10 @@
 
 #include <assert.h>
 #include <dlfcn.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 
 void *__oif_lib_handle;
 char *__oif_current_lang;
