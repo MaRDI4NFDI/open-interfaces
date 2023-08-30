@@ -6,7 +6,7 @@ using OpenInterfaces
 for lang in ["c", "cpp"]
     OpenInterfaces.init(lang)
     try
-        OpenInterfaces.eval("expression")
+        OpenInterfaces.evaluate("expression")
     catch e
         if lang in ["c", "cpp"]
             continue
