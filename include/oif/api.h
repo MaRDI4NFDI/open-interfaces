@@ -33,3 +33,8 @@ typedef struct {
 
 OIFArray *create_array_f64(int nd, intptr_t *dimensions);
 void free_array(OIFArray *x);
+
+BackendHandle
+oif_init_backend(
+    const char *backend, const char *interface, int major, int minor
+);

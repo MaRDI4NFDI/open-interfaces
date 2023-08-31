@@ -3,7 +3,7 @@
 
 
 BackendHandle
-init_backend(
+oif_init_backend(
     const char *backend, const char *interface, int major, int minor) {
     return load_backend_by_name(backend, interface, major, minor);
 }
