@@ -2,10 +2,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-
-// Identifier of the used backend.
-typedef size_t BackendHandle;
-
 #include <oif/api.h>
 
 enum

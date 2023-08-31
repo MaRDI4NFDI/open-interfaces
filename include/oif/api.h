@@ -2,6 +2,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// Identifier of the used backend.
+typedef size_t BackendHandle;
+
 typedef enum {
     OIF_INT = 1,
     OIF_FLOAT32 = 2,
@@ -28,3 +31,5 @@ typedef struct {
     char *data;
 } OIFArray;
 
+OIFArray *create_array_f64(int nd, intptr_t *dimensions);
+void free_array(OIFArray *x);
