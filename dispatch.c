@@ -9,7 +9,7 @@
 #include <string.h>
 
 
-char OIF_BACKEND_C_SO[] = "./liboif_backend_c.so";
+char OIF_BACKEND_C_SO[] =      "./liboif_backend_c.so";
 char OIF_BACKEND_PYTHON_SO[] = "./liboif_backend_python.so";
 
 
@@ -41,7 +41,8 @@ BackendHandle load_backend_by_name(
     void *lib_handle = dlopen(backend_so, RTLD_LOCAL | RTLD_LAZY);
     if (lib_handle == NULL)
     {
-        fprintf(stderr, "[dispatch] Cannot load shared library %s\n", backend_so);
+        fprintf(stderr, "[dispatch] Cannot load shared library '%s'\n", backend_so);
+        fprintf(stderr, "Error message: %s\n", dlerror());
         exit(EXIT_FAILURE);
     }
 

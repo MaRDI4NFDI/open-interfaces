@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
     if (status) {
         fprintf(stderr, "Error occurred\n");
     }
-    printf("x1 = %g", ((double *) roots->data)[0]);
-    printf("x2 = %g", ((double *) roots->data)[1]);
+    printf("x1 = %g\n", ((double *) roots->data)[0]);
+    printf("x2 = %g\n", ((double *) roots->data)[1]);
 
     free_array(roots);
 

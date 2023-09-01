@@ -17,7 +17,7 @@ int oif_solve_qeq(
     OIFArgType out_arg_types[] = {OIF_FLOAT64_P};
     void *out_arg_values[] = {&roots};
     OIFArgs out_args = {
-        .num_args = 3,
+        .num_args = 1,
         .arg_types = out_arg_types,
         .arg_values = out_arg_values,
     };

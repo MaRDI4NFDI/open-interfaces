@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "qeq.h"
+#include <qeq.h>
 
 
 /**

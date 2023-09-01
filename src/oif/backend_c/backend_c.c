@@ -1,6 +1,7 @@
 #include <dlfcn.h>
 #include <ffi.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "dispatch.h"
@@ -12,17 +13,47 @@ BackendHandle load_backend(
     size_t version_major,
     size_t version_minor)
 {
-
     return BACKEND_C;
+}
+
+const char *
+resolve_service_name(const char method[static 1]) {
+    if (strcmp(method, "solve_qeq") == 0) {
+        return "./liboif_backend_c_qeq.so";
+    }
+
+    return NULL;
 }
 
 
 int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
-    void *func = dlsym(OIF_BACKEND_HANDLES[BACKEND_C], method);
+    const char *service_name = resolve_service_name(method);
+    if (service_name == NULL) {
+        fprintf(
+            stderr,
+            "[backend_c] Could not resolve the name of the library implementing method\n"
+        );
+        fprintf(stderr, "[backend_c] dlerror() = %s\n", dlerror());
+        exit(EXIT_FAILURE);
+    }
+
+    void *service_lib = dlopen(service_name, RTLD_LOCAL | RTLD_LAZY);
+    if (service_lib == NULL) {
+        fprintf(
+            stderr,
+            "[backend_c] Could not load service library '%s'\n",
+            service_name
+        );
+        fprintf(stderr, "[backend_c] dlerror() = %s\n", dlerror());
+        exit(EXIT_FAILURE);
+    }
+
+    void *func = dlsym(service_lib, method);
     if (func == NULL)
     {
         fprintf(stderr, "[dispatch] Cannot load interface '%s'\n", method);
+        fprintf(stderr, "[backend_c] dlerror() = %s\n", dlerror());
         exit(EXIT_FAILURE);
     }
 
