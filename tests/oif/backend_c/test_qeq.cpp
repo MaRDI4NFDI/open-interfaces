@@ -19,3 +19,11 @@ TEST(QeqTestSuite, TwoRoots) {
     EXPECT_EQ(roots[0], -1.0);
     EXPECT_EQ(roots[1], -1.0);
 }
+
+
+TEST(QeqTestSuite, TwoDistinctRoots) {
+    double roots[2];
+    solve_qeq_v1(1, 5, -14, roots);
+    EXPECT_EQ(roots[0], -7);
+    EXPECT_EQ(roots[1], +2);
+}
