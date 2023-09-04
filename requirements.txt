@@ -17,6 +17,7 @@ attrs==23.1.0
     #   -r requirements.in
     #   jsonschema
     #   jupyter-cache
+    #   referencing
 babel==2.12.1
     # via sphinx
 backcall==0.2.0
@@ -96,8 +97,10 @@ jinja2==3.1.2
     #   myst-parser
     #   sphinx
     #   sphinx-autoapi
-jsonschema==4.17.3
+jsonschema==4.19.0
     # via nbformat
+jsonschema-specifications==2023.7.1
+    # via jsonschema
 jupyter-cache==0.5.0
     # via myst-nb
 jupyter-client==8.3.0
@@ -187,8 +190,6 @@ pygments==2.15.1
     #   sphinx
 pyproject-hooks==1.0.0
     # via build
-pyrsistent==0.19.3
-    # via jsonschema
 pytest==7.4.0
     # via
     #   -r requirements.in
@@ -219,12 +220,20 @@ pyzmq==25.1.0
     # via
     #   ipykernel
     #   jupyter-client
+referencing==0.30.2
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
 requests==2.31.0
     # via sphinx
 rich==12.6.0
     # via
     #   check-reqs
     #   typer
+rpds-py==0.10.0
+    # via
+    #   jsonschema
+    #   referencing
 shellingham==1.5.1
     # via typer
 six==1.16.0
