@@ -12,7 +12,7 @@ typedef enum {
     OIF_FLOAT32 = 2,
     OIF_FLOAT64 = 3,
     OIF_FLOAT32_P = 4,
-    OIF_FLOAT64_P = 5,
+    OIF_ARRAY_F64 = 5,
     OIF_STR = 6,
 } OIFArgType;
 
@@ -30,11 +30,11 @@ typedef struct {
     // Size of each axis, i = 0, .., nd-1.
     intptr_t *dimensions;
     // Pointer to actual data.
-    char *data;
-} OIFArray;
+    double *data;
+} OIFArrayF64;
 
-OIFArray *create_array_f64(int nd, intptr_t *dimensions);
-void free_array(OIFArray *x);
+OIFArrayF64 *create_array_f64(int nd, intptr_t *dimensions);
+void free_array_f64(OIFArrayF64 *x);
 
 BackendHandle
 oif_init_backend(

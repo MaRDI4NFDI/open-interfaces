@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 int oif_solve_qeq(
-    BackendHandle bh, double a, double b, double c, OIFArray *roots
+    BackendHandle bh, double a, double b, double c, OIFArrayF64 *roots
 ) {
     OIFArgType in_arg_types[3] = {OIF_FLOAT64, OIF_FLOAT64, OIF_FLOAT64};
     void *in_arg_values[3] = {(void *)&a, (void *)&b, (void *)&c};
@@ -14,7 +14,7 @@ int oif_solve_qeq(
         .arg_values = in_arg_values,
     };
 
-    OIFArgType out_arg_types[] = {OIF_FLOAT64_P};
+    OIFArgType out_arg_types[] = {OIF_ARRAY_F64};
     void *out_arg_values[] = {&roots};
     OIFArgs out_args = {
         .num_args = 1,

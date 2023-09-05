@@ -15,6 +15,7 @@
  * @param roots Array with two elements to which the found roots are written.
  * @return int
  */
-int solve_qeq(double a, double b, double c, OIFArray *roots) {
-    solve_qeq_v1(a, b, c, (double *) roots->data);
+int solve_qeq(double a, double b, double c, OIFArrayF64 *roots) {
+    int status = solve_qeq_v1(a, b, c, roots->data);
+    return status;
 }

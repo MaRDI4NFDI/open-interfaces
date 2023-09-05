@@ -3,7 +3,7 @@
 
 #include "dispatch.h"
 
-int solve_qeq(double a, double b, double c, OIFArray *roots);
+int solve_qeq(double a, double b, double c, OIFArrayF64 *roots);
 
 int solve_qeq_v1(double a, double b, double c, double *roots);
 

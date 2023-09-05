@@ -41,17 +41,17 @@ int main(int argc, char *argv[])
     printf("for a = %g, b = %g, c = %g\n", a, b, c);
 
     intptr_t dimensions[] = {2,};
-    OIFArray *roots = create_array_f64(1, dimensions);
+    OIFArrayF64 *roots = create_array_f64(1, dimensions);
     int status = oif_solve_qeq(bh, a, b, c, roots);
     if (status) {
-        free_array(roots);
+        free_array_f64(roots);
         return EXIT_FAILURE;
     }
 
     printf("x1 = %g\n", ((double *) roots->data)[0]);
     printf("x2 = %g\n", ((double *) roots->data)[1]);
 
-    free_array(roots);
+    free_array_f64(roots);
 
     return 0;
 }

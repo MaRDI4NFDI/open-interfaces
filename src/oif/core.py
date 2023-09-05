@@ -10,7 +10,7 @@ OIF_INT = 1
 OIF_FLOAT32 = 2
 OIF_FLOAT64 = 3
 OIF_FLOAT32_P = 4
-OIF_FLOAT64_P = 5
+OIF_ARRAY_F64 = 5
 OIF_STR = 6
 
 
@@ -59,7 +59,7 @@ class OIFBackend:
                 arg_p = ctypes.pointer(arg.data.as_type(ctypes.c_void_p))
                 arg_p_void = ctypes.cast(arg_p, ctypes.c_void_p)
                 arg_values.append(arg_p_void)
-                arg_types.append(OIF_FLOAT64_P)
+                arg_types.append(OIF_ARRAY_F64)
             else:
                 raise ValueError("Cannot handle argument type")
 
@@ -94,7 +94,7 @@ class OIFBackend:
                 oif_array_p = ctypes.cast(ctypes.byref(oif_array), ctypes.c_void_p)
                 oif_array_p_p = ctypes.cast(ctypes.byref(oif_array_p), ctypes.c_void_p)
                 out_arg_values.append(oif_array_p_p)
-                out_arg_types.append(OIF_FLOAT64_P)
+                out_arg_types.append(OIF_ARRAY_F64)
             else:
                 raise ValueError("Cannot handle argument type")
 
@@ -128,12 +128,6 @@ class OIFBackend:
 
         if status != 0:
             raise RuntimeError("Could not execute interface method")
-
-        # result = []
-        # print("Output arguments after call_interface_method")
-        # for typ, val in zip(out_arg_types, out_arg_values):
-        #     if typ == OIF_FLOAT64_P:
-        #         result.append(out_arg_values)
 
         return 0
 

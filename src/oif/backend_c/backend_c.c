@@ -6,6 +6,7 @@
 
 #include "dispatch.h"
 #include "globals.h"
+#include "oif/api.h"
 
 
 BackendHandle load_backend(
@@ -72,7 +73,7 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         {
             arg_types[i] = &ffi_type_double;
         }
-        else if (in_args->arg_types[i] == OIF_FLOAT64_P)
+        else if (in_args->arg_types[i] == OIF_ARRAY_F64)
         {
             arg_types[i] = &ffi_type_pointer;
         }
@@ -90,7 +91,7 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         {
             arg_types[i] = &ffi_type_double;
         }
-        else if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64_P)
+        else if (out_args->arg_types[i - num_in_args] == OIF_ARRAY_F64)
         {
             arg_types[i] = &ffi_type_pointer;
         }

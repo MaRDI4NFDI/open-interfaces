@@ -9,8 +9,8 @@ oif_init_backend(
 }
 
 
-OIFArray *create_array_f64(int nd, intptr_t *dimensions) {
-    OIFArray *x = malloc(sizeof(OIFArray));
+OIFArrayF64 *create_array_f64(int nd, intptr_t *dimensions) {
+    OIFArrayF64 *x = malloc(sizeof(OIFArrayF64));
     x->nd = nd;
     x->dimensions = dimensions;
 
@@ -18,13 +18,13 @@ OIFArray *create_array_f64(int nd, intptr_t *dimensions) {
     for (size_t i = 0; i < nd; ++i) {
         size *= dimensions[i];
     }
-    x->data = (char *) malloc(size * sizeof(double));
+    x->data = (double *) malloc(size * sizeof(double));
 
     return x;
 }
 
 
-void free_array(OIFArray *x) {
+void free_array_f64(OIFArrayF64 *x) {
     if (x == NULL) {
         return;
     }

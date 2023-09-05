@@ -1,3 +1,4 @@
+#include "oif/api.h"
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <numpy/arrayobject.h>
@@ -84,10 +85,10 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         for (int i = 0; i < in_args->num_args; ++i) {
             if (in_args->arg_types[i] == OIF_FLOAT64) {
                 pValue = PyFloat_FromDouble(*(double *)in_args->arg_values[i]);
-            } else if (in_args->arg_types[i] == OIF_FLOAT64_P) {
-                OIFArray *arr = (OIFArray *) in_args->arg_values[i];
+            } else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
+                OIFArrayF64 *arr = *(OIFArrayF64 **) in_args->arg_values[i];
                 pValue = PyArray_SimpleNewFromData(
-                    arr->nd, arr->dimensions, NPY_FLOAT64, *(double **) arr->data
+                    arr->nd, arr->dimensions, NPY_FLOAT64, arr->data
                 );
             }
             if (!pValue) {
@@ -102,10 +103,10 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         for (int i = 0; i < out_args->num_args; ++i) {
             if (out_args->arg_types[i] == OIF_FLOAT64) {
                 pValue = PyFloat_FromDouble(*(double *)out_args->arg_values[i]);
-            } else if (out_args->arg_types[i] == OIF_FLOAT64_P) {
-                OIFArray *arr = *(OIFArray **) out_args->arg_values[i];
+            } else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
+                OIFArrayF64 *arr = *(OIFArrayF64 **) out_args->arg_values[i];
                 pValue = PyArray_SimpleNewFromData(
-                    arr->nd, arr->dimensions, NPY_FLOAT64, (double *) arr->data
+                    arr->nd, arr->dimensions, NPY_FLOAT64, arr->data
                 );
             }
             if (!pValue) {
