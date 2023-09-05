@@ -18,8 +18,18 @@ BackendHandle load_backend(
     if (Py_IsInitialized()) {
         fprintf(stderr, "[backend_python] Backend is already initialized\n");
     } else {
-        PyConfig py_config;
-        PyConfig_InitPythonConfig(&py_config);
+        Py_Initialize();
+    }
+
+    // We need to `dlopen` the Python library, otherwise,
+    // NumPy initialization fails.
+    // Details: https://stackoverflow.com/questions/49784583/numpy-import-fails-on-multiarray-extension-library-when-called-from-embedded-pyt
+    char libpython_name[32];
+    sprintf(libpython_name, "libpython%d.%d.so", PY_MAJOR_VERSION, PY_MINOR_VERSION);
+    void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
+    if (libpython == NULL) {
+        fprintf(stderr, "[backend_python] Cannot open python library\n");
+        exit(EXIT_FAILURE);
     }
 
     PyRun_SimpleString(
@@ -30,7 +40,12 @@ BackendHandle load_backend(
 
     import_array2(
         "Failed to initialize NumPy C API",
-        OIF_ERROR
+        OIF_BACKEND_INIT_ERROR
+    );
+
+    PyRun_SimpleString(
+        "import numpy; "
+        "print('[backend_python] NumPy version: ', numpy.__version__)"
     );
 
     return BACKEND_PYTHON;
@@ -51,7 +66,11 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
     if (pModule == NULL)
     {
         PyErr_Print();
-        fprintf(stderr, "[backend_python] Failed to load \"%s\"\n", method);
+        fprintf(
+            stderr,
+            "[backend_python] Failed to load \"%s\". "
+            "To solve the problem, set PYTHONPATH\n",
+            method);
         return EXIT_FAILURE;
     }
 
@@ -104,7 +123,6 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         pValue = PyObject_CallObject(pFunc, pArgs);
         Py_DECREF(pArgs);
         if (pValue != NULL) {
-            printf("Status of call from C to Python: %ld\n", PyLong_AsLong(pValue));
             Py_DECREF(pValue);
         } else {
             Py_DECREF(pFunc);

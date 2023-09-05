@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "globals.h"
+
 // Identifier of the used backend.
 typedef size_t BackendHandle;
 
