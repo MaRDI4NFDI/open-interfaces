@@ -28,7 +28,7 @@ breathe==4.35.0
     # via
     #   -r requirements.in
     #   exhale
-build==0.10.0
+build==1.0.0
     # via pip-tools
 certifi==2023.7.22
     # via requests
