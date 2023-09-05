@@ -234,7 +234,7 @@ rpds-py==0.10.0
     # via
     #   jsonschema
     #   referencing
-shellingham==1.5.1
+shellingham==1.5.3
     # via typer
 six==1.16.0
     # via
