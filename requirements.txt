@@ -103,7 +103,7 @@ jsonschema-specifications==2023.7.1
     # via jsonschema
 jupyter-cache==0.6.1
     # via myst-nb
-jupyter-client==8.3.0
+jupyter-client==8.3.1
     # via
     #   ipykernel
     #   nbclient
