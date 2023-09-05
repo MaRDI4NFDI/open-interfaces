@@ -101,7 +101,7 @@ jsonschema==4.19.0
     # via nbformat
 jsonschema-specifications==2023.7.1
     # via jsonschema
-jupyter-cache==0.5.0
+jupyter-cache==0.6.1
     # via myst-nb
 jupyter-client==8.3.0
     # via
