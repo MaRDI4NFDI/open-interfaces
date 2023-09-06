@@ -7,6 +7,16 @@
 // Identifier of the used backend.
 typedef size_t BackendHandle;
 
+enum
+{
+    BACKEND_C = 0,
+    BACKEND_CXX = 1,
+    BACKEND_PYTHON = 2,
+    BACKEND_JULIA = 3,
+    BACKEND_R = 4,
+};
+#define OIF_BACKEND_COUNT 5
+
 typedef enum {
     OIF_INT = 1,
     OIF_FLOAT32 = 2,
@@ -15,7 +25,6 @@ typedef enum {
     OIF_ARRAY_F64 = 5,
     OIF_STR = 6,
 } OIFArgType;
-
 
 typedef struct {
     size_t num_args;
@@ -35,8 +44,3 @@ typedef struct {
 
 OIFArrayF64 *create_array_f64(int nd, intptr_t *dimensions);
 void free_array_f64(OIFArrayF64 *x);
-
-BackendHandle
-oif_init_backend(
-    const char *backend, const char *interface, int major, int minor
-);

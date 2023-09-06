@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <oif/api.h>
+#include <oif/frontend_c/frontend_c.h>
 #include <oif/frontend_c/qeq.h>
 
 

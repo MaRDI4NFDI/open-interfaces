@@ -7,7 +7,7 @@
 #include <ffi.h>
 
 #include <oif/api.h>
-#include <oif/dispatch.h>
+#include <oif/backend_api.h>
 
 
 BackendHandle load_backend(

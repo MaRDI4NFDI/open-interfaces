@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include <oif/dispatch.h>
+#include <oif/backend_api.h>
 
 
 char OIF_BACKEND_C_SO[] =      "./liboif_backend_c.so";
