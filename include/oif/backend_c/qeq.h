@@ -1,7 +1,7 @@
 #ifndef _QEQ_H_
 #define _QEQ_H_
 
-#include "dispatch.h"
+#include <oif/api.h>
 
 int solve_qeq(double a, double b, double c, OIFArrayF64 *roots);
 

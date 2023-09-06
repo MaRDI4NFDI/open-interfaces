@@ -107,3 +107,6 @@ compile_commands.json
 # gdb
 .gdbinit
 .gdb_history
+
+# CTest temporary directory
+Testing/

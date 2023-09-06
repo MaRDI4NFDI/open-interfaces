@@ -4,9 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dispatch.h"
-#include "globals.h"
-#include "oif/api.h"
+#include <oif/dispatch.h>
+#include <oif/api.h>
 
 
 BackendHandle load_backend(

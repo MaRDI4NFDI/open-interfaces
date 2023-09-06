@@ -1,4 +1,3 @@
-#include "oif/api.h"
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <numpy/arrayobject.h>
@@ -7,8 +6,8 @@
 #include <dlfcn.h>
 #include <ffi.h>
 
-#include "dispatch.h"
-#include "globals.h"
+#include <oif/api.h>
+#include <oif/dispatch.h>
 
 
 BackendHandle load_backend(

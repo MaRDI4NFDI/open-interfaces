@@ -1,12 +1,12 @@
 // Dispatch library that is called from other languages, and dispatches it
 // to the appropriate backend.
-#include "dispatch.h"
-
 #include <dlfcn.h>
 #include <ffi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <oif/dispatch.h>
 
 
 char OIF_BACKEND_C_SO[] =      "./liboif_backend_c.so";
