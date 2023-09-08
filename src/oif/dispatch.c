@@ -13,6 +13,16 @@
 char OIF_BACKEND_C_SO[] =      "./liboif_backend_c.so";
 char OIF_BACKEND_PYTHON_SO[] = "./liboif_backend_python.so";
 
+/// Array containing handles to the opened dynamic libraries for the backends.
+/**
+ * Array containing handles  to the backend dynamic libraries.
+ * If some backend is not open, corresponding element is NULL.
+ *
+ * Each backend is responsible for populating this array with the library
+ * handle.
+ */
+void *OIF_BACKEND_HANDLES[OIF_BACKEND_COUNT];
+
 
 BackendHandle load_backend_by_name(
     const char *backend_name,

@@ -1,18 +1,10 @@
 #pragma once
+#ifndef OIF_DISPATCH_H
+#define OIF_DISPATCH_H
 #include <stdint.h>
 #include <stdlib.h>
 
 #include <oif/api.h>
-
-/// Array containing handles to the opened dynamic libraries for the backends.
-/**
- * Array containing handles  to the backend dynamic libraries.
- * If some backend is not open, corresponding element is NULL.
- *
- * Each backend is responsible for populating this array with the library
- * handle.
- */
-void *OIF_BACKEND_HANDLES[OIF_BACKEND_COUNT];
 
 
 /**
@@ -32,3 +24,4 @@ int call_interface_method(
     OIFArgs *args,
     OIFArgs *retvals
 );
+#endif
