@@ -11,6 +11,7 @@ Welcome to oif-toy-example's documentation!
    :caption: Contents:
 
    notes-on-dbus.md
+   python-buffer-protocol.md
 
 
 
