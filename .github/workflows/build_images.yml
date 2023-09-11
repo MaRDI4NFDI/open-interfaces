@@ -34,7 +34,7 @@ jobs:
         runs-on: ubuntu-22.04
         needs: matrix-setup
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Docker meta
               id: meta
               uses: docker/metadata-action@v4
@@ -54,7 +54,7 @@ jobs:
         permissions:
             packages: write
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Set up Docker Buildx
               id: buildx
               uses: docker/setup-buildx-action@v2
