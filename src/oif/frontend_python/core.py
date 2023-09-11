@@ -26,11 +26,11 @@ class OIFArgs(ctypes.Structure):
     ]
 
 
-class OIFArray(ctypes.Structure):
+class OIFArrayF64(ctypes.Structure):
     _fields_ = [
         ("nd", ctypes.c_int),
         ("dimensions", ctypes.POINTER(ctypes.c_int)),
-        ("data", ctypes.POINTER(ctypes.c_char)),
+        ("data", ctypes.POINTER(ctypes.c_double)),
     ]
 
 
@@ -56,26 +56,35 @@ class OIFBackend:
                 arg_types.append(OIF_FLOAT64)
             elif isinstance(arg, np.ndarray):
                 print("[frontend_python] Warning: we assume that dtype is np.float64")
+                assert arg.dtype == np.float64
                 nd = arg.ndim
-                dimensions = (ctypes.c_int * len(arg.shape))(*arg.shape)
+                dimensions = ctypes.cast(
+                    (ctypes.c_int * len(arg.shape))(*arg.shape),
+                    ctypes.POINTER(ctypes.c_int),
+                )
                 data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-                oif_array = OIFArray(nd, dimensions, data)
+                __import__("ipdb").set_trace()
+                oif_array = OIFArrayF64(nd, dimensions, data)
                 oif_array_p = ctypes.cast(ctypes.byref(oif_array), ctypes.c_void_p)
-                oif_array_p_p = ctypes.cast(ctypes.byref(oif_array_p, ctypes.c_void_p))
+                oif_array_p_p = ctypes.cast(ctypes.byref(oif_array_p), ctypes.c_void_p)
                 arg_values.append(oif_array_p_p)
+                print(
+                    "[frontend_python] Input arg array, "
+                    f"p_p = {hex(oif_array_p_p.value)}"
+                )
                 arg_types.append(OIF_ARRAY_F64)
             else:
                 raise ValueError("Cannot handle argument type")
 
-        arg_types_ctypes = ctypes.cast(
+        in_arg_types_ctypes = ctypes.cast(
             (ctypes.c_int * len(arg_types))(*arg_types), ctypes.POINTER(OIFArgType)
         )
-        arg_values_ctypes = ctypes.cast(
+        in_arg_values_ctypes = ctypes.cast(
             (ctypes.c_void_p * len(arg_values))(*arg_values),
             ctypes.POINTER(ctypes.c_void_p),
         )
-        args_packed = OIFArgs(num_args, arg_types_ctypes, arg_values_ctypes)
+        in_args_packed = OIFArgs(num_args, in_arg_types_ctypes, in_arg_values_ctypes)
 
         num_out_args = len(out_user_args)
         out_arg_types = []
@@ -93,9 +102,9 @@ class OIFBackend:
                 print("[frontend_python] Warning: we assume that dtype is np.float64")
                 nd = arg.ndim
                 dimensions = (ctypes.c_int * len(arg.shape))(*arg.shape)
-                data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_char))
+                data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-                oif_array = OIFArray(nd, dimensions, data)
+                oif_array = OIFArrayF64(nd, dimensions, data)
                 oif_array_p = ctypes.cast(ctypes.byref(oif_array), ctypes.c_void_p)
                 oif_array_p_p = ctypes.cast(ctypes.byref(oif_array_p), ctypes.c_void_p)
                 out_arg_values.append(oif_array_p_p)
@@ -127,7 +136,7 @@ class OIFBackend:
         status = call_interface_method(
             self.handle,
             method.encode(),
-            ctypes.byref(args_packed),
+            ctypes.byref(in_args_packed),
             ctypes.byref(out_packed),
         )
 
