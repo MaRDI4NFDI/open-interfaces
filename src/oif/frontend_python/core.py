@@ -55,10 +55,15 @@ class OIFBackend:
                 arg_values.append(arg_void_p)
                 arg_types.append(OIF_FLOAT64)
             elif isinstance(arg, np.ndarray):
-                print("Warning: we assume that dtype is np.float64")
-                arg_p = ctypes.pointer(arg.data.as_type(ctypes.c_void_p))
-                arg_p_void = ctypes.cast(arg_p, ctypes.c_void_p)
-                arg_values.append(arg_p_void)
+                print("[frontend_python] Warning: we assume that dtype is np.float64")
+                nd = arg.ndim
+                dimensions = (ctypes.c_int * len(arg.shape))(*arg.shape)
+                data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+
+                oif_array = OIFArray(nd, dimensions, data)
+                oif_array_p = ctypes.cast(ctypes.byref(oif_array), ctypes.c_void_p)
+                oif_array_p_p = ctypes.cast(ctypes.byref(oif_array_p, ctypes.c_void_p))
+                arg_values.append(oif_array_p_p)
                 arg_types.append(OIF_ARRAY_F64)
             else:
                 raise ValueError("Cannot handle argument type")
@@ -85,7 +90,7 @@ class OIFBackend:
                 out_arg_values.append(arg_void_p)
                 out_arg_types.append(OIF_FLOAT64)
             elif isinstance(arg, np.ndarray):
-                print("Warning: we assume that dtype is np.float64")
+                print("[frontend_python] Warning: we assume that dtype is np.float64")
                 nd = arg.ndim
                 dimensions = (ctypes.c_int * len(arg.shape))(*arg.shape)
                 data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_char))
