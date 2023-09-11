@@ -111,6 +111,7 @@ jupyter-core==5.3.1
     # via
     #   ipykernel
     #   jupyter-client
+    #   nbclient
     #   nbformat
 lazy-object-proxy==1.9.0
     # via astroid
@@ -136,7 +137,7 @@ myst-parser==0.18.1
     # via
     #   -r requirements.in
     #   myst-nb
-nbclient==0.5.13
+nbclient==0.7.4
     # via
     #   jupyter-cache
     #   myst-nb
@@ -146,9 +147,7 @@ nbformat==5.9.2
     #   myst-nb
     #   nbclient
 nest-asyncio==1.5.7
-    # via
-    #   ipykernel
-    #   nbclient
+    # via ipykernel
 nodeenv==1.8.0
     # via pre-commit
 numpy==1.25.2
