@@ -93,7 +93,7 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
             if (!pValue) {
                 Py_DECREF(pArgs);
                 Py_DECREF(pModule);
-                fprintf(stderr, "[backend_python] Cannot convert argument\n");
+                fprintf(stderr, "[backend_python] Cannot convert input argument #%d\n", i);
                 return 1;
             }
             PyTuple_SetItem(pArgs, i, pValue);
