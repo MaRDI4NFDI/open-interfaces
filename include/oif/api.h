@@ -41,6 +41,3 @@ typedef struct {
     // Pointer to actual data.
     double *data;
 } OIFArrayF64;
-
-OIFArrayF64 *create_array_f64(int nd, intptr_t *dimensions);
-void free_array_f64(OIFArrayF64 *x);
