@@ -21,16 +21,17 @@ def main():
     print(f"Backend: {backend}")
     A = np.array(
         [
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 0.0, 1.0],
+            [1.0, 1.0],
+            [-3.0, 1.0],
         ]
     )
-    b = np.array([2.0, 17.0, 5.3])
+    b = np.array([6.0, 2.0])
     s = LinearSolver(backend)
     x = s.solve(A, b)
 
-    print(f"Solving system of linear equations A={A}, b={b}:")
+    print("Solving system of linear equations:")
+    print(f"A={A}")
+    print(f"b={b}:")
     print(f"x = {x}")
     print(f"L2 error = {np.linalg.norm(A @ x - b)}")
 
