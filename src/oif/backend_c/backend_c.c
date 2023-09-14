@@ -21,6 +21,8 @@ const char *
 resolve_service_name(const char method[static 1]) {
     if (strcmp(method, "solve_qeq") == 0) {
         return "./liboif_backend_c_qeq.so";
+    } else if (strcmp(method, "solve_lin") == 0) {
+        return "./liboif_backend_c_linsolve.so";
     }
 
     return NULL;
