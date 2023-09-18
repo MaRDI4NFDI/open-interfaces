@@ -10,6 +10,7 @@ Welcome to oif-toy-example's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   overview.md
    notes-on-dbus.md
    python-buffer-protocol.md
 
