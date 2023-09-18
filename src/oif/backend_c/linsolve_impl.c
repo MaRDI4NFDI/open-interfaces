@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Use LAPACKE - C-friendly interface to LAPACK.
 #include <lapacke.h>
@@ -19,7 +20,7 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x) {
     assert(b->nd == x->nd);
     assert(b->dimensions[0] == x->dimensions[0]);
 
-    double *Acopy = malloc(N*N*sizeof(double))
+    double *Acopy = malloc(N*N*sizeof(double));
     memcpy(Acopy, A->data, N*N*sizeof(double));
     memcpy(x->data, b->data, N*sizeof(double));
 
