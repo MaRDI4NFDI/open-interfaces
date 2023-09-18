@@ -14,6 +14,8 @@ release = "0.1"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
+numfig = True
+
 extensions = ["myst_parser"]
 
 templates_path = ["_templates"]
