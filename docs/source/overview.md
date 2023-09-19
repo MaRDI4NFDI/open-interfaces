@@ -1,4 +1,4 @@
-e# Overview
+# Overview
 
 This page describes high-level architecture and the goals of the project.
 
@@ -153,7 +153,7 @@ oif_impl/
          impl/ (later all auto-generated)
             __init__.py
             qeq.py  (abstract methods to implement (abstract class)
-   c/ (later all auto-genereated)
+   c/ (later all auto-generated)
       include/
          qeq.h
       src/
@@ -168,7 +168,7 @@ oif_impl/
          qeq_solver/
             __init__.py
             solver.py
-      qeq_py_solver2/
+      qeq_py_solver2/   # New implementation in Python
          qeq_py_solver2.conf  (which library to load and how to init)
          super_qeq_solver/
             __init__.py
@@ -183,3 +183,52 @@ Here there are three principal layers:
   and header files in C, etc.
 - Configuration files and actual implementations. Configuration files
   provide the means to the dispatch library to find the actual implementation.
+
+Right now, C implementations are separate dynamic shared objects that are
+loaded by the C dispatch library.
+Alternative could be to build a single large shared library for all C
+implementations, however, it is debatable.
+
+### Installed structure
+
+The structure is the following:
+
+```shell
+PREFIX/
+share/
+    oif_impl/
+        qeq/
+        qeq_c_solver.conf
+        qeq_py_solver.conf
+        qeq_py_solver2.conf
+    lib/
+    oif_impl/
+        liboif_dispatch.so
+        liboif_dispatch_python.so
+        liboif_dispatch_c.so
+        qeq/
+            qeq_c_solver.so
+            qeq_c_solver2.so
+        python3.11/
+        site-packages/
+            oif_impl/
+                qeq_solver/
+                __init__.py
+                solver.py
+                super_qeq_solver/
+                __init__.py
+                solver.py
+```
+
+where a configuration file might look like
+
+```
+PREFIX/lib/oif_impl/python_dispatch.so  # What dispatch library to load, in this cas Python
+super_qeq_solver.solver  # What module should be used in Python for actual function invokation
+```
+
+The questions of how shared libraries will be discovered by the linker,
+how Python modules are discovered, are left now unspecified.
+
+Temporary solution is to use `LD_LIBRARY_PATH` and `PYTHONPATH` environment
+variables during the early development stage.
