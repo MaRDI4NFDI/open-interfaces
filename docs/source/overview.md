@@ -66,9 +66,14 @@ interfaces/ # Language-independent interface specifications
     qeq.idl
     linsolve.idl
 oif/        # Data marshalling and dispatch
-oif_impl/   # Implementation of interfaces
+oif_impl/   # Example implementation of interfaces
 ```
 
+Note that we explicitly separate interfaces and implementations,
+so that the implementations can be developed distributedly.
+For example, we provide an interface for an optimization procedure
+and the authors of optimization packages could provide the adapters
+(implement the interface) for their packages.
 ### Language-independent interface specifications
 
 **Language-independent interface specifications are not yet implemented.**
@@ -220,12 +225,26 @@ share/
                 solver.py
 ```
 
-where a configuration file might look like
+## Configuration files
+Configuration file might look like
 
 ```
-PREFIX/lib/oif_impl/python_dispatch.so  # What dispatch library to load, in this cas Python
-super_qeq_solver.solver  # What module should be used in Python for actual function invokation
+PREFIX/lib/oif_impl/python_dispatch.so
+super_qeq_solver.solver solve
 ```
+
+where the first line specifies the dispatch library for the language
+of the requested implementation.
+Second line specifies information that must be passed to this language
+dispatch library so that it can do the actual function call.
+
+For example, for Python it can be dot-separated path to the module
+and, whitespace separated, the function to invoke.
+
+For C, it can be the path to the shared library to load and the name
+of the actual function to call.
+
+## Other technical details
 
 The questions of how shared libraries will be discovered by the linker,
 how Python modules are discovered, are left now unspecified.
