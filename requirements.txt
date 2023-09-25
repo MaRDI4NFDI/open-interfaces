@@ -150,7 +150,7 @@ nest-asyncio==1.5.7
     # via ipykernel
 nodeenv==1.8.0
     # via pre-commit
-numpy==1.25.2
+numpy==1.26.0
     # via -r requirements.in
 packaging==23.1
     # via
