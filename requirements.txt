@@ -305,7 +305,7 @@ wheel==0.41.2
     # via pip-tools
 wrapt==1.15.0
     # via astroid
-zipp==3.16.2
+zipp==3.17.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
