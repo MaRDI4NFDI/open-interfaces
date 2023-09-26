@@ -5,6 +5,7 @@ project(qeq LANGUAGES C)
 
 add_library(oif_backend_c SHARED backend_c.c)
 target_include_directories(oif_backend_c PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(oif_backend_c PRIVATE ${CMAKE_SOURCE_DIR}/oif/include)
 target_link_libraries(oif_backend_c PUBLIC ffi)
 
 add_library(oif_backend_c_qeq SHARED qeq_impl.c qeq.c)

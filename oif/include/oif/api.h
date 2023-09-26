@@ -2,8 +2,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <oif/globals.h>
-
 // Identifier of the used backend.
 typedef size_t BackendHandle;
 
@@ -41,3 +39,8 @@ typedef struct {
     // Pointer to actual data.
     double *data;
 } OIFArrayF64;
+
+enum {
+    OIF_ERROR = 101,
+    OIF_BACKEND_INIT_ERROR = 102,
+};
