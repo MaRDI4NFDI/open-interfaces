@@ -36,6 +36,7 @@ target_link_libraries(test_qeq GTest::gtest_main oif_backend_c)
 target_link_libraries(test_qeq GTest::gtest_main oif_backend_c_qeq)
 target_include_directories(test_qeq PUBLIC include)
 target_include_directories(test_qeq PUBLIC ${CMAKE_SOURCE_DIR})
+target_include_directories(test_qeq PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
 target_compile_features(test_qeq PUBLIC cxx_std_11)
 set_target_properties(test_qeq PROPERTIES CXX_EXTENSIONS OFF)
 
