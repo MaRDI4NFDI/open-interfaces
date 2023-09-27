@@ -1,6 +1,5 @@
 import numpy as np
-
-from .core import OIFBackend, init_backend
+from oif.core import OIFBackend, init_backend
 
 
 class QeqSolver:

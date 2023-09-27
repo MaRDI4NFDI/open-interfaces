@@ -1,6 +1,6 @@
 import argparse
 
-from oif.frontend_python.qeq_solver import QeqSolver
+from oif.interfaces.qeq_solver import QeqSolver
 
 
 def _parse_args():

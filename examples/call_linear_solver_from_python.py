@@ -2,7 +2,7 @@ import argparse
 
 import numpy as np
 
-from oif.frontend_python.linear_solver import LinearSolver
+from oif.interfaces.linear_solver import LinearSolver
 
 
 def _parse_args():
