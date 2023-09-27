@@ -2,7 +2,7 @@
 
 #include <oif/api.h>
 #include <oif/dispatch.h>
-#include <oif/frontend_c/qeq.h>
+#include <oif/interfaces/qeq.h>
 
 int oif_solve_qeq(
     BackendHandle bh, double a, double b, double c, OIFArrayF64 *roots

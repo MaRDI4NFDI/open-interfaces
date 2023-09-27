@@ -15,7 +15,7 @@ all :
 	cp build/src/oif/backend_c/liboif_backend_c_qeq.$(DSO_EXT) .
 	cp build/src/oif/backend_c/liboif_backend_c_linsolve.$(DSO_EXT) .
 	cp build/src/oif/backend_python/liboif_backend_python.$(DSO_EXT) .
-	cp build/src/oif/frontend_c/liboif_frontend_c.$(DSO_EXT) .
+	cp build/oif/lang_c/liboif_c.$(DSO_EXT) .
 
 .PHONY : test
 test :

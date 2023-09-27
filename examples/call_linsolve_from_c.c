@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "oif/api.h"
-#include <oif/frontend_c/linsolve.h>
+#include <oif/api.h>
+#include <oif/interfaces/linsolve.h>
 
 
 char *parse_backend(int argc, char *argv[]) {

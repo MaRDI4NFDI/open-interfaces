@@ -2,7 +2,7 @@
 
 #include <oif/api.h>
 #include <oif/dispatch.h>
-#include <oif/frontend_c/linsolve.h>
+#include <oif/interfaces/linsolve.h>
 
 int oif_solve_linear_system(
     BackendHandle bh, OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x
