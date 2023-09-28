@@ -55,16 +55,15 @@ BackendHandle load_backend(
 
 int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
-    PyObject *pFileName, *pModule, *pFunc;
-    PyObject *pArgs, *pValue;
+    PyObject *pFileName, *pModule;
+    PyObject *pInitArgs, *pArgs, *pValue;
+    PyObject *pClass, *pInstance, *pFunc;
 
     printf("[backend_python] Provided module name: %s\n", method);
     char prefixed_method[256] = "oif.impl.";
     strcat(prefixed_method, method);
     pFileName = PyUnicode_FromString(prefixed_method);
 
-    fprintf(stderr, "prefixed_method = %s\n", prefixed_method);
-    fprintf(stderr, "pFileName = %s\n", pFileName);
     pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
 
@@ -79,7 +78,22 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         return EXIT_FAILURE;
     }
 
-    pFunc = PyObject_GetAttrString(pModule, method);
+    pClass = PyObject_GetAttrString(pModule, method);
+    pInitArgs = Py_BuildValue("()");
+    pInstance = PyObject_CallObject(pClass, pInitArgs);
+    if (pInstance == NULL) {
+        PyErr_Print();
+        fprintf(
+            stderr,
+            "[backend_python] Failed to instantiate class %s\n",
+            method
+        );
+        Py_DECREF(pClass);
+        return EXIT_FAILURE;
+    }
+    Py_DECREF(pClass);
+
+    pFunc = PyObject_GetAttrString(pInstance, method);
 
     if (pFunc && PyCallable_Check(pFunc)) {
         int num_args = in_args->num_args + out_args->num_args;
@@ -131,6 +145,7 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
             Py_DECREF(pValue);
         } else {
             Py_DECREF(pFunc);
+            Py_DECREF(pInstance);
             Py_DECREF(pModule);
             PyErr_Print();
             fprintf(stderr, "Call failed\n");
@@ -143,6 +158,7 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         fprintf(stderr, "Cannot find function \"%s\"\n", method);
     }
     Py_XDECREF(pFunc);
+    Py_DECREF(pInstance);
     Py_DECREF(pModule);
 
     return 0;
