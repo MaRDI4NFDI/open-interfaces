@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <oif/api.h>
+#include <oif/c_bindings.h>
 #include <oif/interfaces/linsolve.h>
 
 
