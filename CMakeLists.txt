@@ -15,6 +15,7 @@ if(POLICY CMP0135)
 endif()
 
 add_subdirectory(oif)
+add_subdirectory(oif_impl)
 
 add_subdirectory(src/oif)
 

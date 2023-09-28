@@ -11,7 +11,7 @@
 
 
 char OIF_BACKEND_C_SO[] =      "./liboif_backend_c.so";
-char OIF_BACKEND_PYTHON_SO[] = "./liboif_backend_python.so";
+char OIF_BACKEND_PYTHON_SO[] = "./liboif_dispatch_python.so";
 
 /// Array containing handles to the opened dynamic libraries for the backends.
 /**

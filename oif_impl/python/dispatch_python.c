@@ -59,8 +59,12 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
     PyObject *pArgs, *pValue;
 
     printf("[backend_python] Provided module name: %s\n", method);
-    pFileName = PyUnicode_FromString(method);
+    char prefixed_method[256] = "oif.impl.";
+    strcat(prefixed_method, method);
+    pFileName = PyUnicode_FromString(prefixed_method);
 
+    fprintf(stderr, "prefixed_method = %s\n", prefixed_method);
+    fprintf(stderr, "pFileName = %s\n", pFileName);
     pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
 
