@@ -25,13 +25,87 @@ void *OIF_BACKEND_HANDLES[OIF_BACKEND_COUNT];
 
 
 BackendHandle load_backend_by_name(
-    const char *backend_name,
-    const char *operation,
+    const char *interface,
+    const char *impl,
     size_t version_major,
     size_t version_minor)
 {
     BackendHandle bh;
     const char *backend_so;
+
+    char conf_filename[1024] = "oif_impl/impl/";
+    strcat(conf_filename, interface);
+    strcat(conf_filename, "/");
+    strcat(conf_filename, impl);
+    strcat(conf_filename, "/");
+    strcat(conf_filename, impl);
+    strcat(conf_filename, ".conf");
+
+    FILE *conf_file = fopen(conf_filename, "r");
+    if (conf_file == NULL) {
+        fprintf(
+            stderr,
+            "[dispatch] Cannot load conf file '%s'", conf_filename
+        );
+    } else {
+        fprintf(
+            stderr,
+            "[dispatch] Configuration file: %s\n", conf_filename
+        );
+    }
+
+    ssize_t nread;
+    // Temporary buffer to read lines from file.
+    const size_t buffer_size = 512;
+    char *buffer = malloc(buffer_size * sizeof(char));
+    char backend_name[16];
+    size_t len = buffer_size;
+    nread = getline(&buffer, &len, conf_file);
+    if (nread != -1) {
+        if (nread > sizeof(backend_name) - 1) {
+            fprintf(
+                stderr, "Backend name is longer than allocated array\n"
+            );
+            exit(EXIT_FAILURE);
+        }
+        // Trim new line character.
+        if (buffer[nread - 1] == '\n') {
+            buffer[nread - 1] = 0;
+        }
+        strcpy(backend_name, buffer);
+    } else {
+        fprintf(
+            stderr,
+            "[dispatch] Could not read backend line from configuration file\n"
+        );
+        return -1;
+    }
+    fprintf(stderr, "[dispatch] Backend name: %s\n", backend_name);
+
+    char impl_details[512];
+    nread = getline(&buffer, &len, conf_file);
+    if (nread != -1) {
+        if (nread > sizeof(impl_details) - 1) {
+            fprintf(
+                stderr, "Backend name is longer than allocated array\n"
+            );
+            exit(EXIT_FAILURE);
+        }
+        // Trim new line character.
+        if (buffer[nread - 1] == '\n') {
+            buffer[nread - 1] = 0;
+        }
+        strcpy(impl_details, buffer);
+    } else {
+        fprintf(
+            stderr,
+            "[dispatch] Could not read implementation details line "
+            "from the configuration file\n"
+        );
+        return -1;
+    }
+    fprintf(stderr, "[dispatch] Implementation details: '%s'\n", impl_details);
+    free(buffer);
 
     if (strcmp(backend_name, "c") == 0)
     {
@@ -72,7 +146,7 @@ BackendHandle load_backend_by_name(
             "load_backend", dlerror());
     }
 
-    bh = load_backend_fn(operation, version_major, version_minor);
+    bh = load_backend_fn(impl_details, version_major, version_minor);
     return bh;
 }
 

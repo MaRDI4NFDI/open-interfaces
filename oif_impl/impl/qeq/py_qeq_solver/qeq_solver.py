@@ -1,9 +1,10 @@
 import math
 
 import numpy as np
+from oif.impl.qeq import QeqInterface
 
 
-class solve_qeq:
+class QeqSolver(QeqInterface):
     def solve_qeq(self, a: float, b: float, c: float, roots: np.ndarray) -> int:
         """Solve quadratic equation ax**2 + bx + c = 0.
 

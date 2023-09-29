@@ -10,6 +10,12 @@
 #include <oif/api.h>
 #include <oif/dispatch_api.h>
 
+typedef struct {
+    PyObject *pInstance;
+} PythonImpl;
+
+static PythonImpl *IMPL;
+
 
 BackendHandle load_backend(
     const char *operation,
@@ -49,21 +55,14 @@ BackendHandle load_backend(
         "print('[backend_python] NumPy version: ', numpy.__version__)"
     );
 
-    return BACKEND_PYTHON;
-}
-
-
-int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args)
-{
+    char moduleName[512] = "qeq.py_qeq_solver.qeq_solver";
+    char className[512] = "QeqSolver";
     PyObject *pFileName, *pModule;
-    PyObject *pInitArgs, *pArgs, *pValue;
-    PyObject *pClass, *pInstance, *pFunc;
-
-    printf("[backend_python] Provided module name: %s\n", method);
-    char prefixed_method[256] = "oif.impl.";
-    strcat(prefixed_method, method);
-    pFileName = PyUnicode_FromString(prefixed_method);
-
+    PyObject *pClass, *pInstance;
+    PyObject *pInitArgs; 
+    printf("[backend_python] Provided module name: %s\n", moduleName);
+    printf("[backend_python] Provided class name: %s\n", className);
+    pFileName = PyUnicode_FromString(moduleName);
     pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
 
@@ -72,13 +71,13 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         PyErr_Print();
         fprintf(
             stderr,
-            "[backend_python] Failed to load \"%s\". "
-            "To solve the problem, set PYTHONPATH\n",
-            method);
+            "[backend_python] Failed to load module \"%s\". ",
+            moduleName
+        );
         return EXIT_FAILURE;
     }
 
-    pClass = PyObject_GetAttrString(pModule, method);
+    pClass = PyObject_GetAttrString(pModule, className);
     pInitArgs = Py_BuildValue("()");
     pInstance = PyObject_CallObject(pClass, pInitArgs);
     if (pInstance == NULL) {
@@ -86,14 +85,27 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         fprintf(
             stderr,
             "[backend_python] Failed to instantiate class %s\n",
-            method
+            className
         );
         Py_DECREF(pClass);
         return EXIT_FAILURE;
     }
     Py_DECREF(pClass);
 
-    pFunc = PyObject_GetAttrString(pInstance, method);
+    IMPL = malloc(sizeof(PythonImpl));
+    IMPL->pInstance = pInstance;
+
+    return BACKEND_PYTHON;
+}
+
+
+int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args)
+{
+    PyObject *pFunc;
+    PyObject *pArgs;
+    PyObject *pValue;
+
+    pFunc = PyObject_GetAttrString(IMPL->pInstance, method);
 
     if (pFunc && PyCallable_Check(pFunc)) {
         int num_args = in_args->num_args + out_args->num_args;
@@ -111,7 +123,7 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
             }
             if (!pValue) {
                 Py_DECREF(pArgs);
-                Py_DECREF(pModule);
+                Py_DECREF(pFunc);
                 fprintf(stderr, "[backend_python] Cannot convert input argument #%d\n", i);
                 return 1;
             }
@@ -129,7 +141,6 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
             }
             if (!pValue) {
                 Py_DECREF(pArgs);
-                Py_DECREF(pModule);
                 fprintf(stderr,
                         "[backend_python] Cannot convert out_arg %d of type %d\n",
                         i, out_args->arg_types[i]);
@@ -145,8 +156,6 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
             Py_DECREF(pValue);
         } else {
             Py_DECREF(pFunc);
-            Py_DECREF(pInstance);
-            Py_DECREF(pModule);
             PyErr_Print();
             fprintf(stderr, "Call failed\n");
             return EXIT_FAILURE;
@@ -158,8 +167,6 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         fprintf(stderr, "Cannot find function \"%s\"\n", method);
     }
     Py_XDECREF(pFunc);
-    Py_DECREF(pInstance);
-    Py_DECREF(pModule);
 
     return 0;
 }

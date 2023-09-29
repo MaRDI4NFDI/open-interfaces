@@ -145,14 +145,14 @@ class OIFBackend:
         return 0
 
 
-def init_backend(backend: str, interface: str, major: UInt, minor: UInt):
+def init_backend(interface: str, impl: str, major: UInt, minor: UInt):
     load_backend = wrap_c_function(
         _lib_dispatch,
         "load_backend_by_name",
         ctypes.c_uint,
         [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint, ctypes.c_uint],
     )
-    handle = load_backend(backend.encode(), interface.encode(), major, minor)
+    handle = load_backend(interface.encode(), impl.encode(), major, minor)
     return OIFBackend(handle)
 
 
