@@ -85,7 +85,7 @@ iniconfig==2.0.0
     # via pytest
 ipykernel==6.25.2
     # via myst-nb
-ipython==8.15.0
+ipython==8.16.1
     # via
     #   ipykernel
     #   myst-nb
