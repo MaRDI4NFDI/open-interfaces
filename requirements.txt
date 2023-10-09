@@ -195,7 +195,7 @@ pytest==7.4.2
     #   pytest-datadir
     #   pytest-pycharm
     #   pytest-regressions
-pytest-datadir==1.4.1
+pytest-datadir==1.5.0
     # via
     #   -r requirements.in
     #   pytest-regressions
