@@ -61,7 +61,7 @@ docutils==0.17.1
     #   exhale
     #   myst-parser
     #   sphinx
-executing==1.2.0
+executing==2.0.0
     # via stack-data
 exhale==0.3.6
     # via -r requirements.in
