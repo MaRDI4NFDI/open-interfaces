@@ -227,7 +227,7 @@ rich==12.6.0
     # via
     #   check-reqs
     #   typer
-rpds-py==0.10.4
+rpds-py==0.10.6
     # via
     #   jsonschema
     #   referencing
