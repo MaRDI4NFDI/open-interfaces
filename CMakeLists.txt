@@ -10,7 +10,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 # DOWNLOAD_EXTRACT_TIMESTAMP = TRUE
-cmake_policy(SET CMP0135 NEW)
+if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
 
 add_subdirectory(src/oif)
 
