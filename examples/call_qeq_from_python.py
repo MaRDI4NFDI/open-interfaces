@@ -21,7 +21,7 @@ def main():
     impl = args.impl
     print("Calling from Python an open interface for quadratic solver")
     print(f"Implementation: {impl}")
-    s = QeqSolver("py_qeq_solver")
+    s = QeqSolver(impl)
     a, b, c = 1.0, 5.0, 4.0
     x = s.solve(a, b, c)
 

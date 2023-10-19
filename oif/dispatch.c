@@ -10,7 +10,7 @@
 #include <oif/dispatch_api.h>
 
 
-char OIF_BACKEND_C_SO[] =      "./liboif_backend_c.so";
+char OIF_BACKEND_C_SO[] =      "./liboif_dispatch_c.so";
 char OIF_BACKEND_PYTHON_SO[] = "./liboif_dispatch_python.so";
 
 /// Array containing handles to the opened dynamic libraries for the backends.
@@ -45,7 +45,7 @@ BackendHandle load_backend_by_name(
     if (conf_file == NULL) {
         fprintf(
             stderr,
-            "[dispatch] Cannot load conf file '%s'", conf_filename
+            "[dispatch] Cannot load conf file '%s'\n", conf_filename
         );
     } else {
         fprintf(

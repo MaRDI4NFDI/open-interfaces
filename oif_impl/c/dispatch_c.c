@@ -8,55 +8,51 @@
 #include <oif/dispatch_api.h>
 #include <oif/dispatch.h>
 
+typedef struct {
+    void *impl_lib;
+} CImpl;
+
+// TODO: Use hash map to have multiple implementations loaded simultaneously.
+static CImpl *IMPL = NULL;
+
 
 BackendHandle load_backend(
-    const char *operation,
+    const char *impl_details,
     size_t version_major,
     size_t version_minor)
 {
-    return BACKEND_C;
-}
-
-const char *
-resolve_service_name(const char method[static 1]) {
-    if (strcmp(method, "solve_qeq") == 0) {
-        return "./liboif_backend_c_qeq.so";
-    } else if (strcmp(method, "solve_lin") == 0) {
-        return "./liboif_backend_c_linsolve.so";
+    // For C implementations, `impl_details` must contain the name
+    // of the shared library with the methods implemented as functions.
+    void *impl_lib = dlopen(impl_details, RTLD_LOCAL | RTLD_LAZY);
+    if (impl_lib == NULL) {
+        fprintf(
+            stderr,
+            "[dispatch_c] Could not load implementation library '%s', error: %s\n",
+            impl_details,
+            dlerror()
+        );
     }
 
-    return NULL;
+    IMPL = malloc(sizeof(CImpl));
+    if (IMPL == NULL) {
+        fprintf(stderr, "[dispatch_c] Could not create an implementation structure\n");
+        return -1;
+    }
+    IMPL->impl_lib = impl_lib;
+    return BACKEND_C;
 }
 
 
 int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
-    const char *service_name = resolve_service_name(method);
-    if (service_name == NULL) {
-        fprintf(
-            stderr,
-            "[backend_c] Could not resolve the name of the library implementing method\n"
-        );
-        fprintf(stderr, "[backend_c] dlerror() = %s\n", dlerror());
-        exit(EXIT_FAILURE);
-    }
-
-    void *service_lib = dlopen(service_name, RTLD_LOCAL | RTLD_LAZY);
-    if (service_lib == NULL) {
-        fprintf(
-            stderr,
-            "[backend_c] Could not load service library '%s'\n",
-            service_name
-        );
-        fprintf(stderr, "[backend_c] dlerror() = %s\n", dlerror());
-        exit(EXIT_FAILURE);
-    }
-
+    void *service_lib = IMPL->impl_lib;
+    printf("I am here\n");
+    fflush(stdout);
     void *func = dlsym(service_lib, method);
     if (func == NULL)
     {
-        fprintf(stderr, "[dispatch] Cannot load interface '%s'\n", method);
-        fprintf(stderr, "[backend_c] dlerror() = %s\n", dlerror());
+        fprintf(stderr, "[dispatch_c] Cannot load interface '%s'\n", method);
+        fprintf(stderr, "[dispatch_c] dlerror() = %s\n", dlerror());
         exit(EXIT_FAILURE);
     }
 
@@ -82,7 +78,7 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         else
         {
             fflush(stdout);
-            fprintf(stderr, "[dispatch] Unknown input arg type: %d\n", in_args->arg_types[i]);
+            fprintf(stderr, "[dispatch_c] Unknown input arg type: %d\n", in_args->arg_types[i]);
             exit(EXIT_FAILURE);
         }
     }
@@ -100,7 +96,7 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         else
         {
             fflush(stdout);
-            fprintf(stderr, "[dispatch] Unknown output arg type: %d\n", out_args->arg_types[i - num_in_args]);
+            fprintf(stderr, "[dispatch_c] Unknown output arg type: %d\n", out_args->arg_types[i - num_in_args]);
             exit(EXIT_FAILURE);
         }
     }
@@ -108,12 +104,12 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
     ffi_status status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_uint, arg_types);
     if (status == FFI_OK)
     {
-        printf("[backend_c] ffi_prep_cif returned FFI_OK\n");
+        printf("[dispatch_c] ffi_prep_cif returned FFI_OK\n");
     }
     else
     {
         fflush(stdout);
-        fprintf(stderr, "[dispatch] ffi_prep_cif was not OK");
+        fprintf(stderr, "[dispatch_c] ffi_prep_cif was not OK");
         exit(EXIT_FAILURE);
     }
 
