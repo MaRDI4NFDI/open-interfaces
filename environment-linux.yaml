@@ -17,5 +17,6 @@ dependencies:
     - python-dotenv
     - flake8
     - black
+    - bandit
     - mypy
     - isort
