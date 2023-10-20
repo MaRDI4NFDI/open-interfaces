@@ -15,6 +15,7 @@ all :
 	cp build/oif_impl/c/liboif_dispatch_c.$(DSO_EXT) .
 	cp build/oif_impl/python/liboif_dispatch_python.$(DSO_EXT) .
 	cp build/oif_impl/impl/qeq/c_qeq_solver/liboif_qeq_c_qeq_solver.$(DSO_EXT) .
+	cp build/oif_impl/impl/linsolve/c_lapack/liboif_linsolve_c_lapack.$(DSO_EXT) .
 
 .PHONY : test
 test :

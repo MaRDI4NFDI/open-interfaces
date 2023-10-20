@@ -6,7 +6,7 @@
 // Use LAPACKE - C-friendly interface to LAPACK.
 #include <lapacke.h>
 
-#include <oif/backend_c/linsolve.h>
+#include <oif_impl/linsolve.h>
 
 
 int
