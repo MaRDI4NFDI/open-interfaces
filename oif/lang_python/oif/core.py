@@ -67,9 +67,6 @@ class OIFBackend:
                     ctypes.pointer(oif_array_p), ctypes.c_void_p
                 )
                 arg_values.append(oif_array_p_p)
-                print(f"[f_python] oif_array_p = {hex(oif_array_p.value)}")
-                print(f"[f_python] oif_array_p_p = {hex(oif_array_p_p.value)}")
-                print(f"[f_python] oif_array.dim = {dimensions}")
                 arg_types.append(OIF_ARRAY_F64)
             else:
                 raise ValueError("Cannot handle argument type")
@@ -149,10 +146,12 @@ def init_backend(interface: str, impl: str, major: UInt, minor: UInt):
     load_backend = wrap_c_function(
         _lib_dispatch,
         "load_backend_by_name",
-        ctypes.c_uint,
+        ctypes.c_int,
         [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint, ctypes.c_uint],
     )
     handle = load_backend(interface.encode(), impl.encode(), major, minor)
+    if handle < 0:
+        raise RuntimeError("Cannot initialize backend")
     return OIFBackend(handle)
 
 

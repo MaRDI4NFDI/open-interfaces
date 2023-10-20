@@ -46,8 +46,6 @@ BackendHandle load_backend(
 int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
     void *service_lib = IMPL->impl_lib;
-    printf("I am here\n");
-    fflush(stdout);
     void *func = dlsym(service_lib, method);
     if (func == NULL)
     {
