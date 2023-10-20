@@ -6,7 +6,7 @@
 
 
 BackendHandle load_backend(
-        const char *operation,
+        const char *impl_details,
         size_t version_major,
         size_t version_minor
 );

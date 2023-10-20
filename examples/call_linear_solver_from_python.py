@@ -13,7 +13,7 @@ class Args:
 def _parse_args():
     p = argparse.ArgumentParser()
     p.add_argument(
-        "impl", type=str, choices=["c_lapack", "python"], default="c_lapack", nargs="?"
+        "impl", type=str, choices=["c_lapack", "numpy"], default="c_lapack", nargs="?"
     )
     args = p.parse_args()
     return Args(**vars(args))

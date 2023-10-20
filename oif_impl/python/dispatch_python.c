@@ -18,7 +18,7 @@ static PythonImpl *IMPL;
 
 
 BackendHandle load_backend(
-    const char *operation,
+    const char *impl_details,
     size_t version_major,
     size_t version_minor)
 {
@@ -55,13 +55,32 @@ BackendHandle load_backend(
         "print('[backend_python] NumPy version: ', numpy.__version__)"
     );
 
-    char moduleName[512] = "qeq.py_qeq_solver.qeq_solver";
-    char className[512] = "QeqSolver";
+    char moduleName[512] = "\0";
+    char className[512] = "\0";
+    size_t i;
+    for (i = 0; i < strlen(impl_details); ++i) {
+        if (impl_details[i] != ' ' && impl_details[i] != '\0') {
+            printf("impl_details[i] = '%c'\n", impl_details[i]);
+            moduleName[i] = impl_details[i];
+        } else {
+            moduleName[i] = '\0';
+            break;
+        }
+    }
+    size_t offset = i + 1;
+    for (; i < strlen(impl_details); ++i) {
+        if (impl_details[i] != ' ' && impl_details[i] != '\0') {
+            className[i - offset] = impl_details[i];
+        } else {
+            className[i] = '\0';
+        }
+    }
+
     PyObject *pFileName, *pModule;
     PyObject *pClass, *pInstance;
     PyObject *pInitArgs; 
-    printf("[backend_python] Provided module name: %s\n", moduleName);
-    printf("[backend_python] Provided class name: %s\n", className);
+    printf("[backend_python] Provided module name: '%s'\n", moduleName);
+    printf("[backend_python] Provided class name: '%s'\n", className);
     pFileName = PyUnicode_FromString(moduleName);
     pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
@@ -162,9 +181,11 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
         }
     } else {
         if (PyErr_Occurred()) {
+            fprintf(stderr, "[dispatch_python] ");
             PyErr_Print();
         }
-        fprintf(stderr, "Cannot find function \"%s\"\n", method);
+        fprintf(stderr, "[dispatch_python] Cannot find function \"%s\"\n", method);
+        return -1;
     }
     Py_XDECREF(pFunc);
 
