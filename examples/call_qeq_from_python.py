@@ -6,12 +6,17 @@ from oif.interfaces.qeq_solver import QeqSolver
 
 @dataclasses.dataclass
 class Args:
-    impl: str = "c_qeq_solver"
+    impl: str
 
 
 def _parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("impl", choices=["c_qeq_solver", "py_qeq_solver"], nargs="?")
+    p.add_argument(
+        "impl",
+        choices=["c_qeq_solver", "py_qeq_solver"],
+        default="c_qeq_solver",
+        nargs="?",
+    )
     args = p.parse_args()
     return Args(**vars(args))
 
