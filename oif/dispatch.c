@@ -47,6 +47,7 @@ BackendHandle load_backend_by_name(
             stderr,
             "[dispatch] Cannot load conf file '%s'\n", conf_filename
         );
+        return -1;
     } else {
         fprintf(
             stderr,

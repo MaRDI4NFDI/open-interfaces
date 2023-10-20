@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 // Identifier of the used backend.
-typedef size_t BackendHandle;
+typedef int BackendHandle;
 
 enum
 {
