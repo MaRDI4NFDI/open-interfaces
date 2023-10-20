@@ -35,14 +35,14 @@ int main(int argc, char *argv[])
         1, (intptr_t [1]){2}, (double [2]){6.0, 2.0}
     );
 
-    BackendHandle bh = oif_init_backend("linsolve", impl, 1, 0);
-    if (bh == OIF_BACKEND_INIT_ERROR) {
+    ImplHandle implh = oif_init_backend("linsolve", impl, 1, 0);
+    if (implh == OIF_BACKEND_INIT_ERROR) {
         fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
         return EXIT_FAILURE;
     }
 
     OIFArrayF64 *roots = create_array_f64(1, (intptr_t []){2});
-    int status = oif_solve_linear_system(bh, A, b, roots);
+    int status = oif_solve_linear_system(implh, A, b, roots);
     if (status) {
         free_array_f64(roots);
         free_array_f64(A);

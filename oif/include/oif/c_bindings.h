@@ -1,9 +1,9 @@
 #pragma once
 #include <oif/api.h>
 
-BackendHandle
+ImplHandle
 oif_init_backend(
-    const char *backend, const char *interface, int major, int minor
+    const char *interface, const char *impl, int major, int minor
 );
 
 OIFArrayF64 *

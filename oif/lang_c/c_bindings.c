@@ -6,7 +6,7 @@
 #include <oif/dispatch.h>
 
 
-BackendHandle
+ImplHandle
 oif_init_backend(
     const char *interface, const char *impl, int major, int minor) {
     return load_backend_by_name(interface, impl, major, minor);

@@ -1,11 +1,11 @@
 #pragma once
 /**
- * Interface that backends should implement.
+ * Interface that language-specific dispatches must implement.
  */
 #include <oif/api.h>
 
 
-BackendHandle load_backend(
+ImplHandle load_backend(
         const char *impl_details,
         size_t version_major,
         size_t version_minor

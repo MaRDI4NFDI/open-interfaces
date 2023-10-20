@@ -16,8 +16,10 @@ typedef struct {
 
 static PythonImpl *IMPL;
 
+static int IMPL_COUNTER = 0;
 
-BackendHandle load_backend(
+
+ImplHandle load_backend(
     const char *impl_details,
     size_t version_major,
     size_t version_minor)
@@ -113,7 +115,10 @@ BackendHandle load_backend(
     IMPL = malloc(sizeof(PythonImpl));
     IMPL->pInstance = pInstance;
 
-    return BACKEND_PYTHON;
+    ImplHandle implh = 1000 * BACKEND_PYTHON + IMPL_COUNTER;
+    IMPL_COUNTER++;
+
+    return implh;
 }
 
 

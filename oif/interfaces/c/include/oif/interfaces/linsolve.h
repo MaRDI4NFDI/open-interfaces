@@ -8,5 +8,5 @@
  */
 int
 oif_solve_linear_system(
-    BackendHandle bh, OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x
+    ImplHandle implh, OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x
 );

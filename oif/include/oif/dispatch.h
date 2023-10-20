@@ -8,18 +8,18 @@
 
 
 /**
- * Load backend by its name and version information.
+ * Load implementation by its name and version information.
  */
-BackendHandle load_backend_by_name(
-        const char *backend_name,
-        const char *operation,
+ImplHandle load_backend_by_name(
+        const char *interface,
+        const char *impl,
         size_t version_major,
         size_t version_minor
 );
 
 
 int call_interface_method(
-    BackendHandle bh,
+    ImplHandle implh,
     const char *method,
     OIFArgs *args,
     OIFArgs *retvals

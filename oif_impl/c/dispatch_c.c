@@ -15,8 +15,10 @@ typedef struct {
 // TODO: Use hash map to have multiple implementations loaded simultaneously.
 static CImpl *IMPL = NULL;
 
+static int IMPL_COUNTER = 0;
 
-BackendHandle load_backend(
+
+ImplHandle load_backend(
     const char *impl_details,
     size_t version_major,
     size_t version_minor)
@@ -39,7 +41,10 @@ BackendHandle load_backend(
         return -1;
     }
     IMPL->impl_lib = impl_lib;
-    return BACKEND_C;
+    
+    ImplHandle implh = 1000 * BACKEND_C + IMPL_COUNTER;
+    IMPL_COUNTER++;
+    return implh;
 }
 
 

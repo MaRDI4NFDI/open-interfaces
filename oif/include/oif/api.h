@@ -2,18 +2,18 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Identifier of the used backend.
-typedef int BackendHandle;
+// Handle to an instantiated implementation.
+typedef int ImplHandle;
 
 enum
 {
-    BACKEND_C = 0,
-    BACKEND_CXX = 1,
-    BACKEND_PYTHON = 2,
-    BACKEND_JULIA = 3,
-    BACKEND_R = 4,
+    BACKEND_C = 1,
+    BACKEND_CXX = 2,
+    BACKEND_PYTHON = 3,
+    BACKEND_JULIA = 4,
+    BACKEND_R = 5,
+    OIF_BACKEND_COUNT = 6,
 };
-#define OIF_BACKEND_COUNT 5
 
 typedef enum {
     OIF_INT = 1,
@@ -45,6 +45,6 @@ enum {
     OIF_BACKEND_INIT_ERROR = 102,
 };
 
-BackendHandle
+ImplHandle
 oif_init_backend(
     const char *backend, const char *interface, int major, int minor);

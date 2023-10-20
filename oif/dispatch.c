@@ -1,5 +1,6 @@
 // Dispatch library that is called from other languages, and dispatches it
 // to the appropriate backend.
+#include <assert.h>
 #include <dlfcn.h>
 #include <ffi.h>
 #include <stdio.h>
@@ -15,16 +16,16 @@ char OIF_BACKEND_PYTHON_SO[] = "./liboif_dispatch_python.so";
 
 /// Array containing handles to the opened dynamic libraries for the backends.
 /**
- * Array containing handles  to the backend dynamic libraries.
+ * Array containing handles  to the backends (language-specific dispatches).
  * If some backend is not open, corresponding element is NULL.
- *
- * Each backend is responsible for populating this array with the library
- * handle.
  */
 void *OIF_BACKEND_HANDLES[OIF_BACKEND_COUNT];
 
+// Identifier for the language-specific dispatch library (C, Python, etc.).
+typedef unsigned int BackendHandle;
 
-BackendHandle load_backend_by_name(
+
+ImplHandle load_backend_by_name(
     const char *interface,
     const char *impl,
     size_t version_major,
@@ -120,26 +121,26 @@ BackendHandle load_backend_by_name(
     }
     else
     {
-        fprintf(stderr, "[dispatch] Cannot load backend: %s\n", backend_name);
+        fprintf(stderr, "[dispatch] Implementation has unknown backend: '%s'\n", backend_name);
         exit(EXIT_FAILURE);
     }
 
-    void *lib_handle = dlopen(backend_so, RTLD_LOCAL | RTLD_LAZY);
-    if (lib_handle == NULL)
-    {
-        fprintf(stderr, "[dispatch] Cannot load shared library '%s'\n", backend_so);
-        fprintf(stderr, "Error message: %s\n", dlerror());
-        exit(EXIT_FAILURE);
+    void *lib_handle;
+    if (OIF_BACKEND_HANDLES[bh] == NULL) {
+        lib_handle = dlopen(backend_so, RTLD_LOCAL | RTLD_LAZY);
+        if (lib_handle == NULL)
+        {
+            fprintf(stderr, "[dispatch] Cannot load shared library '%s'\n", backend_so);
+            fprintf(stderr, "Error message: %s\n", dlerror());
+            exit(EXIT_FAILURE);
+        }
+        OIF_BACKEND_HANDLES[bh] = lib_handle;
+    }
+    else {
+        lib_handle = OIF_BACKEND_HANDLES[bh];
     }
 
-    if (OIF_BACKEND_HANDLES[bh] != NULL) {
-        fprintf(stderr, "[dispatch] Backend handle was already set\n");
-        exit(EXIT_FAILURE);
-    }
-
-    OIF_BACKEND_HANDLES[bh] = lib_handle;
-
-    BackendHandle (*load_backend_fn)(const char *, size_t, size_t);
+    ImplHandle (*load_backend_fn)(const char *, size_t, size_t);
     load_backend_fn = dlsym(lib_handle, "load_backend");
 
     if (load_backend_fn == NULL) {
@@ -147,23 +148,24 @@ BackendHandle load_backend_by_name(
             "load_backend", dlerror());
     }
 
-    bh = load_backend_fn(impl_details, version_major, version_minor);
-    return bh;
+    ImplHandle implh = load_backend_fn(impl_details, version_major, version_minor);
+    assert(implh / 1000 == bh);
+    return implh;
 }
 
 int call_interface_method(
-    BackendHandle bh,
+    ImplHandle implh,
     const char *method,
     OIFArgs *args,
     OIFArgs *retvals)
 {
     int status;
     
+    BackendHandle bh = implh / 1000;
     if (OIF_BACKEND_HANDLES[bh] == NULL) {
-        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%zu'", bh);
+        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%u'", bh);
         exit(EXIT_FAILURE);
     }
-
     void *lib_handle = OIF_BACKEND_HANDLES[bh];
 
     int (*run_interface_method_fn)(const char *, OIFArgs *, OIFArgs *);
