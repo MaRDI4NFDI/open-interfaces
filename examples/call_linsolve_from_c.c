@@ -9,14 +9,14 @@
 #include <oif/interfaces/linsolve.h>
 
 
-char *parse_backend(int argc, char *argv[]) {
+char *parse_impl(int argc, char *argv[]) {
     if (argc == 1) {
-        return "c";
+        return "c_lapack";
     } else {
-        if ((strcmp(argv[1], "c") == 0) || (strcmp(argv[1], "python") == 0)) {
+        if ((strcmp(argv[1], "c_lapack") == 0) || (strcmp(argv[1], "numpy") == 0)) {
             return argv[1];
         } else {
-            fprintf(stderr, "USAGE: %s [c|python]\n", argv[0]);
+            fprintf(stderr, "USAGE: %s [c_lapack|numpy]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
     }
@@ -24,9 +24,9 @@ char *parse_backend(int argc, char *argv[]) {
 
 int main(int argc, char *argv[])
 {
-    char *backend = parse_backend(argc, argv);
+    char *impl = parse_impl(argc, argv);
     printf("Calling from C an open interface for solving Ax = b \n");
-    printf("Backend: %s\n", backend);
+    printf("Implementation: %s\n", impl);
 
     OIFArrayF64 *A = init_array_f64_from_data(
         2, (intptr_t [2]){2, 2}, (double [4]){1.0, 1.0, -3.0, 1.0}
@@ -35,9 +35,9 @@ int main(int argc, char *argv[])
         1, (intptr_t [1]){2}, (double [2]){6.0, 2.0}
     );
 
-    BackendHandle bh = oif_init_backend(backend, "", 1, 0);
+    BackendHandle bh = oif_init_backend("linsolve", impl, 1, 0);
     if (bh == OIF_BACKEND_INIT_ERROR) {
-        fprintf(stderr, "Error during backend initialization. Cannot proceed\n");
+        fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
         return EXIT_FAILURE;
     }
 

@@ -8,24 +8,9 @@
 
 BackendHandle
 oif_init_backend(
-    const char *backend, const char *interface, int major, int minor) {
-    return load_backend_by_name(backend, interface, major, minor);
+    const char *interface, const char *impl, int major, int minor) {
+    return load_backend_by_name(interface, impl, major, minor);
 }
-
-/* int */
-/* oif_call_method( */
-/*     BackendHandle bh, const char *method, OIFArgs *in_args, OIFArgs *out_args */
-/* ) { */
-
-
-/*     int status = call_interface_method(bh, method, in_args, out_args); */
-
-/*     if (status) { */
-/*         fprintf(stderr, "Could not execute interface method"); */
-/*     } */
-
-/*     return 0; */
-/* } */
 
 
 OIFArrayF64 *create_array_f64(int nd, intptr_t *dimensions) {

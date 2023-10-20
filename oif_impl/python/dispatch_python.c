@@ -60,7 +60,6 @@ BackendHandle load_backend(
     size_t i;
     for (i = 0; i < strlen(impl_details); ++i) {
         if (impl_details[i] != ' ' && impl_details[i] != '\0') {
-            printf("impl_details[i] = '%c'\n", impl_details[i]);
             moduleName[i] = impl_details[i];
         } else {
             moduleName[i] = '\0';
