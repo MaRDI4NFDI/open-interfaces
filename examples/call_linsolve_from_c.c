@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
         1, (intptr_t [1]){2}, (double [2]){6.0, 2.0}
     );
 
-    ImplHandle implh = oif_init_backend("linsolve", impl, 1, 0);
-    if (implh == OIF_BACKEND_INIT_ERROR) {
+    ImplHandle implh = oif_init_impl("linsolve", impl, 1, 0);
+    if (implh == OIF_IMPL_INIT_ERROR) {
         fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
         return EXIT_FAILURE;
     }

@@ -7,9 +7,9 @@
 
 
 ImplHandle
-oif_init_backend(
-    const char *interface, const char *impl, int major, int minor) {
-    return load_backend_by_name(interface, impl, major, minor);
+oif_init_impl(
+    const char *interface, const char *impl, int version_major, int version_minor) {
+    return load_interface_impl(interface, impl, version_major, version_minor);
 }
 
 

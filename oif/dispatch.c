@@ -25,7 +25,7 @@ void *OIF_BACKEND_HANDLES[OIF_BACKEND_COUNT];
 typedef unsigned int BackendHandle;
 
 
-ImplHandle load_backend_by_name(
+ImplHandle load_interface_impl(
     const char *interface,
     const char *impl,
     size_t version_major,

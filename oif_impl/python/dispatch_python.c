@@ -49,7 +49,7 @@ ImplHandle load_backend(
 
     import_array2(
         "Failed to initialize NumPy C API",
-        OIF_BACKEND_INIT_ERROR
+        OIF_IMPL_INIT_ERROR
     );
 
     PyRun_SimpleString(

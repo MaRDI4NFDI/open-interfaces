@@ -8,9 +8,16 @@
 
 
 /**
- * Load implementation by its name and version information.
+ * Load implementation of the interface.
+ *
+ * @param interface     Name of the interface
+ * @param impl          Name of the implementation for the interface
+ * @param version_major Major version number of the implementation
+ * @param version_minor Minor version number of the implementation
+ * @return positive number that identifies the requested implementation
+ *         or OIF_IMPL_INIT_ERROR in case of the error
  */
-ImplHandle load_backend_by_name(
+ImplHandle load_interface_impl(
         const char *interface,
         const char *impl,
         size_t version_major,

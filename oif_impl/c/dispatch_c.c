@@ -87,7 +87,6 @@ int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args
     }
     for (size_t i = num_in_args; i < num_total_args; ++i)
     {
-        printf("Processing out_args[%zu] = %u\n", i - num_in_args, out_args->arg_types[i - num_in_args]);
         if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64)
         {
             arg_types[i] = &ffi_type_double;

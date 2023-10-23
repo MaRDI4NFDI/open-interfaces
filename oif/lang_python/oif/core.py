@@ -37,9 +37,9 @@ class OIFArrayF64(ctypes.Structure):
 _lib_dispatch = ctypes.PyDLL("./liboif_dispatch.so")
 
 
-class OIFBackend:
-    def __init__(self, handle):
-        self.handle = handle
+class OIFPyBinding:
+    def __init__(self, implh):
+        self.implh = implh
 
     def call(self, method, user_args, out_user_args):
         num_args = len(user_args)
@@ -69,7 +69,7 @@ class OIFBackend:
                 arg_values.append(oif_array_p_p)
                 arg_types.append(OIF_ARRAY_F64)
             else:
-                raise ValueError("Cannot handle argument type")
+                raise ValueError(f"Cannot convert argument {arg} of type{type(arg)}")
 
         in_arg_types_ctypes = ctypes.cast(
             (ctypes.c_int * len(arg_types))(*arg_types), ctypes.POINTER(OIFArgType)
@@ -106,7 +106,7 @@ class OIFBackend:
                 out_arg_values.append(oif_array_p_p)
                 out_arg_types.append(OIF_ARRAY_F64)
             else:
-                raise ValueError("Cannot handle argument type")
+                raise ValueError(f"Cannot convert argument {arg} of type{type(arg)}")
 
         out_arg_types_ctypes = ctypes.cast(
             (ctypes.c_int * len(out_arg_types))(*out_arg_types),
@@ -130,7 +130,7 @@ class OIFBackend:
             ],
         )
         status = call_interface_method(
-            self.handle,
+            self.implh,
             method.encode(),
             ctypes.byref(in_args_packed),
             ctypes.byref(out_packed),
@@ -142,17 +142,17 @@ class OIFBackend:
         return 0
 
 
-def init_backend(interface: str, impl: str, major: UInt, minor: UInt):
-    load_backend = wrap_c_function(
+def init_impl(interface: str, impl: str, major: UInt, minor: UInt):
+    load_interface_impl = wrap_c_function(
         _lib_dispatch,
-        "load_backend_by_name",
+        "load_interface_impl",
         ctypes.c_int,
         [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint, ctypes.c_uint],
     )
-    handle = load_backend(interface.encode(), impl.encode(), major, minor)
-    if handle < 0:
+    implh = load_interface_impl(interface.encode(), impl.encode(), major, minor)
+    if implh < 0:
         raise RuntimeError("Cannot initialize backend")
-    return OIFBackend(handle)
+    return OIFPyBinding(implh)
 
 
 def wrap_c_function(lib, funcname, restype, argtypes):

@@ -1,9 +1,18 @@
 #pragma once
 #include <oif/api.h>
 
+/**
+ * Initialize interface implementation.
+ * @param interface Name of the interface
+ * @param implementation Name of the implementation
+ * @param version_major  Major version number of the implementation
+ * @param version_minor  Minor version number of the implementation
+ * @return positive number that identifies the requested implementation
+ *         or OIF_IMPL_INIT_ERROR in case of the error
+ */
 ImplHandle
-oif_init_backend(
-    const char *interface, const char *impl, int major, int minor
+oif_init_impl(
+    const char *interface, const char *impl, int version_major, int version_minor
 );
 
 OIFArrayF64 *
