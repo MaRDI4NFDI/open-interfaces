@@ -5,16 +5,6 @@
 // Handle to an instantiated implementation.
 typedef int ImplHandle;
 
-enum
-{
-    BACKEND_C = 1,
-    BACKEND_CXX = 2,
-    BACKEND_PYTHON = 3,
-    BACKEND_JULIA = 4,
-    BACKEND_R = 5,
-    OIF_BACKEND_COUNT = 6,
-};
-
 typedef enum {
     OIF_INT = 1,
     OIF_FLOAT32 = 2,

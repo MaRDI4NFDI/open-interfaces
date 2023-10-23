@@ -115,7 +115,7 @@ ImplHandle load_backend(
     IMPL = malloc(sizeof(PythonImpl));
     IMPL->pInstance = pInstance;
 
-    ImplHandle implh = 1000 * BACKEND_PYTHON + IMPL_COUNTER;
+    ImplHandle implh = 1000 * OIF_LANG_PYTHON + IMPL_COUNTER;
     IMPL_COUNTER++;
 
     return implh;

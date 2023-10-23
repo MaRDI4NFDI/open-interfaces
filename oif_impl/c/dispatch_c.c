@@ -42,7 +42,7 @@ ImplHandle load_backend(
     }
     IMPL->impl_lib = impl_lib;
     
-    ImplHandle implh = 1000 * BACKEND_C + IMPL_COUNTER;
+    ImplHandle implh = 1000 * OIF_LANG_C + IMPL_COUNTER;
     IMPL_COUNTER++;
     return implh;
 }

@@ -1,5 +1,5 @@
 // Dispatch library that is called from other languages, and dispatches it
-// to the appropriate backend.
+// to the appropriate language-specific dispatch.
 #include <assert.h>
 #include <dlfcn.h>
 #include <ffi.h>
@@ -11,18 +11,17 @@
 #include <oif/dispatch_api.h>
 
 
-char OIF_BACKEND_C_SO[] =      "./liboif_dispatch_c.so";
-char OIF_BACKEND_PYTHON_SO[] = "./liboif_dispatch_python.so";
+char OIF_DISPATCH_C_SO[] =      "./liboif_dispatch_c.so";
+char OIF_DISPATCH_PYTHON_SO[] = "./liboif_dispatch_python.so";
 
-/// Array containing handles to the opened dynamic libraries for the backends.
 /**
- * Array containing handles  to the backends (language-specific dispatches).
- * If some backend is not open, corresponding element is NULL.
+ * Array of handles to the dynamically loaded libraries
+ * for the language-specific dispatches.
  */
-void *OIF_BACKEND_HANDLES[OIF_BACKEND_COUNT];
+void *OIF_DISPATCH_HANDLES[OIF_LANG_COUNT];
 
 // Identifier for the language-specific dispatch library (C, Python, etc.).
-typedef unsigned int BackendHandle;
+typedef unsigned int DispatchHandle;
 
 
 ImplHandle load_interface_impl(
@@ -31,8 +30,8 @@ ImplHandle load_interface_impl(
     size_t version_major,
     size_t version_minor)
 {
-    BackendHandle bh;
-    const char *backend_so;
+    DispatchHandle dh;
+    const char *dispatch_lang_so;
 
     char conf_filename[1024] = "oif_impl/impl/";
     strcat(conf_filename, interface);
@@ -111,13 +110,13 @@ ImplHandle load_interface_impl(
 
     if (strcmp(backend_name, "c") == 0)
     {
-        bh = BACKEND_C;
-        backend_so = OIF_BACKEND_C_SO;
+        dh = OIF_LANG_C;
+        dispatch_lang_so = OIF_DISPATCH_C_SO;
     }
     else if (strcmp(backend_name, "python") == 0)
     {
-        bh = BACKEND_PYTHON;
-        backend_so = OIF_BACKEND_PYTHON_SO;
+        dh = OIF_LANG_PYTHON;
+        dispatch_lang_so = OIF_DISPATCH_PYTHON_SO;
     }
     else
     {
@@ -126,18 +125,18 @@ ImplHandle load_interface_impl(
     }
 
     void *lib_handle;
-    if (OIF_BACKEND_HANDLES[bh] == NULL) {
-        lib_handle = dlopen(backend_so, RTLD_LOCAL | RTLD_LAZY);
+    if (OIF_DISPATCH_HANDLES[dh] == NULL) {
+        lib_handle = dlopen(dispatch_lang_so, RTLD_LOCAL | RTLD_LAZY);
         if (lib_handle == NULL)
         {
-            fprintf(stderr, "[dispatch] Cannot load shared library '%s'\n", backend_so);
+            fprintf(stderr, "[dispatch] Cannot load shared library '%s'\n", dispatch_lang_so);
             fprintf(stderr, "Error message: %s\n", dlerror());
             exit(EXIT_FAILURE);
         }
-        OIF_BACKEND_HANDLES[bh] = lib_handle;
+        OIF_DISPATCH_HANDLES[dh] = lib_handle;
     }
     else {
-        lib_handle = OIF_BACKEND_HANDLES[bh];
+        lib_handle = OIF_DISPATCH_HANDLES[dh];
     }
 
     ImplHandle (*load_backend_fn)(const char *, size_t, size_t);
@@ -149,7 +148,7 @@ ImplHandle load_interface_impl(
     }
 
     ImplHandle implh = load_backend_fn(impl_details, version_major, version_minor);
-    assert(implh / 1000 == bh);
+    assert(implh / 1000 == dh);
     return implh;
 }
 
@@ -161,12 +160,12 @@ int call_interface_method(
 {
     int status;
     
-    BackendHandle bh = implh / 1000;
-    if (OIF_BACKEND_HANDLES[bh] == NULL) {
-        fprintf(stderr, "[dispatch] Cannot call interface on backend handle: '%u'", bh);
+    DispatchHandle dh = implh / 1000;
+    if (OIF_DISPATCH_HANDLES[dh] == NULL) {
+        fprintf(stderr, "[dispatch] Cannot call interface implementation for language id: '%u'", dh);
         exit(EXIT_FAILURE);
     }
-    void *lib_handle = OIF_BACKEND_HANDLES[bh];
+    void *lib_handle = OIF_DISPATCH_HANDLES[dh];
 
     int (*run_interface_method_fn)(const char *, OIFArgs *, OIFArgs *);
     run_interface_method_fn = dlsym(lib_handle, "run_interface_method");
