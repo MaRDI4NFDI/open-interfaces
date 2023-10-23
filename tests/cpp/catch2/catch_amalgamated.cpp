@@ -7589,7 +7589,7 @@ CompactReporter::~CompactReporter() {}
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(                                                               \
-        disable : 4061) // Not all labels are EXPLICITLY handled in switch
+    disable : 4061) // Not all labels are EXPLICITLY handled in switch
   // Note that 4062 (not all labels are handled and default is missing) is
   // enabled
 #endif
