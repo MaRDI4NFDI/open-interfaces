@@ -13,7 +13,8 @@ oif_init_impl(
 }
 
 
-OIFArrayF64 *create_array_f64(int nd, intptr_t *dimensions) {
+OIFArrayF64 *
+oif_create_array_f64(int nd, intptr_t *dimensions) {
     OIFArrayF64 *x = malloc(sizeof(OIFArrayF64));
     x->nd = nd;
     x->dimensions = dimensions;
@@ -28,8 +29,8 @@ OIFArrayF64 *create_array_f64(int nd, intptr_t *dimensions) {
 }
 
 OIFArrayF64 *
-init_array_f64_from_data(int nd, intptr_t *dimensions, double *data) {
-    OIFArrayF64 *x = create_array_f64(nd, dimensions);
+oif_init_array_f64_from_data(int nd, intptr_t *dimensions, double *data) {
+    OIFArrayF64 *x = oif_create_array_f64(nd, dimensions);
     int size = 1;
     for (size_t i = 0; i < nd; ++i) {
         size *= dimensions[i];
@@ -40,7 +41,8 @@ init_array_f64_from_data(int nd, intptr_t *dimensions, double *data) {
 }
 
 
-void free_array_f64(OIFArrayF64 *x) {
+void
+oif_free_array_f64(OIFArrayF64 *x) {
     if (x == NULL) {
         return;
     }

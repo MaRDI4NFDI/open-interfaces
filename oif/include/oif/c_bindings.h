@@ -16,13 +16,13 @@ oif_init_impl(
 );
 
 OIFArrayF64 *
-create_array_f64(int nd, intptr_t *dimensions);
+oif_create_array_f64(int nd, intptr_t *dimensions);
 
 OIFArrayF64 *
-init_array_f64_from_data(int nd, intptr_t *dimensions, double *data);
+oif_init_array_f64_from_data(int nd, intptr_t *dimensions, double *data);
 
 void
-free_array_f64(OIFArrayF64 *x);
+oif_free_array_f64(OIFArrayF64 *x);
 
 void
 oif_print_matrix(OIFArrayF64 *mat);

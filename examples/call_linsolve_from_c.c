@@ -28,10 +28,10 @@ int main(int argc, char *argv[])
     printf("Calling from C an open interface for solving Ax = b \n");
     printf("Implementation: %s\n", impl);
 
-    OIFArrayF64 *A = init_array_f64_from_data(
+    OIFArrayF64 *A = oif_init_array_f64_from_data(
         2, (intptr_t [2]){2, 2}, (double [4]){1.0, 1.0, -3.0, 1.0}
     );
-    OIFArrayF64 *b = init_array_f64_from_data(
+    OIFArrayF64 *b = oif_init_array_f64_from_data(
         1, (intptr_t [1]){2}, (double [2]){6.0, 2.0}
     );
 
@@ -41,12 +41,12 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    OIFArrayF64 *roots = create_array_f64(1, (intptr_t []){2});
+    OIFArrayF64 *roots = oif_create_array_f64(1, (intptr_t []){2});
     int status = oif_solve_linear_system(implh, A, b, roots);
     if (status) {
-        free_array_f64(roots);
-        free_array_f64(A);
-        free_array_f64(b);
+        oif_free_array_f64(roots);
+        oif_free_array_f64(A);
+        oif_free_array_f64(b);
         return EXIT_FAILURE;
     }
 
@@ -59,9 +59,9 @@ int main(int argc, char *argv[])
     printf("Solution: ");
     oif_print_vector(roots);
 
-    free_array_f64(roots);
-    free_array_f64(A);
-    free_array_f64(b);
+    oif_free_array_f64(roots);
+    oif_free_array_f64(A);
+    oif_free_array_f64(b);
 
     return 0;
 }
