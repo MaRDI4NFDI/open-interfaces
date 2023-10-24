@@ -37,7 +37,7 @@ jobs:
             - uses: actions/checkout@v4
             - name: Docker meta
               id: meta
-              uses: docker/metadata-action@v4
+              uses: docker/metadata-action@v5
               with:
                   images: ghcr.io/${{github.repository}}/ci_test
                   flavor: |
@@ -65,7 +65,7 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
             - name: Build
-              uses: docker/build-push-action@v4
+              uses: docker/build-push-action@v5
               with:
                   context: .
                   push: true

@@ -8,7 +8,7 @@ alabaster==0.7.13
     # via
     #   -r requirements.in
     #   sphinx
-astroid==2.15.6
+astroid==3.0.1
     # via sphinx-autoapi
 asttokens==2.4.0
     # via stack-data
@@ -18,7 +18,7 @@ attrs==23.1.0
     #   jsonschema
     #   jupyter-cache
     #   referencing
-babel==2.12.1
+babel==2.13.0
     # via sphinx
 backcall==0.2.0
     # via ipython
@@ -34,7 +34,7 @@ certifi==2023.7.22
     # via requests
 cfgv==3.4.0
     # via pre-commit
-charset-normalizer==3.2.0
+charset-normalizer==3.3.1
     # via requests
 check-reqs==1.0.0
     # via -r requirements.in
@@ -49,7 +49,7 @@ comm==0.1.4
     # via ipykernel
 commonmark==0.9.1
     # via rich
-debugpy==1.7.0
+debugpy==1.8.0
     # via ipykernel
 decorator==5.1.1
     # via ipython
@@ -61,17 +61,17 @@ docutils==0.17.1
     #   exhale
     #   myst-parser
     #   sphinx
-executing==1.2.0
+executing==2.0.0
     # via stack-data
 exhale==0.3.6
     # via -r requirements.in
-fastjsonschema==2.18.0
+fastjsonschema==2.18.1
     # via nbformat
-filelock==3.12.3
+filelock==3.12.4
     # via virtualenv
-greenlet==2.0.2
+greenlet==3.0.0
     # via sqlalchemy
-identify==2.5.27
+identify==2.5.30
     # via pre-commit
 idna==3.4
     # via requests
@@ -85,11 +85,11 @@ iniconfig==2.0.0
     # via pytest
 ipykernel==6.25.2
     # via myst-nb
-ipython==8.15.0
+ipython==8.16.1
     # via
     #   ipykernel
     #   myst-nb
-jedi==0.19.0
+jedi==0.19.1
     # via ipython
 jinja2==3.1.2
     # via
@@ -97,24 +97,22 @@ jinja2==3.1.2
     #   myst-parser
     #   sphinx
     #   sphinx-autoapi
-jsonschema==4.19.0
+jsonschema==4.19.1
     # via nbformat
 jsonschema-specifications==2023.7.1
     # via jsonschema
 jupyter-cache==0.6.1
     # via myst-nb
-jupyter-client==8.3.1
+jupyter-client==8.4.0
     # via
     #   ipykernel
     #   nbclient
-jupyter-core==5.3.1
+jupyter-core==5.4.0
     # via
     #   ipykernel
     #   jupyter-client
     #   nbclient
     #   nbformat
-lazy-object-proxy==1.9.0
-    # via astroid
 lxml==4.9.3
     # via exhale
 markdown-it-py==2.2.0
@@ -146,13 +144,13 @@ nbformat==5.9.2
     #   jupyter-cache
     #   myst-nb
     #   nbclient
-nest-asyncio==1.5.7
+nest-asyncio==1.5.8
     # via ipykernel
 nodeenv==1.8.0
     # via pre-commit
-numpy==1.25.2
+numpy==1.26.1
     # via -r requirements.in
-packaging==23.1
+packaging==23.2
     # via
     #   build
     #   ipykernel
@@ -166,17 +164,17 @@ pickleshare==0.7.5
     # via ipython
 pip-tools==7.3.0
     # via -r requirements.in
-platformdirs==3.10.0
+platformdirs==3.11.0
     # via
     #   jupyter-core
     #   virtualenv
 pluggy==1.3.0
     # via pytest
-pre-commit==3.4.0
+pre-commit==3.5.0
     # via -r requirements.in
 prompt-toolkit==3.0.39
     # via ipython
-psutil==5.9.5
+psutil==5.9.6
     # via ipykernel
 ptyprocess==0.7.0
     # via pexpect
@@ -195,7 +193,7 @@ pytest==7.4.2
     #   pytest-datadir
     #   pytest-pycharm
     #   pytest-regressions
-pytest-datadir==1.4.1
+pytest-datadir==1.5.0
     # via
     #   -r requirements.in
     #   pytest-regressions
@@ -229,7 +227,7 @@ rich==12.6.0
     # via
     #   check-reqs
     #   typer
-rpds-py==0.10.2
+rpds-py==0.10.6
     # via
     #   jsonschema
     #   referencing
@@ -266,9 +264,9 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlalchemy==2.0.20
+sqlalchemy==2.0.22
     # via jupyter-cache
-stack-data==0.6.2
+stack-data==0.6.3
     # via ipython
 tabulate==0.9.0
     # via jupyter-cache
@@ -276,7 +274,7 @@ tornado==6.3.3
     # via
     #   ipykernel
     #   jupyter-client
-traitlets==5.9.0
+traitlets==5.11.2
     # via
     #   comm
     #   ipykernel
@@ -288,24 +286,22 @@ traitlets==5.9.0
     #   nbformat
 typer[all]==0.5.0
     # via check-reqs
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via
     #   myst-nb
     #   myst-parser
     #   sqlalchemy
-unidecode==1.3.6
+unidecode==1.3.7
     # via sphinx-autoapi
-urllib3==2.0.4
+urllib3==2.0.7
     # via requests
 virtualenv==20.24.5
     # via pre-commit
-wcwidth==0.2.6
+wcwidth==0.2.8
     # via prompt-toolkit
 wheel==0.41.2
     # via pip-tools
-wrapt==1.15.0
-    # via astroid
-zipp==3.16.2
+zipp==3.17.0
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
