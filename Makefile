@@ -18,5 +18,5 @@ all :
 	cp build/oif_impl/impl/linsolve/c_lapack/liboif_linsolve_c_lapack.$(DSO_EXT) .
 
 .PHONY : test
-test :
+test : all
 	cd build && ctest
