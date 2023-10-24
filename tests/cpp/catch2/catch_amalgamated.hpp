@@ -2887,8 +2887,8 @@ public:
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(                                                               \
-        disable : 4180) // We attempt to stream a function (address) by const&,
-                        // which MSVC complains about but is harmless
+    disable : 4180) // We attempt to stream a function (address) by const&,
+                    // which MSVC complains about but is harmless
 #endif
 
 // We need a dummy global operator<< so we can bring it into Catch namespace
@@ -5108,7 +5108,7 @@ struct RegistrarForTagAliases {
 #pragma warning(disable : 4312) // Converting int to T* using reinterpret_cast
                                 // (issue on x64 platform)
 #pragma warning(                                                               \
-        disable : 4180) // qualifier applied to function type has no meaning
+    disable : 4180) // qualifier applied to function type has no meaning
 #pragma warning(disable : 4800) // Forcing result to true or false
 #endif
 
@@ -5313,12 +5313,12 @@ public:
       std::enable_if_t<                                                        \
           !std::is_arithmetic<std::remove_reference_t<RhsT>>::value, int> = 0> \
   friend auto operator op(ExprLhs &&lhs, RhsT &&rhs)                           \
-      ->BinaryExpr<LhsT, RhsT const &> {                                       \
+      -> BinaryExpr<LhsT, RhsT const &> {                                      \
     return {static_cast<bool>(lhs.m_lhs op rhs), lhs.m_lhs, #op##_sr, rhs};    \
   }                                                                            \
   template <typename RhsT,                                                     \
             std::enable_if_t<std::is_arithmetic<RhsT>::value, int> = 0>        \
-  friend auto operator op(ExprLhs &&lhs, RhsT rhs)->BinaryExpr<LhsT, RhsT> {   \
+  friend auto operator op(ExprLhs &&lhs, RhsT rhs) -> BinaryExpr<LhsT, RhsT> { \
     return {static_cast<bool>(lhs.m_lhs op rhs), lhs.m_lhs, #op##_sr, rhs};    \
   }
 
