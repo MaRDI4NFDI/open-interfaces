@@ -4,10 +4,10 @@ import pytest
 from oif.interfaces.qeq_solver import QeqSolver
 
 
-class TestQeqSolverViaPyQeqSolverImplementation:
-    @pytest.fixture()
-    def s(self):
-        return QeqSolver("py_qeq_solver")
+class TestQeqSolver:
+    @pytest.fixture(params=["py_qeq_solver", "c_qeq_solver"])
+    def s(self, request):
+        return QeqSolver(request.param)
 
     def test_1(self, s):
         a, b, c = 1.0, 5.0, 4.0
