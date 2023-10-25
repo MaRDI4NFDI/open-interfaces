@@ -11,8 +11,8 @@
 #include <oif/dispatch_api.h>
 
 
-char OIF_DISPATCH_C_SO[] =      "./liboif_dispatch_c.so";
-char OIF_DISPATCH_PYTHON_SO[] = "./liboif_dispatch_python.so";
+char OIF_DISPATCH_C_SO[] =      "liboif_dispatch_c.so";
+char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
 
 /**
  * Array of handles to the dynamically loaded libraries
