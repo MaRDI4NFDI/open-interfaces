@@ -11,15 +11,14 @@
 #include <oif/dispatch_api.h>
 
 typedef struct {
+    ImplInfo base;
     PyObject *pInstance;
-} PythonImpl;
-
-static PythonImpl *IMPL;
+} PythonImplInfo;
 
 static int IMPL_COUNTER = 0;
 
 
-ImplHandle load_backend(
+ImplInfo *load_backend(
     const char *impl_details,
     size_t version_major,
     size_t version_minor)
@@ -49,7 +48,7 @@ ImplHandle load_backend(
 
     import_array2(
         "Failed to initialize NumPy C API",
-        OIF_IMPL_INIT_ERROR
+        NULL
     );
 
     PyRun_SimpleString(
@@ -94,7 +93,7 @@ ImplHandle load_backend(
             "[backend_python] Failed to load module \"%s\". ",
             moduleName
         );
-        return EXIT_FAILURE;
+        return NULL;
     }
 
     pClass = PyObject_GetAttrString(pModule, className);
@@ -108,27 +107,33 @@ ImplHandle load_backend(
             className
         );
         Py_DECREF(pClass);
-        return EXIT_FAILURE;
+        return NULL;
     }
     Py_DECREF(pClass);
 
-    IMPL = malloc(sizeof(PythonImpl));
-    IMPL->pInstance = pInstance;
+    PythonImplInfo *impl_info = malloc(sizeof(PythonImplInfo));
+    if (impl_info == NULL) {
+        fprintf(stderr, "[dispatch_python] Could not allocate memory for Python implementation information\n");
+    }
+    impl_info->pInstance = pInstance;
 
-    ImplHandle implh = 1000 * OIF_LANG_PYTHON + IMPL_COUNTER;
-    IMPL_COUNTER++;
-
-    return implh;
+    return (ImplInfo *) impl_info;
 }
 
 
-int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args)
+int run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
+    if (impl_info->dh != OIF_LANG_PYTHON) {
+        fprintf(stderr, "[dispatch_python] Provided implementation is not in Python\n");
+        return -1;
+    }
+    PythonImplInfo *impl = (PythonImplInfo *) impl_info;
+
     PyObject *pFunc;
     PyObject *pArgs;
     PyObject *pValue;
 
-    pFunc = PyObject_GetAttrString(IMPL->pInstance, method);
+    pFunc = PyObject_GetAttrString(impl->pInstance, method);
 
     if (pFunc && PyCallable_Check(pFunc)) {
         int num_args = in_args->num_args + out_args->num_args;

@@ -9,16 +9,14 @@
 #include <oif/dispatch.h>
 
 typedef struct {
+    ImplInfo base;
     void *impl_lib;
-} CImpl;
-
-// TODO: Use hash map to have multiple implementations loaded simultaneously.
-static CImpl *IMPL = NULL;
+} CImplInfo;
 
 static int IMPL_COUNTER = 0;
 
 
-ImplHandle load_backend(
+ImplInfo *load_backend(
     const char *impl_details,
     size_t version_major,
     size_t version_minor)
@@ -33,24 +31,28 @@ ImplHandle load_backend(
             impl_details,
             dlerror()
         );
+        return NULL;
     }
 
-    IMPL = malloc(sizeof(CImpl));
-    if (IMPL == NULL) {
+    CImplInfo *impl_info = malloc(sizeof(CImplInfo));
+    if (impl_info == NULL) {
         fprintf(stderr, "[dispatch_c] Could not create an implementation structure\n");
-        return -1;
+        return NULL;
     }
-    IMPL->impl_lib = impl_lib;
+    impl_info->impl_lib = impl_lib;
     
-    ImplHandle implh = 1000 * OIF_LANG_C + IMPL_COUNTER;
-    IMPL_COUNTER++;
-    return implh;
+    return (ImplInfo *) impl_info;
 }
 
 
-int run_interface_method(const char *method, OIFArgs *in_args, OIFArgs *out_args)
+int run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
-    void *service_lib = IMPL->impl_lib;
+    if (impl_info->dh != OIF_LANG_C) {
+        fprintf(stderr, "[dispatch_c] Provided implementation is not implemented in C\n");
+        return -1;
+    }
+    CImplInfo *impl = (CImplInfo *) impl_info;
+    void *service_lib = impl->impl_lib;
     void *func = dlsym(service_lib, method);
     if (func == NULL)
     {

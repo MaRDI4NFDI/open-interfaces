@@ -14,16 +14,30 @@ enum
     OIF_LANG_COUNT = 6,
 };
 
+// Identifier for the language-specific dispatch library (C, Python, etc.).
+typedef unsigned int DispatchHandle;
 
-ImplHandle load_backend(
-        const char *impl_details,
-        size_t version_major,
-        size_t version_minor
+/**
+ * Base structure for implementation details.
+ * Language-specific implementations can add extra members to the subtypes
+ * of `Impl`, however, they must not set `implh` and `dh` themselves
+ * as this is a responsibility of the `dispatch` library.
+ */
+typedef struct {
+    ImplHandle implh;
+    DispatchHandle dh;
+} ImplInfo;
+
+
+ImplInfo *load_backend(
+    const char *impl_details,
+    size_t version_major,
+    size_t version_minor
 );
 
 
 int
 run_interface_method(
-    const char *method, OIFArgs *in_args, OIFArgs *out_args
+    ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args
 );
 

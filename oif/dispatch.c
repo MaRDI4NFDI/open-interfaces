@@ -1,11 +1,15 @@
 // Dispatch library that is called from other languages, and dispatches it
 // to the appropriate language-specific dispatch.
+#include "oif/api.h"
 #include <assert.h>
 #include <dlfcn.h>
 #include <ffi.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <hashmap.h>
 
 #include <oif/dispatch.h>
 #include <oif/dispatch_api.h>
@@ -20,8 +24,29 @@ char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
  */
 void *OIF_DISPATCH_HANDLES[OIF_LANG_COUNT];
 
-// Identifier for the language-specific dispatch library (C, Python, etc.).
-typedef unsigned int DispatchHandle;
+static HASHMAP(ImplHandle, ImplInfo) IMPL_MAP;
+
+static bool _INITIALIZED = false;
+
+static int _IMPL_COUNTER = 1000;
+
+size_t hash_fn(const ImplHandle *key) {
+    size_t result = *key;
+    if (result < 0) {
+        result = -result;
+    }
+    return result % SIZE_MAX;
+}
+
+int compare_fn(const ImplHandle *key1, const ImplHandle *key2) {
+    return *key1 - *key2;
+}
+
+
+static void _init() {
+    hashmap_init(&IMPL_MAP, hash_fn, compare_fn);
+    _INITIALIZED = true;
+}
 
 
 ImplHandle load_interface_impl(
@@ -30,6 +55,9 @@ ImplHandle load_interface_impl(
     size_t version_major,
     size_t version_minor)
 {
+    if (!_INITIALIZED) {
+        _init();
+    }
     DispatchHandle dh;
     const char *dispatch_lang_so;
 
@@ -139,7 +167,7 @@ ImplHandle load_interface_impl(
         lib_handle = OIF_DISPATCH_HANDLES[dh];
     }
 
-    ImplHandle (*load_backend_fn)(const char *, size_t, size_t);
+    ImplInfo *(*load_backend_fn)(const char *, size_t, size_t);
     load_backend_fn = dlsym(lib_handle, "load_backend");
 
     if (load_backend_fn == NULL) {
@@ -147,9 +175,16 @@ ImplHandle load_interface_impl(
             "load_backend", dlerror());
     }
 
-    ImplHandle implh = load_backend_fn(impl_details, version_major, version_minor);
-    assert(implh / 1000 == dh);
-    return implh;
+    ImplInfo *impl_info = load_backend_fn(impl_details, version_major, version_minor);
+    if (impl_info == NULL) {
+        fprintf(stderr, "[dispatch] Could not load implementation\n");
+        return OIF_IMPL_INIT_ERROR;
+    }
+    impl_info->implh = _IMPL_COUNTER;
+    _IMPL_COUNTER++;
+    impl_info->dh = dh;
+    hashmap_put(&IMPL_MAP, &impl_info->implh, impl_info);
+    return impl_info->implh;
 }
 
 int call_interface_method(
@@ -160,16 +195,17 @@ int call_interface_method(
 {
     int status;
     
-    DispatchHandle dh = implh / 1000;
+    ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
+    DispatchHandle dh = impl_info->dh;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
         fprintf(stderr, "[dispatch] Cannot call interface implementation for language id: '%u'", dh);
         exit(EXIT_FAILURE);
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
 
-    int (*run_interface_method_fn)(const char *, OIFArgs *, OIFArgs *);
+    int (*run_interface_method_fn)(ImplInfo *, const char *, OIFArgs *, OIFArgs *);
     run_interface_method_fn = dlsym(lib_handle, "run_interface_method");
-    status = run_interface_method_fn(method, args, retvals);
+    status = run_interface_method_fn(impl_info, method, args, retvals);
 
     if (status) {
         fprintf(
