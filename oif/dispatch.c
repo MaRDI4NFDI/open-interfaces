@@ -83,49 +83,34 @@ ImplHandle load_interface_impl(
         );
     }
 
-    ssize_t nread;
     // Temporary buffer to read lines from file.
     const size_t buffer_size = 512;
+    int len;
     char *buffer = malloc(buffer_size * sizeof(char));
     char backend_name[16];
-    size_t len = buffer_size;
-    nread = getline(&buffer, &len, conf_file);
-    if (nread != -1) {
-        if (nread > sizeof(backend_name) - 1) {
-            fprintf(
-                stderr, "Backend name is longer than allocated array\n"
-            );
-            exit(EXIT_FAILURE);
-        }
-        // Trim new line character.
-        if (buffer[nread - 1] == '\n') {
-            buffer[nread - 1] = 0;
-        }
-        strcpy(backend_name, buffer);
-    } else {
+    buffer = fgets(buffer, buffer_size, conf_file);
+    if (buffer == NULL) {
         fprintf(
             stderr,
-            "[dispatch] Could not read backend line from configuration file\n"
+            "[dispatch] Could not read backend line from configuration file '%s'\n", conf_filename
         );
         return -1;
     }
+    len = strlen(buffer);
+    if (buffer[len - 1] != '\n') {
+        fprintf(
+            stderr, "Backend name is longer than allocated buffer\n"
+        );
+        return -1;
+    } else {
+        // Trim the new line character.
+        buffer[len - 1] = '\0';
+    }
+    strcpy(backend_name, buffer);
     fprintf(stderr, "[dispatch] Backend name: %s\n", backend_name);
 
-    char impl_details[512];
-    nread = getline(&buffer, &len, conf_file);
-    if (nread != -1) {
-        if (nread > sizeof(impl_details) - 1) {
-            fprintf(
-                stderr, "Backend name is longer than allocated array\n"
-            );
-            exit(EXIT_FAILURE);
-        }
-        // Trim new line character.
-        if (buffer[nread - 1] == '\n') {
-            buffer[nread - 1] = 0;
-        }
-        strcpy(impl_details, buffer);
-    } else {
+    buffer = fgets(buffer, buffer_size, conf_file);
+    if (buffer == NULL) {
         fprintf(
             stderr,
             "[dispatch] Could not read implementation details line "
@@ -133,6 +118,18 @@ ImplHandle load_interface_impl(
         );
         return -1;
     }
+    len = strlen(buffer);
+    if (buffer[len - 1] != '\n') {
+        fprintf(
+            stderr, "Backend name is longer than allocated array\n"
+        );
+        exit(EXIT_FAILURE);
+    } else {
+        // Trim new line character.
+        buffer[len - 1] = '\0';
+    }
+    char impl_details[512];
+    strcpy(impl_details, buffer);
     fprintf(stderr, "[dispatch] Implementation details: '%s'\n", impl_details);
     free(buffer);
 
