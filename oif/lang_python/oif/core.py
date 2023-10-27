@@ -1,5 +1,5 @@
 import ctypes
-from typing import NewType
+from typing import Callable, NewType, Union
 
 import numpy as np
 
@@ -12,6 +12,7 @@ OIF_FLOAT64 = 3
 OIF_FLOAT32_P = 4
 OIF_ARRAY_F64 = 5
 OIF_STR = 6
+OIF_CALLBACK = 7
 
 
 class OIFArgType(ctypes.c_int):
@@ -34,6 +35,44 @@ class OIFArrayF64(ctypes.Structure):
     ]
 
 
+# class OIFCallback(ctypes.Structure):
+#     _fields_ = [
+#         ("fn", ctypes.CFUNCTYPE),
+#         ("num_args", ctypes.c_size_t),
+#         ("argtypes", ctypes.POINTER(OIFArgType)),
+#         ("restype", OIFArgType),
+#     ]
+
+
+def wrap_py_func(
+    fn: Callable, argtypes: list[OIFArgType], restype: OIFArgType
+) -> Callable:
+    ctypes_argtypes: list = []
+    for argt in argtypes:
+        if argt == OIF_FLOAT64:
+            ctypes_argtypes.append(ctypes.c_double)
+        elif argt == OIF_ARRAY_F64:
+            ctypes_argtypes.append(ctypes.POINTER(ctypes.c_double))
+        else:
+            raise ValueError(f"Cannot convert argument type {argt}")
+
+    ctypes_restype: Union[type[ctypes.c_int], type[ctypes.c_double]]
+    if restype == OIF_INT:
+        ctypes_restype = ctypes.c_int
+    elif restype == OIF_FLOAT64:
+        ctypes_restype = ctypes.c_double
+        # TODO: Add c_void_p type
+        # Here there is a discussion why one can use only simple
+        # predefined pointer types as restype:
+        # https://stackoverflow.com/q/33005127
+    else:
+        raise ValueError(f"Cannot convert type '{restype}'")
+
+    fn_t = ctypes.CFUNCTYPE(ctypes_restype, *ctypes_argtypes)
+    wrapper_fn = fn_t(fn)
+    return wrapper_fn
+
+
 _lib_dispatch = ctypes.PyDLL("./liboif_dispatch.so")
 
 
@@ -47,7 +86,9 @@ class OIFPyBinding:
         arg_values = []
         for arg in user_args:
             if isinstance(arg, int):
-                arg_values.append(ctypes.c_void_p(ctypes.c_int(arg)))
+                argp = ctypes.pointer(ctypes.c_int(arg))
+                arg_void_p = ctypes.cast(argp, ctypes.c_void_p)
+                arg_values.append(arg_void_p)
                 arg_types.append(OIF_INT)
             elif isinstance(arg, float):
                 arg_p = ctypes.pointer(ctypes.c_double(arg))
@@ -68,6 +109,10 @@ class OIFPyBinding:
                 )
                 arg_values.append(oif_array_p_p)
                 arg_types.append(OIF_ARRAY_F64)
+            elif isinstance(arg, ctypes._CFuncPtr):
+                argp = ctypes.pointer(arg)
+                arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
+                arg_types.append(OIF_CALLBACK)
             else:
                 raise ValueError(f"Cannot convert argument {arg} of type{type(arg)}")
 
@@ -85,7 +130,9 @@ class OIFPyBinding:
         out_arg_values = []
         for arg in out_user_args:
             if isinstance(arg, int):
-                out_arg_values.append(ctypes.c_void_p(ctypes.c_int(arg)))
+                argp = ctypes.pointer(ctypes.c_int(arg))
+                arg_void_p = ctypes.cast(argp, ctypes.c_void_p)
+                out_arg_values.append(arg_void_p)
                 out_arg_types.append(OIF_INT)
             elif isinstance(arg, float):
                 arg_p = ctypes.pointer(ctypes.c_double(arg))

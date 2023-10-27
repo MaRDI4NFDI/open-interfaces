@@ -12,6 +12,7 @@ typedef enum {
     OIF_FLOAT32_P = 4,
     OIF_ARRAY_F64 = 5,
     OIF_STR = 6,
+    OIF_CALLBACK = 7,
 } OIFArgType;
 
 typedef struct {
