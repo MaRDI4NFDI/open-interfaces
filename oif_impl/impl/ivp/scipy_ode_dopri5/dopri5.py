@@ -1,3 +1,4 @@
+import numpy as np
 from scipy import integrate
 
 
@@ -7,6 +8,9 @@ class Dopri5:
 
     def set_rhs_fn(self, rhs):
         self.rhs = rhs
+
+        x = np.array([1.0, 2.0])
+        assert len(self.rhs(x)) == len(x)
 
         return 0
 

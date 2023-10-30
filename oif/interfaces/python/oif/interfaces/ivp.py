@@ -9,16 +9,12 @@ class IVP:
 
     def set_rhs_fn(self, rhs_fn):
         wrapper = wrap_py_func(rhs_fn, (OIF_ARRAY_F64, OIF_ARRAY_F64), OIF_INT)
-        status = 0
-        self._binding.call("set_rhs_fn", (wrapper,), (status,))
+        self._binding.call("set_rhs_fn", (wrapper,), ())
 
     def set_initial_value(self, t0, y0):
         t0 = float(t0)
         y0 = np.asarray(y0)
-        # I request returning an integer, as functions without
-        # return values do not work right now.
-        status = 0
-        self._binding.call("set_initial_value", (t0, y0), (status,))
+        self._binding.call("set_initial_value", (t0, y0), ())
 
     def integrate(self, t, y):
         self._binding.call("integrate", (t,), (y,))
