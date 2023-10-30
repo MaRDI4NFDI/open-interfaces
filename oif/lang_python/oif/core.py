@@ -15,6 +15,9 @@ OIF_STR = 6
 OIF_CALLBACK = 7
 
 
+_lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
+
+
 class OIFArgType(ctypes.c_int):
     pass
 
@@ -73,9 +76,6 @@ def wrap_py_func(
     return wrapper_fn
 
 
-_lib_dispatch = ctypes.PyDLL("./liboif_dispatch.so")
-
-
 class OIFPyBinding:
     def __init__(self, implh):
         self.implh = implh
@@ -111,6 +111,7 @@ class OIFPyBinding:
                 arg_types.append(OIF_ARRAY_F64)
             elif isinstance(arg, ctypes._CFuncPtr):
                 argp = ctypes.pointer(arg)
+                print(f"Input argument as CFuncPtr = {arg}")
                 arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
                 arg_types.append(OIF_CALLBACK)
             else:
