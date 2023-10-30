@@ -148,24 +148,47 @@ int run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_ar
                 pValue = PyArray_SimpleNewFromData(
                     arr->nd, arr->dimensions, NPY_FLOAT64, arr->data
                 );
+            } else if (in_args->arg_types[i] == OIF_CALLBACK) {
+                void *p = in_args->arg_values[i];
+                pValue = *(PyObject **) p;
+                if (!PyCallable_Check(pValue)) {
+                    fprintf(
+                        stderr,
+                        "[dispatch_python] Input argument #%d "
+                        "has type OIF_CALLBACK "
+                        "but it is actually is not callable",
+                        i
+                    );
+                }
+            } else {
+                pValue = NULL;
             }
             if (!pValue) {
                 Py_DECREF(pArgs);
                 Py_DECREF(pFunc);
-                fprintf(stderr, "[backend_python] Cannot convert input argument #%d\n", i);
+                fprintf(
+                    stderr,
+                    "[backend_python] Cannot convert input argument #%d with provided type id %d\n",
+                    i,
+                    in_args->arg_types[i]
+                );
                 return 1;
             }
             PyTuple_SetItem(pArgs, i, pValue);
         }
         // Convert output arguments.
         for (int i = 0; i < out_args->num_args; ++i) {
-            if (out_args->arg_types[i] == OIF_FLOAT64) {
-                pValue = PyFloat_FromDouble(*(double *)out_args->arg_values[i]);
+            if (out_args->arg_types[i] == OIF_INT) {
+                pValue = PyLong_FromLong(*(int *) out_args->arg_values[i]);
+            } else if (out_args->arg_types[i] == OIF_FLOAT64) {
+                pValue = PyFloat_FromDouble(*(double *) out_args->arg_values[i]);
             } else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
                 OIFArrayF64 *arr = *(OIFArrayF64 **) out_args->arg_values[i];
                 pValue = PyArray_SimpleNewFromData(
                     arr->nd, arr->dimensions, NPY_FLOAT64, arr->data
                 );
+            } else {
+                pValue = NULL;
             }
             if (!pValue) {
                 Py_DECREF(pArgs);
