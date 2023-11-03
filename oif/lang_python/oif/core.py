@@ -38,6 +38,14 @@ class OIFArrayF64(ctypes.Structure):
     ]
 
 
+class OIFCallback(ctypes.Structure):
+    _fields_ = [
+        ("src", ctypes.c_char_p),
+        ("fn_p", ctypes.c_void_p),
+        ("c_fn_p", ctypes.c_void_p),
+    ]
+
+
 # class OIFCallback(ctypes.Structure):
 #     _fields_ = [
 #         ("fn", ctypes.CFUNCTYPE),
@@ -49,7 +57,7 @@ class OIFArrayF64(ctypes.Structure):
 
 def wrap_py_func(
     fn: Callable, argtypes: list[OIFArgType], restype: OIFArgType
-) -> Callable:
+) -> OIFCallback:
     ctypes_argtypes: list = []
     for argt in argtypes:
         if argt == OIF_FLOAT64:
@@ -73,7 +81,14 @@ def wrap_py_func(
 
     fn_t = ctypes.CFUNCTYPE(ctypes_restype, *ctypes_argtypes)
     wrapper_fn = fn_t(fn)
-    return wrapper_fn
+
+    # id returns function pointer. Yes, I am also shocked.
+    # Docstring for `id` says: "CPython uses the object's memory address".
+    fn_p = id(fn)
+
+    # TODO: Replace magic constant with BACKEND_PYTHON = 3
+    oifc = OIFCallback(3, fn_p, ctypes.cast(wrapper_fn, ctypes.c_void_p))
+    return oifc
 
 
 class OIFPyBinding:
@@ -95,8 +110,7 @@ class OIFPyBinding:
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
                 arg_values.append(arg_void_p)
                 arg_types.append(OIF_FLOAT64)
-            elif isinstance(arg, np.ndarray):
-                print("[frontend_python] Warning: we assume that dtype is np.float64")
+            elif isinstance(arg, np.ndarray) and arg.dtype == np.float64:
                 assert arg.dtype == np.float64
                 nd = arg.ndim
                 dimensions = (ctypes.c_long * len(arg.shape))(*arg.shape)
@@ -109,9 +123,8 @@ class OIFPyBinding:
                 )
                 arg_values.append(oif_array_p_p)
                 arg_types.append(OIF_ARRAY_F64)
-            elif isinstance(arg, ctypes._CFuncPtr):
+            elif isinstance(arg, OIFCallback):
                 argp = ctypes.pointer(arg)
-                print(f"Input argument as CFuncPtr = {arg}")
                 arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
                 arg_types.append(OIF_CALLBACK)
             else:
@@ -140,8 +153,7 @@ class OIFPyBinding:
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
                 out_arg_values.append(arg_void_p)
                 out_arg_types.append(OIF_FLOAT64)
-            elif isinstance(arg, np.ndarray):
-                print("[frontend_python] Warning: we assume that dtype is np.float64")
+            elif isinstance(arg, np.ndarray) and arg.dtype == np.float64:
                 nd = arg.ndim
                 dimensions = (ctypes.c_long * len(arg.shape))(*arg.shape)
                 data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_double))

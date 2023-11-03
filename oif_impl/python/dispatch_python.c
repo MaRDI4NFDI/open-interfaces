@@ -149,8 +149,15 @@ int run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_ar
                     arr->nd, arr->dimensions, NPY_FLOAT64, arr->data
                 );
             } else if (in_args->arg_types[i] == OIF_CALLBACK) {
-                void *p = in_args->arg_values[i];
-                pValue = *(PyObject **) p;
+                OIFCallback *p = in_args->arg_values[i];
+                if (p->src != OIF_LANG_PYTHON) {
+                    fprintf(
+                        stderr,
+                        "[dispatch_python] Can handle only Python callable\n"
+                    );
+                    exit(1);
+                }
+                pValue = (PyObject *) p->fn_p;
                 if (!PyCallable_Check(pValue)) {
                     fprintf(
                         stderr,

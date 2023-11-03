@@ -22,8 +22,8 @@ def _parse_args():
     return Args(**vars(args))
 
 
-def rhs(x):
-    return -x
+def rhs(t, y):
+    return -y
 
 
 def main():
@@ -35,14 +35,15 @@ def main():
     s.set_rhs_fn(rhs)
     t0 = 0.0
     y0 = [1.0]
-    s.set_initial_value(t0, y0)
+    s.set_initial_value(y0, t0)
 
     times = np.linspace(t0, t0 + 1, num=11)
 
-    y = np.empty_like(y0)
+    soln = [y0[0]]
     for t in times[1:]:
-        s.integrate(t, y)
-        print(f"{t} {y}")
+        s.integrate(t)
+        print(f"{t:.3f} {s.y[0]:.6f}")
+        soln.append(s.y[0])
 
 
 if __name__ == "__main__":

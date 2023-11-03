@@ -31,6 +31,13 @@ typedef struct {
     double *data;
 } OIFArrayF64;
 
+// This structure is used for callback functions.
+typedef struct {
+    int src;       // Language of the function (one of OIF_LANG_* constants)
+    void *fn_p;    // Function pointer in this language
+    void *c_fn_p;  // C function pointer (can be NULL)
+} OIFCallback;
+
 enum {
     OIF_ERROR = 101,
     OIF_IMPL_INIT_ERROR = 102,

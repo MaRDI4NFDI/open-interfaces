@@ -9,15 +9,18 @@ class Dopri5:
     def set_rhs_fn(self, rhs):
         self.rhs = rhs
 
-        x = np.array([1.0, 2.0])
-        assert len(self.rhs(x)) == len(x)
-
         return 0
 
-    def set_initial_value(self, t0, y0):
-        self.s = integrate.ode(self.rhs).set_integrator("dopri5")
+    def set_initial_value(self, y0, t0):
+        if not isinstance(t0, float):
+            raise ValueError("Argument `t0` must be floating-point number")
+
+        self.s = integrate.ode(self.rhs).set_integrator(
+            "dopri5", atol=1e-15, rtol=1e-15
+        )
         self.s.set_initial_value(y0, t0)
 
     def integrate(self, t, y):
         y[:] = self.s.integrate(t)
+        assert self.s.successful()
         return 0
