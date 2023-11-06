@@ -110,3 +110,6 @@ compile_commands.json
 
 # CTest temporary directory
 Testing/
+
+# Visual Studio Code
+.vscode/
