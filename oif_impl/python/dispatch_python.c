@@ -9,6 +9,7 @@
 
 #include <oif/api.h>
 #include <oif/dispatch_api.h>
+#include <oif/c_bindings.h>
 
 typedef struct {
     ImplInfo base;
@@ -16,6 +17,42 @@ typedef struct {
 } PythonImplInfo;
 
 static int IMPL_COUNTER = 0;
+
+typedef void (*ivp_rhs_ptr_t)(double, OIFArrayF64 *y, OIFArrayF64 *y_dot);
+ivp_rhs_ptr_t IVP_RHS_CALLBACK = NULL;
+
+static PyObject *
+c_to_py_wrapper_ivp_rhs(PyObject *ignored, PyObject *args) {
+    double t;   // Time
+    PyArrayObject *yNDArray;  // NDArray for updated solution
+    
+    if (!PyArg_ParseTuple(args, "dO!", &t, &PyArray_Type, &yNDArray)) {
+        return NULL;
+    }
+
+    OIFArrayF64 y = {
+        .nd = PyArray_NDIM(yNDArray),
+        .dimensions = PyArray_DIMS(yNDArray),
+        .data = PyArray_DATA(yNDArray),
+    };
+
+    OIFArrayF64 *y_dot = oif_create_array_f64(PyArray_NDIM(yNDArray), PyArray_DIMS(yNDArray));
+
+    IVP_RHS_CALLBACK(t, &y, y_dot);
+
+    PyObject *result = PyArray_SimpleNewFromData(
+        y_dot->nd, y_dot->dimensions, NPY_FLOAT64, y_dot->data
+    );
+    
+    return result;
+}
+
+static PyMethodDef ivp_rhs_def = {
+    "ivp_rhs_callback",
+    c_to_py_wrapper_ivp_rhs,
+    METH_VARARGS,
+    NULL
+};
 
 
 ImplInfo *load_backend(
@@ -150,14 +187,19 @@ int run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_ar
                 );
             } else if (in_args->arg_types[i] == OIF_CALLBACK) {
                 OIFCallback *p = in_args->arg_values[i];
-                if (p->src != OIF_LANG_PYTHON) {
+                if (p->src == OIF_LANG_PYTHON) {
+                    pValue = (PyObject *) p->fn_p;
+                } else if (p->src == OIF_LANG_C) {
+                    fprintf(stderr, "[dispatch_python] Check what callback to wrap via src field\n");
+                    IVP_RHS_CALLBACK = (ivp_rhs_ptr_t) p->c_fn_p;
+                    pValue = PyCFunction_New(&ivp_rhs_def, NULL);
+                } else {
                     fprintf(
                         stderr,
-                        "[dispatch_python] Can handle only Python callable\n"
+                        "[dispatch_python] Cannot determine callback source\n"
                     );
-                    exit(1);
+                    pValue = NULL;
                 }
-                pValue = (PyObject *) p->fn_p;
                 if (!PyCallable_Check(pValue)) {
                     fprintf(
                         stderr,
