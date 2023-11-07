@@ -13,6 +13,7 @@ dependencies:
     - r-base=3.6.3
     - mkl
     - openblas
+    - sundials
     - pytest
     - python-dotenv
     - flake8
