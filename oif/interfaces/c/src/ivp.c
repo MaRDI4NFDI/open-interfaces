@@ -10,7 +10,8 @@ int oif_ivp_set_rhs_fn(
 ) {
     OIFCallback rhs_wrapper = {
         .src = OIF_LANG_C,
-        .c_fn_p = rhs
+        .fn_p = NULL,
+        .c_fn_p = &rhs
     };
     OIFArgType in_arg_types[] = {OIF_CALLBACK};
     void *in_arg_values[] = {&rhs_wrapper};

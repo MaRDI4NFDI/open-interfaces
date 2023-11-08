@@ -13,7 +13,7 @@ int oif_ivp_set_rhs_fn(
  * Set initial value y(t0) = y0.
  */
 int oif_ivp_set_initial_value(
-    ImplHandle implh, OIFArrayF64 *y0, double t
+    ImplHandle implh, OIFArrayF64 *y0, double t0
 );
 
 /**
