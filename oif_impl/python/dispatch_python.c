@@ -18,8 +18,8 @@ typedef struct {
 
 static int IMPL_COUNTER = 0;
 
-typedef void (*ivp_rhs_ptr_t)(double, OIFArrayF64 *y, OIFArrayF64 *y_dot);
-ivp_rhs_ptr_t IVP_RHS_CALLBACK = NULL;
+typedef void (*ivp_rhs_fp_t)(double t, OIFArrayF64 *y, OIFArrayF64 *y_dot);
+ivp_rhs_fp_t IVP_RHS_CALLBACK = NULL;
 
 static PyObject *
 c_to_py_wrapper_ivp_rhs(PyObject *ignored, PyObject *args) {
@@ -191,7 +191,7 @@ int run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_ar
                     pValue = (PyObject *) p->fn_p;
                 } else if (p->src == OIF_LANG_C) {
                     fprintf(stderr, "[dispatch_python] Check what callback to wrap via src field\n");
-                    IVP_RHS_CALLBACK = (ivp_rhs_ptr_t) p->c_fn_p;
+                    IVP_RHS_CALLBACK = *(ivp_rhs_fp_t *) p->c_fn_p;
                     pValue = PyCFunction_New(&ivp_rhs_def, NULL);
                 } else {
                     fprintf(
