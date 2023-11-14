@@ -83,3 +83,45 @@ TEST(IvpScipyOdeDopri5TestSuite, LinearOscillatorTestCase) {
         EXPECT_NEAR(y->data[0], LinearOscillatorProblem::exact(t, 0), 1e-12);
     }
 }
+
+TEST(IvpSundialsCvodeTestSuite, ScalarExpDecayTestCase) {
+    double t0 = 0.0;
+    intptr_t dims[] = {ScalarExpDecayProblem::N,};
+    OIFArrayF64 *y0 = oif_init_array_f64_from_data(
+        1, dims, ScalarExpDecayProblem::y0);
+    OIFArrayF64 *y = oif_create_array_f64(1, dims);
+    ImplHandle implh = oif_init_impl("ivp", "sundials_cvode", 1, 0);
+
+    int status;
+    status = oif_ivp_set_rhs_fn(implh, ScalarExpDecayProblem::rhs);
+    status = oif_ivp_set_initial_value(implh, y0, t0);
+
+    double t = 0.1;
+    auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
+    for (auto t : t_span) {
+        status = oif_ivp_integrate(implh, t, y);
+        EXPECT_NEAR(y->data[0], ScalarExpDecayProblem::exact(t, 0), 2e-15);
+    }
+}
+
+
+TEST(IvpSundialsCvodeTestSuite, LinearOscillatorTestCase) {
+    double t0 = 0.0;
+    intptr_t dims[] = {LinearOscillatorProblem::N,};
+    OIFArrayF64 *y0 = oif_init_array_f64_from_data(
+        1, dims, LinearOscillatorProblem::y0
+    );
+     OIFArrayF64 *y = oif_create_array_f64(1, dims);
+    ImplHandle implh = oif_init_impl("ivp", "sundials_cvode", 1, 0);
+
+    int status;
+    status = oif_ivp_set_rhs_fn(implh, LinearOscillatorProblem::rhs);
+    status = oif_ivp_set_initial_value(implh, y0, t0);
+
+    double t = 0.1;
+    auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
+    for (auto t : t_span) {
+        status = oif_ivp_integrate(implh, t, y);
+        EXPECT_NEAR(y->data[0], LinearOscillatorProblem::exact(t, 0), 1e-12);
+    }
+}
