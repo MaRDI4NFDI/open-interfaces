@@ -103,11 +103,8 @@ int run_interface_method(ImplInfo *impl_info,
         }
     }
 
-    ffi_status status = ffi_prep_cif(
-        &cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_uint, arg_types);
-    if (status == FFI_OK) {
-        // printf("[dispatch_c] ffi_prep_cif returned FFI_OK\n");
-    } else {
+    ffi_status status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_uint, arg_types);
+    if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[dispatch_c] ffi_prep_cif was not OK");
         exit(EXIT_FAILURE);
@@ -123,9 +120,6 @@ int run_interface_method(ImplInfo *impl_info,
 
     unsigned result;
     ffi_call(&cif, FFI_FN(func), &result, arg_values);
-
-    // printf("Result is %u\n", result);
-    fflush(stdout);
 
     return 0;
 }
