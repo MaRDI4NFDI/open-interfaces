@@ -73,7 +73,7 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     assert(t0 == t0_in);
 
     // 5. Create CVODE object.
-    cvode_mem = CVodeCreate(CV_BDF, sunctx);
+    cvode_mem = CVodeCreate(CV_ADAMS, sunctx);
 
     // 6. Initialize CVODE solver.
     status = CVodeInit(cvode_mem, cvode_rhs, t0, y0);
