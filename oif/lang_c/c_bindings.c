@@ -27,7 +27,7 @@ OIFArrayF64 *oif_create_array_f64(int nd, intptr_t *dimensions) {
 }
 
 OIFArrayF64 *
-oif_init_array_f64_from_data(int nd, intptr_t *dimensions, double *data) {
+oif_init_array_f64_from_data(int nd, intptr_t *dimensions, const double *data) {
     OIFArrayF64 *x = oif_create_array_f64(nd, dimensions);
     int size = 1;
     for (size_t i = 0; i < nd; ++i) {

@@ -18,7 +18,7 @@ ImplHandle oif_init_impl(const char *interface,
 OIFArrayF64 *oif_create_array_f64(int nd, intptr_t *dimensions);
 
 OIFArrayF64 *
-oif_init_array_f64_from_data(int nd, intptr_t *dimensions, double *data);
+oif_init_array_f64_from_data(int nd, intptr_t *dimensions, const double *data);
 
 void oif_free_array_f64(OIFArrayF64 *x);
 
