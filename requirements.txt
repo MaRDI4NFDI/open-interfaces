@@ -61,6 +61,10 @@ docutils==0.17.1
     #   exhale
     #   myst-parser
     #   sphinx
+exceptiongroup==1.2.0
+    # via
+    #   ipython
+    #   pytest
 executing==2.0.0
     # via stack-data
 exhale==0.3.6
@@ -158,7 +162,7 @@ packaging==23.2
     #   sphinx
 parso==0.8.3
     # via jedi
-pexpect==4.8.0
+pexpect==4.9.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
@@ -270,6 +274,12 @@ stack-data==0.6.3
     # via ipython
 tabulate==0.9.0
     # via jupyter-cache
+tomli==2.0.1
+    # via
+    #   build
+    #   pip-tools
+    #   pyproject-hooks
+    #   pytest
 tornado==6.3.3
     # via
     #   ipykernel
@@ -285,9 +295,12 @@ traitlets==5.11.2
     #   nbclient
     #   nbformat
 typer[all]==0.5.0
-    # via check-reqs
+    # via
+    #   check-reqs
+    #   typer
 typing-extensions==4.8.0
     # via
+    #   astroid
     #   myst-nb
     #   myst-parser
     #   sqlalchemy
