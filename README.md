@@ -27,6 +27,23 @@ To build the software, use command
 which invokes underlying CMake build and builds software inside
 the `build` directory.
 
+## Quality assurance during development
+
+To ensure code consistency, we use [`pre-commit`](https://pre-commit.com/).
+It is configured to run multiple checks for formatting and trailing whitespace
+for all source code in the repo.
+During development, the checks can be run automatically by installing
+a pre-commit Git hook:
+
+    pre-commit install
+
+or by invoking it manually via
+
+    pre-commit run --all-files
+
+We recommend running it automatically so that the code is pushed only after
+formatting checks.
+
 ## Run examples
 
 One needs set `PYTHONPATH`:
