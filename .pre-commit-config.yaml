@@ -1,10 +1,40 @@
+---
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
-    hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
-    -   id: check-yaml
-    -   id: check-added-large-files
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v3.2.0
+      hooks:
+          - id: trailing-whitespace
+          - id: end-of-file-fixer
+          - id: check-added-large-files
+
+    # C source code
+    - repo: https://github.com/pre-commit/mirrors-clang-format
+      rev: v17.0.3
+      hooks:
+          - id: clang-format
+    - repo: https://github.com/cheshirekow/cmake-format-precommit
+      rev: v0.6.13
+      hooks:
+          - id: cmake-format
+
+
+    # Python source code
+    - repo: https://github.com/pycqa/flake8
+      rev: 6.1.0
+      hooks:
+          - id: flake8
+
+
+    # YAML
+    - repo: https://github.com/adrienverge/yamllint.git
+      rev: v1.21.0
+      hooks:
+          - id: yamllint
+            args: [--format, parsable, --strict]
+
+    - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+      rev: 0.2.1
+      hooks:
+          - id: yamlfmt
