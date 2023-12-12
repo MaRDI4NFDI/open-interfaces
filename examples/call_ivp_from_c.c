@@ -29,8 +29,7 @@ void rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
     }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     char *impl = parse_impl(argc, argv);
     printf("Calling from C an open interface for solving y'(t) = f(t, y)\n");
     printf("Implementation: %s\n", impl);
