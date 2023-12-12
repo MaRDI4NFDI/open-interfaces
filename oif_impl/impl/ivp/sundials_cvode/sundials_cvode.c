@@ -23,7 +23,7 @@ const char *prefix = "[impl::sundials_cvode]";
 
 // This macro gives access to the individual components of the data array of an
 // N Vector.
-#define NV_Ith_S(v,i) ( NV_DATA_S(v)[i] )
+#define NV_Ith_S(v, i) (NV_DATA_S(v)[i])
 
 // Signature for the right-hand side that is provided by the `IVP` interface
 // of the OpenInterFaces.
@@ -46,7 +46,7 @@ static SUNContext sunctx;
 void *cvode_mem;
 
 int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
-    int status;  // Check errors
+    int status;              // Check errors
     realtype abstol = 1e-15; // absolute tolerance
     realtype reltol = 1e-15; // relative tolerance
 
@@ -57,10 +57,7 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     status = SUNContext_Create(NULL, &sunctx);
     if (status) {
         fprintf(
-            stderr,
-            "%s An error occurred when creating SUNContext",
-            prefix
-        );
+            stderr, "%s An error occurred when creating SUNContext", prefix);
         return 1;
     }
 
@@ -81,11 +78,7 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     // 6. Initialize CVODE solver.
     status = CVodeInit(cvode_mem, cvode_rhs, t0, y0);
     if (status) {
-        fprintf(
-            stderr,
-            "%s CVodeInit call failed",
-            prefix
-        );
+        fprintf(stderr, "%s CVodeInit call failed", prefix);
         return 1;
     }
 
@@ -96,13 +89,12 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     // pass
 
     // 9. Create linear solver object
-    SUNLinearSolver linear_solver = SUNLinSol_SPGMR(y0, SUN_PREC_NONE, 0, sunctx);
+    SUNLinearSolver linear_solver =
+        SUNLinSol_SPGMR(y0, SUN_PREC_NONE, 0, sunctx);
     if (linear_solver == NULL) {
-        fprintf(
-            stderr,
-            "%s An error occurred when creating SUNLinearSolver",
-            prefix
-        );
+        fprintf(stderr,
+                "%s An error occurred when creating SUNLinearSolver",
+                prefix);
         return 1;
     }
 
@@ -120,7 +112,6 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
 
     return 0;
 }
-
 
 int integrate(double t, OIFArrayF64 *y) {
     int ier; // Error checking.
@@ -142,18 +133,14 @@ int integrate(double t, OIFArrayF64 *y) {
     ier = CVode(cvode_mem, tout, yout, &tret, CV_NORMAL);
     // TODO: Handle all cases: write good error messages for all `ier`.
     switch (ier) {
-      case CV_SUCCESS:
-          return 0;
-      default:
-          fprintf(
-              stderr,
-              "%s During call to `CVode`, an error occurred\n",
-              prefix
-          );
-          return 1;
+    case CV_SUCCESS:
+        return 0;
+    default:
+        fprintf(
+            stderr, "%s During call to `CVode`, an error occurred\n", prefix);
+        return 1;
     }
 }
-
 
 // Simple function that calculates the differential equation.
 static int cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data) {
@@ -162,19 +149,16 @@ static int cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data) {
     // function that works with `OIFArrayF64` data structure,
     // so we need to convert between them here.
 
-    // Construct OIFArrayF64 to pass to the user-provided right-hand side function.
-    OIFArrayF64 oif_y = {
-        .nd = 1,
-        .dimensions = (intptr_t []){N_VGetLength(y)},
-        .data = N_VGetArrayPointer(y)
-    };
-    OIFArrayF64 oif_ydot = {
-        .nd = 1,
-        .dimensions = (intptr_t []){N_VGetLength(ydot)},
-        .data = N_VGetArrayPointer(ydot)
-    };
+    // Construct OIFArrayF64 to pass to the user-provided right-hand side
+    // function.
+    OIFArrayF64 oif_y = {.nd = 1,
+                         .dimensions = (intptr_t[]){N_VGetLength(y)},
+                         .data = N_VGetArrayPointer(y)};
+    OIFArrayF64 oif_ydot = {.nd = 1,
+                            .dimensions = (intptr_t[]){N_VGetLength(ydot)},
+                            .data = N_VGetArrayPointer(ydot)};
 
     OIF_RHS_FN(t, &oif_y, &oif_ydot);
 
-    return(0);
+    return (0);
 }

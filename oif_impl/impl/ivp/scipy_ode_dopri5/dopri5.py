@@ -11,7 +11,7 @@ class Dopri5:
 
         return 0
 
-    def set_initial_value(self, y0, t0):
+    def set_initial_value(self, y0: np.ndarray, t0: float):
         if not isinstance(t0, float):
             raise ValueError("Argument `t0` must be floating-point number")
 

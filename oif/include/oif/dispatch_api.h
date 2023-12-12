@@ -4,8 +4,7 @@
  */
 #include <oif/api.h>
 
-enum
-{
+enum {
     OIF_LANG_C = 1,
     OIF_LANG_CXX = 2,
     OIF_LANG_PYTHON = 3,
@@ -28,15 +27,11 @@ typedef struct {
     DispatchHandle dh;
 } ImplInfo;
 
+ImplInfo *load_backend(const char *impl_details,
+                       size_t version_major,
+                       size_t version_minor);
 
-ImplInfo *load_backend(
-    const char *impl_details,
-    size_t version_major,
-    size_t version_minor
-);
-
-
-int
-run_interface_method(
-    ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args
-);
+int run_interface_method(ImplInfo *impl_info,
+                         const char *method,
+                         OIFArgs *in_args,
+                         OIFArgs *out_args);

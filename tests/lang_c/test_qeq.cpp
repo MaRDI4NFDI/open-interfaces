@@ -5,9 +5,10 @@ extern "C" {
 #include "oif/interfaces/qeq.h"
 }
 
-
 TEST(QeqPyQeqSolverTestSuite, LinearCase) {
-    intptr_t dimensions[] = {2,};
+    intptr_t dimensions[] = {
+        2,
+    };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
     ImplHandle implh = oif_init_impl("qeq", "py_qeq_solver", 1, 0);
 
@@ -17,9 +18,10 @@ TEST(QeqPyQeqSolverTestSuite, LinearCase) {
     EXPECT_EQ(roots->data[1], 0.5);
 }
 
-
 TEST(QeqPyQeqSolverTestSuite, TwoRoots) {
-    intptr_t dimensions[] = {2,};
+    intptr_t dimensions[] = {
+        2,
+    };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
     ImplHandle implh = oif_init_impl("qeq", "py_qeq_solver", 1, 0);
 
@@ -29,9 +31,10 @@ TEST(QeqPyQeqSolverTestSuite, TwoRoots) {
     EXPECT_EQ(roots->data[1], -1.0);
 }
 
-
 TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots) {
-    intptr_t dimensions[] = {2,};
+    intptr_t dimensions[] = {
+        2,
+    };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
     ImplHandle implh = oif_init_impl("qeq", "py_qeq_solver", 1, 0);
 
@@ -41,9 +44,10 @@ TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots) {
     EXPECT_EQ(roots->data[1], +2);
 }
 
-
 TEST(QeqCQeqSolverTestSuite, LinearCase) {
-    intptr_t dimensions[] = {2,};
+    intptr_t dimensions[] = {
+        2,
+    };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
     ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
 
@@ -53,9 +57,10 @@ TEST(QeqCQeqSolverTestSuite, LinearCase) {
     EXPECT_EQ(roots->data[1], 0.5);
 }
 
-
 TEST(QeqCQeqSolverTestSuite, TwoRoots) {
-    intptr_t dimensions[] = {2,};
+    intptr_t dimensions[] = {
+        2,
+    };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
     ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
 
@@ -65,9 +70,10 @@ TEST(QeqCQeqSolverTestSuite, TwoRoots) {
     EXPECT_EQ(roots->data[1], -1.0);
 }
 
-
 TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots) {
-    intptr_t dimensions[] = {2,};
+    intptr_t dimensions[] = {
+        2,
+    };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
     ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
 
@@ -78,7 +84,9 @@ TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots) {
 }
 
 TEST(QeqCQeqSolverTestSuite, ExtremeRoots) {
-    intptr_t dimensions[] = {2,};
+    intptr_t dimensions[] = {
+        2,
+    };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
     ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
 

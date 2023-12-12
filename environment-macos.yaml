@@ -1,3 +1,4 @@
+---
 name: open-interfaces
 
 channels:
@@ -19,5 +20,5 @@ dependencies:
     - mypy
     - isort
     - pip:
-        - sphinx
-        - myst_parser
+          - sphinx
+          - myst_parser

@@ -6,7 +6,6 @@
 
 #include <oif/api.h>
 
-
 /**
  * Load implementation of the interface.
  *
@@ -17,18 +16,13 @@
  * @return positive number that identifies the requested implementation
  *         or OIF_IMPL_INIT_ERROR in case of the error
  */
-ImplHandle load_interface_impl(
-        const char *interface,
-        const char *impl,
-        size_t version_major,
-        size_t version_minor
-);
+ImplHandle load_interface_impl(const char *interface,
+                               const char *impl,
+                               size_t version_major,
+                               size_t version_minor);
 
-
-int call_interface_method(
-    ImplHandle implh,
-    const char *method,
-    OIFArgs *args,
-    OIFArgs *retvals
-);
+int call_interface_method(ImplHandle implh,
+                          const char *method,
+                          OIFArgs *args,
+                          OIFArgs *retvals);
 #endif

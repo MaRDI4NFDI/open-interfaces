@@ -14,8 +14,7 @@
 #include <oif/dispatch.h>
 #include <oif/dispatch_api.h>
 
-
-char OIF_DISPATCH_C_SO[] =      "liboif_dispatch_c.so";
+char OIF_DISPATCH_C_SO[] = "liboif_dispatch_c.so";
 char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
 
 /**
@@ -42,19 +41,15 @@ int compare_fn(const ImplHandle *key1, const ImplHandle *key2) {
     return *key1 - *key2;
 }
 
-
 static void _init() {
     hashmap_init(&IMPL_MAP, hash_fn, compare_fn);
     _INITIALIZED = true;
 }
 
-
-ImplHandle load_interface_impl(
-    const char *interface,
-    const char *impl,
-    size_t version_major,
-    size_t version_minor)
-{
+ImplHandle load_interface_impl(const char *interface,
+                               const char *impl,
+                               size_t version_major,
+                               size_t version_minor) {
     if (!_INITIALIZED) {
         _init();
     }
@@ -72,15 +67,10 @@ ImplHandle load_interface_impl(
     FILE *conf_file = fopen(conf_filename, "r");
     if (conf_file == NULL) {
         fprintf(
-            stderr,
-            "[dispatch] Cannot load conf file '%s'\n", conf_filename
-        );
+            stderr, "[dispatch] Cannot load conf file '%s'\n", conf_filename);
         return -1;
     } else {
-        fprintf(
-            stderr,
-            "[dispatch] Configuration file: %s\n", conf_filename
-        );
+        fprintf(stderr, "[dispatch] Configuration file: %s\n", conf_filename);
     }
 
     // Temporary buffer to read lines from file.
@@ -90,17 +80,15 @@ ImplHandle load_interface_impl(
     char backend_name[16];
     buffer = fgets(buffer, buffer_size, conf_file);
     if (buffer == NULL) {
-        fprintf(
-            stderr,
-            "[dispatch] Could not read backend line from configuration file '%s'\n", conf_filename
-        );
+        fprintf(stderr,
+                "[dispatch] Could not read backend line from configuration "
+                "file '%s'\n",
+                conf_filename);
         return -1;
     }
     len = strlen(buffer);
     if (buffer[len - 1] != '\n') {
-        fprintf(
-            stderr, "Backend name is longer than allocated buffer\n"
-        );
+        fprintf(stderr, "Backend name is longer than allocated buffer\n");
         return -1;
     } else {
         // Trim the new line character.
@@ -111,18 +99,14 @@ ImplHandle load_interface_impl(
 
     buffer = fgets(buffer, buffer_size, conf_file);
     if (buffer == NULL) {
-        fprintf(
-            stderr,
-            "[dispatch] Could not read implementation details line "
-            "from the configuration file\n"
-        );
+        fprintf(stderr,
+                "[dispatch] Could not read implementation details line "
+                "from the configuration file\n");
         return -1;
     }
     len = strlen(buffer);
     if (buffer[len - 1] != '\n') {
-        fprintf(
-            stderr, "Backend name is longer than allocated array\n"
-        );
+        fprintf(stderr, "Backend name is longer than allocated array\n");
         exit(EXIT_FAILURE);
     } else {
         // Trim new line character.
@@ -133,34 +117,31 @@ ImplHandle load_interface_impl(
     fprintf(stderr, "[dispatch] Implementation details: '%s'\n", impl_details);
     free(buffer);
 
-    if (strcmp(backend_name, "c") == 0)
-    {
+    if (strcmp(backend_name, "c") == 0) {
         dh = OIF_LANG_C;
         dispatch_lang_so = OIF_DISPATCH_C_SO;
-    }
-    else if (strcmp(backend_name, "python") == 0)
-    {
+    } else if (strcmp(backend_name, "python") == 0) {
         dh = OIF_LANG_PYTHON;
         dispatch_lang_so = OIF_DISPATCH_PYTHON_SO;
-    }
-    else
-    {
-        fprintf(stderr, "[dispatch] Implementation has unknown backend: '%s'\n", backend_name);
+    } else {
+        fprintf(stderr,
+                "[dispatch] Implementation has unknown backend: '%s'\n",
+                backend_name);
         exit(EXIT_FAILURE);
     }
 
     void *lib_handle;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
         lib_handle = dlopen(dispatch_lang_so, RTLD_LOCAL | RTLD_LAZY);
-        if (lib_handle == NULL)
-        {
-            fprintf(stderr, "[dispatch] Cannot load shared library '%s'\n", dispatch_lang_so);
+        if (lib_handle == NULL) {
+            fprintf(stderr,
+                    "[dispatch] Cannot load shared library '%s'\n",
+                    dispatch_lang_so);
             fprintf(stderr, "Error message: %s\n", dlerror());
             exit(EXIT_FAILURE);
         }
         OIF_DISPATCH_HANDLES[dh] = lib_handle;
-    }
-    else {
+    } else {
         lib_handle = OIF_DISPATCH_HANDLES[dh];
     }
 
@@ -168,11 +149,14 @@ ImplHandle load_interface_impl(
     load_backend_fn = dlsym(lib_handle, "load_backend");
 
     if (load_backend_fn == NULL) {
-        fprintf(stderr, "[dispatch] Could not load function %s: %s\n",
-            "load_backend", dlerror());
+        fprintf(stderr,
+                "[dispatch] Could not load function %s: %s\n",
+                "load_backend",
+                dlerror());
     }
 
-    ImplInfo *impl_info = load_backend_fn(impl_details, version_major, version_minor);
+    ImplInfo *impl_info =
+        load_backend_fn(impl_details, version_major, version_minor);
     if (impl_info == NULL) {
         fprintf(stderr, "[dispatch] Could not load implementation\n");
         return OIF_IMPL_INIT_ERROR;
@@ -184,32 +168,32 @@ ImplHandle load_interface_impl(
     return impl_info->implh;
 }
 
-int call_interface_method(
-    ImplHandle implh,
-    const char *method,
-    OIFArgs *args,
-    OIFArgs *retvals)
-{
+int call_interface_method(ImplHandle implh,
+                          const char *method,
+                          OIFArgs *args,
+                          OIFArgs *retvals) {
     int status;
 
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
     DispatchHandle dh = impl_info->dh;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
-        fprintf(stderr, "[dispatch] Cannot call interface implementation for language id: '%u'", dh);
+        fprintf(stderr,
+                "[dispatch] Cannot call interface implementation for language "
+                "id: '%u'",
+                dh);
         exit(EXIT_FAILURE);
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
 
-    int (*run_interface_method_fn)(ImplInfo *, const char *, OIFArgs *, OIFArgs *);
+    int (*run_interface_method_fn)(
+        ImplInfo *, const char *, OIFArgs *, OIFArgs *);
     run_interface_method_fn = dlsym(lib_handle, "run_interface_method");
     status = run_interface_method_fn(impl_info, method, args, retvals);
 
     if (status) {
-        fprintf(
-            stderr,
-            "[dispatch] ERROR: during execution of open interface "
-            "an error occurred\n"
-        );
+        fprintf(stderr,
+                "[dispatch] ERROR: during execution of open interface "
+                "an error occurred\n");
     }
     return status;
 }

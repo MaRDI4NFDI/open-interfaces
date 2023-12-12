@@ -33,9 +33,9 @@ typedef struct {
 
 // This structure is used for callback functions.
 typedef struct {
-    int src;       // Language of the function (one of OIF_LANG_* constants)
-    void *fn_p;    // Function pointer in this language
-    void *c_fn_p;  // C function pointer (can be NULL)
+    int src;      // Language of the function (one of OIF_LANG_* constants)
+    void *fn_p;   // Function pointer in this language
+    void *c_fn_p; // C function pointer (can be NULL)
 } OIFCallback;
 
 enum {
