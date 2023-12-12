@@ -21,3 +21,5 @@ dependencies:
     - bandit
     - mypy
     - isort
+    - pip:
+        - pre-commit
