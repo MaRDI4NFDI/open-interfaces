@@ -19,13 +19,15 @@ repos:
       hooks:
           - id: cmake-format
 
-
     # Python source code
     - repo: https://github.com/pycqa/flake8
       rev: 6.1.0
       hooks:
           - id: flake8
-
+    - repo: https://github.com/psf/black
+      rev: 22.10.0
+      hooks:
+          - id: black
 
     # YAML
     - repo: https://github.com/adrienverge/yamllint.git
