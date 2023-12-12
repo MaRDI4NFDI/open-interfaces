@@ -40,4 +40,3 @@ int
 run_interface_method(
     ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args
 );
-

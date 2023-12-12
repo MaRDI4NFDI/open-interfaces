@@ -6,4 +6,3 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(hashmap)
-

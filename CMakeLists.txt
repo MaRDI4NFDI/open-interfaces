@@ -37,7 +37,7 @@ add_subdirectory(examples)
  # For Windows: Prevent overriding the parent project's compiler/linker settings
  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
  FetchContent_MakeAvailable(googletest)
- 
+
  enable_testing()
 
  add_executable(test_qeq tests/lang_c/test_qeq.cpp)
@@ -53,10 +53,10 @@ add_subdirectory(examples)
  target_include_directories(test_linsolve PUBLIC ${CMAKE_SOURCE_DIR}/oif/interfaces/c/include)
  target_compile_features(test_linsolve PUBLIC cxx_std_11)
  set_target_properties(test_linsolve PROPERTIES CXX_EXTENSIONS OFF)
- 
+
  include(GoogleTest)
  gtest_discover_tests(test_qeq)
  gtest_discover_tests(test_linsolve)
- 
+
  include(CTest)
  add_test(NAME test_qeq COMMAND test_qeq)

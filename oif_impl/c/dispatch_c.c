@@ -40,7 +40,7 @@ ImplInfo *load_backend(
         return NULL;
     }
     impl_info->impl_lib = impl_lib;
-    
+
     return (ImplInfo *) impl_info;
 }
 
@@ -139,4 +139,3 @@ int run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_ar
 
     return 0;
 }
-

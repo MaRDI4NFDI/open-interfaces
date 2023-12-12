@@ -191,7 +191,7 @@ int call_interface_method(
     OIFArgs *retvals)
 {
     int status;
-    
+
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
     DispatchHandle dh = impl_info->dh;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {

@@ -25,7 +25,7 @@ static PyObject *
 c_to_py_wrapper_ivp_rhs(PyObject *ignored, PyObject *args) {
     double t;   // Time
     PyArrayObject *yNDArray;  // NDArray for updated solution
-    
+
     if (!PyArg_ParseTuple(args, "dO!", &t, &PyArray_Type, &yNDArray)) {
         return NULL;
     }
@@ -43,7 +43,7 @@ c_to_py_wrapper_ivp_rhs(PyObject *ignored, PyObject *args) {
     PyObject *result = PyArray_SimpleNewFromData(
         y_dot->nd, y_dot->dimensions, NPY_FLOAT64, y_dot->data
     );
-    
+
     return result;
 }
 
@@ -115,7 +115,7 @@ ImplInfo *load_backend(
 
     PyObject *pFileName, *pModule;
     PyObject *pClass, *pInstance;
-    PyObject *pInitArgs; 
+    PyObject *pInitArgs;
     printf("[backend_python] Provided module name: '%s'\n", moduleName);
     printf("[backend_python] Provided class name: '%s'\n", className);
     pFileName = PyUnicode_FromString(moduleName);

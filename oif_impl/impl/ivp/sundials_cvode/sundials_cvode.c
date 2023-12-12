@@ -4,7 +4,7 @@
  * using Adams multistep method and stiff problems using BDF method.
  * See https://sundials.readthedocs.io/en/latest/cvode/Usage/index.html
  * Big thank you to the people that created GitHub Copilot.
- * 
+ *
  * This code uses the following types from Sundials:
  * - realtype – the floating-point type
  * - sunindextype – the integer type used for vector and matrix indices
@@ -91,7 +91,7 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
 
     // 7. Specify integration tolerances.
     CVodeSStolerances(cvode_mem, reltol, abstol);
-    
+
     // 8. Create matrix object
     // pass
 
@@ -105,13 +105,13 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
         );
         return 1;
     }
-    
+
     // 10. Set linear solver optional inputs
-    
+
     // 11. Attach linear solver module.
     // NULL is because SPGMR is a matrix-free method, so no matrix is needed.
     CVodeSetLinearSolver(cvode_mem, linear_solver, NULL);
-    
+
     // 12. Set optional inputs
     // 13. Create nonlinear solver object (optional)
     // 14. Attach nonlinear solver module (optional)

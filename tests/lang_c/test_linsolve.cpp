@@ -8,7 +8,7 @@ extern "C" {
 
 TEST(LinearSolverTestSuite, TestCase1) {
     intptr_t A_dims[] = {2, 2};
-    double A_data[] = {1.0, 1.0, -3.0, 1.0}; 
+    double A_data[] = {1.0, 1.0, -3.0, 1.0};
     OIFArrayF64 *A = oif_init_array_f64_from_data(
         2, A_dims, A_data
     );

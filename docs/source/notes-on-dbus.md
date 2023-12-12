@@ -1,6 +1,6 @@
 ---
 title: Notes on DBus
-authors: 
+authors:
     - Dmitry I. Kabanov
       affiliations:
         - Institute for Analysis and Numerics, University of Münster

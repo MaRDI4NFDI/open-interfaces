@@ -32,4 +32,3 @@ int oif_solve_linear_system(
 
     return status;
 }
-

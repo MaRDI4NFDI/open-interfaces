@@ -15,7 +15,7 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x) {
     int NRHS = 1; // Number of right-hand sides.
     int LDA = N;  // Leading Dimension of A
     int LDB = 1;  // Leading Dimension of b
-    
+
     assert(NRHS == b->nd);
     assert(b->nd == x->nd);
     assert(b->dimensions[0] == x->dimensions[0]);
@@ -28,7 +28,7 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x) {
             A->dimensions[0], A->dimensions[1]);
     fprintf(stderr, "[linsolve] b dimensions: nd = %d, dim[0] = %ld\n",
             b->nd, b->dimensions[0]);
-    
+
     int ipiv[N];
 
     int info = LAPACKE_dgesv(
