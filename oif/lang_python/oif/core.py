@@ -56,14 +56,14 @@ class OIFCallback(ctypes.Structure):
 
 
 def wrap_py_func(
-    fn: Callable, argtypes: list[OIFArgType], restype: OIFArgType
+    fn: Callable, fn_w: Callable, argtypes: list[OIFArgType], restype: OIFArgType
 ) -> OIFCallback:
     ctypes_argtypes: list = []
     for argt in argtypes:
         if argt == OIF_FLOAT64:
             ctypes_argtypes.append(ctypes.c_double)
         elif argt == OIF_ARRAY_F64:
-            ctypes_argtypes.append(ctypes.POINTER(ctypes.c_double))
+            ctypes_argtypes.append(ctypes.POINTER(OIFArrayF64))
         else:
             raise ValueError(f"Cannot convert argument type {argt}")
 
@@ -80,15 +80,18 @@ def wrap_py_func(
         raise ValueError(f"Cannot convert type '{restype}'")
 
     fn_t = ctypes.CFUNCTYPE(ctypes_restype, *ctypes_argtypes)
-    wrapper_fn = fn_t(fn)
+    wrapper_fn = fn_t(fn_w)
 
     # id returns function pointer. Yes, I am also shocked.
     # Docstring for `id` says: "CPython uses the object's memory address".
     fn_p = id(fn)
 
-    # TODO: Replace magic constant with BACKEND_PYTHON = 3
-    oifc = OIFCallback(3, fn_p, ctypes.cast(wrapper_fn, ctypes.c_void_p))
-    return oifc
+    wrapper_fn_void_p = ctypes.cast(ctypes.pointer(wrapper_fn), ctypes.c_void_p)
+    assert wrapper_fn_void_p.value is not None
+    print("wrapper_fn_p =", hex(wrapper_fn_void_p.value))
+    # TODO: Replace magic constant with OIF_LANG_PYTHON (= 3)
+    oifcallback = OIFCallback(3, fn_p, wrapper_fn_void_p)
+    return oifcallback
 
 
 class OIFPyBinding:
