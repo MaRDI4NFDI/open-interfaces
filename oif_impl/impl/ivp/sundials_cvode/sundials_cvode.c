@@ -42,6 +42,10 @@ static SUNContext sunctx;
 void *cvode_mem;
 
 int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
+    if ((y0_in == NULL) || (y0_in->data == NULL)) {
+        fprintf(stderr, "`set_initial_value` received NULL argument\n");
+        exit(1);
+    }
     int status;              // Check errors
     realtype abstol = 1e-15; // absolute tolerance
     realtype reltol = 1e-15; // relative tolerance
@@ -112,6 +116,10 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
 }
 
 int integrate(double t, OIFArrayF64 *y) {
+    if ((y == NULL) || (y->data == NULL)) {
+        fprintf(stderr, "`integrate` received NULL argument\n");
+        exit(1);
+    }
     int ier; // Error checking.
 
     sunindextype N = y->dimensions[0];
