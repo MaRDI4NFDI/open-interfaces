@@ -12,6 +12,7 @@ class TestIVPViaScipyODEDopri5Implementation:
     @pytest.fixture(
         params=[
             "scipy_ode_dopri5",
+            "sundials_cvode",
         ]
     )
     def s(self, request):
