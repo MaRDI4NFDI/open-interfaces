@@ -9,11 +9,10 @@ extern "C" {
 }
 
 class ScalarExpDecayProblem {
-public:
+  public:
     static constexpr int N = 1;
     static constexpr double y0[] = {1.0};
-    static void
-    rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
+    static void rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
         int size = y->dimensions[0];
         for (int i = 0; i < size; ++i) {
             rhs_out->data[i] = -y->data[i];
@@ -26,27 +25,28 @@ public:
 };
 
 class LinearOscillatorProblem {
-public:
+  public:
     static constexpr int N = 2;
     static constexpr double y0[2] = {1.0, 0.5};
     static constexpr double omega = M_PI;
-    static void
-    rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
+    static void rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
         rhs_out->data[0] = y->data[1];
         rhs_out->data[1] = -omega * omega * y->data[0];
     }
     static double exact(double t, int i) {
         // Exact solution at time t, component i.
-        assert(i == 0);  // Check only the first component.
-        return y0[0] * cos(omega*t) + y0[1] * sin(omega*t) / omega;
+        assert(i == 0); // Check only the first component.
+        return y0[0] * cos(omega * t) + y0[1] * sin(omega * t) / omega;
     }
 };
 
 TEST(IvpScipyOdeDopri5TestSuite, ScalarExpDecayTestCase) {
     double t0 = 0.0;
-    intptr_t dims[] = {ScalarExpDecayProblem::N,};
-    OIFArrayF64 *y0 = oif_init_array_f64_from_data(
-        1, dims, ScalarExpDecayProblem::y0);
+    intptr_t dims[] = {
+        ScalarExpDecayProblem::N,
+    };
+    OIFArrayF64 *y0 =
+        oif_init_array_f64_from_data(1, dims, ScalarExpDecayProblem::y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
     ImplHandle implh = oif_init_impl("ivp", "scipy_ode_dopri5", 1, 0);
 
@@ -62,14 +62,14 @@ TEST(IvpScipyOdeDopri5TestSuite, ScalarExpDecayTestCase) {
     }
 }
 
-
 TEST(IvpScipyOdeDopri5TestSuite, LinearOscillatorTestCase) {
     double t0 = 0.0;
-    intptr_t dims[] = {LinearOscillatorProblem::N,};
-    OIFArrayF64 *y0 = oif_init_array_f64_from_data(
-        1, dims, LinearOscillatorProblem::y0
-    );
-     OIFArrayF64 *y = oif_create_array_f64(1, dims);
+    intptr_t dims[] = {
+        LinearOscillatorProblem::N,
+    };
+    OIFArrayF64 *y0 =
+        oif_init_array_f64_from_data(1, dims, LinearOscillatorProblem::y0);
+    OIFArrayF64 *y = oif_create_array_f64(1, dims);
     ImplHandle implh = oif_init_impl("ivp", "scipy_ode_dopri5", 1, 0);
 
     int status;
@@ -86,9 +86,11 @@ TEST(IvpScipyOdeDopri5TestSuite, LinearOscillatorTestCase) {
 
 TEST(IvpSundialsCvodeTestSuite, ScalarExpDecayTestCase) {
     double t0 = 0.0;
-    intptr_t dims[] = {ScalarExpDecayProblem::N,};
-    OIFArrayF64 *y0 = oif_init_array_f64_from_data(
-        1, dims, ScalarExpDecayProblem::y0);
+    intptr_t dims[] = {
+        ScalarExpDecayProblem::N,
+    };
+    OIFArrayF64 *y0 =
+        oif_init_array_f64_from_data(1, dims, ScalarExpDecayProblem::y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
     ImplHandle implh = oif_init_impl("ivp", "sundials_cvode", 1, 0);
 
@@ -104,14 +106,14 @@ TEST(IvpSundialsCvodeTestSuite, ScalarExpDecayTestCase) {
     }
 }
 
-
 TEST(IvpSundialsCvodeTestSuite, LinearOscillatorTestCase) {
     double t0 = 0.0;
-    intptr_t dims[] = {LinearOscillatorProblem::N,};
-    OIFArrayF64 *y0 = oif_init_array_f64_from_data(
-        1, dims, LinearOscillatorProblem::y0
-    );
-     OIFArrayF64 *y = oif_create_array_f64(1, dims);
+    intptr_t dims[] = {
+        LinearOscillatorProblem::N,
+    };
+    OIFArrayF64 *y0 =
+        oif_init_array_f64_from_data(1, dims, LinearOscillatorProblem::y0);
+    OIFArrayF64 *y = oif_create_array_f64(1, dims);
     ImplHandle implh = oif_init_impl("ivp", "sundials_cvode", 1, 0);
 
     int status;

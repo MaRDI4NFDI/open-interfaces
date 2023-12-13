@@ -110,6 +110,8 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     // 15. Set nonlinear solver optional inputs (optional)
     // 16. Specify rootfinding problem (optional)
 
+    N_VDestroy_Serial(y0);
+
     return 0;
 }
 
@@ -131,6 +133,7 @@ int integrate(double t, OIFArrayF64 *y) {
 
     // 17. Advance solution in time.
     ier = CVode(cvode_mem, tout, yout, &tret, CV_NORMAL);
+    N_VDestroy(yout);
     // TODO: Handle all cases: write good error messages for all `ier`.
     switch (ier) {
     case CV_SUCCESS:
@@ -142,7 +145,7 @@ int integrate(double t, OIFArrayF64 *y) {
     }
 }
 
-// Simple function that calculates the differential equation.
+// Function that computes the right-hand side of the ODE system.
 static int cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data) {
     // While Sundials CVode works with `N_Vector` data structure
     // for one-dimensional arrays, the user provides right-hand side
@@ -160,5 +163,5 @@ static int cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data) {
 
     OIF_RHS_FN(t, &oif_y, &oif_ydot);
 
-    return (0);
+    return 0;
 }
