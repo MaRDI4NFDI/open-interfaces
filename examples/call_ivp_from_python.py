@@ -14,7 +14,7 @@ def _parse_args():
     p = argparse.ArgumentParser()
     p.add_argument(
         "impl",
-        choices=["scipy_ode_dopri5"],
+        choices=["scipy_ode_dopri5", "sundials_cvode"],
         default="scipy_ode_dopri5",
         nargs="?",
     )
