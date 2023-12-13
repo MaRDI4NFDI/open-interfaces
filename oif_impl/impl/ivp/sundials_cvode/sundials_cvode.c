@@ -21,10 +21,6 @@
 
 const char *prefix = "[impl::sundials_cvode]";
 
-// This macro gives access to the individual components of the data array of an
-// N Vector.
-#define NV_Ith_S(v, i) (NV_DATA_S(v)[i])
-
 // Signature for the right-hand side that is provided by the `IVP` interface
 // of the OpenInterFaces.
 // TODO: Should be part of the interface header?
