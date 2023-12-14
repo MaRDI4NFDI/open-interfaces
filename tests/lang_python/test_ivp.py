@@ -56,8 +56,8 @@ class LinearOscillatorProblem(IVPProblem):
 class TestIVPViaScipyODEDopri5Implementation:
     def test_1(self, s, p):
         p = ScalarExpDecayProblem()
-        s.set_rhs_fn(p.rhs)
         s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
 
         t1 = p.t0 + 1
         times = np.linspace(p.t0, t1, num=11)
@@ -70,8 +70,8 @@ class TestIVPViaScipyODEDopri5Implementation:
         npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-4)
 
     def test_3_test_accept_int_list_for_y0_and_int_for_t0(self, s, p):
-        s.set_rhs_fn(p.rhs)
         s.set_initial_value(list(p.y0), int(p.t0))
+        s.set_rhs_fn(p.rhs)
 
         t1 = p.t0 + 1
         times = np.linspace(p.t0, t1, num=11)

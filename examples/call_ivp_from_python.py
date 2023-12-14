@@ -32,10 +32,10 @@ def main():
     print("Calling from Python an open interface for quadratic solver")
     print(f"Implementation: {impl}")
     s = IVP(impl)
-    s.set_rhs_fn(rhs)
     t0 = 0.0
     y0 = [1.0]
     s.set_initial_value(y0, t0)
+    s.set_rhs_fn(rhs)
 
     times = np.linspace(t0, t0 + 1, num=11)
 

@@ -48,14 +48,14 @@ int main(int argc, char *argv[]) {
     }
 
     int status; // Aux variable to check for errors.
-    status = oif_ivp_set_rhs_fn(implh, rhs);
-    if (status) {
-        fprintf(stderr, "oif_ivp_set_rhs_fn returned error\n");
-        return EXIT_FAILURE;
-    }
     status = oif_ivp_set_initial_value(implh, y0, t0);
     if (status) {
         fprintf(stderr, "oif_ivp_set_set_initial_value returned error\n");
+        return EXIT_FAILURE;
+    }
+    status = oif_ivp_set_rhs_fn(implh, rhs);
+    if (status) {
+        fprintf(stderr, "oif_ivp_set_rhs_fn returned error\n");
         return EXIT_FAILURE;
     }
 

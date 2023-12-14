@@ -16,12 +16,14 @@ class IVP:
     def __init__(self, impl: str):
         self._binding: OIFPyBinding = init_impl("ivp", impl, 1, 0)
         self.s = None
+        self.N: int = 0
         self.y0: np.ndarray
         self.y: np.ndarray
-        self.N: int
 
     def set_rhs_fn(self, rhs_fn):
-        x = np.array([1.0, 2.0])
+        if self.N <= 0:
+            raise RuntimeError("'set_initial_value' must be called before 'set_rhs_fn'")
+        x = np.random.random(size=(self.N,))
         if len(rhs_fn(2.718, x)) != len(x):
             raise ValueError("Right-hand-side function has signature problems")
 

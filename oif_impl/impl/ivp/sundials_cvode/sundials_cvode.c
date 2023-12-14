@@ -30,11 +30,6 @@ static oif_rhs_fn_t OIF_RHS_FN;
 // Signature for the right-hand side function that CVode expects.
 static int cvode_rhs(realtype t, N_Vector u, N_Vector u_dot, void *user_data);
 
-int set_rhs_fn(void rhs(double, OIFArrayF64 *y, OIFArrayF64 *y_dot)) {
-    OIF_RHS_FN = rhs;
-    return 0;
-}
-
 // Global state of the module.
 // Sundials context
 static SUNContext sunctx;
@@ -112,6 +107,16 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
 
     N_VDestroy_Serial(y0);
 
+    return 0;
+}
+
+int set_rhs_fn(void rhs(double, OIFArrayF64 *y, OIFArrayF64 *y_dot)) {
+    if (rhs == NULL) {
+        fprintf(stderr,
+                "`set_rhs_fn` accepts non-null function pointer only\n");
+        return 1;
+    }
+    OIF_RHS_FN = rhs;
     return 0;
 }
 

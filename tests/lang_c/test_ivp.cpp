@@ -51,8 +51,8 @@ TEST(IvpScipyOdeDopri5TestSuite, ScalarExpDecayTestCase) {
     ImplHandle implh = oif_init_impl("ivp", "scipy_ode_dopri5", 1, 0);
 
     int status;
-    status = oif_ivp_set_rhs_fn(implh, ScalarExpDecayProblem::rhs);
     status = oif_ivp_set_initial_value(implh, y0, t0);
+    status = oif_ivp_set_rhs_fn(implh, ScalarExpDecayProblem::rhs);
 
     double t = 0.1;
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
@@ -73,8 +73,8 @@ TEST(IvpScipyOdeDopri5TestSuite, LinearOscillatorTestCase) {
     ImplHandle implh = oif_init_impl("ivp", "scipy_ode_dopri5", 1, 0);
 
     int status;
-    status = oif_ivp_set_rhs_fn(implh, LinearOscillatorProblem::rhs);
     status = oif_ivp_set_initial_value(implh, y0, t0);
+    status = oif_ivp_set_rhs_fn(implh, LinearOscillatorProblem::rhs);
 
     double t = 0.1;
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
@@ -95,8 +95,8 @@ TEST(IvpSundialsCvodeTestSuite, ScalarExpDecayTestCase) {
     ImplHandle implh = oif_init_impl("ivp", "sundials_cvode", 1, 0);
 
     int status;
-    status = oif_ivp_set_rhs_fn(implh, ScalarExpDecayProblem::rhs);
     status = oif_ivp_set_initial_value(implh, y0, t0);
+    status = oif_ivp_set_rhs_fn(implh, ScalarExpDecayProblem::rhs);
 
     double t = 0.1;
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
@@ -117,8 +117,8 @@ TEST(IvpSundialsCvodeTestSuite, LinearOscillatorTestCase) {
     ImplHandle implh = oif_init_impl("ivp", "sundials_cvode", 1, 0);
 
     int status;
-    status = oif_ivp_set_rhs_fn(implh, LinearOscillatorProblem::rhs);
     status = oif_ivp_set_initial_value(implh, y0, t0);
+    status = oif_ivp_set_rhs_fn(implh, LinearOscillatorProblem::rhs);
 
     double t = 0.1;
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
