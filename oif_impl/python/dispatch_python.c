@@ -106,8 +106,9 @@ ImplInfo *load_backend(const char *impl_details,
     PyObject *pFileName, *pModule;
     PyObject *pClass, *pInstance;
     PyObject *pInitArgs;
-    printf("[backend_python] Provided module name: '%s'\n", moduleName);
-    printf("[backend_python] Provided class name: '%s'\n", className);
+    fprintf(
+        stderr, "[backend_python] Provided module name: '%s'\n", moduleName);
+    fprintf(stderr, "[backend_python] Provided class name: '%s'\n", className);
     pFileName = PyUnicode_FromString(moduleName);
     pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
