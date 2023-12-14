@@ -32,17 +32,29 @@ class ScalarExpDecayProblem(IVPProblem):
         return self.y0 * np.exp(-t)
 
 
-class TestIVPViaScipyODEDopri5Implementation:
-    @pytest.fixture(
-        params=[
-            "scipy_ode_dopri5",
-            "sundials_cvode",
-        ]
-    )
-    def s(self, request):
-        return IVP(request.param)
+class LinearOscillatorProblem(IVPProblem):
+    t0 = 0.0
+    y0 = np.array([1.0, 0.5])
+    omega = np.pi
 
-    def test_1(self, s):
+    def rhs(self, t, y):
+        return np.array(
+            [
+                y[1],
+                -(self.omega**2) * y[0],
+            ]
+        )
+
+    def exact(self, t):
+        y_exact = (
+            self.y0[0] * np.cos(self.omega * t)
+            + self.y0[1] * np.sin(self.omega * t) / self.omega
+        )
+        return y_exact
+
+
+class TestIVPViaScipyODEDopri5Implementation:
+    def test_1(self, s, p):
         p = ScalarExpDecayProblem()
         s.set_rhs_fn(p.rhs)
         s.set_initial_value(p.y0, p.t0)
@@ -57,10 +69,9 @@ class TestIVPViaScipyODEDopri5Implementation:
 
         npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-4)
 
-    def test_3_test_accept_int_list_for_y0_and_int_for_t0(self, s):
-        p = ScalarExpDecayProblem()
+    def test_3_test_accept_int_list_for_y0_and_int_for_t0(self, s, p):
         s.set_rhs_fn(p.rhs)
-        s.set_initial_value(list(p.y0), p.t0)
+        s.set_initial_value(list(p.y0), int(p.t0))
 
         t1 = p.t0 + 1
         times = np.linspace(p.t0, t1, num=11)
@@ -71,3 +82,20 @@ class TestIVPViaScipyODEDopri5Implementation:
             soln.append(s.y[0])
 
         npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-4)
+
+
+@pytest.fixture(
+    params=[
+        "scipy_ode_dopri5",
+        "sundials_cvode",
+    ]
+)
+def s(request):
+    """Instantiate IVP with the specified implementation."""
+    return IVP(request.param)
+
+
+@pytest.fixture(params=[ScalarExpDecayProblem(), LinearOscillatorProblem()])
+def p(request):
+    """Return instantiated IVPProblem subclasses."""
+    return request.param

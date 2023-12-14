@@ -11,9 +11,9 @@ class Dopri5:
     def set_rhs_fn(self, rhs):
         self.rhs = rhs
 
-        x = np.array([3.0])
-        assert len(self.rhs(42.0, x)) == len(x)
-        print("after check")
+        # x = np.array([3.0])
+        # assert len(self.rhs(42.0, x)) == len(x)
+        # print("after check")
 
         return 0
 
