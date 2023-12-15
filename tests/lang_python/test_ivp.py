@@ -55,7 +55,6 @@ class LinearOscillatorProblem(IVPProblem):
 
 class TestIVPViaScipyODEDopri5Implementation:
     def test_1(self, s, p):
-        p = ScalarExpDecayProblem()
         s.set_initial_value(p.y0, p.t0)
         s.set_rhs_fn(p.rhs)
 
