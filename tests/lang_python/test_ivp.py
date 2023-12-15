@@ -4,6 +4,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from oif.interfaces.ivp import IVP
+from scipy import optimize
 
 
 class IVPProblem(ABC):
@@ -56,6 +57,45 @@ class LinearOscillatorProblem(IVPProblem):
         )
 
 
+class OrbitEquationsProblem(IVPProblem):
+    eps = 0.9
+    t0 = 0.0
+    y0 = np.array([1 - eps, 0.0, 0.0, np.sqrt((1 + eps) / (1 - eps))])
+
+    def rhs(self, t, y):
+        r = np.sqrt(y[0] ** 2 + y[1] ** 2)
+        return np.array(
+            [
+                y[2],
+                y[3],
+                -y[0] / r**3,
+                -y[1] / r**3,
+            ]
+        )
+
+    def exact(self, t):
+        def f(u):
+            return u - self.eps * np.sin(u) - t
+
+        def df(u):
+            return 1 - self.eps * np.cos(u)
+
+        u, __, ier, msg = optimize.fsolve(
+            f, 1.0, fprime=df, xtol=1e-15, full_output=True
+        )
+        assert ier == 1, msg
+        u = u[0]  # Extract the scalar value from the array.
+        eps = self.eps
+        return np.array(
+            [
+                np.cos(u) - eps,
+                np.sqrt(1 - eps**2) * np.sin(u),
+                -np.sin(u) / (1 - eps * np.cos(u)),
+                (np.sqrt(1 - eps**2) * np.cos(u)) / (1 - eps * np.cos(u)),
+            ]
+        )
+
+
 class TestIVPViaScipyODEDopri5Implementation:
     def test_1(self, s, p):
         s.set_initial_value(p.y0, p.t0)
@@ -69,9 +109,9 @@ class TestIVPViaScipyODEDopri5Implementation:
             s.integrate(t)
             soln.append(s.y)
 
-        npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-4)
+        npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-10)
 
-    def test_3_test_accept_int_list_for_y0_and_int_for_t0(self, s, p):
+    def test_2_test_accept_int_list_for_y0_and_int_for_t0(self, s, p):
         s.set_initial_value(list(p.y0), int(p.t0))
         s.set_rhs_fn(p.rhs)
 
@@ -83,7 +123,7 @@ class TestIVPViaScipyODEDopri5Implementation:
             s.integrate(t)
             soln.append(s.y)
 
-        npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-4)
+        npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-10)
 
 
 @pytest.fixture(
@@ -97,7 +137,13 @@ def s(request):
     return IVP(request.param)
 
 
-@pytest.fixture(params=[ScalarExpDecayProblem(), LinearOscillatorProblem()])
+@pytest.fixture(
+    params=[
+        ScalarExpDecayProblem(),
+        LinearOscillatorProblem(),
+        OrbitEquationsProblem(),
+    ]
+)
 def p(request):
     """Return instantiated IVPProblem subclasses."""
     return request.param
