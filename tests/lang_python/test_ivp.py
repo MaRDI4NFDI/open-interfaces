@@ -23,6 +23,8 @@ class IVPProblem(ABC):
 
 
 class ScalarExpDecayProblem(IVPProblem):
+    """Problem :math:`y(t) = -y, y(0) = 1` with solution :math:`y(t)=exp(-t)`"""
+
     t0 = 0.0
     y0 = np.array([1.0])
 
@@ -34,6 +36,15 @@ class ScalarExpDecayProblem(IVPProblem):
 
 
 class LinearOscillatorProblem(IVPProblem):
+    r"""Linear second-order equation of non-decaying oscillator.
+
+    Second-order equation :math:`y''(t) + \omega^2 y(t) = 0` with given
+    :math:`y(0) = y_0` and :math:`y'(0) = y'_0`, and parameter :math:`\omega`.
+
+    Solution is given by::
+        y(t) = y_0 * \cos(\omega t) + y'_0 \frac{\sin(\omega t) / \omega}
+    """
+
     t0 = 0.0
     y0 = np.array([1.0, 0.5])
     omega = np.pi
@@ -58,6 +69,14 @@ class LinearOscillatorProblem(IVPProblem):
 
 
 class OrbitEquationsProblem(IVPProblem):
+    """System of differential equations that describes movement of two bodies.
+
+    This problem is problem 5 from Problem Class D from the paper:
+    Hull, T. E. et al. 1972. Comparing numerical methods for ordinary
+    differential equations. SIAM J. Numer. Anal., p. 620. doi:10.1137/0709052
+
+    """
+
     eps = 0.9
     t0 = 0.0
     y0 = np.array([1 - eps, 0.0, 0.0, np.sqrt((1 + eps) / (1 - eps))])
