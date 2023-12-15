@@ -46,11 +46,14 @@ class LinearOscillatorProblem(IVPProblem):
         )
 
     def exact(self, t):
-        y_exact = (
-            self.y0[0] * np.cos(self.omega * t)
-            + self.y0[1] * np.sin(self.omega * t) / self.omega
+        return np.array(
+            [
+                self.y0[0] * np.cos(self.omega * t)
+                + self.y0[1] * np.sin(self.omega * t) / self.omega,
+                -self.y0[0] * self.omega * np.sin(self.omega * t)
+                + self.y0[1] * np.cos(self.omega * t),
+            ]
         )
-        return y_exact
 
 
 class TestIVPViaScipyODEDopri5Implementation:
@@ -61,10 +64,10 @@ class TestIVPViaScipyODEDopri5Implementation:
         t1 = p.t0 + 1
         times = np.linspace(p.t0, t1, num=11)
 
-        soln = [p.y0[0]]
+        soln = [p.y0]
         for t in times[1:]:
             s.integrate(t)
-            soln.append(s.y[0])
+            soln.append(s.y)
 
         npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-4)
 
@@ -75,10 +78,10 @@ class TestIVPViaScipyODEDopri5Implementation:
         t1 = p.t0 + 1
         times = np.linspace(p.t0, t1, num=11)
 
-        soln = [p.y0[0]]
+        soln = [p.y0]
         for t in times[1:]:
             s.integrate(t)
-            soln.append(s.y[0])
+            soln.append(s.y)
 
         npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-4)
 
