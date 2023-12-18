@@ -61,6 +61,7 @@ target_link_libraries(test_ivp GTest::gtest_main oif_c)
 target_include_directories(test_ivp PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
 target_include_directories(test_ivp
                            PUBLIC ${CMAKE_SOURCE_DIR}/oif/interfaces/c/include)
+target_include_directories(test_ivp PRIVATE ${CMAKE_SOURCE_DIR}/tests)
 target_compile_features(test_ivp PUBLIC cxx_std_11)
 set_target_properties(test_ivp PROPERTIES CXX_EXTENSIONS OFF)
 
