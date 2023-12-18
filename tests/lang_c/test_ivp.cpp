@@ -22,9 +22,8 @@ class ScalarExpDecayProblem {
             rhs_out->data[i] = -y->data[i];
         }
     }
-    static double exact(double t, int i) {
-        // Exact solution at time t, component i.
-        return exp(-t);
+    static void verify(double t, OIFArrayF64 *y) {
+        EXPECT_NEAR(y->data[0], exp(-t), 1e-15);
     }
 };
 
@@ -37,10 +36,13 @@ class LinearOscillatorProblem {
         rhs_out->data[0] = y->data[1];
         rhs_out->data[1] = -omega * omega * y->data[0];
     }
-    static double exact(double t, int i) {
-        // Exact solution at time t, component i.
-        assert(i == 0); // Check only the first component.
-        return y0[0] * cos(omega * t) + y0[1] * sin(omega * t) / omega;
+    static void verify(double t, OIFArrayF64 *y) {
+        double y_exact_0 =
+            y0[0] * cos(omega * t) + y0[1] * sin(omega * t) / omega;
+        EXPECT_NEAR(y->data[0], y_exact_0, 1e-12);
+        double y_exact_1 =
+            -y0[0] * omega * sin(omega * t) + y0[1] * cos(omega * t);
+        EXPECT_NEAR(y->data[1], y_exact_1, 1e-12);
     }
 };
 
@@ -57,13 +59,15 @@ class OrbitEquationsProblem {
         rhs_out->data[2] = -y->data[0] / (r * r * r);
         rhs_out->data[3] = -y->data[1] / (r * r * r);
     }
-    static double exact(double t, int i) {
-        // Exact solution at time t, component i.
-        assert(i == 0); // Check only the first component.
-
+    static void verify(double t, OIFArrayF64 *y) {
         double u = fsolve([t](double u) { return u - eps * sin(u) - t; },
                           [](double u) { return 1 - eps * cos(u); });
-        return cos(u) - eps;
+        EXPECT_NEAR(y->data[0], cos(u) - eps, 1e-10);
+        EXPECT_NEAR(y->data[1], sqrt(1 - pow(eps, 2)) * sin(u), 1e-10);
+        EXPECT_NEAR(y->data[2], -sin(u) / (1 - eps * cos(u)), 1e-10);
+        EXPECT_NEAR(y->data[3],
+                    sqrt(1 - pow(eps, 2)) * cos(u) / (1 - eps * cos(u)),
+                    1e-10);
     }
 };
 
@@ -84,11 +88,10 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase) {
     status = oif_ivp_set_initial_value(implh, y0, t0);
     status = oif_ivp_set_rhs_fn(implh, ScalarExpDecayProblem::rhs);
 
-    double t = 0.1;
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
     for (auto t : t_span) {
         status = oif_ivp_integrate(implh, t, y);
-        EXPECT_NEAR(y->data[0], ScalarExpDecayProblem::exact(t, 0), 1e-15);
+        ScalarExpDecayProblem::verify(t, y);
     }
 }
 
@@ -106,11 +109,10 @@ TEST_P(IvpImplementationsFixture, LinearOscillatorTestCase) {
     status = oif_ivp_set_initial_value(implh, y0, t0);
     status = oif_ivp_set_rhs_fn(implh, LinearOscillatorProblem::rhs);
 
-    double t = 0.1;
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
     for (auto t : t_span) {
         status = oif_ivp_integrate(implh, t, y);
-        EXPECT_NEAR(y->data[0], LinearOscillatorProblem::exact(t, 0), 1e-12);
+        LinearOscillatorProblem::verify(t, y);
     }
 }
 
@@ -128,11 +130,10 @@ TEST_P(IvpImplementationsFixture, OrbitEquationsProblemTestCase) {
     status = oif_ivp_set_initial_value(implh, y0, t0);
     status = oif_ivp_set_rhs_fn(implh, OrbitEquationsProblem::rhs);
 
-    double t = 0.1;
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
     for (auto t : t_span) {
         status = oif_ivp_integrate(implh, t, y);
-        EXPECT_NEAR(y->data[0], OrbitEquationsProblem::exact(t, 0), 1e-10);
+        OrbitEquationsProblem::verify(t, y);
     }
 }
 
