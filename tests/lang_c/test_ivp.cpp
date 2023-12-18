@@ -1,3 +1,4 @@
+#include "gtest/gtest.h"
 #include <cmath>
 #include <cstdio>
 
@@ -66,7 +67,10 @@ class OrbitEquationsProblem {
     }
 };
 
-TEST(IvpScipyOdeDopri5TestSuite, ScalarExpDecayTestCase) {
+struct IvpImplementationsFixture : public testing::TestWithParam<const char *> {
+};
+
+TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase) {
     double t0 = 0.0;
     intptr_t dims[] = {
         ScalarExpDecayProblem::N,
@@ -88,7 +92,7 @@ TEST(IvpScipyOdeDopri5TestSuite, ScalarExpDecayTestCase) {
     }
 }
 
-TEST(IvpScipyOdeDopri5TestSuite, LinearOscillatorTestCase) {
+TEST_P(IvpImplementationsFixture, LinearOscillatorTestCase) {
     double t0 = 0.0;
     intptr_t dims[] = {
         LinearOscillatorProblem::N,
@@ -110,7 +114,7 @@ TEST(IvpScipyOdeDopri5TestSuite, LinearOscillatorTestCase) {
     }
 }
 
-TEST(IvpScipyOdeDopri5TestSuite, OrbitEquationsProblemTestCase) {
+TEST_P(IvpImplementationsFixture, OrbitEquationsProblemTestCase) {
     double t0 = 0.0;
     intptr_t dims[] = {
         OrbitEquationsProblem::N,
@@ -132,68 +136,6 @@ TEST(IvpScipyOdeDopri5TestSuite, OrbitEquationsProblemTestCase) {
     }
 }
 
-TEST(IvpSundialsCvodeTestSuite, ScalarExpDecayTestCase) {
-    double t0 = 0.0;
-    intptr_t dims[] = {
-        ScalarExpDecayProblem::N,
-    };
-    OIFArrayF64 *y0 =
-        oif_init_array_f64_from_data(1, dims, ScalarExpDecayProblem::y0);
-    OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_init_impl("ivp", "sundials_cvode", 1, 0);
-
-    int status;
-    status = oif_ivp_set_initial_value(implh, y0, t0);
-    status = oif_ivp_set_rhs_fn(implh, ScalarExpDecayProblem::rhs);
-
-    double t = 0.1;
-    auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
-    for (auto t : t_span) {
-        status = oif_ivp_integrate(implh, t, y);
-        EXPECT_NEAR(y->data[0], ScalarExpDecayProblem::exact(t, 0), 2e-15);
-    }
-}
-
-TEST(IvpSundialsCvodeTestSuite, LinearOscillatorTestCase) {
-    double t0 = 0.0;
-    intptr_t dims[] = {
-        LinearOscillatorProblem::N,
-    };
-    OIFArrayF64 *y0 =
-        oif_init_array_f64_from_data(1, dims, LinearOscillatorProblem::y0);
-    OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_init_impl("ivp", "sundials_cvode", 1, 0);
-
-    int status;
-    status = oif_ivp_set_initial_value(implh, y0, t0);
-    status = oif_ivp_set_rhs_fn(implh, LinearOscillatorProblem::rhs);
-
-    double t = 0.1;
-    auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
-    for (auto t : t_span) {
-        status = oif_ivp_integrate(implh, t, y);
-        EXPECT_NEAR(y->data[0], LinearOscillatorProblem::exact(t, 0), 1e-12);
-    }
-}
-
-TEST(IvpSundialsCvodeTestSuite, OrbitEquationsProblemTestCase) {
-    double t0 = 0.0;
-    intptr_t dims[] = {
-        OrbitEquationsProblem::N,
-    };
-    OIFArrayF64 *y0 =
-        oif_init_array_f64_from_data(1, dims, OrbitEquationsProblem::y0);
-    OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_init_impl("ivp", "sundials_cvode", 1, 0);
-
-    int status;
-    status = oif_ivp_set_initial_value(implh, y0, t0);
-    status = oif_ivp_set_rhs_fn(implh, OrbitEquationsProblem::rhs);
-
-    double t = 0.1;
-    double t_span[] = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
-    for (auto t : t_span) {
-        status = oif_ivp_integrate(implh, t, y);
-        EXPECT_NEAR(y->data[0], OrbitEquationsProblem::exact(t, 0), 1e-10);
-    }
-}
+INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests,
+                         IvpImplementationsFixture,
+                         testing::Values("scipy_ode_dopri5", "sundials_cvode"));
