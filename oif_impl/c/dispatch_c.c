@@ -76,18 +76,8 @@ int run_interface_method(ImplInfo *impl_info,
             arg_types[i] = &ffi_type_pointer;
         } else if (in_args->arg_types[i] == OIF_CALLBACK) {
             arg_types[i] = &ffi_type_pointer;
-            fprintf(stderr,
-                    "[dispatch_c] WARN: only C callbacks are processed "
-                    "correctly\n");
             in_args->arg_values[i] =
                 ((OIFCallback *)in_args->arg_values[i])->c_fn_p;
-            fprintf(stderr,
-                    "[dispatch_c] WARN: in_args->arg_values[i] = %p\n",
-                    in_args->arg_values[i]);
-            fprintf(stderr,
-                    "[dispatch_c] WARN: *in_args->arg_values[i] = %p\n",
-                    *(*(void (*)(double, OIFArrayF64 *, OIFArrayF64 *))
-                           in_args->arg_values[i]));
         } else {
             fflush(stdout);
             fprintf(stderr,
