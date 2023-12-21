@@ -6,6 +6,9 @@ else                    # Linux
     DSO_EXT := so
 endif
 
+export LD_LIBRARY_PATH:=build
+export PYTHONPATH:=oif/interfaces/python:oif_impl/python:oif_impl/impl:oif/lang_python:src:"$(PYTHONPATH)"
+
 .PHONY : all
 all :
 	cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \

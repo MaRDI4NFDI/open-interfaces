@@ -1,4 +1,4 @@
-find_package(Python REQUIRED Interpreter Development NumPy)
+find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
 
 add_library(oif_dispatch_python SHARED dispatch_python.c)
 target_include_directories(oif_dispatch_python

@@ -5,18 +5,12 @@ channels:
     - conda-forge
 
 dependencies:
-    - python=3.10
-    - cmake=3.18
+    - python
     - pip
-    - cxx-compiler=1.3.0
-    - fortran-compiler
-    - julia=1.7.3
-    - r-base=3.6.3
-    - mkl
-    - openblas
-    - sundials
     - pytest
     - python-dotenv
+    - numpy
+    - scipy
     - flake8
     - black
     - bandit
@@ -26,3 +20,11 @@ dependencies:
           - pre-commit
           - sphinx
           - myst_parser
+    - cmake=3.18
+    - cxx-compiler=1.3.0
+    - fortran-compiler
+    - julia=1.7.3
+    - r-base=3.6.3
+    - mkl
+    - openblas
+    - sundials
