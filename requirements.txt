@@ -221,7 +221,7 @@ pyzmq==25.1.2
     # via
     #   ipykernel
     #   jupyter-client
-referencing==0.30.2
+referencing==0.32.1
     # via
     #   jsonschema
     #   jsonschema-specifications
