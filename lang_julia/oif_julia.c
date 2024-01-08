@@ -1,7 +1,12 @@
 #include <oif_config.h>
 
-#include "oif_connector/oif_constants.h"
 #include <julia.h>
+#ifndef jl_array_data_
+// Compatibility with nightly versions of Julia
+#define jl_array_data_ jl_array_data
+#endif
+
+#include "oif_connector/oif_constants.h"
 #include <oif_connector/oif_interface.h>
 
 jl_value_t *get_matrix_dims(int N);
@@ -55,7 +60,7 @@ int oif_lang_solve(int N, double *A, double *b, double *x) {
     jl_exception_clear();
     return OIF_RUNTIME_ERROR;
   }
-  memcpy(x, (double *)jl_array_data(ret), N * sizeof(double));
+  memcpy(x, (double *)jl_array_data_(ret), N * sizeof(double));
   return OIF_OK;
 }
 
