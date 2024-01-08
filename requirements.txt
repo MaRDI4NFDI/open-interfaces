@@ -176,7 +176,7 @@ pluggy==1.3.0
     # via pytest
 pre-commit==3.6.0
     # via -r requirements.in
-prompt-toolkit==3.0.39
+prompt-toolkit==3.0.43
     # via ipython
 psutil==5.9.6
     # via ipykernel
