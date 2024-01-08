@@ -117,7 +117,7 @@ jupyter-core==5.4.0
     #   jupyter-client
     #   nbclient
     #   nbformat
-lxml==4.9.3
+lxml==5.1.0
     # via exhale
 markdown-it-py==2.2.0
     # via
