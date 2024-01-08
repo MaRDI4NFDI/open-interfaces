@@ -5313,12 +5313,12 @@ public:
       std::enable_if_t<                                                        \
           !std::is_arithmetic<std::remove_reference_t<RhsT>>::value, int> = 0> \
   friend auto operator op(ExprLhs &&lhs, RhsT &&rhs)                           \
-      ->BinaryExpr<LhsT, RhsT const &> {                                       \
+      -> BinaryExpr<LhsT, RhsT const &> {                                      \
     return {static_cast<bool>(lhs.m_lhs op rhs), lhs.m_lhs, #op##_sr, rhs};    \
   }                                                                            \
   template <typename RhsT,                                                     \
             std::enable_if_t<std::is_arithmetic<RhsT>::value, int> = 0>        \
-  friend auto operator op(ExprLhs &&lhs, RhsT rhs)->BinaryExpr<LhsT, RhsT> {   \
+  friend auto operator op(ExprLhs &&lhs, RhsT rhs) -> BinaryExpr<LhsT, RhsT> { \
     return {static_cast<bool>(lhs.m_lhs op rhs), lhs.m_lhs, #op##_sr, rhs};    \
   }
 

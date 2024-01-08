@@ -34,10 +34,10 @@ jobs:
         runs-on: ubuntu-22.04
         needs: matrix-setup
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Docker meta
               id: meta
-              uses: docker/metadata-action@v4
+              uses: docker/metadata-action@v5
               with:
                   images: ghcr.io/${{github.repository}}/ci_test
                   flavor: |
@@ -54,18 +54,18 @@ jobs:
         permissions:
             packages: write
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Set up Docker Buildx
               id: buildx
-              uses: docker/setup-buildx-action@v2
+              uses: docker/setup-buildx-action@v3
             - name: Login to Github Packages
-              uses: docker/login-action@v2
+              uses: docker/login-action@v3
               with:
                   registry: ghcr.io
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
             - name: Build
-              uses: docker/build-push-action@v4
+              uses: docker/build-push-action@v5
               with:
                   context: .
                   push: true

@@ -6,7 +6,7 @@
  * \warning Currently only one Implementor can be loaded at once.
  */
 
-/** Try to load the Implementor DSO
+/** Try to load the Implementor Dynamic Shared Object (DSO)
  *
  * The connector expects all Implementor DSOs residing in subdirectories:
  *      lang_c/liboif_c.so

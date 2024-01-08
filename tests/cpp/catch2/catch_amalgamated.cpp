@@ -924,9 +924,8 @@ IEventListenerPtr prepareReporters(Config const *config) {
 class TestGroup {
 public:
   explicit TestGroup(IEventListenerPtr &&reporter, Config const *config)
-      : m_reporter(reporter.get()), m_config{config}, m_context{config,
-                                                                CATCH_MOVE(
-                                                                    reporter)} {
+      : m_reporter(reporter.get()), m_config{config},
+        m_context{config, CATCH_MOVE(reporter)} {
 
     assert(m_config->testSpec().getInvalidSpecs().empty() &&
            "Invalid test specs should be handled before running tests");
