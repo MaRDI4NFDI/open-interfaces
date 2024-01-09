@@ -40,3 +40,4 @@ repos:
       rev: 0.2.1
       hooks:
           - id: yamlfmt
+            args: [--preserve-quotes]
