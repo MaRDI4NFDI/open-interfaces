@@ -12,8 +12,8 @@ class IVPProblem(ABC):
     y0: np.ndarray
 
     @abstractmethod
-    def rhs(self, t, y):
-        """Right-hand side function for a system of ODEs: y'(t) = f(t, y)."""
+    def rhs(self, t, y, ydot):
+        r"""Right-hand side function for a system of ODEs: \dot y(t) = f(t, y)."""
         pass
 
     @abstractmethod
@@ -28,8 +28,8 @@ class ScalarExpDecayProblem(IVPProblem):
     t0 = 0.0
     y0 = np.array([1.0])
 
-    def rhs(self, _, y):
-        return -y
+    def rhs(self, _, y, ydot):
+        ydot[:] = -y
 
     def exact(self, t):
         return self.y0 * np.exp(-t)
@@ -49,13 +49,9 @@ class LinearOscillatorProblem(IVPProblem):
     y0 = np.array([1.0, 0.5])
     omega = np.pi
 
-    def rhs(self, t, y):
-        return np.array(
-            [
-                y[1],
-                -(self.omega**2) * y[0],
-            ]
-        )
+    def rhs(self, t, y, ydot):
+        ydot[0] = y[1]
+        ydot[1] = -(self.omega**2) * y[0]
 
     def exact(self, t):
         return np.array(
@@ -81,16 +77,12 @@ class OrbitEquationsProblem(IVPProblem):
     t0 = 0.0
     y0 = np.array([1 - eps, 0.0, 0.0, np.sqrt((1 + eps) / (1 - eps))])
 
-    def rhs(self, t, y):
+    def rhs(self, t, y, ydot):
         r = np.sqrt(y[0] ** 2 + y[1] ** 2)
-        return np.array(
-            [
-                y[2],
-                y[3],
-                -y[0] / r**3,
-                -y[1] / r**3,
-            ]
-        )
+        ydot[0] = y[2]
+        ydot[1] = y[3]
+        ydot[2] = -y[0] / r**3
+        ydot[3] = -y[1] / r**3
 
     def exact(self, t):
         def f(u):

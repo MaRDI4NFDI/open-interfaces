@@ -22,8 +22,8 @@ def _parse_args():
     return Args(**vars(args))
 
 
-def rhs(t, y):
-    return -y
+def rhs(t, y, ydot):
+    ydot[:] = -y
 
 
 def main():

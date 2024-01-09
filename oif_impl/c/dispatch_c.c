@@ -77,7 +77,7 @@ int run_interface_method(ImplInfo *impl_info,
         } else if (in_args->arg_types[i] == OIF_CALLBACK) {
             arg_types[i] = &ffi_type_pointer;
             in_args->arg_values[i] =
-                ((OIFCallback *)in_args->arg_values[i])->c_fn_p;
+                ((OIFCallback *)in_args->arg_values[i])->fn_p_c;
         } else {
             fflush(stdout);
             fprintf(stderr,

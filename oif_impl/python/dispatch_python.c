@@ -18,32 +18,39 @@ typedef struct {
 
 static int IMPL_COUNTER = 0;
 
-typedef void (*ivp_rhs_fp_t)(double t, OIFArrayF64 *y, OIFArrayF64 *y_dot);
+typedef void (*ivp_rhs_fp_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot);
 ivp_rhs_fp_t IVP_RHS_CALLBACK = NULL;
 
 static PyObject *c_to_py_wrapper_ivp_rhs(PyObject *ignored, PyObject *args) {
-    double t;                // Time
-    PyArrayObject *yNDArray; // NDArray for updated solution
+    double t; // Time
+    PyArrayObject *y_ndarray;
+    PyArrayObject *ydot_ndarray;
 
-    if (!PyArg_ParseTuple(args, "dO!", &t, &PyArray_Type, &yNDArray)) {
+    if (!PyArg_ParseTuple(args,
+                          "dO!O!",
+                          &t,
+                          &PyArray_Type,
+                          &y_ndarray,
+                          &PyArray_Type,
+                          &ydot_ndarray)) {
         return NULL;
     }
 
     OIFArrayF64 y = {
-        .nd = PyArray_NDIM(yNDArray),
-        .dimensions = PyArray_DIMS(yNDArray),
-        .data = PyArray_DATA(yNDArray),
+        .nd = PyArray_NDIM(y_ndarray),
+        .dimensions = PyArray_DIMS(y_ndarray),
+        .data = PyArray_DATA(y_ndarray),
     };
 
-    OIFArrayF64 *y_dot =
-        oif_create_array_f64(PyArray_NDIM(yNDArray), PyArray_DIMS(yNDArray));
+    OIFArrayF64 y_dot = {
+        .nd = PyArray_NDIM(ydot_ndarray),
+        .dimensions = PyArray_DIMS(ydot_ndarray),
+        .data = PyArray_DATA(ydot_ndarray),
+    };
 
-    IVP_RHS_CALLBACK(t, &y, y_dot);
+    IVP_RHS_CALLBACK(t, &y, &y_dot);
 
-    PyObject *result = PyArray_SimpleNewFromData(
-        y_dot->nd, y_dot->dimensions, NPY_FLOAT64, y_dot->data);
-
-    return result;
+    return PyLong_FromLong(0);
 }
 
 static PyMethodDef ivp_rhs_def = {
@@ -177,12 +184,12 @@ int run_interface_method(ImplInfo *impl_info,
             } else if (in_args->arg_types[i] == OIF_CALLBACK) {
                 OIFCallback *p = in_args->arg_values[i];
                 if (p->src == OIF_LANG_PYTHON) {
-                    pValue = (PyObject *)p->fn_p;
+                    pValue = (PyObject *)p->fn_p_py;
                 } else if (p->src == OIF_LANG_C) {
                     fprintf(stderr,
                             "[dispatch_python] Check what callback to "
                             "wrap via src field\n");
-                    IVP_RHS_CALLBACK = *(ivp_rhs_fp_t *)p->c_fn_p;
+                    IVP_RHS_CALLBACK = *(ivp_rhs_fp_t *)p->fn_p_c;
                     pValue = PyCFunction_New(&ivp_rhs_def, NULL);
                 } else {
                     fprintf(

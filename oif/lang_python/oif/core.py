@@ -41,8 +41,8 @@ class OIFArrayF64(ctypes.Structure):
 class OIFCallback(ctypes.Structure):
     _fields_ = [
         ("src", ctypes.c_char_p),
-        ("fn_p", ctypes.c_void_p),
-        ("c_fn_p", ctypes.c_void_p),
+        ("fn_p_py", ctypes.c_void_p),
+        ("fn_p_c", ctypes.c_void_p),
     ]
 
 
@@ -56,7 +56,7 @@ class OIFCallback(ctypes.Structure):
 
 
 def wrap_py_func(
-    fn: Callable, fn_w: Callable, argtypes: list[OIFArgType], restype: OIFArgType
+    fn: Callable, argtypes: list[OIFArgType], restype: OIFArgType
 ) -> OIFCallback:
     ctypes_argtypes: list = []
     for argt in argtypes:
@@ -80,7 +80,7 @@ def wrap_py_func(
         raise ValueError(f"Cannot convert type '{restype}'")
 
     fn_t = ctypes.CFUNCTYPE(ctypes_restype, *ctypes_argtypes)
-    wrapper_fn = fn_t(fn_w)
+    wrapper_fn = fn_t(make_oif_wrapper(fn, argtypes, restype))
 
     # id returns function pointer. Yes, I am also shocked.
     # Docstring for `id` says: "CPython uses the object's memory address".
@@ -92,6 +92,36 @@ def wrap_py_func(
     # TODO: Replace magic constant with OIF_LANG_PYTHON (= 3)
     oifcallback = OIFCallback(3, fn_p, wrapper_fn_void_p)
     return oifcallback
+
+
+def make_oif_wrapper(fn: Callable, arg_types: list, restype):
+    """Call `fn` converting OIF data types to native Python data types."""
+
+    def wrapper(*arg_values):
+        py_arg_values = []
+        for i, (t, v) in enumerate(zip(arg_types, arg_values)):
+            if t == OIF_INT:
+                py_arg_values.append(v)
+            elif t == OIF_FLOAT64:
+                py_arg_values.append(v)
+            elif t == OIF_ARRAY_F64:
+                # v is a ctypes pointer to OIFArrayF64 struct.
+                py_arg_values.append(
+                    np.ctypeslib.as_array(
+                        v.contents.data,
+                        shape=[v.contents.dimensions[i] for i in range(v.contents.nd)],
+                    )
+                )
+            else:
+                raise ValueError("Unsupported data type")
+
+        result = fn(*py_arg_values)
+        if result is None:
+            assert restype == OIF_INT
+            result = 0
+        return result
+
+    return wrapper
 
 
 class OIFPyBinding:
