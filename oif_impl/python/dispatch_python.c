@@ -16,15 +16,58 @@ typedef struct {
     PyObject *pInstance;
 } PythonImplInfo;
 
+PyObject *CALLBACK_CLASS_P = NULL;
+
 static int IMPL_COUNTER = 0;
 
 typedef void (*ivp_rhs_fp_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot);
 ivp_rhs_fp_t IVP_RHS_CALLBACK = NULL;
 
-static PyObject *c_to_py_wrapper_ivp_rhs(PyObject *ignored, PyObject *args) {
+int instantiate_callback_class() {
+    char *moduleName = "oif.callback";
+    char class_name[] = "Callback";
+
+    PyObject *pFileName = PyUnicode_FromString(moduleName);
+    PyObject *pModule = PyImport_Import(pFileName);
+    Py_DECREF(pFileName);
+
+    if (pModule == NULL) {
+        PyErr_Print();
+        fprintf(stderr, "[backend_python] Faile to load callback module\n");
+        exit(1);
+    }
+   
+    CALLBACK_CLASS_P = PyObject_GetAttrString(pModule, class_name);
+    if (CALLBACK_CLASS_P == NULL) {
+        PyErr_Print();
+        fprintf(stderr, "[backend_python] Cannot proceed as callback class %s could not be instantiated\n", class_name);
+    }
+    Py_DECREF(pModule);
+
+    return 0;
+}
+
+PyObject *convert_oif_callback_struct_to_pyobject(OIFCallback *p) {
+    const char *id = "123";
+    PyObject *fn_p = PyCapsule_New(p->fn_p_c, id, NULL);
+    if (fn_p == NULL) {
+        fprintf(stderr, "[dispatch_python] Could not create PyCapsule\n");
+    }
+    PyObject *obj = Py_BuildValue(
+        "(O, s)", fn_p, id
+    );
+    if (obj == NULL) {
+        fprintf(stderr, "[backend_python] Could not build arguments\n");
+    }
+    return obj;
+}
+
+static PyObject *c_to_py_wrapper(PyObject *ignored, PyObject *args) {
     double t; // Time
     PyArrayObject *y_ndarray;
     PyArrayObject *ydot_ndarray;
+
+    PyArrayObject **arg_values;
 
     if (!PyArg_ParseTuple(args,
                           "dO!O!",
@@ -54,7 +97,7 @@ static PyObject *c_to_py_wrapper_ivp_rhs(PyObject *ignored, PyObject *args) {
 }
 
 static PyMethodDef ivp_rhs_def = {
-    "ivp_rhs_callback", c_to_py_wrapper_ivp_rhs, METH_VARARGS, NULL};
+    "ivp_rhs_callback", c_to_py_wrapper, METH_VARARGS, NULL};
 
 ImplInfo *load_backend(const char *impl_details,
                        size_t version_major,
@@ -123,7 +166,7 @@ ImplInfo *load_backend(const char *impl_details,
     if (pModule == NULL) {
         PyErr_Print();
         fprintf(stderr,
-                "[backend_python] Failed to load module \"%s\". ",
+                "[backend_python] Failed to load module \"%s\"\n",
                 moduleName);
         return NULL;
     }
