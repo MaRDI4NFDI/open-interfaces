@@ -24,11 +24,12 @@ char *parse_impl(int argc, char *argv[]) {
     }
 }
 
-void rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
+int rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
     int size = y->dimensions[0];
     for (int i = 0; i < size; ++i) {
         rhs_out->data[i] = -y->data[i];
     }
+    return 0;
 }
 
 int main(int argc, char *argv[]) {

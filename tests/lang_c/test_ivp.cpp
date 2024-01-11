@@ -16,11 +16,12 @@ class ScalarExpDecayProblem {
   public:
     static constexpr int N = 1;
     static constexpr double y0[] = {1.0};
-    static void rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
+    static int rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
         int size = y->dimensions[0];
         for (int i = 0; i < size; ++i) {
             rhs_out->data[i] = -y->data[i];
         }
+        return 0;
     }
     static void verify(double t, OIFArrayF64 *y) {
         EXPECT_NEAR(y->data[0], exp(-t), 1e-15);
@@ -32,9 +33,10 @@ class LinearOscillatorProblem {
     static constexpr int N = 2;
     static constexpr double y0[2] = {1.0, 0.5};
     static constexpr double omega = M_PI;
-    static void rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
+    static int rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
         rhs_out->data[0] = y->data[1];
         rhs_out->data[1] = -omega * omega * y->data[0];
+        return 0;
     }
     static void verify(double t, OIFArrayF64 *y) {
         double y_exact_0 =
@@ -52,12 +54,14 @@ class OrbitEquationsProblem {
     static constexpr double eps = 0.9L;
     static constexpr double y0[4] = {
         1 - eps, 0.0, 0.0, constexpr_sqrt((1 + eps) / (1 - eps))};
-    static void rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
+    static int rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
         double r = sqrt(y->data[0] * y->data[0] + y->data[1] * y->data[1]);
         rhs_out->data[0] = y->data[2];
         rhs_out->data[1] = y->data[3];
         rhs_out->data[2] = -y->data[0] / (r * r * r);
         rhs_out->data[3] = -y->data[1] / (r * r * r);
+
+        return 0;
     }
     static void verify(double t, OIFArrayF64 *y) {
         double u = fsolve([t](double u) { return u - eps * sin(u) - t; },

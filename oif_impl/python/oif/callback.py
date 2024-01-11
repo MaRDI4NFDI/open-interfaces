@@ -1,8 +1,7 @@
 import ctypes
 
 import numpy as np
-from oif.core import OIF_ARRAY_F64, OIF_FLOAT64, OIF_INT, OIFArrayF64, OIFCallback
-from scipy import LowLevelCallable
+from oif.core import OIF_ARRAY_F64, OIF_FLOAT64, OIF_INT, OIFArrayF64
 
 
 class Callback:
