@@ -18,14 +18,13 @@
 #include <sunlinsol/sunlinsol_spgmr.h>
 
 #include "oif/api.h"
+#include "oif_impl/ivp.h"
 
 const char *prefix = "[impl::sundials_cvode]";
 
 // Signature for the right-hand side that is provided by the `IVP` interface
 // of the OpenInterFaces.
-// TODO: Should be part of the interface header?
-typedef void (*oif_rhs_fn_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot);
-static oif_rhs_fn_t OIF_RHS_FN;
+static oif_ivp_rhs_fn_t OIF_RHS_FN;
 
 // Signature for the right-hand side function that CVode expects.
 static int cvode_rhs(realtype t, N_Vector u, N_Vector u_dot, void *user_data);
@@ -110,7 +109,7 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     return 0;
 }
 
-int set_rhs_fn(void rhs(double, OIFArrayF64 *y, OIFArrayF64 *y_dot)) {
+int set_rhs_fn(oif_ivp_rhs_fn_t rhs) {
     if (rhs == NULL) {
         fprintf(stderr,
                 "`set_rhs_fn` accepts non-null function pointer only\n");

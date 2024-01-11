@@ -3,9 +3,14 @@
 #include <oif/api.h>
 
 /**
+ * Signature of the right-hand side function f for the system of ODEs.
+ */
+typedef int (*oif_ivp_rhs_fn_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot);
+
+/**
  * Set right hand side of the system of ordinary differential equations.
  */
-int oif_ivp_set_rhs_fn(void rhs(double, OIFArrayF64 *y, OIFArrayF64 *y_dot));
+int oif_ivp_set_rhs_fn(oif_ivp_rhs_fn_t rhs);
 
 /**
  * Set initial value y(t0) = y0.

@@ -1,14 +1,12 @@
 #include "oif/dispatch_api.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <oif/api.h>
 #include <oif/dispatch.h>
 #include <oif/interfaces/ivp.h>
 
-int oif_ivp_set_rhs_fn(ImplHandle implh,
-                       void rhs(double t,
-                                OIFArrayF64 *y,
-                                OIFArrayF64 *y_dot)) {
+int oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs) {
     OIFCallback rhs_wrapper = {
         .src = OIF_LANG_C, .fn_p_py = NULL, .fn_p_c = rhs};
     OIFArgType in_arg_types[] = {OIF_CALLBACK};
