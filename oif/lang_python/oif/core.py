@@ -58,6 +58,10 @@ class OIFCallback(ctypes.Structure):
 def wrap_py_func(
     fn: Callable, argtypes: list[OIFArgType], restype: OIFArgType
 ) -> OIFCallback:
+    # id returns function pointer. Yes, I am also shocked.
+    # Docstring for `id` says: "CPython uses the object's memory address".
+    fn_p_py = id(fn)
+
     ctypes_argtypes: list = []
     for argt in argtypes:
         if argt == OIF_FLOAT64:
@@ -82,15 +86,10 @@ def wrap_py_func(
     fn_t = ctypes.CFUNCTYPE(ctypes_restype, *ctypes_argtypes)
     wrapper_fn = fn_t(make_oif_wrapper(fn, argtypes, restype))
 
-    # id returns function pointer. Yes, I am also shocked.
-    # Docstring for `id` says: "CPython uses the object's memory address".
-    fn_p = id(fn)
-
-    wrapper_fn_void_p = ctypes.cast(ctypes.pointer(wrapper_fn), ctypes.c_void_p)
-    assert wrapper_fn_void_p.value is not None
-    print("wrapper_fn_p =", hex(wrapper_fn_void_p.value))
+    fn_p_c = ctypes.cast(wrapper_fn, ctypes.c_void_p)
+    assert fn_p_c.value is not None
     # TODO: Replace magic constant with OIF_LANG_PYTHON (= 3)
-    oifcallback = OIFCallback(3, fn_p, wrapper_fn_void_p)
+    oifcallback = OIFCallback(3, fn_p_py, fn_p_c)
     return oifcallback
 
 

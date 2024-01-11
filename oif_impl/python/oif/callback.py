@@ -38,6 +38,4 @@ class Callback:
                 oif_array = OIFArrayF64(nd, dimensions, data)
                 c_args.append(ctypes.pointer(oif_array))
 
-        print("__call__ I am here")
-        __import__("ipdb").set_trace()
         return self.fn_p_py(*c_args)
