@@ -47,7 +47,7 @@ int instantiate_callback_class() {
     return 0;
 }
 
-PyObject *convert_oif_callback_struct_to_pyobject(OIFCallback *p) {
+PyObject *convert_oif_callback(OIFCallback *p) {
     const char *id = "123";
     PyObject *fn_p = PyCapsule_New(p->fn_p_c, id, NULL);
     if (fn_p == NULL) {
@@ -232,8 +232,18 @@ int run_interface_method(ImplInfo *impl_info,
                     fprintf(stderr,
                             "[dispatch_python] Check what callback to "
                             "wrap via src field\n");
-                    IVP_RHS_CALLBACK = *(ivp_rhs_fp_t *)p->fn_p_c;
-                    pValue = PyCFunction_New(&ivp_rhs_def, NULL);
+                    if (CALLBACK_CLASS_P == NULL) {
+                        instantiate_callback_class();
+                    }
+                    PyObject *callback_args = convert_oif_callback(p);
+                    pValue = PyObject_CallObject(
+                            CALLBACK_CLASS_P, callback_args);
+                    if (pValue == NULL) {
+                        fprintf(
+                            stderr,
+                            "[backend_python] Could not instantiate "
+                            "Callback class for wrapping C functions\n");
+                    }
                 } else {
                     fprintf(
                         stderr,
@@ -244,7 +254,7 @@ int run_interface_method(ImplInfo *impl_info,
                     fprintf(stderr,
                             "[dispatch_python] Input argument #%d "
                             "has type OIF_CALLBACK "
-                            "but it is actually is not callable",
+                            "but it is actually is not callable\n",
                             i);
                 }
             } else {
