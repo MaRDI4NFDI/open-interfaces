@@ -6,11 +6,11 @@
 #include <oif/interfaces/ivp.h>
 
 int oif_ivp_set_rhs_fn(ImplHandle implh,
-                       void (*rhs)(double t,
-                                   OIFArrayF64 *y,
-                                   OIFArrayF64 *y_dot)) {
+                       void rhs(double t,
+                                OIFArrayF64 *y,
+                                OIFArrayF64 *y_dot)) {
     OIFCallback rhs_wrapper = {
-        .src = OIF_LANG_C, .fn_p_py = NULL, .fn_p_c = &rhs};
+        .src = OIF_LANG_C, .fn_p_py = NULL, .fn_p_c = rhs};
     OIFArgType in_arg_types[] = {OIF_CALLBACK};
     void *in_arg_values[] = {&rhs_wrapper};
     OIFArgs in_args = {
