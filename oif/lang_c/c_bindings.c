@@ -40,9 +40,11 @@ oif_init_array_f64_from_data(int nd, intptr_t *dimensions, const double *data) {
 
 void oif_free_array_f64(OIFArrayF64 *x) {
     if (x == NULL) {
+        fprintf(stderr, "[oif_free_array_f64] Attempt to free NULL pointer\n");
         return;
     }
     if (x->data == NULL) {
+        fprintf(stderr, "[oif_free_array_f64] Attempt to free NULL pointer\n");
         return;
     }
 
