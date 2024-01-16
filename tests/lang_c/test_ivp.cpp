@@ -97,6 +97,9 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase) {
         status = oif_ivp_integrate(implh, t, y);
         ScalarExpDecayProblem::verify(t, y);
     }
+
+    oif_free_array_f64(y0);
+    oif_free_array_f64(y);
 }
 
 TEST_P(IvpImplementationsFixture, LinearOscillatorTestCase) {
@@ -118,6 +121,9 @@ TEST_P(IvpImplementationsFixture, LinearOscillatorTestCase) {
         status = oif_ivp_integrate(implh, t, y);
         LinearOscillatorProblem::verify(t, y);
     }
+
+    oif_free_array_f64(y0);
+    oif_free_array_f64(y);
 }
 
 TEST_P(IvpImplementationsFixture, OrbitEquationsProblemTestCase) {
@@ -139,6 +145,9 @@ TEST_P(IvpImplementationsFixture, OrbitEquationsProblemTestCase) {
         status = oif_ivp_integrate(implh, t, y);
         OrbitEquationsProblem::verify(t, y);
     }
+
+    oif_free_array_f64(y0);
+    oif_free_array_f64(y);
 }
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests,
