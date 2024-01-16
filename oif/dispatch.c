@@ -77,6 +77,13 @@ ImplHandle load_interface_impl(const char *interface,
     const size_t buffer_size = 512;
     int len;
     char *buffer = malloc(buffer_size * sizeof(char));
+    if (buffer == NULL) {
+        fprintf(
+            stderr,
+            "[dispatch] Could not allocate buffer for parsing "
+            "implementation configuration files\n");
+        exit(1);
+    }
     char backend_name[16];
     buffer = fgets(buffer, buffer_size, conf_file);
     if (buffer == NULL) {
