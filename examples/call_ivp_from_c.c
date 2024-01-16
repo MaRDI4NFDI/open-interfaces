@@ -67,11 +67,16 @@ int main(int argc, char *argv[]) {
     for (double t = t0 + dt; t <= 1.0; t += dt) {
         status = oif_ivp_integrate(implh, t, y);
         if (status) {
+            oif_free_array_f64(y0);
+            oif_free_array_f64(y);
             fprintf(stderr, "oif_ivp_integrate returned error\n");
             return EXIT_FAILURE;
         }
         printf("%.3f %.6f\n", t, y->data[0]);
     }
+
+    oif_free_array_f64(y0);
+    oif_free_array_f64(y);
 
     return 0;
 }
