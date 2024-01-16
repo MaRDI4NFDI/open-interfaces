@@ -5,6 +5,8 @@
 
 #include <dlfcn.h>
 #include <ffi.h>
+#include <stdbool.h>
+
 #include <stdlib.h>
 
 #include <oif/api.h>
@@ -19,6 +21,8 @@ typedef struct {
 PyObject *CALLBACK_CLASS_P = NULL;
 
 static int IMPL_COUNTER = 0;
+
+static bool is_python_initialized_by_us = false;
 
 typedef void (*ivp_rhs_fp_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot);
 ivp_rhs_fp_t IVP_RHS_CALLBACK = NULL;
@@ -106,6 +110,7 @@ ImplInfo *load_backend(const char *impl_details,
         fprintf(stderr, "[backend_python] Backend is already initialized\n");
     } else {
         Py_Initialize();
+        is_python_initialized_by_us = true;
     }
 
     // We need to `dlopen` the Python library, otherwise,
@@ -189,6 +194,7 @@ ImplInfo *load_backend(const char *impl_details,
         fprintf(stderr,
                 "[dispatch_python] Could not allocate memory for Python "
                 "implementation information\n");
+        return NULL;
     }
     impl_info->pInstance = pInstance;
 
@@ -328,8 +334,11 @@ int unload_backend_python() {
         return 0;
     }
 
-    if (Py_FinalizeEx() < 0) {
-        return 120;
+    if (is_python_initialized_by_us) {
+        if (Py_FinalizeEx() < 0) {
+            fprintf(stderr, "[dispatch_python] Unloading Python dispatch failed\n");
+            return 120;
+        }
     }
 
     return 0;
