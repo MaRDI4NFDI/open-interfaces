@@ -17,4 +17,4 @@ all :
 .PHONY : test
 test : all
 	cd build && ctest
-	pytest tests/lang_python
+	python -m pytest tests/lang_python
