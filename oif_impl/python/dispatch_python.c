@@ -18,7 +18,7 @@ typedef struct {
     PyObject *pInstance;
 } PythonImplInfo;
 
-PyObject *CALLBACK_CLASS_P = NULL;
+static PyObject *CALLBACK_CLASS_P = NULL;
 
 static int IMPL_COUNTER = 0;
 
@@ -110,7 +110,9 @@ ImplInfo *load_backend(const char *impl_details,
         fprintf(stderr, "[backend_python] Backend is already initialized\n");
     } else {
         Py_Initialize();
-        is_python_initialized_by_us = true;
+        if (IMPL_COUNTER == 0) {
+            is_python_initialized_by_us = true;
+        }
     }
 
     // We need to `dlopen` the Python library, otherwise,
@@ -197,6 +199,8 @@ ImplInfo *load_backend(const char *impl_details,
         return NULL;
     }
     impl_info->pInstance = pInstance;
+
+    IMPL_COUNTER++;
 
     return (ImplInfo *)impl_info;
 }
@@ -329,17 +333,27 @@ int run_interface_method(ImplInfo *impl_info,
     return 0;
 }
 
-int unload_backend_python() {
-    if (!Py_IsInitialized()) {
-        return 0;
+int unload_impl(ImplInfo *impl_info_) {
+    if (impl_info_->dh != OIF_LANG_PYTHON) {
+        fprintf(
+            stderr,
+            "[dispatch_python] unload_impl received non-Python implementation argument\n"
+        );
+        return -1;
     }
+    PythonImplInfo *impl_info = (PythonImplInfo *) impl_info_;
 
-    if (is_python_initialized_by_us) {
-        if (Py_FinalizeEx() < 0) {
-            fprintf(stderr, "[dispatch_python] Unloading Python dispatch failed\n");
-            return 120;
+    Py_DECREF(impl_info->pInstance);
+    IMPL_COUNTER--;
+
+    if (is_python_initialized_by_us && (IMPL_COUNTER == 0)) {
+        int status = Py_FinalizeEx();
+        if (status < 0) {
+            fprintf(stderr, "[dispatch_python] Py_FinalizeEx with status %d\n", status);
+            return status;
         }
     }
+    free(impl_info);
 
     return 0;
 }

@@ -124,8 +124,10 @@ def make_oif_wrapper(fn: Callable, arg_types: list, restype):
 
 
 class OIFPyBinding:
-    def __init__(self, implh):
+    def __init__(self, implh, interface, impl):
         self.implh = implh
+        self.interface = interface
+        self.impl = impl
 
     def call(self, method, user_args, out_user_args):
         num_args = len(user_args)
@@ -244,7 +246,22 @@ def init_impl(interface: str, impl: str, major: UInt, minor: UInt):
     implh = load_interface_impl(interface.encode(), impl.encode(), major, minor)
     if implh < 0:
         raise RuntimeError("Cannot initialize backend")
-    return OIFPyBinding(implh)
+    return OIFPyBinding(implh, interface, impl)
+
+
+def unload_impl(binding: OIFPyBinding):
+    unload_interface_impl = wrap_c_function(
+        _lib_dispatch,
+        "unload_interface_impl",
+        ctypes.c_int,
+        [ctypes.c_int],
+    )
+    status = unload_interface_impl(binding.implh)
+    if status != 0:
+        raise RuntimeError(
+            f"Could not unload implementation '{binding.impl}' "
+            f"of the interface '{binding.interface}' correctly"
+        )
 
 
 def wrap_c_function(lib, funcname, restype, argtypes):

@@ -31,6 +31,8 @@ ImplInfo *load_backend(const char *impl_details,
                        size_t version_major,
                        size_t version_minor);
 
+int unload_backend(ImplInfo *impl_info);
+
 int run_interface_method(ImplInfo *impl_info,
                          const char *method,
                          OIFArgs *in_args,

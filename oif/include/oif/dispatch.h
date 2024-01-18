@@ -7,7 +7,7 @@
 #include <oif/api.h>
 
 /**
- * Load implementation of the interface.
+ * Load implementation of an interface.
  *
  * @param interface     Name of the interface
  * @param impl          Name of the implementation for the interface
@@ -20,6 +20,15 @@ ImplHandle load_interface_impl(const char *interface,
                                const char *impl,
                                size_t version_major,
                                size_t version_minor);
+
+/**
+ * Unload implementation of an interface.
+ *
+ * @param implh Implementation handle that identifies the implementation
+ * @return nonnegative number that identifies whether the operation
+ *         was successful
+ */
+int unload_interface_impl(ImplHandle implh);
 
 int call_interface_method(ImplHandle implh,
                           const char *method,

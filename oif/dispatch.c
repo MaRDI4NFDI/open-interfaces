@@ -175,6 +175,31 @@ ImplHandle load_interface_impl(const char *interface,
     return impl_info->implh;
 }
 
+int unload_interface_impl(ImplHandle implh) {
+    ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
+    DispatchHandle dh = impl_info->dh;
+    if (OIF_DISPATCH_HANDLES[dh] == NULL) {
+        fprintf(stderr,
+                "[dispatch] Cannot unload interface implementation for language "
+                "id: '%u'\n",
+                dh);
+        exit(EXIT_FAILURE);
+    }
+    void *lib_handle = OIF_DISPATCH_HANDLES[dh];
+
+    int (*unload_impl_fn)(ImplInfo *);
+    unload_impl_fn = dlsym(lib_handle, "unload_impl");
+    if (unload_impl_fn == NULL) {
+        fprintf(stderr, "[dispatch] Cannot find function 'unload_impl' for lang"
+                "id: '%u'\n", dh);
+        return -1;
+    }
+    unload_impl_fn(impl_info);
+    impl_info = NULL;
+
+    return 0;
+}
+
 int call_interface_method(ImplHandle implh,
                           const char *method,
                           OIFArgs *args,
@@ -195,6 +220,15 @@ int call_interface_method(ImplHandle implh,
     int (*run_interface_method_fn)(
         ImplInfo *, const char *, OIFArgs *, OIFArgs *);
     run_interface_method_fn = dlsym(lib_handle, "run_interface_method");
+    if (run_interface_method_fn == NULL) {
+        fprintf(
+            stderr,
+            "[dispatch] Could not load function 'run_interface_method' "
+            "for language id '%u'\n",
+            dh
+        );
+        return -1;
+    }
     status = run_interface_method_fn(impl_info, method, args, retvals);
 
     if (status) {

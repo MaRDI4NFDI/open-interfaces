@@ -15,6 +15,8 @@ ImplHandle oif_init_impl(const char *interface,
                          int version_major,
                          int version_minor);
 
+int oif_unload_impl(ImplHandle implh);
+
 OIFArrayF64 *oif_create_array_f64(int nd, intptr_t *dimensions);
 
 OIFArrayF64 *
