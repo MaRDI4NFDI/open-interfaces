@@ -114,5 +114,8 @@ Testing/
 # Visual Studio Code
 .vscode/
 
+# Vim local config file
+vimrc.local
+
 # cmake_wrapper.sh is a script to force VSCode use conda environment.
 cmake_wrapper.sh
