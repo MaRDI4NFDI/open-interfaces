@@ -16,5 +16,5 @@ all :
 
 .PHONY : test
 test : all
-	cd build && ctest
+	cd build && ./test_qeq && ./test_linsolve && ./test_ivp
 	python -m pytest tests/lang_python
