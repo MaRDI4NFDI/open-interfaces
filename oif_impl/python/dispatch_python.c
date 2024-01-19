@@ -16,9 +16,8 @@
 typedef struct {
     ImplInfo base;
     PyObject *pInstance;
+    PyObject *pCallbackClass;
 } PythonImplInfo;
-
-static PyObject *CALLBACK_CLASS_P = NULL;
 
 static int IMPL_COUNTER = 0;
 
@@ -27,7 +26,7 @@ static bool is_python_initialized_by_us = false;
 typedef void (*ivp_rhs_fp_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot);
 ivp_rhs_fp_t IVP_RHS_CALLBACK = NULL;
 
-int instantiate_callback_class() {
+PyObject *instantiate_callback_class(void) {
     char *moduleName = "oif.callback";
     char class_name[] = "Callback";
 
@@ -41,7 +40,7 @@ int instantiate_callback_class() {
         exit(1);
     }
 
-    CALLBACK_CLASS_P = PyObject_GetAttrString(pModule, class_name);
+    PyObject *CALLBACK_CLASS_P = PyObject_GetAttrString(pModule, class_name);
     if (CALLBACK_CLASS_P == NULL) {
         PyErr_Print();
         fprintf(stderr,
@@ -51,7 +50,7 @@ int instantiate_callback_class() {
     }
     Py_DECREF(pModule);
 
-    return 0;
+    return CALLBACK_CLASS_P;
 }
 
 PyObject *convert_oif_callback(OIFCallback *p) {
@@ -192,7 +191,7 @@ ImplInfo *load_backend(const char *impl_details,
     }
     Py_DECREF(pClass);
 
-    PythonImplInfo *impl_info = malloc(sizeof(PythonImplInfo));
+    PythonImplInfo *impl_info = malloc(sizeof(*impl_info));
     if (impl_info == NULL) {
         fprintf(stderr,
                 "[dispatch_python] Could not allocate memory for Python "
@@ -200,10 +199,11 @@ ImplInfo *load_backend(const char *impl_details,
         return NULL;
     }
     impl_info->pInstance = pInstance;
+    impl_info->pCallbackClass = NULL;
 
     IMPL_COUNTER++;
 
-    return (ImplInfo *)impl_info;
+    return (ImplInfo *) impl_info;
 }
 
 int run_interface_method(ImplInfo *impl_info,
@@ -243,12 +243,12 @@ int run_interface_method(ImplInfo *impl_info,
                     fprintf(stderr,
                             "[dispatch_python] Check what callback to "
                             "wrap via src field\n");
-                    if (CALLBACK_CLASS_P == NULL) {
-                        instantiate_callback_class();
+                    if (impl->pCallbackClass == NULL) {
+                        impl->pCallbackClass = instantiate_callback_class();
                     }
                     PyObject *callback_args = convert_oif_callback(p);
                     pValue =
-                        PyObject_CallObject(CALLBACK_CLASS_P, callback_args);
+                        PyObject_CallObject(impl->pCallbackClass, callback_args);
                     if (pValue == NULL) {
                         fprintf(stderr,
                                 "[backend_python] Could not instantiate "
@@ -343,6 +343,7 @@ int unload_impl(ImplInfo *impl_info_) {
     PythonImplInfo *impl_info = (PythonImplInfo *)impl_info_;
 
     Py_DECREF(impl_info->pInstance);
+    Py_XDECREF(impl_info->pCallbackClass);
     IMPL_COUNTER--;
 
     if (is_python_initialized_by_us && (IMPL_COUNTER == 0)) {
