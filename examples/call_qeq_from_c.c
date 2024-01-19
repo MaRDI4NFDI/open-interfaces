@@ -56,5 +56,7 @@ int main(int argc, char *argv[]) {
 
     oif_free_array_f64(roots);
 
+    oif_unload_impl(implh);
+
     return 0;
 }

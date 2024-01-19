@@ -5,6 +5,7 @@ from oif.core import (
     OIF_INT,
     OIFPyBinding,
     init_impl,
+    unload_impl,
     wrap_py_func,
 )
 
@@ -36,3 +37,6 @@ class IVP:
 
     def integrate(self, t):
         self._binding.call("integrate", (t,), (self.y,))
+
+    def __del__(self):
+        unload_impl(self._binding)

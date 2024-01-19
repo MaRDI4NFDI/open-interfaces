@@ -22,33 +22,29 @@ jobs:
               uses: actions/cache@v3
               env:
                 # Increase this value to reset cache if environment.yaml has not changed
-                  CACHE_NUMBER: 0
+                  CACHE_NUMBER: 1
               with:
                   path: ~/conda_pkgs_dir
                   key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment-linux.yaml') }}
             - name: Setup conda environment
               uses: conda-incubator/setup-miniconda@v3
               with:
-                  auto-activate-base: false
                   activate-environment: test
                   environment-file: environment-linux.yaml
-                  miniconda-version: latest
+                  miniforge-version: latest
                   mamba-version: '*'
                   python-version: ${{ matrix.python-version }}
             - name: Show info
               run: |
-                  conda activate test
                   conda info
                   type gcc
                   type g++
                   type python
                   type pip
+                  git status
             - name: Build
               run: |
-                  type gcc
-                  type g++
-                  type python
-                  type pip
                   make
             - name: Run tests
-              run: make test
+              run: |
+                  make test

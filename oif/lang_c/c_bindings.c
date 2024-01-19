@@ -13,9 +13,7 @@ ImplHandle oif_init_impl(const char *interface,
     return load_interface_impl(interface, impl, version_major, version_minor);
 }
 
-int oif_unload_impl(ImplHandle implh) {
-    return unload_interface_impl(implh);
-}
+int oif_unload_impl(ImplHandle implh) { return unload_interface_impl(implh); }
 
 OIFArrayF64 *oif_create_array_f64(int nd, intptr_t *dimensions) {
     OIFArrayF64 *x = malloc(sizeof(OIFArrayF64));

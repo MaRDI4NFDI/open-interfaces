@@ -1,5 +1,5 @@
 import numpy as np
-from oif.core import OIFPyBinding, init_impl
+from oif.core import OIFPyBinding, init_impl, unload_impl
 
 
 class LinearSolver:
@@ -10,3 +10,6 @@ class LinearSolver:
         result = np.empty((A.shape[1]))
         self._binding.call("solve_lin", (A, b), (result,))
         return result
+
+    def __del__(self):
+        unload_impl(self._binding)

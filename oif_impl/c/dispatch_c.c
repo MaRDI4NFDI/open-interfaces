@@ -39,20 +39,21 @@ ImplInfo *load_backend(const char *impl_details,
     }
     impl_info->impl_lib = impl_lib;
     impl_info->impl_details = strdup(impl_details);
-    fprintf(stderr, "[dispatch_c] load_impl impl_info->impl_details = %s\n", impl_info->impl_details);
+    fprintf(stderr,
+            "[dispatch_c] load_impl impl_info->impl_details = %s\n",
+            impl_info->impl_details);
 
-    return (ImplInfo *) impl_info;
+    return (ImplInfo *)impl_info;
 }
 
 int unload_impl(ImplInfo *impl_info_) {
     if (impl_info_->dh != OIF_LANG_C) {
-        fprintf(
-            stderr,
-            "[dispatch_python] unload_impl received non-C implementation argument\n"
-        );
+        fprintf(stderr,
+                "[dispatch_python] unload_impl received non-C implementation "
+                "argument\n");
         return -1;
     }
-    CImplInfo *impl_info = (CImplInfo *) impl_info_;
+    CImplInfo *impl_info = (CImplInfo *)impl_info_;
 
     int status = dlclose(impl_info->impl_lib);
     if (status != 0) {
@@ -61,8 +62,7 @@ int unload_impl(ImplInfo *impl_info_) {
             "[dispatch_c] While closing implementation '%s' an error occurred. "
             "Error message: %s",
             impl_info->impl_details,
-            dlerror()
-        );
+            dlerror());
     }
     IMPL_COUNTER--;
 
@@ -90,12 +90,12 @@ int run_interface_method(ImplInfo *impl_info,
         exit(EXIT_FAILURE);
     }
 
-    int num_in_args = in_args->num_args;
-    int num_out_args = out_args->num_args;
-    int num_total_args = num_in_args + num_out_args;
+    size_t num_in_args = in_args->num_args;
+    size_t num_out_args = out_args->num_args;
+    size_t num_total_args = num_in_args + num_out_args;
 
     ffi_cif cif;
-    ffi_type **arg_types = malloc(num_total_args * sizeof(ffi_type));
+    ffi_type **arg_types = malloc(num_total_args * sizeof(ffi_type *));
     void **arg_values = malloc(num_total_args * sizeof(void *));
 
     // Merge input and output argument types together in `arg_types` array.

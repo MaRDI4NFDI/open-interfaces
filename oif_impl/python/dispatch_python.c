@@ -40,11 +40,14 @@ int instantiate_callback_class() {
         fprintf(stderr, "[backend_python] Faile to load callback module\n");
         exit(1);
     }
-   
+
     CALLBACK_CLASS_P = PyObject_GetAttrString(pModule, class_name);
     if (CALLBACK_CLASS_P == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[backend_python] Cannot proceed as callback class %s could not be instantiated\n", class_name);
+        fprintf(stderr,
+                "[backend_python] Cannot proceed as callback class %s could "
+                "not be instantiated\n",
+                class_name);
     }
     Py_DECREF(pModule);
 
@@ -57,9 +60,7 @@ PyObject *convert_oif_callback(OIFCallback *p) {
     if (fn_p == NULL) {
         fprintf(stderr, "[dispatch_python] Could not create PyCapsule\n");
     }
-    PyObject *obj = Py_BuildValue(
-        "(O, s)", fn_p, id
-    );
+    PyObject *obj = Py_BuildValue("(O, s)", fn_p, id);
     if (obj == NULL) {
         fprintf(stderr, "[backend_python] Could not build arguments\n");
     }
@@ -246,13 +247,12 @@ int run_interface_method(ImplInfo *impl_info,
                         instantiate_callback_class();
                     }
                     PyObject *callback_args = convert_oif_callback(p);
-                    pValue = PyObject_CallObject(
-                            CALLBACK_CLASS_P, callback_args);
+                    pValue =
+                        PyObject_CallObject(CALLBACK_CLASS_P, callback_args);
                     if (pValue == NULL) {
-                        fprintf(
-                            stderr,
-                            "[backend_python] Could not instantiate "
-                            "Callback class for wrapping C functions\n");
+                        fprintf(stderr,
+                                "[backend_python] Could not instantiate "
+                                "Callback class for wrapping C functions\n");
                     }
                 } else {
                     fprintf(
@@ -335,13 +335,12 @@ int run_interface_method(ImplInfo *impl_info,
 
 int unload_impl(ImplInfo *impl_info_) {
     if (impl_info_->dh != OIF_LANG_PYTHON) {
-        fprintf(
-            stderr,
-            "[dispatch_python] unload_impl received non-Python implementation argument\n"
-        );
+        fprintf(stderr,
+                "[dispatch_python] unload_impl received non-Python "
+                "implementation argument\n");
         return -1;
     }
-    PythonImplInfo *impl_info = (PythonImplInfo *) impl_info_;
+    PythonImplInfo *impl_info = (PythonImplInfo *)impl_info_;
 
     Py_DECREF(impl_info->pInstance);
     IMPL_COUNTER--;
@@ -349,7 +348,9 @@ int unload_impl(ImplInfo *impl_info_) {
     if (is_python_initialized_by_us && (IMPL_COUNTER == 0)) {
         int status = Py_FinalizeEx();
         if (status < 0) {
-            fprintf(stderr, "[dispatch_python] Py_FinalizeEx with status %d\n", status);
+            fprintf(stderr,
+                    "[dispatch_python] Py_FinalizeEx with status %d\n",
+                    status);
             return status;
         }
     }

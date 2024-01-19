@@ -1,5 +1,5 @@
 import numpy as np
-from oif.core import OIFPyBinding, init_impl
+from oif.core import OIFPyBinding, init_impl, unload_impl
 
 
 class QeqSolver:
@@ -10,3 +10,6 @@ class QeqSolver:
         result = np.array([11.0, 22.0])
         self._binding.call("solve_qeq", (a, b, c), (result,))
         return result
+
+    def __del__(self):
+        unload_impl(self._binding)

@@ -1,6 +1,6 @@
 #include "oif/dispatch_api.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <oif/api.h>
 #include <oif/dispatch.h>
