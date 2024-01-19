@@ -1,4 +1,5 @@
 UNAME := $(shell uname)
+PWD := $(shell pwd)
 
 ifeq ($(UNAME), Darwin)  # macOS
     DSO_EXT := dylib
@@ -7,7 +8,7 @@ else                    # Linux
 endif
 
 export LD_LIBRARY_PATH:=build
-export PYTHONPATH:=oif/interfaces/python:oif_impl/python:oif_impl/impl:oif/lang_python:src:"$(PYTHONPATH)"
+export PYTHONPATH:=$(PWD)/oif/interfaces/python:$(PWD)/oif_impl/python:$(PWD)/oif_impl/impl:$(PWD)/oif/lang_python:$(PWD)/src
 
 .PHONY : all
 all :
@@ -17,4 +18,4 @@ all :
 .PHONY : test
 test : all
 	cd build && ./test_qeq && ./test_linsolve && ./test_ivp
-	python -m pytest tests/lang_python
+	pytest tests/lang_python
