@@ -16,6 +16,8 @@ TEST(QeqPyQeqSolverTestSuite, LinearCase) {
 
     EXPECT_EQ(roots->data[0], 0.5);
     EXPECT_EQ(roots->data[1], 0.5);
+
+    oif_free_array_f64(roots);
 }
 
 TEST(QeqPyQeqSolverTestSuite, TwoRoots) {
@@ -29,6 +31,7 @@ TEST(QeqPyQeqSolverTestSuite, TwoRoots) {
 
     EXPECT_EQ(roots->data[0], -1.0);
     EXPECT_EQ(roots->data[1], -1.0);
+    oif_free_array_f64(roots);
 }
 
 TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots) {
@@ -42,6 +45,7 @@ TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots) {
 
     EXPECT_EQ(roots->data[0], -7);
     EXPECT_EQ(roots->data[1], +2);
+    oif_free_array_f64(roots);
 }
 
 TEST(QeqCQeqSolverTestSuite, LinearCase) {
@@ -55,6 +59,7 @@ TEST(QeqCQeqSolverTestSuite, LinearCase) {
 
     EXPECT_EQ(roots->data[0], 0.5);
     EXPECT_EQ(roots->data[1], 0.5);
+    oif_free_array_f64(roots);
 }
 
 TEST(QeqCQeqSolverTestSuite, TwoRoots) {
@@ -68,6 +73,7 @@ TEST(QeqCQeqSolverTestSuite, TwoRoots) {
 
     EXPECT_EQ(roots->data[0], -1.0);
     EXPECT_EQ(roots->data[1], -1.0);
+    oif_free_array_f64(roots);
 }
 
 TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots) {
@@ -81,6 +87,7 @@ TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots) {
 
     EXPECT_EQ(roots->data[0], -7);
     EXPECT_EQ(roots->data[1], +2);
+    oif_free_array_f64(roots);
 }
 
 TEST(QeqCQeqSolverTestSuite, ExtremeRoots) {
@@ -94,4 +101,5 @@ TEST(QeqCQeqSolverTestSuite, ExtremeRoots) {
 
     EXPECT_EQ(roots->data[0], 19999.999949999998);
     EXPECT_EQ(roots->data[1], 5.000000012500001e-05);
+    oif_free_array_f64(roots);
 }
