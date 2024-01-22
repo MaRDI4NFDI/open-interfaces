@@ -45,7 +45,7 @@ click==8.1.7
     #   typer
 colorama==0.4.6
     # via typer
-comm==0.1.4
+comm==0.2.1
     # via ipykernel
 commonmark==0.9.1
     # via rich
