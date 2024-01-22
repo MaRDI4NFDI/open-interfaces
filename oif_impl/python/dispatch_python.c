@@ -167,6 +167,13 @@ ImplInfo *load_backend(const char *impl_details,
         stderr, "[backend_python] Provided module name: '%s'\n", moduleName);
     fprintf(stderr, "[backend_python] Provided class name: '%s'\n", className);
     pFileName = PyUnicode_FromString(moduleName);
+    if (pFileName == NULL) {
+        fprintf(
+            stderr,
+            "[dispatch_python::load_impl] Provided moduleName '%s' "
+            "could not be resolved to file name\n", moduleName);
+        return NULL;
+    }
     pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
 
