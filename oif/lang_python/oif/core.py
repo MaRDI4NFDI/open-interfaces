@@ -55,7 +55,7 @@ class OIFCallback(ctypes.Structure):
 #     ]
 
 
-def wrap_py_func(
+def make_oif_callback(
     fn: Callable, argtypes: list[OIFArgType], restype: OIFArgType
 ) -> OIFCallback:
     # id returns function pointer. Yes, I am also shocked.

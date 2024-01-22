@@ -5,8 +5,8 @@ from oif.core import (
     OIF_INT,
     OIFPyBinding,
     init_impl,
+    make_oif_callback,
     unload_impl,
-    wrap_py_func,
 )
 
 
@@ -30,7 +30,7 @@ class IVP:
         if self.N <= 0:
             raise RuntimeError("'set_initial_value' must be called before 'set_rhs_fn'")
 
-        self.wrapper = wrap_py_func(
+        self.wrapper = make_oif_callback(
             rhs_fn, (OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64), OIF_INT
         )
         self._binding.call("set_rhs_fn", (self.wrapper,), ())
