@@ -58,7 +58,6 @@ distlib==0.3.8
 docutils==0.17.1
     # via
     #   breathe
-    #   exhale
     #   myst-parser
     #   sphinx
 exceptiongroup==1.2.0
@@ -67,7 +66,7 @@ exceptiongroup==1.2.0
     #   pytest
 executing==2.0.0
     # via stack-data
-exhale==0.3.6
+exhale==0.3.7
     # via -r requirements.in
 fastjsonschema==2.19.1
     # via nbformat
