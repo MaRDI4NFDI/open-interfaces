@@ -40,7 +40,7 @@ class OIFArrayF64(ctypes.Structure):
 
 class OIFCallback(ctypes.Structure):
     _fields_ = [
-        ("src", ctypes.c_char_p),
+        ("src", ctypes.c_int),
         ("fn_p_py", ctypes.c_void_p),
         ("fn_p_c", ctypes.c_void_p),
     ]
