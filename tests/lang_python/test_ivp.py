@@ -107,7 +107,7 @@ class OrbitEquationsProblem(IVPProblem):
         )
 
 
-class TestIVPViaScipyODEDopri5Implementation:
+class TestIVP:
     def test_1(self, s, p):
         s.set_initial_value(p.y0, p.t0)
         s.set_rhs_fn(p.rhs)

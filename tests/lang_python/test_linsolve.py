@@ -4,7 +4,7 @@ import pytest
 from oif.interfaces.linear_solver import LinearSolver
 
 
-class TestLinearSolverViaNumPyImplementation:
+class TestLinearSolver:
     @pytest.fixture(params=["c_lapack", "numpy"])
     def s(self, request):
         return LinearSolver(request.param)
