@@ -48,6 +48,7 @@ PyObject *instantiate_callback_class(void) {
                 "not be instantiated\n",
                 class_name);
     }
+    Py_INCREF(CALLBACK_CLASS_P);
     Py_DECREF(pModule);
 
     return CALLBACK_CLASS_P;
@@ -59,7 +60,7 @@ PyObject *convert_oif_callback(OIFCallback *p) {
     if (fn_p == NULL) {
         fprintf(stderr, "[dispatch_python] Could not create PyCapsule\n");
     }
-    PyObject *obj = Py_BuildValue("(O, s)", fn_p, id);
+    PyObject *obj = Py_BuildValue("(N, s)", fn_p, id);
     if (obj == NULL) {
         fprintf(stderr, "[backend_python] Could not build arguments\n");
     }
@@ -196,6 +197,8 @@ ImplInfo *load_backend(const char *impl_details,
         Py_DECREF(pClass);
         return NULL;
     }
+    Py_INCREF(pInstance);
+    Py_DECREF(pInitArgs);
     Py_DECREF(pClass);
 
     PythonImplInfo *impl_info = malloc(sizeof(*impl_info));
@@ -225,14 +228,13 @@ int run_interface_method(ImplInfo *impl_info,
     PythonImplInfo *impl = (PythonImplInfo *)impl_info;
 
     PyObject *pFunc;
-    PyObject *pArgs;
     PyObject *pValue;
 
     pFunc = PyObject_GetAttrString(impl->pInstance, method);
 
     if (pFunc && PyCallable_Check(pFunc)) {
         int num_args = in_args->num_args + out_args->num_args;
-        pArgs = PyTuple_New(num_args);
+        PyObject *pArgs = PyTuple_New(num_args);
 
         // Convert input arguments.
         for (int i = 0; i < in_args->num_args; ++i) {
@@ -246,6 +248,15 @@ int run_interface_method(ImplInfo *impl_info,
                 OIFCallback *p = in_args->arg_values[i];
                 if (p->src == OIF_LANG_PYTHON) {
                     pValue = (PyObject *)p->fn_p_py;
+                    /*
+                     * It is important to incref the callback pointed to
+                     * with p->fn_p_py, because somehow a reference count
+                     * to the ctypes object on Python side is not incremented.
+                     * Therefore, when decref of `pArgs` occurs down below,
+                     * the memory pointed to by p->fn_p_py is getting freed
+                     * prematurely with the consequent segfault.
+                     */
+                    Py_INCREF(pValue);
                 } else if (p->src == OIF_LANG_C) {
                     fprintf(stderr,
                             "[dispatch_python] Check what callback to "
@@ -305,6 +316,7 @@ int run_interface_method(ImplInfo *impl_info,
             }
             if (!pValue) {
                 Py_DECREF(pArgs);
+                Py_DECREF(pFunc);
                 fprintf(
                     stderr,
                     "[backend_python] Cannot convert out_arg %d of type %d\n",
@@ -324,7 +336,7 @@ int run_interface_method(ImplInfo *impl_info,
             Py_DECREF(pFunc);
             PyErr_Print();
             fprintf(stderr, "Call failed\n");
-            return EXIT_FAILURE;
+            return 2;
         }
     } else {
         if (PyErr_Occurred()) {
@@ -333,9 +345,10 @@ int run_interface_method(ImplInfo *impl_info,
         }
         fprintf(
             stderr, "[dispatch_python] Cannot find function \"%s\"\n", method);
+        Py_XDECREF(pFunc);
         return -1;
     }
-    Py_XDECREF(pFunc);
+    Py_DECREF(pFunc);
 
     return 0;
 }
