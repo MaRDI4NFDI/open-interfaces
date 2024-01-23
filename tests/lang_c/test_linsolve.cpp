@@ -5,8 +5,7 @@ extern "C" {
 #include "oif/interfaces/linsolve.h"
 }
 
-class LinearSolverFixture : public ::testing::TestWithParam<const char *> {
-};
+class LinearSolverFixture : public ::testing::TestWithParam<const char *> {};
 
 TEST_P(LinearSolverFixture, TestCase1) {
     intptr_t A_dims[] = {2, 2};
@@ -37,9 +36,6 @@ TEST_P(LinearSolverFixture, TestCase1) {
     oif_unload_impl(implh);
 }
 
-
-INSTANTIATE_TEST_SUITE_P(
-    LinearSolverTestSuite,
-    LinearSolverFixture,
-    ::testing::Values("c_lapack", "numpy")
-);
+INSTANTIATE_TEST_SUITE_P(LinearSolverTestSuite,
+                         LinearSolverFixture,
+                         ::testing::Values("c_lapack", "numpy"));
