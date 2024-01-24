@@ -94,7 +94,7 @@ def main():
     plt.plot(problem.x, soln[0], "--", label="Initial condition")
     plt.plot(problem.x, soln[-1], "-", label="Final solution")
     plt.legend(loc="best")
-    plt.savefig(os.path.join("assets", "examples_burgers_eq.pdf"))
+    plt.savefig(os.path.join("assets", f"ivp_burgers_soln_{impl}.pdf"))
     print("Finished")
 
 
