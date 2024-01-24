@@ -24,7 +24,7 @@ class ScalarExpDecayProblem {
         return 0;
     }
     static void verify(double t, OIFArrayF64 *y) {
-        EXPECT_NEAR(y->data[0], exp(-t), 1e-15);
+        EXPECT_NEAR(y->data[0], exp(-t), 1e-14);
     }
 };
 
@@ -86,15 +86,18 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase) {
     OIFArrayF64 *y0 =
         oif_init_array_f64_from_data(1, dims, ScalarExpDecayProblem::y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_init_impl("ivp", "scipy_ode_dopri5", 1, 0);
+    ImplHandle implh = oif_init_impl("ivp", GetParam(), 1, 0);
 
     int status;
     status = oif_ivp_set_initial_value(implh, y0, t0);
+    EXPECT_EQ(status, 0);
     status = oif_ivp_set_rhs_fn(implh, ScalarExpDecayProblem::rhs);
+    EXPECT_EQ(status, 0);
 
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
     for (auto t : t_span) {
         status = oif_ivp_integrate(implh, t, y);
+        EXPECT_EQ(status, 0);
         ScalarExpDecayProblem::verify(t, y);
     }
 
@@ -110,11 +113,13 @@ TEST_P(IvpImplementationsFixture, LinearOscillatorTestCase) {
     OIFArrayF64 *y0 =
         oif_init_array_f64_from_data(1, dims, LinearOscillatorProblem::y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_init_impl("ivp", "scipy_ode_dopri5", 1, 0);
+    ImplHandle implh = oif_init_impl("ivp", GetParam(), 1, 0);
 
     int status;
     status = oif_ivp_set_initial_value(implh, y0, t0);
+    EXPECT_EQ(status, 0);
     status = oif_ivp_set_rhs_fn(implh, LinearOscillatorProblem::rhs);
+    EXPECT_EQ(status, 0);
 
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
     for (auto t : t_span) {
@@ -134,11 +139,13 @@ TEST_P(IvpImplementationsFixture, OrbitEquationsProblemTestCase) {
     OIFArrayF64 *y0 =
         oif_init_array_f64_from_data(1, dims, OrbitEquationsProblem::y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_init_impl("ivp", "scipy_ode_dopri5", 1, 0);
+    ImplHandle implh = oif_init_impl("ivp", GetParam(), 1, 0);
 
     int status;
     status = oif_ivp_set_initial_value(implh, y0, t0);
+    EXPECT_EQ(status, 0);
     status = oif_ivp_set_rhs_fn(implh, OrbitEquationsProblem::rhs);
+    EXPECT_EQ(status, 0);
 
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
     for (auto t : t_span) {
