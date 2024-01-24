@@ -1,32 +1,3 @@
-cmake_minimum_required(VERSION 3.18)
-
-project(oif-toy-example LANGUAGES C CXX)
-
-set(CMAKE_C_STANDARD 11)
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  message("Disable optimizations for Debug build type")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
-endif()
-
-# DOWNLOAD_EXTRACT_TIMESTAMP = TRUE
-if(POLICY CMP0135)
-  cmake_policy(SET CMP0135 NEW)
-endif()
-
-# Copy all built library targets to a common directory, so that it is easy to
-# find and load them.
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-add_subdirectory(vendor)
-
-add_subdirectory(oif)
-file(COPY oif_impl DESTINATION ${CMAKE_BINARY_DIR})
-add_subdirectory(oif_impl)
-
-add_subdirectory(examples)
-
-# -----------------------------------------------------------------------------
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -72,8 +43,3 @@ gtest_discover_tests(test_ivp)
 
 include(CTest)
 add_test(NAME test_qeq COMMAND test_qeq)
-
-# if(CMAKE_BUILD_TYPE MATCHES "Debug") set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
-# -Werror -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer" )
-# target_link_options( test_ivp BEFORE PUBLIC -fsanitize=undefined PUBLIC
-# -fsanitize=address) endif()
