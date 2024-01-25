@@ -19,3 +19,13 @@ all :
 test : all
 	cd build && ./test_qeq && ./test_linsolve && ./test_ivp
 	pytest tests/lang_python
+
+.PHONY : release
+release :
+	rm -rf build
+	cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \
+	cmake --build build
+
+.PHONY : docs
+docs :
+	cd docs && make html
