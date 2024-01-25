@@ -11,6 +11,8 @@ Welcome to oif-toy-example's documentation!
    :caption: Contents:
 
    overview.md
+   example-ivp-burgers-equation-in-python.md
+   compare-perf-ivp-burgers-eqn.md
    notes-on-dbus.md
    python-buffer-protocol.md
 
