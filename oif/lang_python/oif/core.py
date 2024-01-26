@@ -14,6 +14,13 @@ OIF_ARRAY_F64 = 5
 OIF_STR = 6
 OIF_CALLBACK = 7
 
+OIF_LANG_C = 1
+OIF_LANG_CXX = 2
+OIF_LANG_PYTHON = 3
+OIF_LANG_JULIA = 4
+OIF_LANG_R = 5
+OIF_LANG_COUNT = 6
+
 
 _lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
 
@@ -84,16 +91,14 @@ def make_oif_callback(
         raise ValueError(f"Cannot convert type '{restype}'")
 
     fn_t = ctypes.CFUNCTYPE(ctypes_restype, *ctypes_argtypes)
-    wrapper_fn = fn_t(make_oif_wrapper(fn, argtypes, restype))
+    c_wrapper_fn = fn_t(_make_c_func_wrapper_from_py_callable(fn, argtypes, restype))
 
-    fn_p_c = ctypes.cast(wrapper_fn, ctypes.c_void_p)
-    assert fn_p_c.value is not None
-    # TODO: Replace magic constant with OIF_LANG_PYTHON (= 3)
-    oifcallback = OIFCallback(3, fn_p_py, fn_p_c)
+    fn_p_c = ctypes.cast(c_wrapper_fn, ctypes.c_void_p)
+    oifcallback = OIFCallback(OIF_LANG_PYTHON, fn_p_py, fn_p_c)
     return oifcallback
 
 
-def make_oif_wrapper(fn: Callable, arg_types: list, restype):
+def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype):
     """Call `fn` converting OIF data types to native Python data types."""
 
     def wrapper(*arg_values):
