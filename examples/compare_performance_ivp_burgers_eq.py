@@ -1,5 +1,6 @@
 import argparse
 import os
+import pickle
 import time
 
 import matplotlib.pyplot as plt
@@ -8,9 +9,11 @@ from oif.interfaces.ivp import IVP
 from scipy import integrate
 
 IMPL_LIST = ["scipy_ode_dopri5", "sundials_cvode", "native_scipy_dopri5"]
+RESOLUTIONS = [101, 1001, 10_001]
 
 RESULT_SOLUTION_FILENAME_TPL = os.path.join("assets", "ivp_burgers_soln_{}.pdf")
 RESULT_PERF_FILENAME = os.path.join("assets", "ivp_burgers_perf.pdf")
+RESULT_DATA_PICKLE = os.path.join("assets", "ivp_burgers_data.pickle")
 
 
 def _parse_args():
@@ -97,48 +100,69 @@ def run_one_impl(args):
 def run_all_impl(args):
     print("================================================================")
     print("Run all implementations")
-    print(f"args.scalability = {args.scalability}")
     print(f"args.n_runs = {args.n_runs}")
 
-    if args.scalability:
-        resolutions = [101, 1001, 10_001]
-    else:
-        resolutions = [1001]
-    print(f"Run with resolutions: {resolutions}")
+    print(f"Run with resolutions: {RESOLUTIONS}")
 
     tts_list = {}
-    for N in resolutions:
-        tts_list[N] = {}
-        for impl in IMPL_LIST:
-            tts_list[N][impl] = []
+    for impl in IMPL_LIST:
+        tts_list[impl] = {}
+        for N in RESOLUTIONS:
+            tts_list[impl][N] = []
 
-    for N in resolutions:
-        for impl in IMPL_LIST:
+    for impl in IMPL_LIST:
+        for N in RESOLUTIONS:
             for __ in range(args.n_runs):
                 elapsed_time = _run_once(impl, N, plot_solution=False)
-                tts_list[N][impl].append(elapsed_time)
+                tts_list[impl][N].append(elapsed_time)
 
+    analyze(tts_list)
+
+    with open(RESULT_DATA_PICKLE, "wb") as fh:
+        pickle.dump(tts_list, fh)
+
+    return tts_list
+
+
+def analyze(tts_list):
     print("================================================================")
     print("Statistics:")
     tts_stats = {}
     for impl in IMPL_LIST:
         tts_stats[impl] = {}
-        for N in resolutions:
+        for N in RESOLUTIONS:
             tts_stats[impl][N] = {}
-    for N in resolutions:
-        print(f"N = {N}")
-        for impl in IMPL_LIST:
-            tts_ave = np.mean(tts_list[N][impl])
-            tts_std = np.std(tts_list[N][impl], ddof=1)
-            print(f"{impl:24s} {tts_ave:6.2f} {tts_std:6.2f}")
+
+    for impl in IMPL_LIST:
+        for N in RESOLUTIONS:
+            tts_ave = np.mean(tts_list[impl][N])
+            tts_std = np.std(tts_list[impl][N], ddof=1)
             tts_stats[impl][N]["tts_ave"] = tts_ave
             tts_stats[impl][N]["tts_std"] = tts_std
 
+    col_sep = 5 * " "
+    print(
+        "{:^24s} ".format("N")
+        + col_sep.join(["{:^13d}".format(N) for N in RESOLUTIONS])
+    )
+    for impl in IMPL_LIST:
+        print(
+            "{:24s} ".format(impl)
+            + col_sep.join(
+                [
+                    "{:6.2f} {:6.2f}".format(
+                        tts_stats[impl][N]["tts_ave"], tts_stats[impl][N]["tts_ave"]
+                    )
+                    for N in RESOLUTIONS
+                ]
+            )
+        )
+
     plt.figure()
     for impl in IMPL_LIST:
-        tts_ave = [tts_stats[impl][N]["tts_ave"] for N in resolutions]
-        tts_std = [tts_stats[impl][N]["tts_std"] for N in resolutions]
-        plt.errorbar(resolutions, tts_ave, yerr=tts_std, label=impl)
+        tts_ave = [tts_stats[impl][N]["tts_ave"] for N in RESOLUTIONS]
+        tts_std = [tts_stats[impl][N]["tts_std"] for N in RESOLUTIONS]
+        plt.errorbar(RESOLUTIONS, tts_ave, yerr=tts_std, label=impl)
     plt.legend(loc="best")
     plt.tight_layout(pad=0.1)
     plt.savefig(RESULT_PERF_FILENAME)
