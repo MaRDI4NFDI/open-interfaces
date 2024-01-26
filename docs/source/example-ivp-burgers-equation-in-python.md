@@ -5,12 +5,12 @@ differential equations, that is, time integration) interface
 with Python bindings to solve the following problem based on
 the inviscid Burgers' equation:
 $$
-    u_t + 0.5 * (u^2)_x = 0, \quad x \in [0, 2], \quad t \in [0, 2]
     \begin{align}
         u_t + \left(\frac{u^2}{2}\right)_x &= 0,
             \quad x \in [0, 2], \quad t \in [0, 2], \\
         u(0, x) &= 0.5 - 0.25 \sin(\pi x), \\
         u(t, 0) &= u(t, 2)
+    \end{align}
 $$
 
 This is one of the most famous nonlinear hyperbolic equations with the property
@@ -35,10 +35,11 @@ $$
 $$
 which is commonly discretized in space (the right-hand side) in the following
 way:
-$$
-\label{odes}
+```{math}
+:label: ode-system
+
 \frac{du_i}{dt} = - \frac{\hat f(u_{i + 1/2}) - \hat f(u_{i - 1/2})}{\Delta x},
-$$
+```
 where $f = 0.5 u^2$ and $\hat f$ is an approximation of $f$.
 There are different ways of approximating $f$, we will use one of the simplest
 just for the sake of a demonstration.
@@ -59,7 +60,7 @@ as the most important thing here is that we instantiate the `IVP` interface,
 with a given implementation that we want to use, then we invoke the
 `set_initial_value` method with the actual initial conditions,
 and the `set_rhs_fn` method that takes a callback that evaluates the
-right-hand side of the system :eqref:.
+right-hand side of the system {eq}`ode-system`.
 Important here is that callback has a signature `rhs(t, u, udot)`,
 where `t` is time to which we want to integrate currently, `u` is the `ndarray`
 with current values of the ODE system solution vector, and `udot` is `ndarray`

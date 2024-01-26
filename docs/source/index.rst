@@ -9,6 +9,7 @@ Welcome to oif-toy-example's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :numbered:
 
    overview.md
    example-ivp-burgers-equation-in-python.md
