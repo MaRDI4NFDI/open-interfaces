@@ -11,7 +11,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-add_executable(test_qeq tests/lang_c/test_qeq.cpp)
+add_executable(test_qeq lang_c/test_qeq.cpp)
 target_link_libraries(test_qeq GTest::gtest_main oif_c)
 target_include_directories(test_qeq PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
 target_include_directories(test_qeq
@@ -19,7 +19,7 @@ target_include_directories(test_qeq
 target_compile_features(test_qeq PUBLIC cxx_std_11)
 set_target_properties(test_qeq PROPERTIES CXX_EXTENSIONS OFF)
 
-add_executable(test_linsolve tests/lang_c/test_linsolve.cpp)
+add_executable(test_linsolve lang_c/test_linsolve.cpp)
 target_link_libraries(test_linsolve GTest::gtest_main oif_c)
 target_include_directories(test_linsolve PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
 target_include_directories(test_linsolve
@@ -27,7 +27,7 @@ target_include_directories(test_linsolve
 target_compile_features(test_linsolve PUBLIC cxx_std_11)
 set_target_properties(test_linsolve PROPERTIES CXX_EXTENSIONS OFF)
 
-add_executable(test_ivp tests/lang_c/test_ivp.cpp)
+add_executable(test_ivp lang_c/test_ivp.cpp)
 target_link_libraries(test_ivp GTest::gtest_main oif_c)
 target_include_directories(test_ivp PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
 target_include_directories(test_ivp
