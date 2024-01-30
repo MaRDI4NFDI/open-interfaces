@@ -8,7 +8,7 @@ import numpy as np
 from oif.interfaces.ivp import IVP
 from scipy import integrate
 
-IMPL_LIST = ["scipy_ode_dopri5", "sundials_cvode", "native_scipy_dopri5"]
+IMPL_LIST = ["scipy_ode_dopri5", "sundials_cvode", "native_scipy_ode_dopri5"]
 RESOLUTIONS = [101, 1001, 10_001]
 
 RESULT_SOLUTION_FILENAME_TPL = os.path.join("assets", "ivp_burgers_soln_{}.pdf")
@@ -173,7 +173,8 @@ def _run_once(impl, N=1001, plot_solution=True) -> float:
     print(f"Solving Burgers' equation with time integration {impl}")
     begin_time = time.time()
     problem = BurgersEquationProblem(N=N)
-    if impl == "native_scipy_dopri5":
+    if impl == "native_scipy_ode_dopri5":
+        print(f"Use native impl {impl}")
         s = integrate.ode(problem.compute_rhs_native)
         s.set_integrator("dopri5", atol=1e-15, rtol=1e-15, nsteps=1000)
         t0 = 0.0
