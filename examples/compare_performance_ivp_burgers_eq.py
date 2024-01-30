@@ -32,9 +32,6 @@ def _parse_args():
     all_impl.add_argument(
         "--n_runs", default=1, type=int, help="Number of runs for each implementation"
     )
-    all_impl.add_argument(
-        "--scalability", action="store_true", help="Run with different resolutions"
-    )
     all_impl.set_defaults(func=run_all_impl)
 
     return p.parse_args()
