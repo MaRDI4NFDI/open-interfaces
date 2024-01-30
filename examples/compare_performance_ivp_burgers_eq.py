@@ -148,7 +148,7 @@ def analyze(tts_list):
             + col_sep.join(
                 [
                     "{:6.2f} {:6.2f}".format(
-                        tts_stats[impl][N]["tts_ave"], tts_stats[impl][N]["tts_ave"]
+                        tts_stats[impl][N]["tts_ave"], tts_stats[impl][N]["tts_std"]
                     )
                     for N in RESOLUTIONS
                 ]
