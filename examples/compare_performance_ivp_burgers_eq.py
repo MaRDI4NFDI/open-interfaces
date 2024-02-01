@@ -9,11 +9,14 @@ from oif.interfaces.ivp import IVP
 from scipy import integrate
 
 IMPL_LIST = ["scipy_ode_dopri5", "sundials_cvode", "native_scipy_ode_dopri5"]
-RESOLUTIONS = [101, 1001, 2001, 4001, 8001, 10_001]
+RESOLUTIONS = [101, 201, 401, 801, 1001, 2001, 4001, 8001, 10_001, 20_001, 40_001]
 
 RESULT_SOLUTION_FILENAME_TPL = os.path.join("assets", "ivp_burgers_soln_{}.pdf")
 RESULT_PERF_FILENAME = os.path.join("assets", "ivp_burgers_perf.pdf")
 RESULT_DATA_PICKLE = os.path.join("assets", "ivp_burgers_data.pickle")
+RESULT_PERF_NORMALIZED_FILENAME = os.path.join(
+    "assets", "ivp_burgers_perf_normalized.pdf"
+)
 
 
 def _parse_args():
@@ -159,10 +162,33 @@ def analyze(tts_list):
     for impl in IMPL_LIST:
         tts_ave = [tts_stats[impl][N]["tts_ave"] for N in RESOLUTIONS]
         tts_std = [tts_stats[impl][N]["tts_std"] for N in RESOLUTIONS]
-        plt.errorbar(RESOLUTIONS, tts_ave, yerr=tts_std, label=impl)
+        plt.errorbar(RESOLUTIONS, tts_ave, fmt="-o", yerr=tts_std, label=impl)
     plt.legend(loc="best")
     plt.tight_layout(pad=0.1)
     plt.savefig(RESULT_PERF_FILENAME)
+
+    # Plot relative times (normalized by native performance).
+    impl = IMPL_LIST[-1]
+    assert impl.startswith("native_")
+    tts_ave_native = np.array([tts_stats[impl][N]["tts_ave"] for N in RESOLUTIONS])
+    tts_std_native = np.array([tts_stats[impl][N]["tts_std"] for N in RESOLUTIONS])
+    plt.figure()
+    for impl in IMPL_LIST[:-1]:
+        tts_ave = np.array([tts_stats[impl][N]["tts_ave"] for N in RESOLUTIONS])
+        tts_std = np.array([tts_stats[impl][N]["tts_std"] for N in RESOLUTIONS])
+        tts_std_normalized = np.sqrt(
+            np.square(tts_std / tts_ave) + np.square(tts_std_native / tts_ave_native)
+        )
+        plt.errorbar(
+            RESOLUTIONS,
+            tts_ave / tts_ave_native,
+            yerr=tts_std_normalized,
+            fmt="-o",
+            label=impl,
+        )
+    plt.legend(loc="best")
+    plt.tight_layout(pad=0.1)
+    plt.savefig(RESULT_PERF_NORMALIZED_FILENAME)
 
 
 def _run_once(impl, N=1001, plot_solution=True) -> float:
