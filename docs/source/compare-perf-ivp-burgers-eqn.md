@@ -49,10 +49,10 @@ the number of invocations of integration functions increases as well.
 
 To produce the results below, we run the following command:
 ```shell
-python examples/compare_performance_ivp_burgers_eq.py all --n_runs 10 --scalability
+python examples/compare_performance_ivp_burgers_eq.py all --n_runs 10
 ```
-where `--n_runs` specifies number of runs for obtaining statistics,
-and `--scalability` requests analysis for different grid resolutions.
+where `--n_runs` specifies number of runs for obtaining statistics for each
+implementation and grid resolution.
 
 Note that all implementations used absolute and relative tolerances
 set to $10^{-15}$.
@@ -97,7 +97,9 @@ Using the script `examples/compare_performance_ivp_burgers_eq_pure_comparison.py
 
 Profile the code with the following command:
 ```
-
+python -m cProfile -o profiler-results \
+    examples/compare_performance_ivp_burgers_eq_pure_comparison.py \
+        one scipy_ode_dopri5
 ```
 
 than using
