@@ -120,7 +120,7 @@ jupyter-core==5.7.1
     #   nbformat
 lxml==5.1.0
     # via exhale
-markdown-it-py==2.2.0
+markdown-it-py==3.0.0
     # via
     #   mdit-py-plugins
     #   myst-parser
@@ -130,13 +130,13 @@ matplotlib-inline==0.1.6
     # via
     #   ipykernel
     #   ipython
-mdit-py-plugins==0.3.5
+mdit-py-plugins==0.4.0
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
 myst-nb==1.0.0
     # via -r requirements.in
-myst-parser==1.0.0
+myst-parser==2.0.0
     # via
     #   -r requirements.in
     #   myst-nb
