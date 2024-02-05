@@ -124,7 +124,7 @@ markdown-it-py==3.0.0
     # via
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==2.1.4
+markupsafe==2.1.5
     # via jinja2
 matplotlib-inline==0.1.6
     # via
