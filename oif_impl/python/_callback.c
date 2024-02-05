@@ -22,16 +22,16 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    unsigned int num_total_args = 3;
+    unsigned int nargs = 3;
 
     ffi_cif cif;
-    ffi_type **arg_types = malloc(num_total_args * sizeof(ffi_type *));
+    ffi_type **arg_types = malloc(nargs * sizeof(ffi_type *));
     if (arg_types == NULL) {
         fprintf(stderr,
                 "[_callback] Could not allocate memory for `arg_types`");
         return NULL;
     }
-    void **arg_values = malloc(num_total_args * sizeof(void *));
+    void **arg_values = malloc(nargs * sizeof(void *));
     if (arg_values == NULL) {
         fprintf(stderr,
                 "[_callback] Could not allocate memory for `arg_values`");
@@ -46,7 +46,7 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
 
     assert(n_args == PyTuple_Size(py_args));
     // Merge input and output argument types together in `arg_types` array.
-    for (Py_ssize_t i = 0; i < num_total_args; ++i) {
+    for (Py_ssize_t i = 0; i < nargs; ++i) {
         PyObject *arg = PyTuple_GetItem(py_args, i);
         if (arg_type_ids[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
@@ -73,7 +73,7 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
     }
 
     ffi_status status = ffi_prep_cif(
-        &cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_sint, arg_types);
+        &cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[dispatch_c] ffi_prep_cif was not OK");
