@@ -8,6 +8,7 @@
 #include "oif/api.h"
 
 static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
+    PyObject *retval = NULL;
     PyObject *capsule;
     PyObject *py_args;
 
@@ -35,23 +36,22 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
     if (arg_values == NULL) {
         fprintf(stderr,
                 "[_callback] Could not allocate memory for `arg_values`\n");
-        free(arg_types);
-        return NULL;
+        goto clean_arg_types;
     }
 
     int arg_type_ids[] = {OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64};
-    Py_ssize_t n_args = sizeof arg_type_ids / sizeof arg_type_ids[0];
     void *fn_p = PyCapsule_GetPointer(capsule, "123");
     printf("Function pointer is %p\n", fn_p);
 
-    assert(n_args == PyTuple_Size(py_args));
-    // Merge input and output argument types together in `arg_types` array.
+    // Prepare function arguments for FFI expectations (pointers)
+    // and convert NumPy arrays to OIFArrayF64 structs.
     for (Py_ssize_t i = 0; i < nargs; ++i) {
         PyObject *arg = PyTuple_GetItem(py_args, i);
         if (arg_type_ids[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
             if (!PyFloat_Check(arg)) {
                 fprintf(stderr, "[_callback] Expected PyFloat object.\n");
+                goto clean_arg_values;
             }
             double double_value = PyFloat_AsDouble(arg);
             printf("Received double value: %f\n", double_value);
@@ -78,7 +78,7 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
             fprintf(stderr,
                     "[_callback] Unknown input arg type: %d\n",
                     arg_type_ids[i]);
-            exit(EXIT_FAILURE);
+            goto clean_arg_values;
         }
     }
 
@@ -87,16 +87,18 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[_callback] ffi_prep_cif was not OK");
-        exit(EXIT_FAILURE);
+        goto clean_arg_values;
     }
 
     int result;
     ffi_call(&cif, FFI_FN(fn_p), &result, arg_values);
 
+    retval = PyLong_FromLong(result);
+clean_arg_values:
     free(arg_values);
+clean_arg_types:
     free(arg_types);
-
-    return PyLong_FromLong(result);
+    return retval;
 }
 
 static PyMethodDef callback_methods[] = {
