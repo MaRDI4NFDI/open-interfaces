@@ -58,11 +58,21 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
             arg_values[i] = &double_value;
         } else if (arg_type_ids[i] == OIF_ARRAY_F64) {
             arg_types[i] = &ffi_type_pointer;
-            OIFArrayF64 array_value = {
+            PyArrayObject *py_arr = (PyArrayObject *) arg;
+            if (!PyArray_Check(py_arr)) {
+                fprintf(stderr, "[_callback] Expected PyArrayObject (NumPy ndarray) object\n");
+                goto clean_arg_values;
+            }
+            OIFArrayF64 arr = {
                 .nd = PyArray_NDIM((PyArrayObject *)arg),
                 .dimensions = PyArray_DIMS((PyArrayObject *)arg),
                 .data = PyArray_DATA((PyArrayObject *)arg)};
-            arg_values[i] = &array_value;
+            // We always pass array data structure as pointer: `OIFArrayF64 *`,
+            // and FFI requires pointer to function arguments;
+            // hence, we need to obtain `OIFArrayF64 **`.
+            printf("[_callback] Arrays first value: %f\n", arr.data[0]);
+            OIFArrayF64 *arr_p = &arr;
+            arg_values[i] = &arr_p;
         } else {
             fflush(stdout);
             fprintf(stderr,
