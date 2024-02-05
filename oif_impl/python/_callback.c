@@ -11,6 +11,12 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
     PyObject *capsule;
     PyObject *py_args;
 
+    // We need to initialize PyArray_API (table of function pointers)
+    // in every translation unit (separate .c file).
+    // See the details in the accepted solution here:
+    // https://stackoverflow.com/q/47026900/1095202
+    import_array();
+
     if (!PyArg_ParseTuple(args, "OO!", &capsule, &PyTuple_Type, &py_args)) {
         fprintf(stderr, "[_callback] Could not parse function arguments");
         return NULL;
