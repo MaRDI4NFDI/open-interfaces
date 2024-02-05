@@ -28,13 +28,13 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
     ffi_type **arg_types = malloc(nargs * sizeof(ffi_type *));
     if (arg_types == NULL) {
         fprintf(stderr,
-                "[_callback] Could not allocate memory for `arg_types`");
+                "[_callback] Could not allocate memory for `arg_types`\n");
         return NULL;
     }
     void **arg_values = malloc(nargs * sizeof(void *));
     if (arg_values == NULL) {
         fprintf(stderr,
-                "[_callback] Could not allocate memory for `arg_values`");
+                "[_callback] Could not allocate memory for `arg_values`\n");
         free(arg_types);
         return NULL;
     }
@@ -51,7 +51,7 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
         if (arg_type_ids[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
             if (!PyFloat_Check(arg)) {
-                fprintf(stderr, "Expected PyFloat object.\n");
+                fprintf(stderr, "[_callback] Expected PyFloat object.\n");
             }
             double double_value = PyFloat_AsDouble(arg);
             printf("Received double value: %f\n", double_value);
@@ -66,7 +66,7 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
         } else {
             fflush(stdout);
             fprintf(stderr,
-                    "[dispatch_c] Unknown input arg type: %d\n",
+                    "[_callback] Unknown input arg type: %d\n",
                     arg_type_ids[i]);
             exit(EXIT_FAILURE);
         }
@@ -76,7 +76,7 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
         &cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
-        fprintf(stderr, "[dispatch_c] ffi_prep_cif was not OK");
+        fprintf(stderr, "[_callback] ffi_prep_cif was not OK");
         exit(EXIT_FAILURE);
     }
 
