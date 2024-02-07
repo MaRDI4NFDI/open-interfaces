@@ -122,3 +122,10 @@ cmake_wrapper.sh
 
 # Jetbrains Intellij IDEA
 .idea/
+
+# Profiler results
+callgrind*
+*.lprof
+
+# Generated images and tables, binary files
+assets*
