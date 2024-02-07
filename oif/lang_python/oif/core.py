@@ -94,6 +94,7 @@ def make_oif_callback(
     c_wrapper_fn = fn_t(_make_c_func_wrapper_from_py_callable(fn, argtypes, restype))
 
     fn_p_c = ctypes.cast(c_wrapper_fn, ctypes.c_void_p)
+    assert fn_p_c.value is not None
     oifcallback = OIFCallback(OIF_LANG_PYTHON, fn_p_py, fn_p_c)
     return oifcallback
 

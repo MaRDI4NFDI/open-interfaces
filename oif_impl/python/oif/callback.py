@@ -25,7 +25,6 @@ class Callback:
         self.fn_p_py = c_func_wrapper(raw_pointer)
 
     def __call__(self, *args):
-        print(f"args are: {args}")
         return _callback.call_c_fn_from_python(self.fn_capsule, args)
         c_args = []
         for i, (t, v) in enumerate(zip(self.arg_types, args)):
