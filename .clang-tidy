@@ -1,3 +1,4 @@
+---
 # This file is taken from: https://nrk.neocities.org/articles/c-static-analyzers
 Checks: >
     performance-*,
@@ -22,7 +23,7 @@ Checks: >
 WarningsAsErrors: '*'
 
 CheckOptions:
-  - key:             bugprone-assert-side-effect.AssertMacros
-    value:           'ASSERT'
+    - key: bugprone-assert-side-effect.AssertMacros
+      value: 'ASSERT'
 
-ExtraArgs: [-std=c11,-DDEBUG]
+ExtraArgs: [-std=c11, -DDEBUG]

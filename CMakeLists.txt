@@ -14,8 +14,8 @@ if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
 
-# Copy all built library targets to a common directory,
-# so that it is easy to find and load them.
+# Copy all built library targets to a common directory, so that it is easy to
+# find and load them.
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_subdirectory(vendor)

@@ -8,7 +8,8 @@
 
 #include "oif/api.h"
 
-static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args) {
+static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self),
+                                       PyObject *args) {
     PyObject *retval = NULL;
     PyObject *capsule;
     PyObject *py_args;
@@ -26,22 +27,19 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
 
     Py_ssize_t nargs_s = PyTuple_Size(py_args);
     if (nargs_s < 0) {
-        fprintf(
-            stderr,
-            "[_callback] Unexpected negative value of the tuple of args "
-            "for the callback function\n"
-        );
+        fprintf(stderr,
+                "[_callback] Unexpected negative value of the tuple of args "
+                "for the callback function\n");
         return NULL;
     }
     unsigned int nargs;
     if (nargs_s <= UINT_MAX) {
-        nargs = (unsigned int) nargs_s;  // Explicit cast to eliminate compiler warning
+        nargs = (unsigned int)
+            nargs_s; // Explicit cast to eliminate compiler warning
     } else {
-        fprintf(
-            stderr,
-            "[_callback] Could not convert size of the tuple of args "
-            "to 'unsigned int' type\n"
-        );
+        fprintf(stderr,
+                "[_callback] Could not convert size of the tuple of args "
+                "to 'unsigned int' type\n");
         return NULL;
     }
     int arg_type_ids[] = {OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64};
@@ -62,7 +60,7 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
                 "[_callback] Could not allocate memory for `arg_values`\n");
         goto clean_arg_types;
     }
-    int narray_args = 0;  // Number of arguments of type `OIFArrayF64 *`.
+    int narray_args = 0; // Number of arguments of type `OIFArrayF64 *`.
     for (size_t i = 0; i < nargs; ++i) {
         if (arg_type_ids[i] == OIF_INT) {
             arg_values[i] = malloc(sizeof(int));
@@ -84,7 +82,7 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
             goto clean_arg_values;
         }
     }
-    
+
     OIFArrayF64 **oif_arrays = calloc(narray_args, sizeof(OIFArrayF64 *));
     if (oif_arrays == NULL) {
         fprintf(stderr,
@@ -94,9 +92,10 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
     for (Py_ssize_t i = 0; i < narray_args; ++i) {
         oif_arrays[i] = malloc(sizeof(OIFArrayF64));
         if (oif_arrays[i] == NULL) {
-            fprintf(stderr,
-                    "[_callback] Could not allocate memory for `oif_arrays[%ld]`\n",
-                    i);
+            fprintf(
+                stderr,
+                "[_callback] Could not allocate memory for `oif_arrays[%ld]`\n",
+                i);
             goto clean_oif_arrays;
         }
     }
@@ -117,12 +116,14 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
             *double_value = PyFloat_AsDouble(arg);
         } else if (arg_type_ids[i] == OIF_ARRAY_F64) {
             arg_types[i] = &ffi_type_pointer;
-            PyArrayObject *py_arr = (PyArrayObject *) arg;
+            PyArrayObject *py_arr = (PyArrayObject *)arg;
             if (!PyArray_Check(py_arr)) {
-                fprintf(stderr, "[_callback] Expected PyArrayObject (NumPy ndarray) object\n");
+                fprintf(stderr,
+                        "[_callback] Expected PyArrayObject (NumPy ndarray) "
+                        "object\n");
                 goto clean_oif_arrays;
             }
-            oif_arrays[j]->nd =PyArray_NDIM(py_arr); 
+            oif_arrays[j]->nd = PyArray_NDIM(py_arr);
             oif_arrays[j]->dimensions = PyArray_DIMS(py_arr);
             oif_arrays[j]->data = PyArray_DATA(py_arr);
             // We always pass array data structure as pointer: `OIFArrayF64 *`,
@@ -140,8 +141,8 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
         }
     }
 
-    ffi_status status = ffi_prep_cif(
-        &cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, arg_types);
+    ffi_status status =
+        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[_callback] ffi_prep_cif was not OK");
