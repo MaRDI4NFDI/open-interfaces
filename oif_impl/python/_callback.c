@@ -23,7 +23,26 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    unsigned int nargs = 3;
+    Py_ssize_t nargs_s = PyTuple_Size(py_args);
+    if (nargs_s < 0) {
+        fprintf(
+            stderr,
+            "[_callback] Unexpected negative value of the tuple of args "
+            "for the callback function\n"
+        );
+        return NULL;
+    }
+    unsigned int nargs;
+    if (nargs_s <= UINT_MAX) {
+        nargs = (unsigned int) nargs_s;  // Explicit cast to eliminate compiler warning
+    } else {
+        fprintf(
+            stderr,
+            "[_callback] Could not convert size of the tuple of args "
+            "to 'unsigned int' type\n"
+        );
+        return NULL;
+    }
 
     ffi_cif cif;
     ffi_type **arg_types = malloc(nargs * sizeof(ffi_type *));
@@ -45,7 +64,7 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
 
     // Prepare function arguments for FFI expectations (pointers)
     // and convert NumPy arrays to OIFArrayF64 structs.
-    for (Py_ssize_t i = 0; i < nargs; ++i) {
+    for (size_t i = 0, j = 0; i < nargs; ++i) {
         PyObject *arg = PyTuple_GetItem(py_args, i);
         if (arg_type_ids[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
