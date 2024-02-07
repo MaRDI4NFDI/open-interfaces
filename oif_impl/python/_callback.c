@@ -4,6 +4,7 @@
 #include <ffi.h>
 #include <numpy/arrayobject.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "oif/api.h"
 
@@ -110,7 +111,7 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
             arg_types[i] = &ffi_type_double;
             if (!PyFloat_Check(arg)) {
                 fprintf(stderr, "[_callback] Expected PyFloat object.\n");
-                goto clean_arg_values;
+                goto clean_oif_arrays;
             }
             double *double_value = arg_values[i];
             *double_value = PyFloat_AsDouble(arg);
@@ -119,7 +120,7 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
             PyArrayObject *py_arr = (PyArrayObject *) arg;
             if (!PyArray_Check(py_arr)) {
                 fprintf(stderr, "[_callback] Expected PyArrayObject (NumPy ndarray) object\n");
-                goto clean_arg_values;
+                goto clean_oif_arrays;
             }
             oif_arrays[j]->nd =PyArray_NDIM(py_arr); 
             oif_arrays[j]->dimensions = PyArray_DIMS(py_arr);
@@ -135,7 +136,7 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
             fprintf(stderr,
                     "[_callback] Unknown input arg type: %d\n",
                     arg_type_ids[i]);
-            goto clean_arg_values;
+            goto clean_oif_arrays;
         }
     }
 
@@ -144,17 +145,31 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[_callback] ffi_prep_cif was not OK");
-        goto clean_arg_values;
+        goto clean_oif_arrays;
     }
 
     int result;
     ffi_call(&cif, FFI_FN(fn_p), &result, arg_values);
 
     retval = PyLong_FromLong(result);
+
+clean_oif_arrays:
+    for (int i = 0; i < narray_args; ++i) {
+        if (oif_arrays[i] != NULL) {
+            free(oif_arrays[i]);
+        }
+    }
+    free(oif_arrays);
 clean_arg_values:
+    for (Py_ssize_t i = 0; i < nargs; ++i) {
+        if (arg_values[i] != NULL) {
+            free(arg_values[i]);
+        }
+    }
     free(arg_values);
 clean_arg_types:
     free(arg_types);
+
     return retval;
 }
 
