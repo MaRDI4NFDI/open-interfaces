@@ -126,6 +126,7 @@ cmake_wrapper.sh
 # Profiler results
 callgrind*
 *.lprof
+profiler-results*
 
 # Generated images and tables, binary files
 assets*
