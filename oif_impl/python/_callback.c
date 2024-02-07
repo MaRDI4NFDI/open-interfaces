@@ -43,6 +43,7 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
         );
         return NULL;
     }
+    int arg_type_ids[] = {OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64};
 
     ffi_cif cif;
     ffi_type **arg_types = malloc(nargs * sizeof(ffi_type *));
@@ -51,16 +52,55 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
                 "[_callback] Could not allocate memory for `arg_types`\n");
         return NULL;
     }
-    void **arg_values = malloc(nargs * sizeof(void *));
+
+    // We need to allocate memory for all values, to make sure
+    // that the lifetime of the arguments ends after `ffi_call` below.
+    void **arg_values = calloc(nargs, sizeof(void *));
     if (arg_values == NULL) {
         fprintf(stderr,
                 "[_callback] Could not allocate memory for `arg_values`\n");
         goto clean_arg_types;
     }
+    int narray_args = 0;  // Number of arguments of type `OIFArrayF64 *`.
+    for (size_t i = 0; i < nargs; ++i) {
+        if (arg_type_ids[i] == OIF_INT) {
+            arg_values[i] = malloc(sizeof(int));
+        } else if (arg_type_ids[i] == OIF_FLOAT64) {
+            arg_values[i] = malloc(sizeof(double));
+        } else if (arg_type_ids[i] == OIF_ARRAY_F64) {
+            arg_values[i] = malloc(sizeof(OIFArrayF64 **));
+            narray_args++;
+        } else {
+            fprintf(stderr,
+                    "[_callback] Unknown input arg type: %d\n",
+                    arg_type_ids[i]);
+            goto clean_arg_values;
+        }
+        if (arg_values[i] == NULL) {
+            fprintf(stderr,
+                    "[_callback] Could not allocate memory for element #%zu\n",
+                    i);
+            goto clean_arg_values;
+        }
+    }
+    
+    OIFArrayF64 **oif_arrays = calloc(narray_args, sizeof(OIFArrayF64 *));
+    if (oif_arrays == NULL) {
+        fprintf(stderr,
+                "[_callback] Could not allocate memory for `oif_arrays`\n");
+        goto clean_arg_values;
+    }
+    for (Py_ssize_t i = 0; i < narray_args; ++i) {
+        oif_arrays[i] = malloc(sizeof(OIFArrayF64));
+        if (oif_arrays[i] == NULL) {
+            fprintf(stderr,
+                    "[_callback] Could not allocate memory for `oif_arrays[%ld]`\n",
+                    i);
+            goto clean_oif_arrays;
+        }
+    }
 
-    int arg_type_ids[] = {OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64};
     void *fn_p = PyCapsule_GetPointer(capsule, "123");
-    printf("Function pointer is %p\n", fn_p);
 
     // Prepare function arguments for FFI expectations (pointers)
     // and convert NumPy arrays to OIFArrayF64 structs.
@@ -72,9 +112,8 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
                 fprintf(stderr, "[_callback] Expected PyFloat object.\n");
                 goto clean_arg_values;
             }
-            double double_value = PyFloat_AsDouble(arg);
-            printf("Received double value: %f\n", double_value);
-            arg_values[i] = &double_value;
+            double *double_value = arg_values[i];
+            *double_value = PyFloat_AsDouble(arg);
         } else if (arg_type_ids[i] == OIF_ARRAY_F64) {
             arg_types[i] = &ffi_type_pointer;
             PyArrayObject *py_arr = (PyArrayObject *) arg;
@@ -82,16 +121,15 @@ static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
                 fprintf(stderr, "[_callback] Expected PyArrayObject (NumPy ndarray) object\n");
                 goto clean_arg_values;
             }
-            OIFArrayF64 arr = {
-                .nd = PyArray_NDIM((PyArrayObject *)arg),
-                .dimensions = PyArray_DIMS((PyArrayObject *)arg),
-                .data = PyArray_DATA((PyArrayObject *)arg)};
+            oif_arrays[j]->nd =PyArray_NDIM(py_arr); 
+            oif_arrays[j]->dimensions = PyArray_DIMS(py_arr);
+            oif_arrays[j]->data = PyArray_DATA(py_arr);
             // We always pass array data structure as pointer: `OIFArrayF64 *`,
             // and FFI requires pointer to function arguments;
             // hence, we need to obtain `OIFArrayF64 **`.
-            printf("[_callback] Arrays first value: %f\n", arr.data[0]);
-            OIFArrayF64 *arr_p = &arr;
-            arg_values[i] = &arr_p;
+            OIFArrayF64 **pp = arg_values[i];
+            *pp = oif_arrays[j];
+            j++;
         } else {
             fflush(stdout);
             fprintf(stderr,
