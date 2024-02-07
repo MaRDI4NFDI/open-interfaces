@@ -7,7 +7,7 @@
 
 #include "oif/api.h"
 
-static PyObject *call_c_fn_from_python(PyObject *self, PyObject *args) {
+static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self), PyObject *args) {
     PyObject *retval = NULL;
     PyObject *capsule;
     PyObject *py_args;
