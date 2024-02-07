@@ -119,3 +119,6 @@ vimrc.local
 
 # cmake_wrapper.sh is a script to force VSCode use conda environment.
 cmake_wrapper.sh
+
+# Jetbrains Intellij IDEA
+.idea/
