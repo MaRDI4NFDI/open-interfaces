@@ -11,7 +11,7 @@
 static PyObject *
 numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self), PyObject *args) {
     PyObject *retval = NULL;
-    void *ctypes_pointer;
+    PyObject *ctypes_pointer;
 
     // We need to initialize PyArray_API (table of function pointers)
     // in every translation unit (separate .c file).
@@ -20,18 +20,22 @@ numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self), PyObject *args) {
     if (PyArray_API == NULL) {
         import_array();
     }
-    OIFArrayF64 *arr;
 
-    PyObject_Print(args, stdout, 0);
-    fprintf(stdout, "\n");
-
-    if (!PyArg_ParseTuple(args, "w*", &arr)) {
+    if (!PyArg_ParseTuple(args, "O", &ctypes_pointer)) {
         fprintf(stderr, "[_conversion] Could not parse function arguments\n");
         return NULL;
     }
-
-    printf("arr->nd = %d\n", arr->nd);
-    printf("arr->dimensions = %ld\n", arr->dimensions[0]);
+     
+    // Life is too short not to play with raw pointers.
+    OIFArrayF64 *arr = PyLong_AsVoidPtr(ctypes_pointer);
+    if (arr == NULL) {
+        fprintf(
+            stderr,
+            "[_conversion] Could not convert pointer "
+            "to OIFArrayF64 data structure\n"
+               );
+        return NULL;
+    }
 
     retval = PyArray_SimpleNewFromData(
         arr->nd, arr->dimensions, NPY_FLOAT64, arr->data);

@@ -21,7 +21,7 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self),
     import_array();
 
     if (!PyArg_ParseTuple(args, "OO!", &capsule, &PyTuple_Type, &py_args)) {
-        fprintf(stderr, "[_callback] Could not parse function arguments");
+        fprintf(stderr, "[_callback] Could not parse function arguments\n");
         return NULL;
     }
 

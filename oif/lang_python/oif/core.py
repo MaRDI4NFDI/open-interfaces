@@ -1,6 +1,7 @@
 import ctypes
 from typing import Callable, NewType, Union
 
+import _conversion
 import numpy as np
 
 UInt = NewType("UInt", int)
@@ -111,11 +112,14 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
                 py_arg_values.append(v)
             elif t == OIF_ARRAY_F64:
                 # v is a ctypes pointer to OIFArrayF64 struct.
+                # v_p is a raw C pointer
+                v_p = ctypes.addressof(v.contents)
                 py_arg_values.append(
-                    np.ctypeslib.as_array(
-                        v.contents.data,
-                        shape=[v.contents.dimensions[i] for i in range(v.contents.nd)],
-                    )
+                    _conversion.numpy_array_from_oif_array_f64(v_p)
+                    # np.ctypeslib.as_array(
+                    #     v.contents.data,
+                    #     shape=[v.contents.dimensions[i] for i in range(v.contents.nd)],
+                    # )
                 )
             else:
                 raise ValueError("Unsupported data type")
