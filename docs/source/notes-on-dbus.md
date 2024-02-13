@@ -1,11 +1,3 @@
----
-title: Notes on DBus
-authors:
-    - Dmitry I. Kabanov
-      affiliations:
-        - Institute for Analysis and Numerics, University of Münster
----
-
 (notes-on-dbus)=
 # Notes on DBus
 

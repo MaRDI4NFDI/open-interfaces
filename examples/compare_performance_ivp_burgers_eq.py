@@ -10,6 +10,7 @@ from scipy import integrate
 
 IMPL_LIST = ["scipy_ode_dopri5", "sundials_cvode", "native_scipy_ode_dopri5"]
 RESOLUTIONS = [101, 201, 401, 801, 1001, 2001, 4001, 8001, 10_001, 20_001]
+RESOLUTIONS = [101, 201, 401, 801, 1001, 10_001]
 
 RESULT_SOLUTION_FILENAME_TPL = os.path.join("assets", "ivp_burgers_soln_{}.pdf")
 RESULT_PERF_FILENAME = os.path.join("assets", "ivp_burgers_perf.pdf")

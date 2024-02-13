@@ -29,3 +29,7 @@ release :
 .PHONY : docs
 docs :
 	cd docs && make html
+
+.PHONY : docs-from-scratch
+docs-from-scratch:
+	cd docs && rm -rf build && make html

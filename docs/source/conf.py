@@ -21,6 +21,7 @@ math_eqref_format = "Eq. {number}"  # Space after . is non-breaking space!!!
 extensions = [
     "myst_parser",
     "sphinx.ext.mathjax",
+    "sphinx.ext.imgconverter",
 ]
 
 templates_path = ["_templates"]
