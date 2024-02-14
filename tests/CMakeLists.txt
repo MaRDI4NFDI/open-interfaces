@@ -8,8 +8,6 @@ set(gtest_force_shared_crt
     CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-enable_testing()
-
 add_executable(test_qeq lang_c/test_qeq.cpp)
 target_link_libraries(test_qeq GTest::gtest_main oif_c)
 target_include_directories(test_qeq PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
@@ -39,6 +37,3 @@ include(GoogleTest)
 gtest_discover_tests(test_qeq)
 gtest_discover_tests(test_linsolve)
 gtest_discover_tests(test_ivp)
-
-include(CTest)
-add_test(NAME test_qeq COMMAND test_qeq)

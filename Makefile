@@ -8,7 +8,7 @@ else                    # Linux
 endif
 
 export LD_LIBRARY_PATH:=build
-export PYTHONPATH:=$(PWD)/oif/interfaces/python:$(PWD)/oif_impl/python:$(PWD)/oif_impl/impl:$(PWD)/oif/lang_python:$(PWD)/src
+export PYTHONPATH:=$(PWD)/oif/interfaces/python:$(PWD)/oif_impl/python:$(PWD)/oif_impl/impl:$(PWD)/oif/lang_python:$(PWD)/src:$(PWD)/build
 
 .PHONY : all
 all :
@@ -17,7 +17,7 @@ all :
 
 .PHONY : test
 test : all
-	cd build && ./test_qeq && ./test_linsolve && ./test_ivp
+	cd build && ctest
 	pytest tests/lang_python
 
 .PHONY : release

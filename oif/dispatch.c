@@ -17,6 +17,8 @@
 char OIF_DISPATCH_C_SO[] = "liboif_dispatch_c.so";
 char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
 
+static const char *OIF_IMPL_ROOT_DIR;
+
 /**
  * Array of handles to the dynamically loaded libraries
  * for the language-specific dispatches.
@@ -41,9 +43,19 @@ int compare_fn(const ImplHandle *key1, const ImplHandle *key2) {
     return *key1 - *key2;
 }
 
-static void _init() {
+static int init_module_(void) {
+    OIF_IMPL_ROOT_DIR = getenv("OIF_IMPL_ROOT_DIR");
+    if (OIF_IMPL_ROOT_DIR == NULL) {
+        fprintf(
+                stderr,
+                "[dispatch] Environment variable 'OIF_IMPL_ROOT_DIR' must be "
+                "set so that implementations can be found. Cannot proceed\n");
+        return -1;
+    }
     hashmap_init(&IMPL_MAP, hash_fn, compare_fn);
     _INITIALIZED = true;
+
+    return 0;
 }
 
 ImplHandle load_interface_impl(const char *interface,
@@ -51,12 +63,17 @@ ImplHandle load_interface_impl(const char *interface,
                                size_t version_major,
                                size_t version_minor) {
     if (!_INITIALIZED) {
-        _init();
+        int status = init_module_();
+        if (status) {
+            return -1;
+        }
     }
     DispatchHandle dh;
     const char *dispatch_lang_so;
 
-    char conf_filename[1024] = "oif_impl/impl/";
+    char conf_filename[1024] = "";
+    strcat(conf_filename, OIF_IMPL_ROOT_DIR);
+    strcat(conf_filename, "/oif_impl/impl/");
     strcat(conf_filename, interface);
     strcat(conf_filename, "/");
     strcat(conf_filename, impl);

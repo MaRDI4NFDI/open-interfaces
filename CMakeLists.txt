@@ -21,9 +21,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 add_subdirectory(vendor)
 
 add_subdirectory(oif)
-file(COPY oif_impl DESTINATION ${CMAKE_BINARY_DIR})
 add_subdirectory(oif_impl)
 
 add_subdirectory(examples)
 
+enable_testing()
 add_subdirectory(tests)
