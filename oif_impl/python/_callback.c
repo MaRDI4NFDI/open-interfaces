@@ -28,8 +28,8 @@ static PyObject *call_c_fn_from_python(PyObject *Py_UNUSED(self),
     Py_ssize_t nargs_s = PyTuple_Size(py_args);
     if (nargs_s < 0) {
         fprintf(stderr,
-                "[_callback] Unexpected negative value of the tuple of args "
-                "for the callback function\n");
+                "[_callback] Unexpected negative value for the size "
+                "of the tuple of args for the callback function\n");
         return NULL;
     }
     unsigned int nargs;
