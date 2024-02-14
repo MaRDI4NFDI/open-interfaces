@@ -14,4 +14,3 @@ set_target_properties(
   PROPERTIES PREFIX ""
              OUTPUT_NAME "_conversion"
              SUFFIX ".${Python_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
-

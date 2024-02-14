@@ -8,8 +8,8 @@
 
 #include "oif/api.h"
 
-static PyObject *
-numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self), PyObject *args) {
+static PyObject *numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self),
+                                                PyObject *args) {
     PyObject *retval = NULL;
     PyObject *ctypes_pointer;
 
@@ -25,15 +25,13 @@ numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self), PyObject *args) {
         fprintf(stderr, "[_conversion] Could not parse function arguments\n");
         return NULL;
     }
-     
+
     // Life is too short not to play with raw pointers.
     OIFArrayF64 *arr = PyLong_AsVoidPtr(ctypes_pointer);
     if (arr == NULL) {
-        fprintf(
-            stderr,
-            "[_conversion] Could not convert pointer "
-            "to OIFArrayF64 data structure\n"
-               );
+        fprintf(stderr,
+                "[_conversion] Could not convert pointer "
+                "to OIFArrayF64 data structure\n");
         return NULL;
     }
 
@@ -41,8 +39,7 @@ numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self), PyObject *args) {
         arr->nd, arr->dimensions, NPY_FLOAT64, arr->data);
 
     if (retval == NULL) {
-        fprintf(stderr,
-                "[_conversion] Could not create a new NumPy array\n");
+        fprintf(stderr, "[_conversion] Could not create a new NumPy array\n");
     }
 
     return retval;
@@ -56,16 +53,14 @@ static PyMethodDef callback_methods[] = {
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
-PyDoc_STRVAR(
-    conversion_doc,
-    "Conversion functions between C and Python types");
+PyDoc_STRVAR(conversion_doc, "Conversion functions between C and Python types");
 
 static struct PyModuleDef callbackmodule = {
     .m_base = PyModuleDef_HEAD_INIT,
-    .m_name = "_conversion",  /* name of module */
+    .m_name = "_conversion", /* name of module */
     .m_doc = conversion_doc, /* module documentation, may be NULL */
-    .m_size = -1,          /* size of per-interpreter state of the module,
-                              or -1 if the module keeps state in global variables. */
+    .m_size = -1,            /* size of per-interpreter state of the module,
+                                or -1 if the module keeps state in global variables. */
     .m_methods = callback_methods};
 
 PyMODINIT_FUNC PyInit__conversion(void) {
@@ -78,4 +73,3 @@ PyMODINIT_FUNC PyInit__conversion(void) {
 
     return m;
 }
-

@@ -90,4 +90,3 @@ N = 10001
 scipy_ode_dopri5         107.32   1.95
 sundials_cvode           126.12   1.65
 ```
-

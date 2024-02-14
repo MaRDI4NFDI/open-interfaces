@@ -127,5 +127,3 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 We can see from the results of line profiling, that somehow functions
 `ndarray.ctypes.data_as` and `numpy.ctypeslib.as_array` are taking 40 % of run
 time, and look as the main targets for optimization.
-
-
