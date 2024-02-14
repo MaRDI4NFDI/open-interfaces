@@ -30,6 +30,9 @@ exclude_patterns = ["build"]
 myst_enable_extensions = ["dollarmath", "amsmath"]
 myst_dmath_double_inline = True
 
+# Convert PDFs to PNGs such that images look good on HiDPI displays.
+image_converter_args = ["-density", "600"]
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
