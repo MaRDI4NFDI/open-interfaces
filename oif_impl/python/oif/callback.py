@@ -1,5 +1,4 @@
 import ctypes
-import time
 
 import _callback
 import numpy as np
