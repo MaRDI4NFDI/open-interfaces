@@ -1,6 +1,7 @@
-# Python buffer protocol
+# 2024-09-08 Python buffer protocol
 
-Conspect of the documentation: <https://docs.python.org/3/c-api/buffer.html>.
+Notes on the Python buffer documentation page:
+<https://docs.python.org/3/c-api/buffer.html>.
 
 ## Introduction
 

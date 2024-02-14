@@ -1,5 +1,5 @@
 (notes-on-dbus)=
-# Notes on DBus
+# 2024-09-05 Notes on DBus
 
 DBus is a system for inter-process communication that provides a way
 for applications to talk to each other.

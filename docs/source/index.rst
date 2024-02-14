@@ -14,9 +14,6 @@ Welcome to oif-toy-example's documentation!
    overview.md
    example-ivp-burgers-equation-in-python.md
    technotes/index.rst
-   notes-on-dbus.md
-   python-buffer-protocol.md
-
 
 
 Indices and tables
