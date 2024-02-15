@@ -130,3 +130,6 @@ profiler-results*
 
 # Generated images and tables, binary files
 assets*
+
+# Memory profiles
+memray*
