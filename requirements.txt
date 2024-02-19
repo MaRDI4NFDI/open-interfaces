@@ -57,7 +57,7 @@ decorator==5.1.1
     # via ipython
 distlib==0.3.8
     # via virtualenv
-docutils==0.19
+docutils==0.20.1
     # via
     #   breathe
     #   myst-parser
