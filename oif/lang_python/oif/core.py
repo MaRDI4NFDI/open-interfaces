@@ -103,26 +103,27 @@ def make_oif_callback(
 def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype):
     """Call `fn` converting OIF data types to native Python data types."""
 
+    type_conversion = {
+        OIF_INT: lambda v: v,
+        OIF_FLOAT64: lambda v: v,
+        # v is a ctypes pointer to OIFArrayF64 struct.
+        # v_p is a raw C pointer
+        # Initially this block of code used numpy.ctypeslib.as_array
+        # to obtain a NumPy array for existing C buffer, but somehow
+        # it works very slowly, so we get NumPy arrays now using
+        # C extension.
+        OIF_ARRAY_F64: lambda v: _conversion.numpy_array_from_oif_array_f64(
+            ctypes.addressof(v.contents)
+        ),
+    }
+    py_arg_values = [None] * len(arg_types)
+
     def wrapper(*arg_values):
-        py_arg_values = []
         for i, (t, v) in enumerate(zip(arg_types, arg_values)):
-            if t == OIF_INT:
-                py_arg_values.append(v)
-            elif t == OIF_FLOAT64:
-                py_arg_values.append(v)
-            elif t == OIF_ARRAY_F64:
-                # v is a ctypes pointer to OIFArrayF64 struct.
-                # v_p is a raw C pointer
-                v_p = ctypes.addressof(v.contents)
-                py_arg_values.append(
-                    _conversion.numpy_array_from_oif_array_f64(v_p)
-                    # np.ctypeslib.as_array(
-                    #     v.contents.data,
-                    #     shape=[v.contents.dimensions[i] for i in range(v.contents.nd)],
-                    # )
-                )
-            else:
-                raise ValueError("Unsupported data type")
+            try:
+                py_arg_values[i] = type_conversion[t](v)
+            except KeyError:
+                raise ValueError(f"Unsupported data type {t}")
 
         result = fn(*py_arg_values)
         if result is None:
