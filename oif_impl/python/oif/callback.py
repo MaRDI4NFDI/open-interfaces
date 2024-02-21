@@ -6,7 +6,23 @@ from oif.core import OIF_ARRAY_F64, OIF_FLOAT64, OIF_INT, OIFArrayF64
 
 
 class Callback:
-    def __init__(self, fn_p, id: str):
+    """Wrapper around C callback to use from Python.
+
+    This class implements __call__ so that it can be used as Python callable
+    for Python implementations, but it wraps a C function so that also
+    handles conversion of the arguments from Python types to C types.
+
+    Parameters
+    ----------
+    fn_p : PyCapsule
+        PyCapsule object that contains a function pointer to C callback.
+    id : str
+        Identifier that is need to open the capsule.
+    arg_types: list
+        List of OIF types that describe callback arguments.
+    """
+
+    def __init__(self, fn_p, id: str, arg_types=[]):
         get_pointer_fn = ctypes.pythonapi.PyCapsule_GetPointer
         get_pointer_fn.argtypes = [ctypes.py_object, ctypes.c_char_p]
         get_pointer_fn.restype = ctypes.c_void_p
