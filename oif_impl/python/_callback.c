@@ -3,6 +3,7 @@
 #include <Python.h>
 #include <ffi.h>
 #include <numpy/arrayobject.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
