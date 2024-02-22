@@ -27,8 +27,8 @@ typedef void (*ivp_rhs_fp_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot);
 ivp_rhs_fp_t IVP_RHS_CALLBACK = NULL;
 
 PyObject *instantiate_callback_class(void) {
-    char *moduleName = "oif.callback";
-    char class_name[] = "Callback";
+    char *moduleName = "_callback";
+    char class_name[] = "PythonWrapperForCCallback";
 
     PyObject *pFileName = PyUnicode_FromString(moduleName);
     PyObject *pModule = PyImport_Import(pFileName);
@@ -60,7 +60,9 @@ PyObject *convert_oif_callback(OIFCallback *p) {
     if (fn_p == NULL) {
         fprintf(stderr, "[dispatch_python] Could not create PyCapsule\n");
     }
-    PyObject *obj = Py_BuildValue("(N, s)", fn_p, id);
+    fprintf(stderr, "[dispatch_python] HARDCODE!!!!!!\n");
+    unsigned int nargs = 3;
+    PyObject *obj = Py_BuildValue("(N, I)", fn_p, nargs);
     if (obj == NULL) {
         fprintf(stderr, "[backend_python] Could not build arguments\n");
     }
