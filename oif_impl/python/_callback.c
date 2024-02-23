@@ -202,7 +202,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
 
     OIFArgType *arg_type_ids = self->oif_arg_types;
 
-    ffi_cif *cif_p = self->cif_p;
+    ffi_cif cif;
     ffi_type **arg_types = self->arg_types;
     void **arg_values = self->arg_values;
     OIFArrayF64 **oif_arrays = self->oif_arrays;
@@ -249,7 +249,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
     }
 
     ffi_status status =
-        ffi_prep_cif(cif_p, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, arg_types);
+        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[_callback] ffi_prep_cif was not OK");
@@ -257,7 +257,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
     }
 
     int result;
-    ffi_call(cif_p, FFI_FN(fn_p), &result, arg_values);
+    ffi_call(&cif, FFI_FN(fn_p), &result, arg_values);
 
     retval = PyLong_FromLong(result);
 
@@ -268,8 +268,29 @@ static PyMemberDef PythonWrapperForCCallback_members[] = {
     {NULL}  /* Sentinel */
 };
 
+static PyObject *
+make_pycapsule(PyObject *Py_UNUSED(self), PyObject *args)
+{
+    PyObject *py_fn_p;
+    void *fn_p;
+    PyObject *capsule;
 
-static PyMethodDef PythonWrapperForCCallback_methods[] = {
+    if (! PyArg_ParseTuple(args, "O", &py_fn_p)) {
+        fprintf(stderr, "[_callback] Could not parse make_capsule arguments\n");
+        return NULL;
+    }
+    fn_p = PyLong_AsVoidPtr(py_fn_p);
+    capsule = PyCapsule_New(fn_p, "123", NULL);
+    if (capsule == NULL) {
+        fprintf(stderr, "[_callback] Could not create a capsule\n");
+        return NULL;
+    }
+
+    return capsule;
+}
+
+static PyMethodDef callback_methods[] = {
+    {"make_pycapsule", make_pycapsule, METH_VARARGS, "Make a PyCapsule for C function pointer"},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
@@ -285,7 +306,7 @@ static PyTypeObject PythonWrapperForCCallbackType = {
     .tp_dealloc = (destructor) PythonWrapperForCCallback_dealloc,
     .tp_call = (ternaryfunc) PythonWrapperForCCallback_call,
     .tp_members = PythonWrapperForCCallback_members,
-    .tp_methods = PythonWrapperForCCallback_methods,
+    // .tp_methods = PythonWrapperForCCallback_methods,
 };
 
 PyDoc_STRVAR(
@@ -299,6 +320,7 @@ static struct PyModuleDef callbackmodule = {
     .m_doc = callback_doc, /* module documentation, may be NULL */
     .m_size = -1,          /* size of per-interpreter state of the module,
                               or -1 if the module keeps state in global variables. */
+    .m_methods = callback_methods,
 };
 
 static void test_fn_(void)
