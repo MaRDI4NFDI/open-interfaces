@@ -1,11 +1,14 @@
 #define PY_SSIZE_T_CLEAN
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <Python.h>
+#include <structmember.h>
+
 #include <ffi.h>
-#include <numpy/arrayobject.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
 
 #include "oif/api.h"
 
@@ -268,6 +271,21 @@ static PyMemberDef PythonWrapperForCCallback_members[] = {
     {NULL}  /* Sentinel */
 };
 
+static PyTypeObject PythonWrapperForCCallbackType = {
+    .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "callback.PythonWrapperForCCallback",
+    .tp_doc = PyDoc_STR("Python wrapper for a C callback function"),
+    .tp_basicsize = sizeof(PythonWrapperForCCallbackObject),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    .tp_new = PyType_GenericNew,
+    .tp_init = (initproc) PythonWrapperForCCallback_init,
+    .tp_dealloc = (destructor) PythonWrapperForCCallback_dealloc,
+    .tp_call = (ternaryfunc) PythonWrapperForCCallback_call,
+    .tp_members = PythonWrapperForCCallback_members,
+    // .tp_methods = PythonWrapperForCCallback_methods,
+};
+
 static PyObject *
 make_pycapsule(PyObject *Py_UNUSED(self), PyObject *args)
 {
@@ -292,21 +310,6 @@ make_pycapsule(PyObject *Py_UNUSED(self), PyObject *args)
 static PyMethodDef callback_methods[] = {
     {"make_pycapsule", make_pycapsule, METH_VARARGS, "Make a PyCapsule for C function pointer"},
     {NULL, NULL, 0, NULL} /* Sentinel */
-};
-
-static PyTypeObject PythonWrapperForCCallbackType = {
-    .ob_base = PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name = "callback.PythonWrapperForCCallback",
-    .tp_doc = PyDoc_STR("Python wrapper for a C callback function"),
-    .tp_basicsize = sizeof(PythonWrapperForCCallbackObject),
-    .tp_itemsize = 0,
-    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    .tp_new = PyType_GenericNew,
-    .tp_init = (initproc) PythonWrapperForCCallback_init,
-    .tp_dealloc = (destructor) PythonWrapperForCCallback_dealloc,
-    .tp_call = (ternaryfunc) PythonWrapperForCCallback_call,
-    .tp_members = PythonWrapperForCCallback_members,
-    // .tp_methods = PythonWrapperForCCallback_methods,
 };
 
 PyDoc_STRVAR(
