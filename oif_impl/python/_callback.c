@@ -99,10 +99,17 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
     unsigned int narray_args = 0; // Number of arguments of type `OIFArrayF64 *`.
     for (size_t i = 0; i < nargs; ++i) {
         if (self->oif_arg_types[i] == OIF_INT) {
+            fprintf(
+                stderr,
+                "[_callback] WARNING: There must be better support "
+                "for integer types\n");
+            self->arg_types[i] = &ffi_type_sint64;
             self->arg_values[i] = malloc(sizeof(int));
         } else if (self->oif_arg_types[i] == OIF_FLOAT64) {
+            self->arg_types[i] = &ffi_type_double;
             self->arg_values[i] = malloc(sizeof(double));
         } else if (self->oif_arg_types[i] == OIF_ARRAY_F64) {
+            self->arg_types[i] = &ffi_type_pointer;
             self->arg_values[i] = malloc(sizeof(OIFArrayF64 **));
             narray_args++;
         } else {
@@ -206,7 +213,6 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
     OIFArgType *arg_type_ids = self->oif_arg_types;
 
     ffi_cif cif;
-    ffi_type **arg_types = self->arg_types;
     void **arg_values = self->arg_values;
     OIFArrayF64 **oif_arrays = self->oif_arrays;
 
@@ -217,7 +223,6 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
     for (size_t i = 0, j = 0; i < nargs; ++i) {
         PyObject *arg = PyTuple_GetItem(py_args, i);
         if (arg_type_ids[i] == OIF_FLOAT64) {
-            arg_types[i] = &ffi_type_double;
             if (!PyFloat_Check(arg)) {
                 fprintf(stderr, "[_callback] Expected PyFloat object.\n");
                 return NULL;
@@ -225,7 +230,6 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
             double *double_value = arg_values[i];
             *double_value = PyFloat_AsDouble(arg);
         } else if (arg_type_ids[i] == OIF_ARRAY_F64) {
-            arg_types[i] = &ffi_type_pointer;
             PyArrayObject *py_arr = (PyArrayObject *)arg;
             if (!PyArray_Check(py_arr)) {
                 fprintf(stderr,
@@ -252,7 +256,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
     }
 
     ffi_status status =
-        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, arg_types);
+        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, self->arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[_callback] ffi_prep_cif was not OK");
