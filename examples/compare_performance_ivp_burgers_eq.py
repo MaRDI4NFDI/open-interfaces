@@ -2,14 +2,16 @@ import argparse
 import os
 import pickle
 import time
+from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
 from oif.interfaces.ivp import IVP
+from oif.util import UsedMemoryMonitor
 from scipy import integrate
 
 IMPL_LIST = ["scipy_ode_dopri5", "sundials_cvode", "native_scipy_ode_dopri5"]
-RESOLUTIONS = [101, 201, 401, 801, 1001, 2001, 4001, 8001, 10_001, 20_001]
+RESOLUTIONS = [101, 201, 401, 801, 1001, 2001, 4001, 8001, 10_001, 20_001, 40_001]
 
 RESULT_SOLUTION_FILENAME_TPL = os.path.join("assets", "ivp_burgers_soln_{}.pdf")
 RESULT_PERF_FILENAME = os.path.join("assets", "ivp_burgers_perf.pdf")
@@ -17,6 +19,9 @@ RESULT_DATA_PICKLE = os.path.join("assets", "ivp_burgers_data.pickle")
 RESULT_PERF_NORMALIZED_FILENAME = os.path.join(
     "assets", "ivp_burgers_perf_normalized.pdf"
 )
+
+current_datetime = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
+memory_monitor = UsedMemoryMonitor(csv_filename=f"memory_usage_{current_datetime}.csv")
 
 
 def _parse_args():
@@ -192,6 +197,7 @@ def analyze(tts_list):
 
 
 def _run_once(impl, N=1001, plot_solution=True) -> float:
+    global memory_monitor
     print("================================================================")
     print(f"Solving Burgers' equation with time integration {impl}, N = {N}")
     begin_time = time.time()
@@ -210,13 +216,14 @@ def _run_once(impl, N=1001, plot_solution=True) -> float:
         s.set_initial_value(y0, t0)
         s.set_rhs_fn(problem.compute_rhs)
 
-    times = np.linspace(problem.t0, problem.tfinal, num=11)
     times = np.arange(problem.t0, problem.tfinal + problem.dt_max, step=problem.dt_max)
 
     soln = [y0]
-    for t in times[1:]:
+    for i, t in enumerate(times[1:]):
         s.integrate(t)
-        soln.append(s.y)
+        if i % 100 == 0:
+            memory_monitor.record()
+    soln.append(s.y)
     end_time = time.time()
     elapsed_time = end_time - begin_time
     print("Finished")
