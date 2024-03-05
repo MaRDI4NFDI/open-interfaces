@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import psutil
+from scipy import sparse as sp
 
 
 class UsedMemoryMonitor:
@@ -56,3 +57,11 @@ class UsedMemoryMonitor:
 
     def __del__(self):
         self.fh.close()
+
+
+def laplacian2DMatrix(N, dx, dy):
+    diag = np.ones([N * N])
+    Id = sp.eye(N)
+    mat_x = sp.spdiags([diag, -2 * diag, diag], [-1, 0, 1], N, N) / dx**2
+    mat_y = sp.spdiags([diag, -2 * diag, diag], [-1, 0, 1], N, N) / dy**2
+    return sp.kron(Id, mat_x, format="csr") + sp.kron(mat_y, Id)
