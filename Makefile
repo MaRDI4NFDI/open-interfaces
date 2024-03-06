@@ -20,6 +20,11 @@ test : all
 	cd build && ctest
 	pytest tests/lang_python
 
+.PHONY : pytest-valgrind
+pytest-valgrind :
+	PYTHONMALLOC=malloc valgrind --show-leak-kinds=definite --log-file=/tmp/valgrind-output \
+	python -m pytest -s -vv --valgrind --valgrind-log=/tmp/valgrind-output
+
 .PHONY : release
 release :
 	rm -rf build
