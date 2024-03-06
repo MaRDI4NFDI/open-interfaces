@@ -21,6 +21,7 @@ dependencies:
           - pre-commit
           - sphinx
           - myst_parser
+          - furo  # Sphinx theme
     - cmake=3.18
     - c-compiler=1.7.0
     - cxx-compiler=1.7.0
