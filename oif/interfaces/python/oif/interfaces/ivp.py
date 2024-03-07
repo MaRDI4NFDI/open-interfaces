@@ -41,5 +41,8 @@ class IVP:
     def integrate(self, t):
         self._binding.call("integrate", (t,), (self.y,))
 
+    def print_stats(self):
+        self._binding.call("print_stats", (), ())
+
     def __del__(self):
         unload_impl(self._binding)

@@ -146,6 +146,10 @@ int set_tolerances(double rtol, double atol)
     return 0;
 }
 
+int print_stats(void) {
+    return CVodePrintAllStats(cvode_mem, stdout, SUN_OUTPUTFORMAT_TABLE);
+}
+
 int integrate(double t, OIFArrayF64 *y) {
     if ((y == NULL) || (y->data == NULL)) {
         fprintf(stderr, "`integrate` received NULL argument\n");
