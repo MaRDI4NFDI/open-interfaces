@@ -1,7 +1,6 @@
 import argparse
 import os
 import pickle
-import sys
 import time
 
 import matplotlib as mpl
@@ -120,6 +119,7 @@ class GrayScottProblem:
         N = self.N
         assert len(y) == 2 * N**2
         F, k, Du, Dv = self.F, self.k, self.Du, self.Dv
+
         U = np.reshape(y[:s], (N, N))
         V = np.reshape(y[s:], (N, N))
         assert U.base is y
