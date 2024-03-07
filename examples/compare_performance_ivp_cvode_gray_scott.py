@@ -407,6 +407,8 @@ def _run_once(args, N=255, plot_solution=True) -> float:
             old_api=False,
             lmm_type="ADAMS",
             nonlinsolver="fixedpoint",
+            rtol=1e-15,
+            atol=1e-15,
         )
         s.init_step(problem.t0, problem.y0)
 
