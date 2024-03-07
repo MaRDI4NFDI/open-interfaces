@@ -113,8 +113,6 @@ class GrayScottProblem:
         # Solution state vector for time integrators.
         self.y0 = np.hstack((np.reshape(U, (-1,)), np.reshape(V, (-1,))))
 
-        # Right-hand side vector.
-        self._udot = np.empty_like(self.y0)
         self.approx = Laplacian2DApproximator(self.N, self.dx, self.dy)
 
     def compute_rhs(self, t, y: np.ndarray, ydot: np.ndarray) -> None:
@@ -127,33 +125,13 @@ class GrayScottProblem:
         assert U.base is y
         assert V.base is y
 
-        # We compute the Laplacian of u and v.
         deltaU = self.approx.laplacian_periodic(U)
         deltaV = self.approx.laplacian_periodic(V)
 
-        # plt.ioff()
-        # plt.figure()
-        # plt.imshow(V)
-        # plt.colorbar()
-        # plt.title(f"V, time = {t}")
-        # plt.tight_layout(pad=0.1)
-        # plt.show()
         Udot = np.reshape(ydot[:s], (N, N))
         Vdot = np.reshape(ydot[s:], (N, N))
         Udot[:] = Du * deltaU - U * V**2 + F * (1 - U)
         Vdot[:] = Dv * deltaV + U * V**2 - (F + k) * V
-        assert Udot.base is ydot
-        assert Vdot.base is ydot
-        # plt.figure()
-        # plt.imshow(Vdot)
-        # plt.colorbar()
-        # plt.title("Vdot")
-        # plt.tight_layout(pad=0.1)
-        # plt.show()
-
-    def compute_rhs_native(self, t):
-        self.compute_rhs(t, self.y, self._udot)
-        return self._udot
 
     def plot_2D_solution(
         self,
