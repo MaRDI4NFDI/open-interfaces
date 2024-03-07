@@ -136,6 +136,28 @@ class TestIVP:
 
         npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-10)
 
+    def test_3__more_stringent_tolerances_lead_to_smaller_errors(self, s, p):
+        s.set_initial_value(list(p.y0), int(p.t0))
+        s.set_rhs_fn(p.rhs)
+
+        t1 = p.t0 + 1
+        times = np.linspace(p.t0, t1, num=11)
+
+        errors = []
+        for tol in [1e-3, 1e-4, 1e-6, 1e-8]:
+            s.set_initial_value(p.y0, p.t0)
+            s.set_tolerances(tol, tol)
+            for t in times[1:]:
+                s.integrate(t)
+
+            final_value = s.y
+            true_value = p.exact(t1)
+            error = np.linalg.norm(final_value - true_value)
+            errors.append(error)
+
+        for k in range(1, len(errors)):
+            assert errors[k - 1] >= errors[k]
+
 
 @pytest.fixture(
     params=[
@@ -145,6 +167,7 @@ class TestIVP:
 )
 def s(request):
     """Instantiate IVP with the specified implementation."""
+    print(f"IVP: {request.param}")
     return IVP(request.param)
 
 
@@ -157,4 +180,5 @@ def s(request):
 )
 def p(request):
     """Return instantiated IVPProblem subclasses."""
+    print(f"Problem: {request.param}")
     return request.param
