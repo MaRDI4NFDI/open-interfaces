@@ -10,6 +10,7 @@
  * - sunindextype – the integer type used for vector and matrix indices
  */
 #include <assert.h>
+#include <limits.h>
 
 #include <cvode/cvode.h>
 #include <nvector/nvector_serial.h>
@@ -35,6 +36,8 @@ static SUNContext sunctx;
 // CVode memory block.
 void *cvode_mem;
 
+sunindextype N;
+
 int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     if ((y0_in == NULL) || (y0_in->data == NULL)) {
         fprintf(stderr, "`set_initial_value` received NULL argument\n");
@@ -56,7 +59,25 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     }
 
     // 3. Set problem dimensions, etc.
-    sunindextype N = y0_in->dimensions[0];
+    if (sizeof(SUNDIALS_INDEX_TYPE) == sizeof(int)) {
+        if (y0_in->dimensions[0] > INT_MAX) {
+            fprintf(
+                stderr, 
+                "[sundials_cvode] Dimensions of the array are larger "
+                "than the internal Sundials type 'sunindextype'\n"
+            );
+            return 1;
+        } else {
+            N = (sunindextype) y0_in->dimensions[0];
+        }
+    } else {
+        fprintf(
+            stderr,
+            "[sundials_cvode] Assumption that the internal Sundials type "
+            "'sundindextype' is 'int' is violated. Cannot proceed\n"
+        );
+        return 2;
+    }
 
     // 4. Set vector of initial values.
     N_Vector y0 = N_VMake_Serial(N, y0_in->data, sunctx); // Problem vector.
@@ -131,8 +152,6 @@ int integrate(double t, OIFArrayF64 *y) {
         exit(1);
     }
     int ier; // Error checking.
-
-    sunindextype N = y->dimensions[0];
 
     N_Vector yout = N_VMake_Serial(N, y->data, sunctx);
     realtype tout = t;
