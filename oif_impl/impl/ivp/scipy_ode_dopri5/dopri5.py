@@ -8,6 +8,7 @@ class Dopri5:
     def __init__(self):
         self.rhs = None  # Right-hand side function.
         self.N = 0  # Problem dimension.
+        self.s = None
 
     def set_initial_value(self, y0: np.ndarray, t0: float):
         _p = f"[{_prefix}::set_initial_value]"
@@ -35,6 +36,10 @@ class Dopri5:
         self.s.set_initial_value(self.y0, self.t0)
 
         return 0
+
+    def set_tolerances(self, rtol, atol):
+        self.s.set_integrator("dopri5", rtol=rtol, atol=atol, nsteps=1000)
+        self.s.set_initial_value(self.y0, self.t0)
 
     def integrate(self, t, y):
         y[:] = self.s.integrate(t)

@@ -119,6 +119,12 @@ int set_rhs_fn(oif_ivp_rhs_fn_t rhs) {
     return 0;
 }
 
+int set_tolerances(double rtol, double atol)
+{
+    CVodeSStolerances(cvode_mem, rtol, atol);
+    return 0;
+}
+
 int integrate(double t, OIFArrayF64 *y) {
     if ((y == NULL) || (y->data == NULL)) {
         fprintf(stderr, "`integrate` received NULL argument\n");

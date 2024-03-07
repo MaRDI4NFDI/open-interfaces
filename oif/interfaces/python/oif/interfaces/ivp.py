@@ -35,6 +35,9 @@ class IVP:
         )
         self._binding.call("set_rhs_fn", (self.wrapper,), ())
 
+    def set_tolerances(self, rtol: float, atol: float):
+        self._binding.call("set_tolerances", (rtol, atol), ())
+
     def integrate(self, t):
         self._binding.call("integrate", (t,), (self.y,))
 
