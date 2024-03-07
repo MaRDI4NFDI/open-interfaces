@@ -242,7 +242,7 @@ class OIFPyBinding:
         )
 
         if status != 0:
-            raise RuntimeError("Could not execute interface method")
+            raise RuntimeError(f"Error occurred while executing method '{method}'")
 
         return 0
 
