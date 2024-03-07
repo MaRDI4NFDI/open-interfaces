@@ -12,7 +12,7 @@ from oif.interfaces.ivp import IVP
 from oif.util import Laplacian2DApproximator
 from scikits.odes.ode import ode
 
-IMPL_LIST = ["sundials_cvode", "native_sundials_cvode", "forward_euler"]
+IMPL_LIST = ["sundials_cvode", "native_sundials_cvode"]
 RESOLUTIONS = [64, 128, 256, 512]
 
 RESULT_SOLUTION_FILENAME_TPL = os.path.join("assets", "ivp_cvode_gs_soln_{}.pdf")
@@ -29,7 +29,7 @@ def _parse_args():
     one_impl = subparsers.add_parser("one")
     one_impl.add_argument(
         "impl",
-        choices=IMPL_LIST,
+        choices=IMPL_LIST + ["forward_euler"],
         default=IMPL_LIST[0],
         nargs="?",
     )
