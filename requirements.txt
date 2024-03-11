@@ -208,7 +208,7 @@ pytest-pycharm==0.7.0
     # via -r requirements.in
 pytest-regressions==2.5.0
     # via -r requirements.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via jupyter-client
 python-dotenv==1.0.1
     # via -r requirements.in
