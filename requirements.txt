@@ -155,7 +155,7 @@ nodeenv==1.8.0
     # via pre-commit
 numpy==1.26.4
     # via -r requirements.in
-packaging==23.2
+packaging==24.0
     # via
     #   build
     #   ipykernel
