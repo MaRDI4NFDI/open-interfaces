@@ -239,7 +239,7 @@ static int cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data) {
                             .dimensions = (intptr_t[]){N_VGetLength(ydot)},
                             .data = N_VGetArrayPointer(ydot)};
 
-    OIF_RHS_FN(t, &oif_y, &oif_ydot);
+    int result = OIF_RHS_FN(t, &oif_y, &oif_ydot);
 
-    return 0;
+    return result;
 }
