@@ -3,7 +3,6 @@
  * CVODE solver is an advanced solver that can solve nonstiff problems
  * using Adams multistep method and stiff problems using BDF method.
  * See https://sundials.readthedocs.io/en/latest/cvode/Usage/index.html
- * Big thank you to the people that created GitHub Copilot.
  *
  * This code uses the following types from Sundials:
  * - realtype – the floating-point type
@@ -16,12 +15,14 @@
 #include <nvector/nvector_serial.h>
 #include <sundials/sundials_nvector.h>
 #include <sundials/sundials_types.h>
-#include <sunlinsol/sunlinsol_spgmr.h>
+#include <sunmatrix/sunmatrix_dense.h>
+#include <sunlinsol/sunlinsol_dense.h>
+#include <sunnonlinsol/sunnonlinsol_fixedpoint.h>
 
 #include "oif/api.h"
 #include "oif_impl/ivp.h"
 
-const char *prefix = "[impl::sundials_cvode]";
+const char *prefix = "[ivp::sundials_cvode]";
 
 // Signature for the right-hand side that is provided by the `IVP` interface
 // of the OpenInterFaces.
@@ -36,6 +37,7 @@ static SUNContext sunctx;
 // CVode memory block.
 void *cvode_mem;
 
+/** Number of equations */
 sunindextype N;
 
 int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
@@ -101,27 +103,67 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     CVodeSStolerances(cvode_mem, reltol, abstol);
 
     // 8. Create matrix object
-    // pass
+    /* A = SUNDenseMatrix(N, N, sunctx); */
+    /* if (A == NULL) { */
+    /*     fprintf(stderr, "[sundials_cvode] Could not create matrix for dense linear solver\n"); */
+    /*     return 2; */
+    /* } */
 
     // 9. Create linear solver object
-    SUNLinearSolver linear_solver =
-        SUNLinSol_SPGMR(y0, SUN_PREC_NONE, 0, sunctx);
-    if (linear_solver == NULL) {
-        fprintf(stderr,
-                "%s An error occurred when creating SUNLinearSolver",
-                prefix);
-        return 1;
-    }
+    /* SUNLinearSolver linear_solver = */
+    /*     SUNLinSol_Dense(y0, A, sunctx); */
+    /* if (linear_solver == NULL) { */
+    /*     fprintf(stderr, */
+    /*             "%s An error occurred when creating SUNLinearSolver", */
+    /*             prefix); */
+    /*     return 3; */
+    /* } */
 
     // 10. Set linear solver optional inputs
 
     // 11. Attach linear solver module.
-    // NULL is because SPGMR is a matrix-free method, so no matrix is needed.
-    CVodeSetLinearSolver(cvode_mem, linear_solver, NULL);
+    /* status = CVodeSetLinearSolver(cvode_mem, linear_solver, A); */
+    /* if (status == CVLS_MEM_FAIL) { */
+    /*     fprintf( */
+    /*         stderr, */
+    /*         "[sundials_cvode] Setting linear solver failed\n" */
+    /*     ); */
+    /*     return 4; */
+    /* } else if (status == CVLS_ILL_INPUT) { */
+    /*     fprintf( */
+    /*         stderr, */
+    /*         "[sundials_cvode] Setting linear solver failed due to ill input\n" */
+    /*     ); */
+    /*     return 5; */
+    /* } else if (status != CVLS_SUCCESS) { */
+    /*     fprintf( */
+    /*         stderr, */
+    /*         "[sundials_cvode] Setting linear solver was unsuccessful\n" */
+    /*     ); */
+    /*     return 6; */
+    /* } */
 
     // 12. Set optional inputs
     // 13. Create nonlinear solver object (optional)
+    SUNNonlinearSolver NLS = SUNNonlinSol_FixedPoint(y0, 0, sunctx);
+    if (NLS == NULL) {
+        fprintf(
+            stderr,
+            "%s Could not create Fixed Point Nonlinear solver\n",
+            prefix
+        );
+        return 7;
+    }
     // 14. Attach nonlinear solver module (optional)
+    status = CVodeSetNonlinearSolver(cvode_mem, NLS);
+    if (status != CV_SUCCESS) {
+        fprintf(
+            stderr,
+            "%s CVodeSetNonlinearSolver failed with code %d",
+            prefix, status
+         );
+        return 8;
+    }
     // 15. Set nonlinear solver optional inputs (optional)
     // 16. Specify rootfinding problem (optional)
 
@@ -151,15 +193,14 @@ int print_stats(void) {
 }
 
 int integrate(double t, OIFArrayF64 *y) {
-    if ((y == NULL) || (y->data == NULL)) {
-        fprintf(stderr, "`integrate` received NULL argument\n");
-        exit(1);
-    }
+    /* if ((y == NULL) || (y->data == NULL)) { */
+    /*     fprintf(stderr, "`integrate` received NULL argument\n"); */
+    /*     exit(1); */
+    /* } */
     int ier; // Error checking.
 
     N_Vector yout = N_VMake_Serial(N, y->data, sunctx);
     realtype tout = t;
-    assert(tout == t);
 
     // Time that will be reached by solver during integration.
     // When we request CV_NORMAL task, it must be close to requested time
