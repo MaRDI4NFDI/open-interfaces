@@ -23,9 +23,6 @@ static int IMPL_COUNTER = 0;
 
 static bool is_python_initialized_by_us = false;
 
-typedef void (*ivp_rhs_fp_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot);
-ivp_rhs_fp_t IVP_RHS_CALLBACK = NULL;
-
 PyObject *instantiate_callback_class(void) {
     char *moduleName = "_callback";
     char class_name[] = "PythonWrapperForCCallback";
@@ -68,43 +65,6 @@ PyObject *convert_oif_callback(OIFCallback *p) {
     }
     return obj;
 }
-
-static PyObject *c_to_py_wrapper(PyObject *ignored, PyObject *args) {
-    double t; // Time
-    PyArrayObject *y_ndarray;
-    PyArrayObject *ydot_ndarray;
-
-    PyArrayObject **arg_values;
-
-    if (!PyArg_ParseTuple(args,
-                          "dO!O!",
-                          &t,
-                          &PyArray_Type,
-                          &y_ndarray,
-                          &PyArray_Type,
-                          &ydot_ndarray)) {
-        return NULL;
-    }
-
-    OIFArrayF64 y = {
-        .nd = PyArray_NDIM(y_ndarray),
-        .dimensions = PyArray_DIMS(y_ndarray),
-        .data = PyArray_DATA(y_ndarray),
-    };
-
-    OIFArrayF64 y_dot = {
-        .nd = PyArray_NDIM(ydot_ndarray),
-        .dimensions = PyArray_DIMS(ydot_ndarray),
-        .data = PyArray_DATA(ydot_ndarray),
-    };
-
-    IVP_RHS_CALLBACK(t, &y, &y_dot);
-
-    return PyLong_FromLong(0);
-}
-
-static PyMethodDef ivp_rhs_def = {
-    "ivp_rhs_callback", c_to_py_wrapper, METH_VARARGS, NULL};
 
 ImplInfo *load_backend(const char *impl_details,
                        size_t version_major,
