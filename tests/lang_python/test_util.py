@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from numpy.testing import assert_allclose
 from oif.util import Laplacian2DApproximator
@@ -101,12 +100,5 @@ def test_laplacian_periodic_1():
     approx = Laplacian2DApproximator(256, dx, dy)
     lapF = approx.laplacian_periodic(F)
     desired = -2 * np.sin(X) * np.cos(Y)
-
-    fig, (ax1, ax2) = plt.subplots(nrows=2)
-    im1 = ax1.imshow(lapF)
-    fig.colorbar(im1, ax=ax1)
-    im2 = ax2.imshow(desired)
-    fig.colorbar(im2, ax=ax2)
-    plt.show()
 
     assert_allclose(lapF, desired, rtol=1e-4, atol=1e-4)
