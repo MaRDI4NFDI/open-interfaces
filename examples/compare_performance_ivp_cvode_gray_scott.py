@@ -215,7 +215,6 @@ class AnimatedSolution:
             repeat=False,
             blit=True,
         )
-        plt.show()
 
     def init_func(self):
         return (self.im,)
@@ -361,7 +360,7 @@ class ForwardEulerSolver:
         self.t = t
 
 
-def _run_once(args, N=256, tfinal=1000, plot_solution=True) -> float:
+def _run_once(args, N=512, tfinal=1000, plot_solution=True) -> float:
     if isinstance(args, argparse.Namespace):
         impl = args.impl
     else:
@@ -401,7 +400,7 @@ def _run_once(args, N=256, tfinal=1000, plot_solution=True) -> float:
     elif impl == "forward_euler":
         print("Use Forward Euler time integrator")
         s = ForwardEulerSolver(problem)
-        problem.tfinal = 200_000
+        problem.tfinal = 100_000
         times = np.arange(problem.t0, problem.tfinal + problem.dt, step=problem.dt)
         if args.anim_play or args.anim_save:
             anim = AnimatedSolution(problem, s, times)
