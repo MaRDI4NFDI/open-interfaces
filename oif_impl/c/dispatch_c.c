@@ -133,7 +133,7 @@ int run_interface_method(ImplInfo *impl_info,
     }
 
     ffi_status status = ffi_prep_cif(
-        &cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_uint, arg_types);
+        &cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_sint, arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[dispatch_c] ffi_prep_cif was not OK");
@@ -148,11 +148,11 @@ int run_interface_method(ImplInfo *impl_info,
         arg_values[i] = out_args->arg_values[i - num_in_args];
     }
 
-    unsigned result;
+    int result;
     ffi_call(&cif, FFI_FN(func), &result, arg_values);
 
     free(arg_values);
     free(arg_types);
 
-    return 0;
+    return result;
 }
