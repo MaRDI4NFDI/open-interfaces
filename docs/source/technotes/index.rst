@@ -11,3 +11,4 @@ Technical notes
    2024-01-31-profiling.md
    2024-02-08-perf-conv-to-c-types-from-py.md
    2024-02-09-conversion-of-oif-arrays-c-ext.md
+   2024-02-23-python-wrapper-for-c-callback.md
