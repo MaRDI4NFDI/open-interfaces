@@ -77,7 +77,9 @@ class GrayScottProblem:
     vol. 261.
     """
 
-    def __init__(self, N=256, seed=None, left=-2.5, right=2.5, bottom=-2.5, top=2.5):
+    def __init__(
+        self, N=512, tfinal=100, left=-2.5, right=2.5, bottom=-2.5, top=2.5, seed=None
+    ):
         self._count = 0
 
         # Problem parameters
@@ -86,12 +88,15 @@ class GrayScottProblem:
         self.Du = 2 * 10**-5
         self.Dv = 10**-5
 
-        # Resolution in space and time.
-        self.x, self.dx = np.linspace(-2.5, +2.5, num=N + 1, retstep=True)
-        self.dy = self.dx
+        # Set up time-space grid.
+        # The number of the grid points is actually by one larger than
+        # the passed parameter N, as the grid is
+        # 0 -- 1  -- ... --- N-1 --- N
         self.N = N + 1
+        self.x, self.dx = np.linspace(left, right, num=self.N, retstep=True)
+        self.y, self.dy = np.linspace(bottom, top, num=self.N, retstep=True)
         self.t0 = 0.0
-        self.tfinal = 1_000.0
+        self.tfinal = tfinal
         self.dt = 1.0
 
         self.extent = [left, right, bottom, top]
@@ -144,21 +149,6 @@ class GrayScottProblem:
         assert y.ndim == 1  # It is a 1D array from a time-integration solver.
         s = len(y) // 2
         U = np.reshape(y[:s], (self.N, self.N))
-        # V = np.reshape(y[s:], (self.N, self.N))
-
-        umin = np.min(U)
-        umax = np.max(U)
-        Uplot = (U - umin) / (umax - umin)
-        Uplot = U
-
-        R = 0
-        G = 155
-        B = 210
-
-        #         Uplot_RGB = np.empty((self.N, self.N, 3))
-        #         Uplot_RGB[:, :, 0] = (1 - Uplot) * R
-        #         Uplot_RGB[:, :, 1] = Uplot * G
-        #         Uplot_RGB[:, :, 2] = Uplot * B
 
         if fig is None:
             fig = plt.figure()
@@ -166,20 +156,23 @@ class GrayScottProblem:
 
         if im is None:
             im = plt.imshow(
-                Uplot,
+                U,
                 cmap=mpl.colormaps["viridis"],
                 interpolation="bilinear",
                 extent=self.extent,
             )
         else:
-            im.set_data(Uplot)
+            im.set_data(U)
         if cbar is None:
             cbar = plt.colorbar()
         else:
-            im.set_clim(umin, umax)
+            im.set_clim(np.min(U), np.max(U))
 
         if title is not None:
-            ax.set_title(title)
+            if text is not None:
+                text.set_text(title)
+            else:
+                ax.set_title(title)
 
         return fig, im, cbar
 
@@ -187,11 +180,18 @@ class GrayScottProblem:
 class AnimatedSolution:
     def __init__(self, problem, solver, times):
         self.problem = problem
-        self.fig, self.im, self.cbar = problem.plot_2D_solution(
-            problem.y0, title=f"Time {0:.3f}"
-        )
+        self._time_tpl = "Time {0:.3f}"
+        self.fig, self.im, self.cbar = problem.plot_2D_solution(problem.y0)
         self.fig.set_size_inches(12.8, 9.6)
         self.ax = plt.gca()
+        self.title = self.ax.text(
+            0.08,
+            0.95,
+            self._time_tpl.format(self.problem.t0),
+            bbox={"facecolor": "w", "alpha": 0.5, "pad": 5},
+            transform=self.ax.transAxes,
+            ha="center",
+        )
         plt.tight_layout(pad=0.1)
         self.solver = solver
 
@@ -215,7 +215,7 @@ class AnimatedSolution:
             repeat=False,
             blit=True,
         )
-        # plt.show()
+        plt.show()
 
     def init_func(self):
         return (self.im,)
@@ -233,10 +233,10 @@ class AnimatedSolution:
             fig=self.fig,
             im=self.im,
             cbar=self.cbar,
-            title=f"Time {t:.3f}",
         )
+        self.title.set_text(self._time_tpl.format(t))
 
-        return (self.im,)
+        return (self.im, self.title)
 
     def on_key_release(self, event):
         """Interrupt program with `Ctrl-C` when matplotlib figure is in focus."""
@@ -361,7 +361,7 @@ class ForwardEulerSolver:
         self.t = t
 
 
-def _run_once(args, N=255, plot_solution=True) -> float:
+def _run_once(args, N=256, tfinal=1000, plot_solution=True) -> float:
     if isinstance(args, argparse.Namespace):
         impl = args.impl
     else:
@@ -372,17 +372,13 @@ def _run_once(args, N=255, plot_solution=True) -> float:
         f"with time integration {impl}, N = {N}"
     )
     begin_time = time.time()
-    problem = GrayScottProblem(N=N, seed=42)
+    problem = GrayScottProblem(N=N, tfinal=tfinal, seed=42)
     times = np.arange(problem.t0, problem.tfinal + problem.dt, step=problem.dt)
     if impl == "native_sundials_cvode":
         print(f"Use native impl {impl}")
-        # y = np.copy(problem.y0)
-        # problem.plot_2D_solution(y)
-        # ydot = np.empty_like(y)
         s = ode(
             "cvode",
             problem.compute_rhs,
-            old_api=False,
             lmm_type="ADAMS",
             nonlinsolver="fixedpoint",
             rtol=1e-15,
@@ -403,15 +399,17 @@ def _run_once(args, N=255, plot_solution=True) -> float:
             s.integrate(t)
         y = s.y
     elif impl == "forward_euler":
-        print(f"Use native impl {impl}")
-        times = np.arange(problem.t0, problem.tfinal + problem.dt, step=problem.dt)
+        print("Use Forward Euler time integrator")
         s = ForwardEulerSolver(problem)
+        problem.tfinal = 200_000
+        times = np.arange(problem.t0, problem.tfinal + problem.dt, step=problem.dt)
         if args.anim_play or args.anim_save:
             anim = AnimatedSolution(problem, s, times)
             if args.anim_play:
                 plt.show()
             else:
                 anim.save("animation.mp4")
+            y = s.y
         else:
             for t in times:
                 s.integrate(t)
@@ -420,10 +418,6 @@ def _run_once(args, N=255, plot_solution=True) -> float:
             plt.tight_layout(pad=0.1)
             filename = RESULT_SOLUTION_FILENAME_TPL.format("forward_euler")
             plt.savefig(filename)
-        # extra_options = {"lmm_type": "ADAMS", "old_api": False}
-        # ode_solver = ode("CVODE", problem.compute_rhs, **extra_options)
-        # output = ode_solver.solve(times, problem.y0)
-        # y = output.values.y[-1]
 
     soln = [problem.y0]
     soln.append(y)
