@@ -26,4 +26,3 @@ set_target_properties(test_ivp PROPERTIES CXX_EXTENSIONS OFF)
 gtest_discover_tests(test_qeq)
 gtest_discover_tests(test_linsolve)
 gtest_discover_tests(test_ivp)
-
