@@ -1,5 +1,4 @@
-# 2024-03-12 Performance study for IVP CVODE against direct bindings for
-Gray--Scott reaction-diffusion system
+# 2024-03-12 IVP CVODE performance study
 
 This technical note documents performance study based on integration
 of the 2D Gray--Scott reaction-diffusion system using `IVP` interface
