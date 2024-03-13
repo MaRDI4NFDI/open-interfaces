@@ -137,5 +137,7 @@ memray*
 memory*
 
 # Separate build-type directories
+# Now it is a symlink, not a directory
+build
 build.debug/
 build.release/
