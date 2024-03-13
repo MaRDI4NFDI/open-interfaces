@@ -135,3 +135,7 @@ assets*
 # Memory profiles
 memray*
 memory*
+
+# Separate build-type directories
+build.debug/
+build.release/

@@ -12,11 +12,13 @@ export PYTHONPATH:=$(PWD)/oif/interfaces/python:$(PWD)/oif_impl/python:$(PWD)/oi
 
 .PHONY : all
 all :
-	cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \
-	cmake --build build
+	cmake -S . -B build.debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \
+	cmake --build build.debug && \
+	rm -f build && \
+	ln -sv build.debug build
 
 .PHONY : test
-test : all
+test :
 	cd build && ctest
 	pytest tests/lang_python
 
@@ -27,9 +29,10 @@ pytest-valgrind :
 
 .PHONY : release
 release :
-	rm -rf build
-	cmake -S . -B build -DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \
-	cmake --build build
+	cmake -S . -B build.release -DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \
+	cmake --build build.release && \
+	rm -f build && \
+	ln -sv build.release build
 
 .PHONY : docs
 docs :
