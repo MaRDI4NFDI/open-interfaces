@@ -5,7 +5,7 @@
  * See https://sundials.readthedocs.io/en/latest/cvode/Usage/index.html
  *
  * This code uses the following types from Sundials:
- * - realtype – the floating-point type
+ * - sunrealtype – the floating-point type
  * - sunindextype – the integer type used for vector and matrix indices
  */
 #include <assert.h>
@@ -29,7 +29,7 @@ const char *prefix = "[ivp::sundials_cvode]";
 static oif_ivp_rhs_fn_t OIF_RHS_FN;
 
 // Signature for the right-hand side function that CVode expects.
-static int cvode_rhs(realtype t, N_Vector u, N_Vector u_dot, void *user_data);
+static int cvode_rhs(sunrealtype t, N_Vector u, N_Vector u_dot, void *user_data);
 
 // Global state of the module.
 // Sundials context
@@ -40,20 +40,29 @@ void *cvode_mem;
 /** Number of equations */
 sunindextype N;
 
+/*
+ * In Sundials 7.0, `SUNContext_Create` accepts `SUNComm` instead of `void *`
+ * as the first argument.
+ * This is required for compatibility with versions <7.0.
+ */
+#ifndef SUN_COMM_NULL
+#define SUN_COMM_NULL NULL
+#endif
+
 int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     if ((y0_in == NULL) || (y0_in->data == NULL)) {
         fprintf(stderr, "`set_initial_value` received NULL argument\n");
         exit(1);
     }
     int status;              // Check errors
-    realtype abstol = 1e-15; // absolute tolerance
-    realtype reltol = 1e-15; // relative tolerance
+    sunrealtype abstol = 1e-15; // absolute tolerance
+    sunrealtype reltol = 1e-15; // relative tolerance
 
     // 1. Initialize parallel or multi-threaded environment, if appropriate.
     // No, it is not appropriate here as we work with serial code :-)
 
     // 2. Create the Sundials context object.
-    status = SUNContext_Create(NULL, &sunctx);
+    status = SUNContext_Create(SUN_COMM_NULL, &sunctx);
     if (status) {
         fprintf(
             stderr, "%s An error occurred when creating SUNContext", prefix);
@@ -83,10 +92,10 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
 
     // 4. Set vector of initial values.
     N_Vector y0 = N_VMake_Serial(N, y0_in->data, sunctx); // Problem vector.
-    // Sanity check that `realtype` is actually the same as OIF_FLOAT64.
+    // Sanity check that `sunrealtype` is actually the same as OIF_FLOAT64.
     assert(NV_Ith_S(y0, 0) == y0_in->data[0]);
 
-    realtype t0 = t0_in;
+    sunrealtype t0 = t0_in;
     assert(t0 == t0_in);
 
     // 5. Create CVODE object.
@@ -200,14 +209,14 @@ int integrate(double t, OIFArrayF64 *y) {
     int ier; // Error checking.
 
     N_Vector yout = N_VMake_Serial(N, y->data, sunctx);
-    realtype tout = t;
+    sunrealtype tout = t;
 
     // Time that will be reached by solver during integration.
     // When we request CV_NORMAL task, it must be close to requested time
     // `tout`.
     // When we request CV_ONE_STEP task, than it will be just time reached
     // via internal time step (time step that satisfies error tolerances).
-    realtype tret;
+    sunrealtype tret;
 
     // 17. Advance solution in time.
     ier = CVode(cvode_mem, tout, yout, &tret, CV_NORMAL);
@@ -224,7 +233,7 @@ int integrate(double t, OIFArrayF64 *y) {
 }
 
 // Function that computes the right-hand side of the ODE system.
-static int cvode_rhs(realtype t, N_Vector y, N_Vector ydot, void *user_data) {
+static int cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {
     // While Sundials CVode works with `N_Vector` data structure
     // for one-dimensional arrays, the user provides right-hand side
     // function that works with `OIFArrayF64` data structure,
