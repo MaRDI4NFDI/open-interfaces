@@ -360,7 +360,7 @@ class ForwardEulerSolver:
         self.t = t
 
 
-def _run_once(args, N=512, tfinal=1000, plot_solution=True) -> float:
+def _run_once(args, N=512, tfinal=100, plot_solution=True) -> float:
     if isinstance(args, argparse.Namespace):
         impl = args.impl
     else:
@@ -368,7 +368,7 @@ def _run_once(args, N=512, tfinal=1000, plot_solution=True) -> float:
     print("================================================================")
     print(
         "Solving Gray--Scott system with boundary conditions "
-        f"with time integration {impl}, N = {N}"
+        f"with time integration {impl}, N = {N}, tfinal = {tfinal}"
     )
     begin_time = time.time()
     problem = GrayScottProblem(N=N, tfinal=tfinal, seed=42)

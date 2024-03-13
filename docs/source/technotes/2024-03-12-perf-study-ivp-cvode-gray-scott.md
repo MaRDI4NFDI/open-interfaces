@@ -24,9 +24,11 @@ a square of $40 \times 40$ grid points  centered in the center of the domain,
 which was set to $u = 0.5 + U(0; 0.1)$ and $v = 0.25 + U(0; 0.1)$, where
 $U$ is a uniform distribution.
 
-The system is evolved to time $T = 1000$ with time step 1.
+The system is evolved to time $T = 100$ with time step 1.
 The resolution $N$ in $x$ and $y$ directions was the same with $N \in {64, 128,
 256, 512}$.
+Parameters of the problem are set to values $F = 0.055$, $k = 0.062$, $d_u =
+\num{2e-5}$, $d_v = \num{e-5}$.
 
 ## Procedure
 
@@ -63,3 +65,13 @@ We can see from the figure that for small resolutions we have about 10%
 performance penalty, while for larger resolutions the Open Interfaces
 implementation actually outperforms the result obtained via direct
 Python-to-C bindings of `scikits.odes`.
+
+
+## Quantitative data
+
+The following table shows numbers behind the previous figure
+```
+           N                  64                128               256               512
+sundials_cvode             0.40   0.01       1.81   0.01      10.51   0.07      75.79   0.39
+native_sundials_cvode      0.42   0.03       1.90   0.04      11.02   0.26      76.63   0.75
+```
