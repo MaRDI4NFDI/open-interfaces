@@ -169,10 +169,7 @@ class GrayScottProblem:
             im.set_clim(np.min(U), np.max(U))
 
         if title is not None:
-            if text is not None:
-                text.set_text(title)
-            else:
-                ax.set_title(title)
+            ax.set_title(title)
 
         return fig, im, cbar
 

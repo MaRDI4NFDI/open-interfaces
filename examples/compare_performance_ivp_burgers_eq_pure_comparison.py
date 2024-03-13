@@ -129,7 +129,7 @@ class TwoConversions:
         begin = time.time()
         result = self.problem.compute_rhs_native(*py_args)
         end = time.time()
-        # print("{:35s} {:.2e}".format("Elapsed time compute_rhs_native", end - begin))
+        print("{:35s} {:.2e}".format("Elapsed time compute_rhs_native", end - begin))
         return result
 
     @profile
@@ -151,7 +151,7 @@ class TwoConversions:
                 oif_array = OIFArrayF64(nd, dimensions, data)
                 c_args.append(ctypes.pointer(oif_array))
         end = time.time()
-        # print("{:35s} {:.2e}".format("Elapsed time _c_args_from_py_args", end - begin))
+        print("{:35s} {:.2e}".format("Elapsed time _c_args_from_py_args", end - begin))
         return c_args
 
     @profile
@@ -173,7 +173,7 @@ class TwoConversions:
         #     )
         # )
         end = time.time()
-        # print("{:35s} {:.2e}".format("Elapsed time _py_args_from_c_args", end - begin))
+        print("{:35s} {:.2e}".format("Elapsed time _py_args_from_c_args", end - begin))
 
         return py_args
 
