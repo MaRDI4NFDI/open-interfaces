@@ -10,6 +10,8 @@ endif
 export LD_LIBRARY_PATH:=build
 export PYTHONPATH:=$(PWD)/oif/interfaces/python:$(PWD)/oif_impl/python:$(PWD)/oif_impl/impl:$(PWD)/oif/lang_python:$(PWD)/src:$(PWD)/build
 
+export OIF_IMPL_ROOT_DIR := $(PWD)
+
 .PHONY : all
 all :
 	cmake -S . -B build.debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \
