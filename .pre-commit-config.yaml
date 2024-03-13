@@ -48,3 +48,11 @@ repos:
       hooks:
           - id: yamlfmt
             args: [--preserve-quotes]
+
+    # Sphinx documentation
+    - repo: https://github.com/sphinx-contrib/sphinx-lint
+      rev: v0.9.1
+      hooks:
+          - id: sphinx-lint
+            args: [--enable=default-role]
+            files: ^docs/
