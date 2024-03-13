@@ -208,20 +208,18 @@ int run_interface_method(ImplInfo *impl_info,
                     arr->nd, arr->dimensions, NPY_FLOAT64, arr->data);
             } else if (in_args->arg_types[i] == OIF_CALLBACK) {
                 OIFCallback *p = in_args->arg_values[i];
-                /*if (p->src == OIF_LANG_PYTHON) { */
-                /*    pValue = (PyObject *)p->fn_p_py; */
-                /*    /1* */
-                /*     * It is important to incref the callback pointed to */
-                /*     * with p->fn_p_py, because somehow a reference count */
-                /*     * to the ctypes object on Python side is not incremented.
-                 */
-                /*     * Therefore, when decref of `pArgs` occurs down below, */
-                /*     * the memory pointed to by p->fn_p_py is getting freed */
-                /*     * prematurely with the consequent segfault. */
-                /*     *1/ */
-                /*    Py_INCREF(pValue); */
-                /*} else if (p->src == OIF_LANG_C) { */
-                if (p->src == OIF_LANG_PYTHON || p->src == OIF_LANG_C) {
+                if (p->src == OIF_LANG_PYTHON) {
+                    pValue = (PyObject *)p->fn_p_py;
+                    /*
+                    * It is important to incref the callback pointed to
+                    * with p->fn_p_py, because somehow a reference count
+                    * to the ctypes object on Python side is not incremented.
+                    * Therefore, when decref of `pArgs` occurs down below,
+                    * the memory pointed to by p->fn_p_py is getting freed
+                    * prematurely with the consequent segfault.
+                    */
+                    Py_INCREF(pValue);
+                } else if (p->src == OIF_LANG_C) {
                     fprintf(stderr,
                             "[dispatch_python] Check what callback to "
                             "wrap via src field\n");
