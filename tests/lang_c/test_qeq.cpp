@@ -5,7 +5,8 @@ extern "C" {
 #include "oif/interfaces/qeq.h"
 }
 
-TEST(QeqPyQeqSolverTestSuite, LinearCase) {
+TEST(QeqPyQeqSolverTestSuite, LinearCase)
+{
     intptr_t dimensions[] = {
         2,
     };
@@ -20,7 +21,8 @@ TEST(QeqPyQeqSolverTestSuite, LinearCase) {
     oif_free_array_f64(roots);
 }
 
-TEST(QeqPyQeqSolverTestSuite, TwoRoots) {
+TEST(QeqPyQeqSolverTestSuite, TwoRoots)
+{
     intptr_t dimensions[] = {
         2,
     };
@@ -34,7 +36,8 @@ TEST(QeqPyQeqSolverTestSuite, TwoRoots) {
     oif_free_array_f64(roots);
 }
 
-TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots) {
+TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots)
+{
     intptr_t dimensions[] = {
         2,
     };
@@ -48,7 +51,8 @@ TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots) {
     oif_free_array_f64(roots);
 }
 
-TEST(QeqCQeqSolverTestSuite, LinearCase) {
+TEST(QeqCQeqSolverTestSuite, LinearCase)
+{
     intptr_t dimensions[] = {
         2,
     };
@@ -62,7 +66,8 @@ TEST(QeqCQeqSolverTestSuite, LinearCase) {
     oif_free_array_f64(roots);
 }
 
-TEST(QeqCQeqSolverTestSuite, TwoRoots) {
+TEST(QeqCQeqSolverTestSuite, TwoRoots)
+{
     intptr_t dimensions[] = {
         2,
     };
@@ -76,7 +81,8 @@ TEST(QeqCQeqSolverTestSuite, TwoRoots) {
     oif_free_array_f64(roots);
 }
 
-TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots) {
+TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots)
+{
     intptr_t dimensions[] = {
         2,
     };
@@ -90,7 +96,8 @@ TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots) {
     oif_free_array_f64(roots);
 }
 
-TEST(QeqCQeqSolverTestSuite, ExtremeRoots) {
+TEST(QeqCQeqSolverTestSuite, ExtremeRoots)
+{
     intptr_t dimensions[] = {
         2,
     };

@@ -7,7 +7,8 @@ extern "C" {
 
 class LinearSolverFixture : public ::testing::TestWithParam<const char *> {};
 
-TEST_P(LinearSolverFixture, TestCase1) {
+TEST_P(LinearSolverFixture, TestCase1)
+{
     intptr_t A_dims[] = {2, 2};
     double A_data[] = {1.0, 1.0, -3.0, 1.0};
     OIFArrayF64 *A = oif_init_array_f64_from_data(2, A_dims, A_data);
@@ -36,6 +37,5 @@ TEST_P(LinearSolverFixture, TestCase1) {
     oif_unload_impl(implh);
 }
 
-INSTANTIATE_TEST_SUITE_P(LinearSolverTestSuite,
-                         LinearSolverFixture,
+INSTANTIATE_TEST_SUITE_P(LinearSolverTestSuite, LinearSolverFixture,
                          ::testing::Values("c_lapack", "numpy"));

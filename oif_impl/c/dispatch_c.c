@@ -16,9 +16,9 @@ typedef struct {
 
 static int IMPL_COUNTER = 0;
 
-ImplInfo *load_backend(const char *impl_details,
-                       size_t version_major,
-                       size_t version_minor) {
+ImplInfo *
+load_backend(const char *impl_details, size_t version_major, size_t version_minor)
+{
     // For C implementations, `impl_details` must contain the name
     // of the shared library with the methods implemented as functions.
     void *impl_lib = dlopen(impl_details, RTLD_LOCAL | RTLD_LAZY);
@@ -26,27 +26,26 @@ ImplInfo *load_backend(const char *impl_details,
         fprintf(stderr,
                 "[dispatch_c] Could not load implementation library '%s', "
                 "error: %s\n",
-                impl_details,
-                dlerror());
+                impl_details, dlerror());
         return NULL;
     }
 
     CImplInfo *impl_info = malloc(sizeof(CImplInfo));
     if (impl_info == NULL) {
-        fprintf(stderr,
-                "[dispatch_c] Could not create an implementation structure\n");
+        fprintf(stderr, "[dispatch_c] Could not create an implementation structure\n");
         return NULL;
     }
     impl_info->impl_lib = impl_lib;
     impl_info->impl_details = strdup(impl_details);
-    fprintf(stderr,
-            "[dispatch_c] load_impl impl_info->impl_details = %s\n",
+    fprintf(stderr, "[dispatch_c] load_impl impl_info->impl_details = %s\n",
             impl_info->impl_details);
 
     return (ImplInfo *)impl_info;
 }
 
-int unload_impl(ImplInfo *impl_info_) {
+int
+unload_impl(ImplInfo *impl_info_)
+{
     if (impl_info_->dh != OIF_LANG_C) {
         fprintf(stderr,
                 "[dispatch_python] unload_impl received non-C implementation "
@@ -57,12 +56,10 @@ int unload_impl(ImplInfo *impl_info_) {
 
     int status = dlclose(impl_info->impl_lib);
     if (status != 0) {
-        fprintf(
-            stderr,
-            "[dispatch_c] While closing implementation '%s' an error occurred. "
-            "Error message: %s",
-            impl_info->impl_details,
-            dlerror());
+        fprintf(stderr,
+                "[dispatch_c] While closing implementation '%s' an error occurred. "
+                "Error message: %s",
+                impl_info->impl_details, dlerror());
     }
     IMPL_COUNTER--;
 
@@ -71,14 +68,12 @@ int unload_impl(ImplInfo *impl_info_) {
     return 0;
 }
 
-int run_interface_method(ImplInfo *impl_info,
-                         const char *method,
-                         OIFArgs *in_args,
-                         OIFArgs *out_args) {
+int
+run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_args,
+                     OIFArgs *out_args)
+{
     if (impl_info->dh != OIF_LANG_C) {
-        fprintf(
-            stderr,
-            "[dispatch_c] Provided implementation is not implemented in C\n");
+        fprintf(stderr, "[dispatch_c] Provided implementation is not implemented in C\n");
         return -1;
     }
     CImplInfo *impl = (CImplInfo *)impl_info;
@@ -102,18 +97,19 @@ int run_interface_method(ImplInfo *impl_info,
     for (size_t i = 0; i < num_in_args; ++i) {
         if (in_args->arg_types[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
-        } else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
+        }
+        else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
             arg_types[i] = &ffi_type_pointer;
-        } else if (in_args->arg_types[i] == OIF_CALLBACK) {
+        }
+        else if (in_args->arg_types[i] == OIF_CALLBACK) {
             arg_types[i] = &ffi_type_pointer;
             // We need to take a pointer to a pointer according to the FFI
             // convention, hence the & operator.
-            in_args->arg_values[i] =
-                &((OIFCallback *)in_args->arg_values[i])->fn_p_c;
-        } else {
+            in_args->arg_values[i] = &((OIFCallback *)in_args->arg_values[i])->fn_p_c;
+        }
+        else {
             fflush(stdout);
-            fprintf(stderr,
-                    "[dispatch_c] Unknown input arg type: %d\n",
+            fprintf(stderr, "[dispatch_c] Unknown input arg type: %d\n",
                     in_args->arg_types[i]);
             exit(EXIT_FAILURE);
         }
@@ -121,19 +117,20 @@ int run_interface_method(ImplInfo *impl_info,
     for (size_t i = num_in_args; i < num_total_args; ++i) {
         if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
-        } else if (out_args->arg_types[i - num_in_args] == OIF_ARRAY_F64) {
+        }
+        else if (out_args->arg_types[i - num_in_args] == OIF_ARRAY_F64) {
             arg_types[i] = &ffi_type_pointer;
-        } else {
+        }
+        else {
             fflush(stdout);
-            fprintf(stderr,
-                    "[dispatch_c] Unknown output arg type: %d\n",
+            fprintf(stderr, "[dispatch_c] Unknown output arg type: %d\n",
                     out_args->arg_types[i - num_in_args]);
             exit(EXIT_FAILURE);
         }
     }
 
-    ffi_status status = ffi_prep_cif(
-        &cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_sint, arg_types);
+    ffi_status status =
+        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_sint, arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[dispatch_c] ffi_prep_cif was not OK");

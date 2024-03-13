@@ -23,7 +23,9 @@ static int IMPL_COUNTER = 0;
 
 static bool is_python_initialized_by_us = false;
 
-PyObject *instantiate_callback_class(void) {
+PyObject *
+instantiate_callback_class(void)
+{
     char *moduleName = "_callback";
     char class_name[] = "PythonWrapperForCCallback";
 
@@ -51,7 +53,9 @@ PyObject *instantiate_callback_class(void) {
     return CALLBACK_CLASS_P;
 }
 
-PyObject *convert_oif_callback(OIFCallback *p) {
+PyObject *
+convert_oif_callback(OIFCallback *p)
+{
     const char *id = "123";
     PyObject *fn_p = PyCapsule_New(p->fn_p_c, id, NULL);
     if (fn_p == NULL) {
@@ -66,12 +70,13 @@ PyObject *convert_oif_callback(OIFCallback *p) {
     return obj;
 }
 
-ImplInfo *load_backend(const char *impl_details,
-                       size_t version_major,
-                       size_t version_minor) {
+ImplInfo *
+load_backend(const char *impl_details, size_t version_major, size_t version_minor)
+{
     if (Py_IsInitialized()) {
         fprintf(stderr, "[backend_python] Backend is already initialized\n");
-    } else {
+    }
+    else {
         Py_Initialize();
         if (IMPL_COUNTER == 0) {
             is_python_initialized_by_us = true;
@@ -83,19 +88,17 @@ ImplInfo *load_backend(const char *impl_details,
     // Details:
     // https://stackoverflow.com/questions/49784583/numpy-import-fails-on-multiarray-extension-library-when-called-from-embedded-pyt
     char libpython_name[32];
-    sprintf(libpython_name,
-            "libpython%d.%d.so",
-            PY_MAJOR_VERSION,
-            PY_MINOR_VERSION);
+    sprintf(libpython_name, "libpython%d.%d.so", PY_MAJOR_VERSION, PY_MINOR_VERSION);
     void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
     if (libpython == NULL) {
         fprintf(stderr, "[backend_python] Cannot open python library\n");
         exit(EXIT_FAILURE);
     }
 
-    PyRun_SimpleString("import sys; "
-                       "print('[backend_python]', sys.executable); "
-                       "print('[backend_python]', sys.version)");
+    PyRun_SimpleString(
+        "import sys; "
+        "print('[backend_python]', sys.executable); "
+        "print('[backend_python]', sys.version)");
 
     import_array2("Failed to initialize NumPy C API", NULL);
 
@@ -109,7 +112,8 @@ ImplInfo *load_backend(const char *impl_details,
     for (i = 0; i < strlen(impl_details); ++i) {
         if (impl_details[i] != ' ' && impl_details[i] != '\0') {
             moduleName[i] = impl_details[i];
-        } else {
+        }
+        else {
             moduleName[i] = '\0';
             break;
         }
@@ -118,7 +122,8 @@ ImplInfo *load_backend(const char *impl_details,
     for (; i < strlen(impl_details); ++i) {
         if (impl_details[i] != ' ' && impl_details[i] != '\0') {
             className[i - offset] = impl_details[i];
-        } else {
+        }
+        else {
             className[i] = '\0';
         }
     }
@@ -126,8 +131,7 @@ ImplInfo *load_backend(const char *impl_details,
     PyObject *pFileName, *pModule;
     PyObject *pClass, *pInstance;
     PyObject *pInitArgs;
-    fprintf(
-        stderr, "[backend_python] Provided module name: '%s'\n", moduleName);
+    fprintf(stderr, "[backend_python] Provided module name: '%s'\n", moduleName);
     fprintf(stderr, "[backend_python] Provided class name: '%s'\n", className);
     pFileName = PyUnicode_FromString(moduleName);
     if (pFileName == NULL) {
@@ -142,9 +146,7 @@ ImplInfo *load_backend(const char *impl_details,
 
     if (pModule == NULL) {
         PyErr_Print();
-        fprintf(stderr,
-                "[backend_python] Failed to load module \"%s\"\n",
-                moduleName);
+        fprintf(stderr, "[backend_python] Failed to load module \"%s\"\n", moduleName);
         return NULL;
     }
 
@@ -153,9 +155,7 @@ ImplInfo *load_backend(const char *impl_details,
     pInstance = PyObject_CallObject(pClass, pInitArgs);
     if (pInstance == NULL) {
         PyErr_Print();
-        fprintf(stderr,
-                "[backend_python] Failed to instantiate class %s\n",
-                className);
+        fprintf(stderr, "[backend_python] Failed to instantiate class %s\n", className);
         Py_DECREF(pClass);
         return NULL;
     }
@@ -178,13 +178,12 @@ ImplInfo *load_backend(const char *impl_details,
     return (ImplInfo *)impl_info;
 }
 
-int run_interface_method(ImplInfo *impl_info,
-                         const char *method,
-                         OIFArgs *in_args,
-                         OIFArgs *out_args) {
+int
+run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_args,
+                     OIFArgs *out_args)
+{
     if (impl_info->dh != OIF_LANG_PYTHON) {
-        fprintf(stderr,
-                "[dispatch_python] Provided implementation is not in Python\n");
+        fprintf(stderr, "[dispatch_python] Provided implementation is not in Python\n");
         return -1;
     }
     PythonImplInfo *impl = (PythonImplInfo *)impl_info;
@@ -202,24 +201,27 @@ int run_interface_method(ImplInfo *impl_info,
         for (int i = 0; i < in_args->num_args; ++i) {
             if (in_args->arg_types[i] == OIF_FLOAT64) {
                 pValue = PyFloat_FromDouble(*(double *)in_args->arg_values[i]);
-            } else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
+            }
+            else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
                 OIFArrayF64 *arr = *(OIFArrayF64 **)in_args->arg_values[i];
-                pValue = PyArray_SimpleNewFromData(
-                    arr->nd, arr->dimensions, NPY_FLOAT64, arr->data);
-            } else if (in_args->arg_types[i] == OIF_CALLBACK) {
+                pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
+                                                   arr->data);
+            }
+            else if (in_args->arg_types[i] == OIF_CALLBACK) {
                 OIFCallback *p = in_args->arg_values[i];
                 if (p->src == OIF_LANG_PYTHON) {
                     pValue = (PyObject *)p->fn_p_py;
                     /*
-                    * It is important to incref the callback pointed to
-                    * with p->fn_p_py, because somehow a reference count
-                    * to the ctypes object on Python side is not incremented.
-                    * Therefore, when decref of `pArgs` occurs down below,
-                    * the memory pointed to by p->fn_p_py is getting freed
-                    * prematurely with the consequent segfault.
-                    */
+                     * It is important to incref the callback pointed to
+                     * with p->fn_p_py, because somehow a reference count
+                     * to the ctypes object on Python side is not incremented.
+                     * Therefore, when decref of `pArgs` occurs down below,
+                     * the memory pointed to by p->fn_p_py is getting freed
+                     * prematurely with the consequent segfault.
+                     */
                     Py_INCREF(pValue);
-                } else if (p->src == OIF_LANG_C) {
+                }
+                else if (p->src == OIF_LANG_C) {
                     fprintf(stderr,
                             "[dispatch_python] Check what callback to "
                             "wrap via src field\n");
@@ -227,17 +229,15 @@ int run_interface_method(ImplInfo *impl_info,
                         impl->pCallbackClass = instantiate_callback_class();
                     }
                     PyObject *callback_args = convert_oif_callback(p);
-                    pValue = PyObject_CallObject(impl->pCallbackClass,
-                                                 callback_args);
+                    pValue = PyObject_CallObject(impl->pCallbackClass, callback_args);
                     if (pValue == NULL) {
                         fprintf(stderr,
                                 "[backend_python] Could not instantiate "
                                 "Callback class for wrapping C functions\n");
                     }
-                } else {
-                    fprintf(
-                        stderr,
-                        "[dispatch_python] Cannot determine callback source\n");
+                }
+                else {
+                    fprintf(stderr, "[dispatch_python] Cannot determine callback source\n");
                     pValue = NULL;
                 }
                 if (!PyCallable_Check(pValue)) {
@@ -247,18 +247,17 @@ int run_interface_method(ImplInfo *impl_info,
                             "but it is actually is not callable\n",
                             i);
                 }
-            } else {
+            }
+            else {
                 pValue = NULL;
             }
             if (!pValue) {
                 Py_DECREF(pArgs);
                 Py_DECREF(pFunc);
-                fprintf(
-                    stderr,
-                    "[backend_python] Cannot convert input argument #%d with "
-                    "provided type id %d\n",
-                    i,
-                    in_args->arg_types[i]);
+                fprintf(stderr,
+                        "[backend_python] Cannot convert input argument #%d with "
+                        "provided type id %d\n",
+                        i, in_args->arg_types[i]);
                 return 1;
             }
             PyTuple_SetItem(pArgs, i, pValue);
@@ -267,23 +266,23 @@ int run_interface_method(ImplInfo *impl_info,
         for (int i = 0; i < out_args->num_args; ++i) {
             if (out_args->arg_types[i] == OIF_INT) {
                 pValue = PyLong_FromLong(*(int *)out_args->arg_values[i]);
-            } else if (out_args->arg_types[i] == OIF_FLOAT64) {
+            }
+            else if (out_args->arg_types[i] == OIF_FLOAT64) {
                 pValue = PyFloat_FromDouble(*(double *)out_args->arg_values[i]);
-            } else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
+            }
+            else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
                 OIFArrayF64 *arr = *(OIFArrayF64 **)out_args->arg_values[i];
-                pValue = PyArray_SimpleNewFromData(
-                    arr->nd, arr->dimensions, NPY_FLOAT64, arr->data);
-            } else {
+                pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
+                                                   arr->data);
+            }
+            else {
                 pValue = NULL;
             }
             if (!pValue) {
                 Py_DECREF(pArgs);
                 Py_DECREF(pFunc);
-                fprintf(
-                    stderr,
-                    "[backend_python] Cannot convert out_arg %d of type %d\n",
-                    i,
-                    out_args->arg_types[i]);
+                fprintf(stderr, "[backend_python] Cannot convert out_arg %d of type %d\n", i,
+                        out_args->arg_types[i]);
                 return 1;
             }
             PyTuple_SetItem(pArgs, i + in_args->num_args, pValue);
@@ -294,19 +293,20 @@ int run_interface_method(ImplInfo *impl_info,
         Py_DECREF(pArgs);
         if (pValue != NULL) {
             Py_DECREF(pValue);
-        } else {
+        }
+        else {
             Py_DECREF(pFunc);
             PyErr_Print();
             fprintf(stderr, "Call failed\n");
             return 2;
         }
-    } else {
+    }
+    else {
         if (PyErr_Occurred()) {
             fprintf(stderr, "[dispatch_python] ");
             PyErr_Print();
         }
-        fprintf(
-            stderr, "[dispatch_python] Cannot find function \"%s\"\n", method);
+        fprintf(stderr, "[dispatch_python] Cannot find function \"%s\"\n", method);
         Py_XDECREF(pFunc);
         return -1;
     }
@@ -315,7 +315,9 @@ int run_interface_method(ImplInfo *impl_info,
     return 0;
 }
 
-int unload_impl(ImplInfo *impl_info_) {
+int
+unload_impl(ImplInfo *impl_info_)
+{
     if (impl_info_->dh != OIF_LANG_PYTHON) {
         fprintf(stderr,
                 "[dispatch_python] unload_impl received non-Python "
@@ -331,9 +333,7 @@ int unload_impl(ImplInfo *impl_info_) {
     if (is_python_initialized_by_us && (IMPL_COUNTER == 0)) {
         int status = Py_FinalizeEx();
         if (status < 0) {
-            fprintf(stderr,
-                    "[dispatch_python] Py_FinalizeEx with status %d\n",
-                    status);
+            fprintf(stderr, "[dispatch_python] Py_FinalizeEx with status %d\n", status);
             return status;
         }
     }

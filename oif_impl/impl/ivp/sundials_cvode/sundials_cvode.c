@@ -15,8 +15,8 @@
 #include <nvector/nvector_serial.h>
 #include <sundials/sundials_nvector.h>
 #include <sundials/sundials_types.h>
-#include <sunmatrix/sunmatrix_dense.h>
 #include <sunlinsol/sunlinsol_dense.h>
+#include <sunmatrix/sunmatrix_dense.h>
 #include <sunnonlinsol/sunnonlinsol_fixedpoint.h>
 
 #include "oif/api.h"
@@ -29,7 +29,8 @@ const char *prefix = "[ivp::sundials_cvode]";
 static oif_ivp_rhs_fn_t OIF_RHS_FN;
 
 // Signature for the right-hand side function that CVode expects.
-static int cvode_rhs(sunrealtype t, N_Vector u, N_Vector u_dot, void *user_data);
+static int
+cvode_rhs(sunrealtype t, N_Vector u, N_Vector u_dot, void *user_data);
 
 // Global state of the module.
 // Sundials context
@@ -49,14 +50,16 @@ sunindextype N;
 #define SUN_COMM_NULL NULL
 #endif
 
-int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
+int
+set_initial_value(OIFArrayF64 *y0_in, double t0_in)
+{
     if ((y0_in == NULL) || (y0_in->data == NULL)) {
         fprintf(stderr, "`set_initial_value` received NULL argument\n");
         exit(1);
     }
-    int status;              // Check errors
-    sunrealtype abstol = 1e-15; // absolute tolerance
-    sunrealtype reltol = 1e-15; // relative tolerance
+    int status;                  // Check errors
+    sunrealtype abstol = 1e-15;  // absolute tolerance
+    sunrealtype reltol = 1e-15;  // relative tolerance
 
     // 1. Initialize parallel or multi-threaded environment, if appropriate.
     // No, it is not appropriate here as we work with serial code :-)
@@ -64,34 +67,31 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     // 2. Create the Sundials context object.
     status = SUNContext_Create(SUN_COMM_NULL, &sunctx);
     if (status) {
-        fprintf(
-            stderr, "%s An error occurred when creating SUNContext", prefix);
+        fprintf(stderr, "%s An error occurred when creating SUNContext", prefix);
         return 1;
     }
 
     // 3. Set problem dimensions, etc.
     if (sizeof(SUNDIALS_INDEX_TYPE) == sizeof(int)) {
         if (y0_in->dimensions[0] > INT_MAX) {
-            fprintf(
-                stderr, 
-                "[sundials_cvode] Dimensions of the array are larger "
-                "than the internal Sundials type 'sunindextype'\n"
-            );
+            fprintf(stderr,
+                    "[sundials_cvode] Dimensions of the array are larger "
+                    "than the internal Sundials type 'sunindextype'\n");
             return 1;
-        } else {
-            N = (sunindextype) y0_in->dimensions[0];
         }
-    } else {
-        fprintf(
-            stderr,
-            "[sundials_cvode] Assumption that the internal Sundials type "
-            "'sundindextype' is 'int' is violated. Cannot proceed\n"
-        );
+        else {
+            N = (sunindextype)y0_in->dimensions[0];
+        }
+    }
+    else {
+        fprintf(stderr,
+                "[sundials_cvode] Assumption that the internal Sundials type "
+                "'sundindextype' is 'int' is violated. Cannot proceed\n");
         return 2;
     }
 
     // 4. Set vector of initial values.
-    N_Vector y0 = N_VMake_Serial(N, y0_in->data, sunctx); // Problem vector.
+    N_Vector y0 = N_VMake_Serial(N, y0_in->data, sunctx);  // Problem vector.
     // Sanity check that `sunrealtype` is actually the same as OIF_FLOAT64.
     assert(NV_Ith_S(y0, 0) == y0_in->data[0]);
 
@@ -114,7 +114,8 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     // 8. Create matrix object
     /* A = SUNDenseMatrix(N, N, sunctx); */
     /* if (A == NULL) { */
-    /*     fprintf(stderr, "[sundials_cvode] Could not create matrix for dense linear solver\n"); */
+    /*     fprintf(stderr, "[sundials_cvode] Could not create matrix for dense
+     * linear solver\n"); */
     /*     return 2; */
     /* } */
 
@@ -141,7 +142,8 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     /* } else if (status == CVLS_ILL_INPUT) { */
     /*     fprintf( */
     /*         stderr, */
-    /*         "[sundials_cvode] Setting linear solver failed due to ill input\n" */
+    /*         "[sundials_cvode] Setting linear solver failed due to ill
+     * input\n" */
     /*     ); */
     /*     return 5; */
     /* } else if (status != CVLS_SUCCESS) { */
@@ -156,21 +158,13 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     // 13. Create nonlinear solver object (optional)
     SUNNonlinearSolver NLS = SUNNonlinSol_FixedPoint(y0, 0, sunctx);
     if (NLS == NULL) {
-        fprintf(
-            stderr,
-            "%s Could not create Fixed Point Nonlinear solver\n",
-            prefix
-        );
+        fprintf(stderr, "%s Could not create Fixed Point Nonlinear solver\n", prefix);
         return 7;
     }
     // 14. Attach nonlinear solver module (optional)
     status = CVodeSetNonlinearSolver(cvode_mem, NLS);
     if (status != CV_SUCCESS) {
-        fprintf(
-            stderr,
-            "%s CVodeSetNonlinearSolver failed with code %d",
-            prefix, status
-         );
+        fprintf(stderr, "%s CVodeSetNonlinearSolver failed with code %d", prefix, status);
         return 8;
     }
     // 15. Set nonlinear solver optional inputs (optional)
@@ -181,32 +175,38 @@ int set_initial_value(OIFArrayF64 *y0_in, double t0_in) {
     return 0;
 }
 
-int set_rhs_fn(oif_ivp_rhs_fn_t rhs) {
+int
+set_rhs_fn(oif_ivp_rhs_fn_t rhs)
+{
     if (rhs == NULL) {
-        fprintf(stderr,
-                "`set_rhs_fn` accepts non-null function pointer only\n");
+        fprintf(stderr, "`set_rhs_fn` accepts non-null function pointer only\n");
         return 1;
     }
     OIF_RHS_FN = rhs;
     return 0;
 }
 
-int set_tolerances(double rtol, double atol)
+int
+set_tolerances(double rtol, double atol)
 {
     CVodeSStolerances(cvode_mem, rtol, atol);
     return 0;
 }
 
-int print_stats(void) {
+int
+print_stats(void)
+{
     return CVodePrintAllStats(cvode_mem, stdout, SUN_OUTPUTFORMAT_TABLE);
 }
 
-int integrate(double t, OIFArrayF64 *y) {
+int
+integrate(double t, OIFArrayF64 *y)
+{
     /* if ((y == NULL) || (y->data == NULL)) { */
     /*     fprintf(stderr, "`integrate` received NULL argument\n"); */
     /*     exit(1); */
     /* } */
-    int ier; // Error checking.
+    int ier;  // Error checking.
 
     N_Vector yout = N_VMake_Serial(N, y->data, sunctx);
     sunrealtype tout = t;
@@ -223,17 +223,18 @@ int integrate(double t, OIFArrayF64 *y) {
     N_VDestroy(yout);
     // TODO: Handle all cases: write good error messages for all `ier`.
     switch (ier) {
-    case CV_SUCCESS:
-        return 0;
-    default:
-        fprintf(
-            stderr, "%s During call to `CVode`, an error occurred\n", prefix);
-        return 1;
+        case CV_SUCCESS:
+            return 0;
+        default:
+            fprintf(stderr, "%s During call to `CVode`, an error occurred\n", prefix);
+            return 1;
     }
 }
 
 // Function that computes the right-hand side of the ODE system.
-static int cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) {
+static int
+cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data)
+{
     // While Sundials CVode works with `N_Vector` data structure
     // for one-dimensional arrays, the user provides right-hand side
     // function that works with `OIFArrayF64` data structure,
@@ -241,9 +242,8 @@ static int cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data) 
 
     // Construct OIFArrayF64 to pass to the user-provided right-hand side
     // function.
-    OIFArrayF64 oif_y = {.nd = 1,
-                         .dimensions = (intptr_t[]){N_VGetLength(y)},
-                         .data = N_VGetArrayPointer(y)};
+    OIFArrayF64 oif_y = {
+        .nd = 1, .dimensions = (intptr_t[]){N_VGetLength(y)}, .data = N_VGetArrayPointer(y)};
     OIFArrayF64 oif_ydot = {.nd = 1,
                             .dimensions = (intptr_t[]){N_VGetLength(ydot)},
                             .data = N_VGetArrayPointer(ydot)};

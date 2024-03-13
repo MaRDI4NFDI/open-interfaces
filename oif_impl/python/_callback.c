@@ -13,18 +13,19 @@
 #include "oif/api.h"
 
 typedef struct {
-    PyObject_HEAD void *fn_p; // raw C function pointer retrieved from PyCapsule
-    unsigned int nargs;       // Number of function arguments
-    OIFArgType *oif_arg_types; // Arg types used in OpenInterFaces
-    ffi_cif *cif_p;            // Pointer to libffi context object
-    ffi_type **arg_types;      // Arg types in terms of libffi
-    void **arg_values;         // Memory for the data converted to C
-    unsigned int narray_args;  // Number of arrays among argument types
+    PyObject_HEAD void *fn_p;   // raw C function pointer retrieved from PyCapsule
+    unsigned int nargs;         // Number of function arguments
+    OIFArgType *oif_arg_types;  // Arg types used in OpenInterFaces
+    ffi_cif *cif_p;             // Pointer to libffi context object
+    ffi_type **arg_types;       // Arg types in terms of libffi
+    void **arg_values;          // Memory for the data converted to C
+    unsigned int narray_args;   // Number of arrays among argument types
     OIFArrayF64 **oif_arrays;
 } PythonWrapperForCCallbackObject;
 
 static void
-PythonWrapperForCCallback_dealloc(PythonWrapperForCCallbackObject *self) {
+PythonWrapperForCCallback_dealloc(PythonWrapperForCCallbackObject *self)
+{
     unsigned int nargs = self->nargs;
     unsigned int narray_args = self->narray_args;
     for (unsigned int i = 0; i < narray_args; ++i) {
@@ -47,9 +48,10 @@ PythonWrapperForCCallback_dealloc(PythonWrapperForCCallbackObject *self) {
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
-static int PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self,
-                                          PyObject *args,
-                                          PyObject *Py_UNUSED(kwds)) {
+static int
+PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *args,
+                               PyObject *Py_UNUSED(kwds))
+{
     PyObject *capsule;
     unsigned int nargs;
 
@@ -67,8 +69,7 @@ static int PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self,
 
     self->oif_arg_types = malloc(sizeof(OIFArgType) * nargs);
     if (self->oif_arg_types == NULL) {
-        fprintf(stderr,
-                "[_callback] Could not allocated memory for oif_arg_types\n");
+        fprintf(stderr, "[_callback] Could not allocated memory for oif_arg_types\n");
         goto fail_clean_self;
     }
     self->oif_arg_types[0] = OIF_FLOAT64;
@@ -82,8 +83,7 @@ static int PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self,
 
     self->arg_types = malloc(nargs * sizeof(ffi_type *));
     if (self->arg_types == NULL) {
-        fprintf(stderr,
-                "[_callback] Could not allocate memory for `arg_types`\n");
+        fprintf(stderr, "[_callback] Could not allocate memory for `arg_types`\n");
         goto fail_clean_cif_p;
     }
 
@@ -91,12 +91,10 @@ static int PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self,
     // that the lifetime of the arguments ends after `ffi_call` below.
     self->arg_values = calloc(nargs, sizeof(void *));
     if (self->arg_values == NULL) {
-        fprintf(stderr,
-                "[_callback] Could not allocate memory for `arg_values`\n");
+        fprintf(stderr, "[_callback] Could not allocate memory for `arg_values`\n");
         goto fail_clean_arg_types;
     }
-    unsigned int narray_args =
-        0; // Number of arguments of type `OIFArrayF64 *`.
+    unsigned int narray_args = 0;  // Number of arguments of type `OIFArrayF64 *`.
     for (size_t i = 0; i < nargs; ++i) {
         if (self->oif_arg_types[i] == OIF_INT) {
             fprintf(stderr,
@@ -104,23 +102,23 @@ static int PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self,
                     "for integer types\n");
             self->arg_types[i] = &ffi_type_sint64;
             self->arg_values[i] = malloc(sizeof(int));
-        } else if (self->oif_arg_types[i] == OIF_FLOAT64) {
+        }
+        else if (self->oif_arg_types[i] == OIF_FLOAT64) {
             self->arg_types[i] = &ffi_type_double;
             self->arg_values[i] = malloc(sizeof(double));
-        } else if (self->oif_arg_types[i] == OIF_ARRAY_F64) {
+        }
+        else if (self->oif_arg_types[i] == OIF_ARRAY_F64) {
             self->arg_types[i] = &ffi_type_pointer;
             self->arg_values[i] = malloc(sizeof(OIFArrayF64 **));
             narray_args++;
-        } else {
-            fprintf(stderr,
-                    "[_callback] Unknown input arg type: %d\n",
+        }
+        else {
+            fprintf(stderr, "[_callback] Unknown input arg type: %d\n",
                     self->oif_arg_types[i]);
             goto fail_clean_arg_values;
         }
         if (self->arg_values[i] == NULL) {
-            fprintf(stderr,
-                    "[_callback] Could not allocate memory for element #%zu\n",
-                    i);
+            fprintf(stderr, "[_callback] Could not allocate memory for element #%zu\n", i);
             goto fail_clean_arg_values;
         }
     }
@@ -129,17 +127,14 @@ static int PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self,
 
     self->oif_arrays = calloc(narray_args, sizeof(OIFArrayF64 *));
     if (self->oif_arrays == NULL) {
-        fprintf(stderr,
-                "[_callback] Could not allocate memory for `oif_arrays`\n");
+        fprintf(stderr, "[_callback] Could not allocate memory for `oif_arrays`\n");
         goto fail_clean_arg_values;
     }
     for (Py_ssize_t i = 0; i < narray_args; ++i) {
         self->oif_arrays[i] = malloc(sizeof(OIFArrayF64));
         if (self->oif_arrays[i] == NULL) {
-            fprintf(
-                stderr,
-                "[_callback] Could not allocate memory for `oif_arrays[%ld]`\n",
-                i);
+            fprintf(stderr, "[_callback] Could not allocate memory for `oif_arrays[%ld]`\n",
+                    i);
             goto fail_clean_oif_arrays;
         }
     }
@@ -172,11 +167,10 @@ fail_clean_self:
     return -1;
 }
 
-static PyObject *PythonWrapperForCCallback_call(PyObject *myself,
-                                                PyObject *args,
-                                                PyObject *Py_UNUSED(kwds)) {
-    PythonWrapperForCCallbackObject *self =
-        (PythonWrapperForCCallbackObject *)myself;
+static PyObject *
+PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UNUSED(kwds))
+{
+    PythonWrapperForCCallbackObject *self = (PythonWrapperForCCallbackObject *)myself;
     PyObject *retval = NULL;
 
     // We need to initialize PyArray_API (table of function pointers)
@@ -201,9 +195,9 @@ static PyObject *PythonWrapperForCCallback_call(PyObject *myself,
     }
     unsigned int nargs;
     if (nargs_s <= UINT_MAX) {
-        nargs = (unsigned int)
-            nargs_s; // Explicit cast to eliminate compiler warning
-    } else {
+        nargs = (unsigned int)nargs_s;  // Explicit cast to eliminate compiler warning
+    }
+    else {
         fprintf(stderr,
                 "[_callback] Could not convert size of the tuple of args "
                 "to 'unsigned int' type\n");
@@ -230,7 +224,8 @@ static PyObject *PythonWrapperForCCallback_call(PyObject *myself,
             }
             double *double_value = arg_values[i];
             *double_value = PyFloat_AsDouble(arg);
-        } else if (arg_type_ids[i] == OIF_ARRAY_F64) {
+        }
+        else if (arg_type_ids[i] == OIF_ARRAY_F64) {
             PyArrayObject *py_arr = (PyArrayObject *)arg;
             if (!PyArray_Check(py_arr)) {
                 fprintf(stderr,
@@ -247,17 +242,16 @@ static PyObject *PythonWrapperForCCallback_call(PyObject *myself,
             OIFArrayF64 **pp = arg_values[i];
             *pp = oif_arrays[j];
             j++;
-        } else {
+        }
+        else {
             fflush(stdout);
-            fprintf(stderr,
-                    "[_callback] Unknown input arg type: %d\n",
-                    arg_type_ids[i]);
+            fprintf(stderr, "[_callback] Unknown input arg type: %d\n", arg_type_ids[i]);
             return NULL;
         }
     }
 
-    ffi_status status = ffi_prep_cif(
-        &cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, self->arg_types);
+    ffi_status status =
+        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, self->arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[_callback] ffi_prep_cif was not OK");
@@ -277,8 +271,7 @@ static PyMemberDef PythonWrapperForCCallback_members[] = {
 };
 
 static PyTypeObject PythonWrapperForCCallbackType = {
-    .ob_base = PyVarObject_HEAD_INIT(NULL, 0).tp_name =
-        "callback.PythonWrapperForCCallback",
+    .ob_base = PyVarObject_HEAD_INIT(NULL, 0).tp_name = "callback.PythonWrapperForCCallback",
     .tp_doc = PyDoc_STR("Python wrapper for a C callback function"),
     .tp_basicsize = sizeof(PythonWrapperForCCallbackObject),
     .tp_itemsize = 0,
@@ -291,7 +284,9 @@ static PyTypeObject PythonWrapperForCCallbackType = {
     // .tp_methods = PythonWrapperForCCallback_methods,
 };
 
-static PyObject *make_pycapsule(PyObject *Py_UNUSED(self), PyObject *args) {
+static PyObject *
+make_pycapsule(PyObject *Py_UNUSED(self), PyObject *args)
+{
     PyObject *py_fn_p;
     void *fn_p;
     PyObject *capsule;
@@ -311,17 +306,14 @@ static PyObject *make_pycapsule(PyObject *Py_UNUSED(self), PyObject *args) {
 }
 
 static PyMethodDef callback_methods[] = {
-    {"make_pycapsule",
-     make_pycapsule,
-     METH_VARARGS,
+    {"make_pycapsule", make_pycapsule, METH_VARARGS,
      "Make a PyCapsule for C function pointer"},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
-PyDoc_STRVAR(
-    callback_doc,
-    "This module contains a function to invoke a given C function from Python "
-    "converting NumPy arrays to their OIFArrayF64 analogs.");
+PyDoc_STRVAR(callback_doc,
+             "This module contains a function to invoke a given C function from Python "
+             "converting NumPy arrays to their OIFArrayF64 analogs.");
 
 static struct PyModuleDef callbackmodule = {
     .m_base = PyModuleDef_HEAD_INIT,
@@ -332,9 +324,15 @@ static struct PyModuleDef callbackmodule = {
     .m_methods = callback_methods,
 };
 
-static void test_fn_(void) { fprintf(stdout, "[_callback] I am test_fn\n"); }
+static void
+test_fn_(void)
+{
+    fprintf(stdout, "[_callback] I am test_fn\n");
+}
 
-PyMODINIT_FUNC PyInit__callback(void) {
+PyMODINIT_FUNC
+PyInit__callback(void)
+{
     PyObject *m;
 
     if (PyType_Ready(&PythonWrapperForCCallbackType) < 0) {
@@ -348,8 +346,7 @@ PyMODINIT_FUNC PyInit__callback(void) {
         return NULL;
     }
 
-    if (PyModule_AddObject(m,
-                           "PythonWrapperForCCallback",
+    if (PyModule_AddObject(m, "PythonWrapperForCCallback",
                            (PyObject *)&PythonWrapperForCCallbackType) < 0) {
         goto fail;
     }

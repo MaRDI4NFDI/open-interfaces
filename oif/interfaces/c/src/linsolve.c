@@ -4,10 +4,9 @@
 #include <oif/dispatch.h>
 #include <oif/interfaces/linsolve.h>
 
-int oif_solve_linear_system(ImplHandle implh,
-                            OIFArrayF64 *A,
-                            OIFArrayF64 *b,
-                            OIFArrayF64 *x) {
+int
+oif_solve_linear_system(ImplHandle implh, OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
+{
     OIFArgType in_arg_types[] = {OIF_ARRAY_F64, OIF_ARRAY_F64};
     void *in_arg_values[] = {(void *)&A, (void *)&b};
     OIFArgs in_args = {

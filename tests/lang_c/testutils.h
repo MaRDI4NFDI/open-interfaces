@@ -12,7 +12,9 @@
  * @param x Value, square root of which is to be computed
  * @return Approximate value of the square root of `x`
  */
-constexpr double constexpr_sqrt(double x) {
+constexpr double
+constexpr_sqrt(double x)
+{
     double tol = 1e-8;
     double y = x / 2.0;
     int k = 0;
@@ -37,7 +39,9 @@ constexpr double constexpr_sqrt(double x) {
  * `f: R -> R`.
  */
 template <class F, class Fprime>
-double fsolve(F const &f, Fprime const &fprime) {
+double
+fsolve(F const &f, Fprime const &fprime)
+{
     double x = 1.0;
     double tol = 1e-15;
     size_t k = 0;

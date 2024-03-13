@@ -8,8 +8,9 @@
 
 #include "oif/api.h"
 
-static PyObject *numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self),
-                                                PyObject *args) {
+static PyObject *
+numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self), PyObject *args)
+{
     PyObject *retval = NULL;
     PyObject *ctypes_pointer;
 
@@ -35,8 +36,7 @@ static PyObject *numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self),
         return NULL;
     }
 
-    retval = PyArray_SimpleNewFromData(
-        arr->nd, arr->dimensions, NPY_FLOAT64, arr->data);
+    retval = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64, arr->data);
 
     if (retval == NULL) {
         fprintf(stderr, "[_conversion] Could not create a new NumPy array\n");
@@ -46,9 +46,7 @@ static PyObject *numpy_array_from_oif_array_f64(PyObject *Py_UNUSED(self),
 }
 
 static PyMethodDef callback_methods[] = {
-    {"numpy_array_from_oif_array_f64",
-     numpy_array_from_oif_array_f64,
-     METH_VARARGS,
+    {"numpy_array_from_oif_array_f64", numpy_array_from_oif_array_f64, METH_VARARGS,
      "Invoke a given C function from Python."},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
@@ -63,7 +61,9 @@ static struct PyModuleDef callbackmodule = {
                                 or -1 if the module keeps state in global variables. */
     .m_methods = callback_methods};
 
-PyMODINIT_FUNC PyInit__conversion(void) {
+PyMODINIT_FUNC
+PyInit__conversion(void)
+{
     PyObject *m;
 
     m = PyModule_Create(&callbackmodule);

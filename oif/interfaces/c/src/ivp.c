@@ -6,9 +6,10 @@
 #include <oif/dispatch.h>
 #include <oif/interfaces/ivp.h>
 
-int oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs) {
-    OIFCallback rhs_wrapper = {
-        .src = OIF_LANG_C, .fn_p_py = NULL, .fn_p_c = rhs};
+int
+oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs)
+{
+    OIFCallback rhs_wrapper = {.src = OIF_LANG_C, .fn_p_py = NULL, .fn_p_c = rhs};
     OIFArgType in_arg_types[] = {OIF_CALLBACK};
     void *in_arg_values[] = {&rhs_wrapper};
     OIFArgs in_args = {
@@ -25,13 +26,14 @@ int oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs) {
         .arg_values = out_arg_values,
     };
 
-    int status =
-        call_interface_method(implh, "set_rhs_fn", &in_args, &out_args);
+    int status = call_interface_method(implh, "set_rhs_fn", &in_args, &out_args);
 
     return status;
 }
 
-int oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0) {
+int
+oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0)
+{
     OIFArgType in_arg_types[] = {OIF_ARRAY_F64, OIF_FLOAT64};
     void *in_arg_values[] = {&y0, &t0};
     OIFArgs in_args = {
@@ -48,13 +50,14 @@ int oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0) {
         .arg_values = out_arg_values,
     };
 
-    int status =
-        call_interface_method(implh, "set_initial_value", &in_args, &out_args);
+    int status = call_interface_method(implh, "set_initial_value", &in_args, &out_args);
 
     return status;
 }
 
-int oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y) {
+int
+oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y)
+{
     OIFArgType in_arg_types[] = {OIF_FLOAT64};
     void *in_arg_values[] = {&t};
     OIFArgs in_args = {

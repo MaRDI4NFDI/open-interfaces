@@ -16,10 +16,9 @@
  * @return positive number that identifies the requested implementation
  *         or OIF_IMPL_INIT_ERROR in case of the error
  */
-ImplHandle load_interface_impl(const char *interface,
-                               const char *impl,
-                               size_t version_major,
-                               size_t version_minor);
+ImplHandle
+load_interface_impl(const char *interface, const char *impl, size_t version_major,
+                    size_t version_minor);
 
 /**
  * Unload implementation of an interface.
@@ -28,10 +27,9 @@ ImplHandle load_interface_impl(const char *interface,
  * @return nonnegative number that identifies whether the operation
  *         was successful
  */
-int unload_interface_impl(ImplHandle implh);
+int
+unload_interface_impl(ImplHandle implh);
 
-int call_interface_method(ImplHandle implh,
-                          const char *method,
-                          OIFArgs *args,
-                          OIFArgs *retvals);
+int
+call_interface_method(ImplHandle implh, const char *method, OIFArgs *args, OIFArgs *retvals);
 #endif

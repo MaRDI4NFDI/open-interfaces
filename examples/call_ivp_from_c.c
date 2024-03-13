@@ -8,23 +8,27 @@
 #include <oif/c_bindings.h>
 #include <oif/interfaces/ivp.h>
 
-char *parse_impl(int argc, char *argv[]) {
+char *
+parse_impl(int argc, char *argv[])
+{
     if (argc == 1) {
         return "scipy_ode_dopri5";
-    } else {
+    }
+    else {
         if ((strcmp(argv[1], "scipy_ode_dopri5") == 0) ||
             (strcmp(argv[1], "sundials_cvode") == 0)) {
             return argv[1];
-        } else {
-            fprintf(stderr,
-                    "USAGE: %s [scipy_ode_dopri5 | sundials_cvode]\n",
-                    argv[0]);
+        }
+        else {
+            fprintf(stderr, "USAGE: %s [scipy_ode_dopri5 | sundials_cvode]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
     }
 }
 
-int rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
+int
+rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out)
+{
     int size = y->dimensions[0];
     for (int i = 0; i < size; ++i) {
         rhs_out->data[i] = -y->data[i];
@@ -32,23 +36,23 @@ int rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out) {
     return 0;
 }
 
-int main(int argc, char *argv[]) {
+int
+main(int argc, char *argv[])
+{
     char *impl = parse_impl(argc, argv);
     printf("Calling from C an open interface for solving y'(t) = f(t, y)\n");
     printf("Implementation: %s\n", impl);
 
     double t0 = 0.0;
-    OIFArrayF64 *y0 =
-        oif_init_array_f64_from_data(1, (intptr_t[1]){1}, (double[1]){1.0});
+    OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, (intptr_t[1]){1}, (double[1]){1.0});
 
     ImplHandle implh = oif_init_impl("ivp", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
-        fprintf(stderr,
-                "Error during implementation initialization. Cannot proceed\n");
+        fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
         return EXIT_FAILURE;
     }
 
-    int status; // Aux variable to check for errors.
+    int status;  // Aux variable to check for errors.
     status = oif_ivp_set_initial_value(implh, y0, t0);
     if (status) {
         fprintf(stderr, "oif_ivp_set_set_initial_value returned error\n");

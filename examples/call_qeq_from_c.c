@@ -7,22 +7,27 @@
 #include <oif/c_bindings.h>
 #include <oif/interfaces/qeq.h>
 
-char *parse_impl(int argc, char *argv[]) {
+char *
+parse_impl(int argc, char *argv[])
+{
     if (argc == 1) {
         return "c_qeq_solver";
-    } else {
+    }
+    else {
         if ((strcmp(argv[1], "c_qeq_solver") == 0) ||
             (strcmp(argv[1], "py_qeq_solver") == 0)) {
             return argv[1];
-        } else {
-            fprintf(
-                stderr, "USAGE: %s [c_qeq_solver|py_qeq_solver]\n", argv[0]);
+        }
+        else {
+            fprintf(stderr, "USAGE: %s [c_qeq_solver|py_qeq_solver]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
     }
 }
 
-int main(int argc, char *argv[]) {
+int
+main(int argc, char *argv[])
+{
     char *impl = parse_impl(argc, argv);
     printf("Calling from C an open interface for quadratic solver \n");
     printf("Implementation: %s\n", impl);
@@ -33,8 +38,7 @@ int main(int argc, char *argv[]) {
 
     ImplHandle implh = oif_init_impl("qeq", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
-        fprintf(stderr,
-                "Error during implementation initialization. Cannot proceed\n");
+        fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
         return EXIT_FAILURE;
     }
 

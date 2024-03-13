@@ -31,7 +31,9 @@ static bool _INITIALIZED = false;
 
 static int _IMPL_COUNTER = 1000;
 
-size_t hash_fn(const ImplHandle *key) {
+size_t
+hash_fn(const ImplHandle *key)
+{
     size_t result = *key;
     if (result < 0) {
         result = -result;
@@ -39,15 +41,18 @@ size_t hash_fn(const ImplHandle *key) {
     return result % SIZE_MAX;
 }
 
-int compare_fn(const ImplHandle *key1, const ImplHandle *key2) {
+int
+compare_fn(const ImplHandle *key1, const ImplHandle *key2)
+{
     return *key1 - *key2;
 }
 
-static int init_module_(void) {
+static int
+init_module_(void)
+{
     OIF_IMPL_ROOT_DIR = getenv("OIF_IMPL_ROOT_DIR");
     if (OIF_IMPL_ROOT_DIR == NULL) {
-        fprintf(
-                stderr,
+        fprintf(stderr,
                 "[dispatch] Environment variable 'OIF_IMPL_ROOT_DIR' must be "
                 "set so that implementations can be found. Cannot proceed\n");
         return -1;
@@ -58,10 +63,10 @@ static int init_module_(void) {
     return 0;
 }
 
-ImplHandle load_interface_impl(const char *interface,
-                               const char *impl,
-                               size_t version_major,
-                               size_t version_minor) {
+ImplHandle
+load_interface_impl(const char *interface, const char *impl, size_t version_major,
+                    size_t version_minor)
+{
     if (!_INITIALIZED) {
         int status = init_module_();
         if (status) {
@@ -83,10 +88,10 @@ ImplHandle load_interface_impl(const char *interface,
 
     FILE *conf_file = fopen(conf_filename, "r");
     if (conf_file == NULL) {
-        fprintf(
-            stderr, "[dispatch] Cannot load conf file '%s'\n", conf_filename);
+        fprintf(stderr, "[dispatch] Cannot load conf file '%s'\n", conf_filename);
         return -1;
-    } else {
+    }
+    else {
         fprintf(stderr, "[dispatch] Configuration file: %s\n", conf_filename);
     }
 
@@ -113,7 +118,8 @@ ImplHandle load_interface_impl(const char *interface,
     if (buffer[len - 1] != '\n') {
         fprintf(stderr, "Backend name is longer than allocated buffer\n");
         return -1;
-    } else {
+    }
+    else {
         // Trim the new line character.
         buffer[len - 1] = '\0';
     }
@@ -131,7 +137,8 @@ ImplHandle load_interface_impl(const char *interface,
     if (buffer[len - 1] != '\n') {
         fprintf(stderr, "Backend name is longer than allocated array\n");
         exit(EXIT_FAILURE);
-    } else {
+    }
+    else {
         // Trim new line character.
         buffer[len - 1] = '\0';
     }
@@ -143,13 +150,13 @@ ImplHandle load_interface_impl(const char *interface,
     if (strcmp(backend_name, "c") == 0) {
         dh = OIF_LANG_C;
         dispatch_lang_so = OIF_DISPATCH_C_SO;
-    } else if (strcmp(backend_name, "python") == 0) {
+    }
+    else if (strcmp(backend_name, "python") == 0) {
         dh = OIF_LANG_PYTHON;
         dispatch_lang_so = OIF_DISPATCH_PYTHON_SO;
-    } else {
-        fprintf(stderr,
-                "[dispatch] Implementation has unknown backend: '%s'\n",
-                backend_name);
+    }
+    else {
+        fprintf(stderr, "[dispatch] Implementation has unknown backend: '%s'\n", backend_name);
         exit(EXIT_FAILURE);
     }
 
@@ -157,14 +164,13 @@ ImplHandle load_interface_impl(const char *interface,
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
         lib_handle = dlopen(dispatch_lang_so, RTLD_LOCAL | RTLD_LAZY);
         if (lib_handle == NULL) {
-            fprintf(stderr,
-                    "[dispatch] Cannot load shared library '%s'\n",
-                    dispatch_lang_so);
+            fprintf(stderr, "[dispatch] Cannot load shared library '%s'\n", dispatch_lang_so);
             fprintf(stderr, "Error message: %s\n", dlerror());
             exit(EXIT_FAILURE);
         }
         OIF_DISPATCH_HANDLES[dh] = lib_handle;
-    } else {
+    }
+    else {
         lib_handle = OIF_DISPATCH_HANDLES[dh];
     }
 
@@ -172,14 +178,11 @@ ImplHandle load_interface_impl(const char *interface,
     load_backend_fn = dlsym(lib_handle, "load_backend");
 
     if (load_backend_fn == NULL) {
-        fprintf(stderr,
-                "[dispatch] Could not load function %s: %s\n",
-                "load_backend",
+        fprintf(stderr, "[dispatch] Could not load function %s: %s\n", "load_backend",
                 dlerror());
     }
 
-    ImplInfo *impl_info =
-        load_backend_fn(impl_details, version_major, version_minor);
+    ImplInfo *impl_info = load_backend_fn(impl_details, version_major, version_minor);
     if (impl_info == NULL) {
         fprintf(stderr, "[dispatch] Could not load implementation\n");
         return OIF_IMPL_INIT_ERROR;
@@ -191,15 +194,16 @@ ImplHandle load_interface_impl(const char *interface,
     return impl_info->implh;
 }
 
-int unload_interface_impl(ImplHandle implh) {
+int
+unload_interface_impl(ImplHandle implh)
+{
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
     DispatchHandle dh = impl_info->dh;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
-        fprintf(
-            stderr,
-            "[dispatch] Cannot unload interface implementation for language "
-            "id: '%u'\n",
-            dh);
+        fprintf(stderr,
+                "[dispatch] Cannot unload interface implementation for language "
+                "id: '%u'\n",
+                dh);
         exit(EXIT_FAILURE);
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
@@ -219,10 +223,9 @@ int unload_interface_impl(ImplHandle implh) {
     return 0;
 }
 
-int call_interface_method(ImplHandle implh,
-                          const char *method,
-                          OIFArgs *args,
-                          OIFArgs *retvals) {
+int
+call_interface_method(ImplHandle implh, const char *method, OIFArgs *args, OIFArgs *retvals)
+{
     int status;
 
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
@@ -236,8 +239,7 @@ int call_interface_method(ImplHandle implh,
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
 
-    int (*run_interface_method_fn)(
-        ImplInfo *, const char *, OIFArgs *, OIFArgs *);
+    int (*run_interface_method_fn)(ImplInfo *, const char *, OIFArgs *, OIFArgs *);
     run_interface_method_fn = dlsym(lib_handle, "run_interface_method");
     if (run_interface_method_fn == NULL) {
         fprintf(stderr,

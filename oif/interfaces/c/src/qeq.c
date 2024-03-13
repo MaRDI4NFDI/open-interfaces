@@ -4,8 +4,9 @@
 #include <oif/dispatch.h>
 #include <oif/interfaces/qeq.h>
 
-int oif_solve_qeq(
-    ImplHandle implh, double a, double b, double c, OIFArrayF64 *roots) {
+int
+oif_solve_qeq(ImplHandle implh, double a, double b, double c, OIFArrayF64 *roots)
+{
     OIFArgType in_arg_types[3] = {OIF_FLOAT64, OIF_FLOAT64, OIF_FLOAT64};
     void *in_arg_values[3] = {(void *)&a, (void *)&b, (void *)&c};
     OIFArgs in_args = {
