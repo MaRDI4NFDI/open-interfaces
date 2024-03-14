@@ -29,6 +29,7 @@ static const char *OIF_IMPL_ROOT_DIR;
  */
 void *OIF_DISPATCH_HANDLES[OIF_LANG_COUNT];
 
+// cppcheck-suppress unusedStructMember
 static HASHMAP(ImplHandle, ImplInfo) IMPL_MAP;
 
 static bool INITIALIZED_ = false;
