@@ -29,7 +29,7 @@ def rhs(t, y, ydot):
 def main():
     args = _parse_args()
     impl = args.impl
-    print("Calling from Python an open interface for quadratic solver")
+    print("Calling from Python an open interface for initial-value problems")
     print(f"Implementation: {impl}")
     s = IVP(impl)
     t0 = 0.0

@@ -256,7 +256,11 @@ def init_impl(interface: str, impl: str, major: UInt, minor: UInt):
     )
     implh = load_interface_impl(interface.encode(), impl.encode(), major, minor)
     if implh < 0:
-        raise RuntimeError("Cannot initialize backend")
+        raise RuntimeError(
+            "Error occurred "
+            f"during initialization of the implementation '{impl}' "
+            f"for the interface '{interface}'"
+        )
     return OIFPyBinding(implh, interface, impl)
 
 
