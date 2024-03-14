@@ -45,4 +45,5 @@ class IVP:
         self._binding.call("print_stats", (), ())
 
     def __del__(self):
-        unload_impl(self._binding)
+        if hasattr(self, "_binding"):
+            unload_impl(self._binding)

@@ -12,4 +12,5 @@ class LinearSolver:
         return result
 
     def __del__(self):
-        unload_impl(self._binding)
+        if hasattr(self, "_binding"):
+            unload_impl(self._binding)
