@@ -39,6 +39,6 @@ typedef struct {
 } OIFCallback;
 
 enum {
-    OIF_ERROR = 101,
-    OIF_IMPL_INIT_ERROR = 102,
+    OIF_ERROR = -1,
+    OIF_IMPL_INIT_ERROR = -2,
 };

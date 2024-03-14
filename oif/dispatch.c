@@ -83,7 +83,8 @@ ImplHandle load_interface_impl(const char *interface,
     void *lib_handle = NULL;
     FILE *conf_file;
     char *buffer;
-    ImplHandle retval = -1;
+    /* One must be a pessimist, while programming in C. */
+    ImplHandle retval = OIF_IMPL_INIT_ERROR;
 
     char conf_filename[1024] = "";
     strcat(conf_filename, OIF_IMPL_ROOT_DIR);
@@ -244,9 +245,10 @@ unload_interface_impl(ImplHandle implh)
     return 0;
 }
 
-int
-call_interface_method(ImplHandle implh, const char *method, OIFArgs *args, OIFArgs *retvals)
-{
+int call_interface_impl(ImplHandle implh,
+                        const char *method,
+                        OIFArgs *in_args,
+                        OIFArgs *out_args) {
     int status;
 
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
@@ -269,7 +271,7 @@ call_interface_method(ImplHandle implh, const char *method, OIFArgs *args, OIFAr
                 dh);
         return -1;
     }
-    status = run_interface_method_fn(impl_info, method, args, retvals);
+    status = run_interface_method_fn(impl_info, method, in_args, out_args);
 
     if (status) {
         fprintf(stderr,
