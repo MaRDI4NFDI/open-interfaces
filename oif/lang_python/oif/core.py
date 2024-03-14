@@ -223,7 +223,7 @@ class OIFPyBinding:
         )
         out_packed = OIFArgs(num_out_args, out_arg_types_ctypes, out_arg_values_ctypes)
 
-        call_interface_method = wrap_c_function(
+        call_interface_method = _wrap_c_function(
             _lib_dispatch,
             "call_interface_method",
             ctypes.c_int,
@@ -248,7 +248,7 @@ class OIFPyBinding:
 
 
 def init_impl(interface: str, impl: str, major: UInt, minor: UInt):
-    load_interface_impl = wrap_c_function(
+    load_interface_impl = _wrap_c_function(
         _lib_dispatch,
         "load_interface_impl",
         ctypes.c_int,
@@ -265,7 +265,7 @@ def init_impl(interface: str, impl: str, major: UInt, minor: UInt):
 
 
 def unload_impl(binding: OIFPyBinding):
-    unload_interface_impl = wrap_c_function(
+    unload_interface_impl = _wrap_c_function(
         _lib_dispatch,
         "unload_interface_impl",
         ctypes.c_int,
@@ -279,7 +279,7 @@ def unload_impl(binding: OIFPyBinding):
         )
 
 
-def wrap_c_function(lib, funcname, restype, argtypes):
+def _wrap_c_function(lib, funcname, restype, argtypes):
     if isinstance(argtypes, list):
         if len(argtypes) == 1:
             assert argtypes[0] is not None, "For func(void) pass [] or None, not [None]"
