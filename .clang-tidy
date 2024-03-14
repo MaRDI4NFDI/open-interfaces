@@ -16,6 +16,7 @@ Checks: >
     bugprone-signed-char-misuse,
     bugprone-sizeof-expression,
     bugprone-branch-clone,
+    misc-include-cleaner,
     -clang-analyzer-security.insecureAPI.*,
     -misc-no-recursion,
 
