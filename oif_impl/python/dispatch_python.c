@@ -70,9 +70,9 @@ convert_oif_callback(OIFCallback *p)
     return obj;
 }
 
-ImplInfo *
-load_backend(const char *impl_details, size_t version_major, size_t version_minor)
-{
+ImplInfo *load_impl(const char *impl_details,
+                       size_t version_major,
+                       size_t version_minor) {
     if (Py_IsInitialized()) {
         fprintf(stderr, "[backend_python] Backend is already initialized\n");
     }

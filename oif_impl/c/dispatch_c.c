@@ -16,9 +16,9 @@ typedef struct {
 
 static int IMPL_COUNTER = 0;
 
-ImplInfo *
-load_backend(const char *impl_details, size_t version_major, size_t version_minor)
-{
+ImplInfo *load_impl(const char *impl_details,
+                    size_t version_major,
+                    size_t version_minor) {
     // For C implementations, `impl_details` must contain the name
     // of the shared library with the methods implemented as functions.
     void *impl_lib = dlopen(impl_details, RTLD_LOCAL | RTLD_LAZY);

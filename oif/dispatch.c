@@ -174,15 +174,18 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         lib_handle = OIF_DISPATCH_HANDLES[dh];
     }
 
-    ImplInfo *(*load_backend_fn)(const char *, size_t, size_t);
-    load_backend_fn = dlsym(lib_handle, "load_backend");
+    ImplInfo *(*load_impl_fn)(const char *, size_t, size_t);
+    load_impl_fn = dlsym(lib_handle, "load_impl");
 
-    if (load_backend_fn == NULL) {
-        fprintf(stderr, "[dispatch] Could not load function %s: %s\n", "load_backend",
+    if (load_impl_fn == NULL) {
+        fprintf(stderr,
+                "[dispatch] Could not load function %s: %s\n",
+                "load_impl",
                 dlerror());
     }
 
-    ImplInfo *impl_info = load_backend_fn(impl_details, version_major, version_minor);
+    ImplInfo *impl_info =
+        load_impl_fn(impl_details, version_major, version_minor);
     if (impl_info == NULL) {
         fprintf(stderr, "[dispatch] Could not load implementation\n");
         return OIF_IMPL_INIT_ERROR;
