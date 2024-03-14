@@ -70,9 +70,9 @@ convert_oif_callback(OIFCallback *p)
     return obj;
 }
 
-ImplInfo *load_impl(const char *impl_details,
-                       size_t version_major,
-                       size_t version_minor) {
+ImplInfo *
+load_impl(const char *impl_details, size_t version_major, size_t version_minor)
+{
     if (Py_IsInitialized()) {
         fprintf(stderr, "[backend_python] Backend is already initialized\n");
     }
@@ -178,10 +178,9 @@ ImplInfo *load_impl(const char *impl_details,
     return (ImplInfo *)impl_info;
 }
 
-int call_impl(ImplInfo *impl_info,
-              const char *method,
-              OIFArgs *in_args,
-              OIFArgs *out_args) {
+int
+call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+{
     if (impl_info->dh != OIF_LANG_PYTHON) {
         fprintf(stderr, "[dispatch_python] Provided implementation is not in Python\n");
         return -1;

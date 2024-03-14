@@ -26,8 +26,7 @@ oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs)
         .arg_values = out_arg_values,
     };
 
-    int status =
-        call_interface_impl(implh, "set_rhs_fn", &in_args, &out_args);
+    int status = call_interface_impl(implh, "set_rhs_fn", &in_args, &out_args);
 
     return status;
 }
@@ -51,8 +50,7 @@ oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0)
         .arg_values = out_arg_values,
     };
 
-    int status =
-        call_interface_impl(implh, "set_initial_value", &in_args, &out_args);
+    int status = call_interface_impl(implh, "set_initial_value", &in_args, &out_args);
 
     return status;
 }

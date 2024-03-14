@@ -38,8 +38,6 @@ unload_interface_impl(ImplHandle implh);
  * @param out_args Array of output arguments
  * @return status code that signals about an error if non-zero
  */
-int call_interface_impl(ImplHandle implh,
-                        const char *method,
-                        OIFArgs *in_args,
-                        OIFArgs *out_args);
+int
+call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args);
 #endif

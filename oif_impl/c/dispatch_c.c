@@ -16,9 +16,9 @@ typedef struct {
 
 static int IMPL_COUNTER = 0;
 
-ImplInfo *load_impl(const char *impl_details,
-                    size_t version_major,
-                    size_t version_minor) {
+ImplInfo *
+load_impl(const char *impl_details, size_t version_major, size_t version_minor)
+{
     // For C implementations, `impl_details` must contain the name
     // of the shared library with the methods implemented as functions.
     void *impl_lib = dlopen(impl_details, RTLD_LOCAL | RTLD_LAZY);
@@ -68,10 +68,9 @@ unload_impl(ImplInfo *impl_info_)
     return 0;
 }
 
-int call_impl(ImplInfo *impl_info,
-              const char *method,
-              OIFArgs *in_args,
-              OIFArgs *out_args) {
+int
+call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+{
     if (impl_info->dh != OIF_LANG_C) {
         fprintf(stderr, "[dispatch_c] Provided implementation is not implemented in C\n");
         return -1;

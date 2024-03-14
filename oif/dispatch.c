@@ -36,12 +36,11 @@ static bool INITIALIZED_ = false;
 
 static int IMPL_COUNTER_ = 1000;
 
-size_t hash_fn(const ImplHandle *key) {
+size_t
+hash_fn(const ImplHandle *key)
+{
     if (*key < 0) {
-        fprintf(
-            stderr,
-            "[dispatch] Was expecting a non-negative number\n"
-        );
+        fprintf(stderr, "[dispatch] Was expecting a non-negative number\n");
         exit(1);
     }
     return *key;
@@ -69,10 +68,10 @@ init_module_(void)
     return 0;
 }
 
-ImplHandle load_interface_impl(const char *interface,
-                               const char *impl,
-                               size_t version_major,
-                               size_t version_minor) {
+ImplHandle
+load_interface_impl(const char *interface, const char *impl, size_t version_major,
+                    size_t version_minor)
+{
     if (!INITIALIZED_) {
         int status = init_module_();
         if (status) {
@@ -130,7 +129,8 @@ ImplHandle load_interface_impl(const char *interface,
     if (buffer[len - 1] != '\n') {
         fprintf(stderr, "Backend name is longer than allocated buffer\n");
         goto cleanup;
-    } else {
+    }
+    else {
         // Trim the new line character.
         buffer[len - 1] = '\0';
     }
@@ -148,7 +148,8 @@ ImplHandle load_interface_impl(const char *interface,
     if (buffer[len - 1] != '\n') {
         fprintf(stderr, "[dispatch] Backend name is longer than allocated array\n");
         goto cleanup;
-    } else {
+    }
+    else {
         // Trim new line character.
         buffer[len - 1] = '\0';
     }
@@ -163,10 +164,9 @@ ImplHandle load_interface_impl(const char *interface,
     else if (strcmp(backend_name, "python") == 0) {
         dh = OIF_LANG_PYTHON;
         dispatch_lang_so = OIF_DISPATCH_PYTHON_SO;
-    } else {
-        fprintf(stderr,
-                "[dispatch] Implementation has unknown backend: '%s'\n",
-                backend_name);
+    }
+    else {
+        fprintf(stderr, "[dispatch] Implementation has unknown backend: '%s'\n", backend_name);
         goto cleanup;
     }
 
@@ -187,15 +187,11 @@ ImplHandle load_interface_impl(const char *interface,
     load_impl_fn = dlsym(lib_handle, "load_impl");
 
     if (load_impl_fn == NULL) {
-        fprintf(stderr,
-                "[dispatch] Could not load function %s: %s\n",
-                "load_impl",
-                dlerror());
+        fprintf(stderr, "[dispatch] Could not load function %s: %s\n", "load_impl", dlerror());
         goto cleanup;
     }
 
-    ImplInfo *impl_info =
-        load_impl_fn(impl_details, version_major, version_minor);
+    ImplInfo *impl_info = load_impl_fn(impl_details, version_major, version_minor);
     if (impl_info == NULL) {
         fprintf(stderr, "[dispatch] Could not load implementation\n");
         goto cleanup;
@@ -246,10 +242,9 @@ unload_interface_impl(ImplHandle implh)
     return 0;
 }
 
-int call_interface_impl(ImplHandle implh,
-                        const char *method,
-                        OIFArgs *in_args,
-                        OIFArgs *out_args) {
+int
+call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+{
     int status;
 
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
@@ -263,8 +258,7 @@ int call_interface_impl(ImplHandle implh,
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
 
-    int (*call_impl_fn)(
-        ImplInfo *, const char *, OIFArgs *, OIFArgs *);
+    int (*call_impl_fn)(ImplInfo *, const char *, OIFArgs *, OIFArgs *);
     call_impl_fn = dlsym(lib_handle, "call_impl");
     if (call_impl_fn == NULL) {
         fprintf(stderr,
