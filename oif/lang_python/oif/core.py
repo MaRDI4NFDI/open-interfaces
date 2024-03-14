@@ -223,9 +223,9 @@ class OIFPyBinding:
         )
         out_packed = OIFArgs(num_out_args, out_arg_types_ctypes, out_arg_values_ctypes)
 
-        call_interface_method = _wrap_c_function(
+        call_interface_impl = _wrap_c_function(
             _lib_dispatch,
-            "call_interface_method",
+            "call_interface_impl",
             ctypes.c_int,
             [
                 ctypes.c_int,
@@ -234,7 +234,7 @@ class OIFPyBinding:
                 ctypes.POINTER(OIFArgs),
             ],
         )
-        status = call_interface_method(
+        status = call_interface_impl(
             self.implh,
             method.encode(),
             ctypes.byref(in_args_packed),

@@ -178,10 +178,10 @@ ImplInfo *load_impl(const char *impl_details,
     return (ImplInfo *)impl_info;
 }
 
-int
-run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_args,
-                     OIFArgs *out_args)
-{
+int call_impl(ImplInfo *impl_info,
+              const char *method,
+              OIFArgs *in_args,
+              OIFArgs *out_args) {
     if (impl_info->dh != OIF_LANG_PYTHON) {
         fprintf(stderr, "[dispatch_python] Provided implementation is not in Python\n");
         return -1;

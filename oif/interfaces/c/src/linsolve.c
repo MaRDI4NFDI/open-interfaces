@@ -23,7 +23,7 @@ oif_solve_linear_system(ImplHandle implh, OIFArrayF64 *A, OIFArrayF64 *b, OIFArr
         .arg_values = out_arg_values,
     };
 
-    int status = call_interface_method(implh, "solve_lin", &in_args, &out_args);
+    int status = call_interface_impl(implh, "solve_lin", &in_args, &out_args);
 
     return status;
 }

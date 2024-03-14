@@ -68,10 +68,10 @@ unload_impl(ImplInfo *impl_info_)
     return 0;
 }
 
-int
-run_interface_method(ImplInfo *impl_info, const char *method, OIFArgs *in_args,
-                     OIFArgs *out_args)
-{
+int call_impl(ImplInfo *impl_info,
+              const char *method,
+              OIFArgs *in_args,
+              OIFArgs *out_args) {
     if (impl_info->dh != OIF_LANG_C) {
         fprintf(stderr, "[dispatch_c] Provided implementation is not implemented in C\n");
         return -1;

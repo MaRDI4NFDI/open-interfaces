@@ -30,6 +30,16 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
 int
 unload_interface_impl(ImplHandle implh);
 
-int
-call_interface_method(ImplHandle implh, const char *method, OIFArgs *args, OIFArgs *retvals);
+/**
+ * Call implementation of an interface.
+ * @param implh Implementat handle that identifies the implementation
+ * @param method Name of the method (function) to invoke
+ * @param in_args Array of input arguments
+ * @param out_args Array of output arguments
+ * @return status code that signals about an error if non-zero
+ */
+int call_interface_impl(ImplHandle implh,
+                        const char *method,
+                        OIFArgs *in_args,
+                        OIFArgs *out_args);
 #endif

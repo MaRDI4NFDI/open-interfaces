@@ -262,16 +262,17 @@ int call_interface_impl(ImplHandle implh,
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
 
-    int (*run_interface_method_fn)(ImplInfo *, const char *, OIFArgs *, OIFArgs *);
-    run_interface_method_fn = dlsym(lib_handle, "run_interface_method");
-    if (run_interface_method_fn == NULL) {
+    int (*call_impl_fn)(
+        ImplInfo *, const char *, OIFArgs *, OIFArgs *);
+    call_impl_fn = dlsym(lib_handle, "call_impl");
+    if (call_impl_fn == NULL) {
         fprintf(stderr,
-                "[dispatch] Could not load function 'run_interface_method' "
+                "[dispatch] Could not load function 'call_impl' "
                 "for language id '%u'\n",
                 dh);
         return -1;
     }
-    status = run_interface_method_fn(impl_info, method, in_args, out_args);
+    status = call_impl_fn(impl_info, method, in_args, out_args);
 
     if (status) {
         fprintf(stderr,

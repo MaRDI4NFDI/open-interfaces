@@ -23,7 +23,7 @@ oif_solve_qeq(ImplHandle implh, double a, double b, double c, OIFArrayF64 *roots
         .arg_values = out_arg_values,
     };
 
-    int status = call_interface_method(implh, "solve_qeq", &in_args, &out_args);
+    int status = call_interface_impl(implh, "solve_qeq", &in_args, &out_args);
 
     return status;
 }
