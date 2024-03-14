@@ -1,18 +1,22 @@
 // Dispatch library that is called from other languages, and dispatches it
 // to the appropriate language-specific dispatch.
-#include "oif/api.h"
-#include <assert.h>
 #include <dlfcn.h>
-#include <ffi.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+// This is required to avoid clang-tidy issues with `hashmap.h`.
+#if __STDC_VERSION__ < 202300L
+#define typeof __typeof__
+#endif
+
 #include <hashmap.h>
 
-#include <oif/dispatch.h>
-#include <oif/dispatch_api.h>
+#include "oif/api.h"
+#include "oif/dispatch.h"
+#include "oif/dispatch_api.h"
 
 char OIF_DISPATCH_C_SO[] = "liboif_dispatch_c.so";
 char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
@@ -27,18 +31,19 @@ void *OIF_DISPATCH_HANDLES[OIF_LANG_COUNT];
 
 static HASHMAP(ImplHandle, ImplInfo) IMPL_MAP;
 
-static bool _INITIALIZED = false;
+static bool INITIALIZED_ = false;
 
-static int _IMPL_COUNTER = 1000;
+static int IMPL_COUNTER_ = 1000;
 
-size_t
-hash_fn(const ImplHandle *key)
-{
-    size_t result = *key;
-    if (result < 0) {
-        result = -result;
+size_t hash_fn(const ImplHandle *key) {
+    if (*key < 0) {
+        fprintf(
+            stderr,
+            "[dispatch] Was expecting a non-negative number\n"
+        );
+        exit(1);
     }
-    return result % SIZE_MAX;
+    return *key;
 }
 
 int
@@ -58,16 +63,16 @@ init_module_(void)
         return -1;
     }
     hashmap_init(&IMPL_MAP, hash_fn, compare_fn);
-    _INITIALIZED = true;
+    INITIALIZED_ = true;
 
     return 0;
 }
 
-ImplHandle
-load_interface_impl(const char *interface, const char *impl, size_t version_major,
-                    size_t version_minor)
-{
-    if (!_INITIALIZED) {
+ImplHandle load_interface_impl(const char *interface,
+                               const char *impl,
+                               size_t version_major,
+                               size_t version_minor) {
+    if (!INITIALIZED_) {
         int status = init_module_();
         if (status) {
             return -1;
@@ -75,6 +80,10 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     }
     DispatchHandle dh;
     const char *dispatch_lang_so;
+    void *lib_handle = NULL;
+    FILE *conf_file;
+    char *buffer;
+    ImplHandle retval = -1;
 
     char conf_filename[1024] = "";
     strcat(conf_filename, OIF_IMPL_ROOT_DIR);
@@ -86,7 +95,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     strcat(conf_filename, impl);
     strcat(conf_filename, ".conf");
 
-    FILE *conf_file = fopen(conf_filename, "r");
+    conf_file = fopen(conf_filename, "re");
     if (conf_file == NULL) {
         fprintf(stderr, "[dispatch] Cannot load conf file '%s'\n", conf_filename);
         return -1;
@@ -96,56 +105,54 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     }
 
     // Temporary buffer to read lines from file.
-    const size_t buffer_size = 512;
-    int len;
-    char *buffer = malloc(buffer_size * sizeof(char));
+    const int buffer_size = 512;
+    size_t len;
+    char *fgets_status;
+    buffer = malloc(sizeof(char) * buffer_size);
     if (buffer == NULL) {
         fprintf(stderr,
                 "[dispatch] Could not allocate buffer for parsing "
                 "implementation configuration files\n");
-        exit(1);
+        goto cleanup;
     }
     char backend_name[16];
-    buffer = fgets(buffer, buffer_size, conf_file);
-    if (buffer == NULL) {
+    fgets_status = fgets(buffer, buffer_size, conf_file);
+    if (fgets_status == NULL) {
         fprintf(stderr,
                 "[dispatch] Could not read backend line from configuration "
                 "file '%s'\n",
                 conf_filename);
-        return -1;
+        goto cleanup;
     }
     len = strlen(buffer);
     if (buffer[len - 1] != '\n') {
         fprintf(stderr, "Backend name is longer than allocated buffer\n");
-        return -1;
-    }
-    else {
+        goto cleanup;
+    } else {
         // Trim the new line character.
         buffer[len - 1] = '\0';
     }
     strcpy(backend_name, buffer);
     fprintf(stderr, "[dispatch] Backend name: %s\n", backend_name);
 
-    buffer = fgets(buffer, buffer_size, conf_file);
-    if (buffer == NULL) {
+    fgets_status = fgets(buffer, buffer_size, conf_file);
+    if (fgets_status == NULL) {
         fprintf(stderr,
                 "[dispatch] Could not read implementation details line "
                 "from the configuration file\n");
-        return -1;
+        goto cleanup;
     }
     len = strlen(buffer);
     if (buffer[len - 1] != '\n') {
-        fprintf(stderr, "Backend name is longer than allocated array\n");
-        exit(EXIT_FAILURE);
-    }
-    else {
+        fprintf(stderr, "[dispatch] Backend name is longer than allocated array\n");
+        goto cleanup;
+    } else {
         // Trim new line character.
         buffer[len - 1] = '\0';
     }
     char impl_details[512];
     strcpy(impl_details, buffer);
     fprintf(stderr, "[dispatch] Implementation details: '%s'\n", impl_details);
-    free(buffer);
 
     if (strcmp(backend_name, "c") == 0) {
         dh = OIF_LANG_C;
@@ -154,19 +161,19 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     else if (strcmp(backend_name, "python") == 0) {
         dh = OIF_LANG_PYTHON;
         dispatch_lang_so = OIF_DISPATCH_PYTHON_SO;
-    }
-    else {
-        fprintf(stderr, "[dispatch] Implementation has unknown backend: '%s'\n", backend_name);
-        exit(EXIT_FAILURE);
+    } else {
+        fprintf(stderr,
+                "[dispatch] Implementation has unknown backend: '%s'\n",
+                backend_name);
+        goto cleanup;
     }
 
-    void *lib_handle;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
         lib_handle = dlopen(dispatch_lang_so, RTLD_LOCAL | RTLD_LAZY);
         if (lib_handle == NULL) {
             fprintf(stderr, "[dispatch] Cannot load shared library '%s'\n", dispatch_lang_so);
             fprintf(stderr, "Error message: %s\n", dlerror());
-            exit(EXIT_FAILURE);
+            goto cleanup;
         }
         OIF_DISPATCH_HANDLES[dh] = lib_handle;
     }
@@ -182,19 +189,30 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
                 "[dispatch] Could not load function %s: %s\n",
                 "load_impl",
                 dlerror());
+        goto cleanup;
     }
 
     ImplInfo *impl_info =
         load_impl_fn(impl_details, version_major, version_minor);
     if (impl_info == NULL) {
         fprintf(stderr, "[dispatch] Could not load implementation\n");
-        return OIF_IMPL_INIT_ERROR;
+        goto cleanup;
     }
-    impl_info->implh = _IMPL_COUNTER;
-    _IMPL_COUNTER++;
+    impl_info->implh = IMPL_COUNTER_;
+    IMPL_COUNTER_++;
     impl_info->dh = dh;
     hashmap_put(&IMPL_MAP, &impl_info->implh, impl_info);
-    return impl_info->implh;
+    retval = impl_info->implh;
+
+cleanup:
+    if (buffer != NULL) {
+        free(buffer);
+    }
+    if (conf_file != NULL) {
+        fclose(conf_file);
+    }
+
+    return retval;
 }
 
 int
