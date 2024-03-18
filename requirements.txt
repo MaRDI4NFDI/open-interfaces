@@ -287,7 +287,7 @@ tornado==6.3.3
     # via
     #   ipykernel
     #   jupyter-client
-traitlets==5.14.1
+traitlets==5.14.2
     # via
     #   comm
     #   ipykernel
@@ -298,9 +298,7 @@ traitlets==5.14.1
     #   nbclient
     #   nbformat
 typer[all]==0.5.0
-    # via
-    #   check-reqs
-    #   typer
+    # via check-reqs
 typing-extensions==4.10.0
     # via
     #   astroid
