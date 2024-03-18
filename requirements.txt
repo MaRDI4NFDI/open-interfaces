@@ -108,7 +108,7 @@ jsonschema-specifications==2023.12.1
     # via jsonschema
 jupyter-cache==1.0.0
     # via myst-nb
-jupyter-client==8.4.0
+jupyter-client==8.6.1
     # via
     #   ipykernel
     #   nbclient
