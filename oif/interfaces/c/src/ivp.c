@@ -55,6 +55,30 @@ oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0)
     return status;
 }
 
+int oif_ivp_set_user_data(ImplHandle implh, void *user_data)
+{
+    OIFArgType in_arg_types[] = {OIF_VOID_P};
+    void *in_arg_values[] = {&user_data};
+    size_t n = sizeof(in_arg_values) / sizeof(in_arg_values[0]);
+    OIFArgs in_args = {
+        .num_args = n,
+        .arg_types = in_arg_types,
+        .arg_values = in_arg_values,
+    };
+
+    OIFArgType out_arg_types[] = {};
+    void *out_arg_values[] = {};
+    size_t num_out_args = sizeof(out_arg_values) / sizeof(out_arg_values[0]);
+    OIFArgs out_args = {
+        .num_args = num_out_args,
+        .arg_types = out_arg_types,
+        .arg_values = out_arg_values,
+    };
+
+    int status = call_interface_impl(implh, "set_user_data", &in_args, &out_args);
+    return status;
+}
+
 int
 oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y)
 {

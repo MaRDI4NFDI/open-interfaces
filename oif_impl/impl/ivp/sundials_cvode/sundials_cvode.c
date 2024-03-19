@@ -25,7 +25,7 @@
 const char *prefix = "[ivp::sundials_cvode]";
 
 // Signature for the right-hand side that is provided by the `IVP` interface
-// of the OpenInterFaces.
+// of the Open Interfaces.
 static oif_ivp_rhs_fn_t OIF_RHS_FN;
 
 // Signature for the right-hand side function that CVode expects.
@@ -164,7 +164,7 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     // 14. Attach nonlinear solver module (optional)
     status = CVodeSetNonlinearSolver(cvode_mem, NLS);
     if (status != CV_SUCCESS) {
-        fprintf(stderr, "%s CVodeSetNonlinearSolver failed with code %d", prefix, status);
+        fprintf(stderr, "%s CVodeSetNonlinearSolver failed with code %d\n", prefix, status);
         return 8;
     }
     // 15. Set nonlinear solver optional inputs (optional)
@@ -172,6 +172,21 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
 
     N_VDestroy_Serial(y0);
 
+    return 0;
+}
+
+int
+set_user_data(void *user_data)
+{
+    int status = CVodeSetUserData(cvode_mem, user_data);
+    if (status == CV_MEM_NULL) {
+        fprintf(
+            stderr,
+            "%s Could not set user data as "
+            "CVODE memory block is not yet initialized\n", prefix);
+        return 1;
+    }
+    assert(status == CV_SUCCESS);
     return 0;
 }
 
@@ -248,7 +263,7 @@ cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data)
                             .dimensions = (intptr_t[]){N_VGetLength(ydot)},
                             .data = N_VGetArrayPointer(ydot)};
 
-    int result = OIF_RHS_FN(t, &oif_y, &oif_ydot);
+    int result = OIF_RHS_FN(t, &oif_y, &oif_ydot, user_data);
 
     return result;
 }
