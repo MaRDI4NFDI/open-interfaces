@@ -100,6 +100,9 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
             arg_types[i] = &ffi_type_pointer;
         }
+        else if (in_args->arg_types[i] == OIF_VOID_P) {
+            arg_types[i] = &ffi_type_pointer;
+        }
         else if (in_args->arg_types[i] == OIF_CALLBACK) {
             arg_types[i] = &ffi_type_pointer;
             // We need to take a pointer to a pointer according to the FFI

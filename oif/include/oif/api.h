@@ -7,11 +7,11 @@ typedef int ImplHandle;
 
 typedef enum {
     OIF_INT = 1,
-    OIF_FLOAT32 = 2,
+    // OIF_FLOAT32 = 2,
     OIF_FLOAT64 = 3,
-    OIF_FLOAT32_P = 4,
+    // OIF_FLOAT32_P = 4,
     OIF_ARRAY_F64 = 5,
-    OIF_STR = 6,
+    OIF_VOID_P = 6,
     OIF_CALLBACK = 7,
 } OIFArgType;
 
