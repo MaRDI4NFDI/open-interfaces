@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <oif/api.h>
 
 typedef int (*oif_ivp_rhs_fn_t)(double, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_data);
@@ -28,3 +32,8 @@ oif_ivp_set_user_data(ImplHandle implh, void *user_data);
  */
 int
 oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y);
+
+#ifdef __cplusplus
+}
+#endif
+

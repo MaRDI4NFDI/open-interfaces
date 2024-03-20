@@ -1,9 +1,7 @@
 #include <gtest/gtest.h>
 
-extern "C" {
 #include "oif/c_bindings.h"
 #include "oif/interfaces/qeq.h"
-}
 
 TEST(QeqPyQeqSolverTestSuite, LinearCase)
 {

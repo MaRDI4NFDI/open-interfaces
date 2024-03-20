@@ -1,5 +1,9 @@
-#ifndef _OIF_IMPL_QEQ_H_
-#define _OIF_IMPL_QEQ_H_
+#ifndef OIF_IMPL_QEQ_H_
+#define OIF_IMPL_QEQ_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <oif/api.h>
 
@@ -15,4 +19,8 @@
  */
 int
 solve_qeq(double a, double b, double c, OIFArrayF64 *roots);
+#endif
+
+#ifdef __cplusplus
+}
 #endif

@@ -4,10 +4,8 @@
 #include "testutils.h"
 #include <gtest/gtest.h>
 
-extern "C" {
 #include "oif/c_bindings.h"
 #include "oif/interfaces/ivp.h"
-}
 
 const double EPS = 0.9;
 

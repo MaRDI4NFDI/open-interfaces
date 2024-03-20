@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <oif/api.h>
 
 /**
@@ -30,3 +35,7 @@ oif_print_matrix(OIFArrayF64 *mat);
 
 void
 oif_print_vector(OIFArrayF64 *vec);
+
+#ifdef __cplusplus
+}
+#endif

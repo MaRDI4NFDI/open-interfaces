@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -42,3 +47,7 @@ enum {
     OIF_ERROR = -1,
     OIF_IMPL_INIT_ERROR = -2,
 };
+
+#ifdef __cplusplus
+}
+#endif

@@ -31,3 +31,4 @@ oif_ivp_set_user_data(void *user_data);
  */
 int
 oif_ivp_integrate(double t, OIFArrayF64 *y);
+
