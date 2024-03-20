@@ -12,11 +12,13 @@ TEST(QeqPyQeqSolverTestSuite, LinearCase)
     ImplHandle implh = oif_init_impl("qeq", "py_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 0.0, 2.0, -1.0, roots);
+    ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], 0.5);
     EXPECT_EQ(roots->data[1], 0.5);
 
     oif_free_array_f64(roots);
+    oif_unload_impl(implh);
 }
 
 TEST(QeqPyQeqSolverTestSuite, TwoRoots)
@@ -28,10 +30,12 @@ TEST(QeqPyQeqSolverTestSuite, TwoRoots)
     ImplHandle implh = oif_init_impl("qeq", "py_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1.0, 2.0, 1.0, roots);
+    ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], -1.0);
     EXPECT_EQ(roots->data[1], -1.0);
     oif_free_array_f64(roots);
+    oif_unload_impl(implh);
 }
 
 TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots)
@@ -43,10 +47,12 @@ TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots)
     ImplHandle implh = oif_init_impl("qeq", "py_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1, 5, -14, roots);
+    ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], -7);
     EXPECT_EQ(roots->data[1], +2);
     oif_free_array_f64(roots);
+    oif_unload_impl(implh);
 }
 
 TEST(QeqCQeqSolverTestSuite, LinearCase)
@@ -58,10 +64,12 @@ TEST(QeqCQeqSolverTestSuite, LinearCase)
     ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 0.0, 2.0, -1.0, roots);
+    ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], 0.5);
     EXPECT_EQ(roots->data[1], 0.5);
     oif_free_array_f64(roots);
+    oif_unload_impl(implh);
 }
 
 TEST(QeqCQeqSolverTestSuite, TwoRoots)
@@ -73,10 +81,12 @@ TEST(QeqCQeqSolverTestSuite, TwoRoots)
     ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1.0, 2.0, 1.0, roots);
+    ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], -1.0);
     EXPECT_EQ(roots->data[1], -1.0);
     oif_free_array_f64(roots);
+    oif_unload_impl(implh);
 }
 
 TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots)
@@ -88,10 +98,12 @@ TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots)
     ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1, 5, -14, roots);
+    ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], -7);
     EXPECT_EQ(roots->data[1], +2);
     oif_free_array_f64(roots);
+    oif_unload_impl(implh);
 }
 
 TEST(QeqCQeqSolverTestSuite, ExtremeRoots)
@@ -103,8 +115,10 @@ TEST(QeqCQeqSolverTestSuite, ExtremeRoots)
     ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1, -20'000, 1.0, roots);
+    ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], 19999.999949999998);
     EXPECT_EQ(roots->data[1], 5.000000012500001e-05);
     oif_free_array_f64(roots);
+    oif_unload_impl(implh);
 }

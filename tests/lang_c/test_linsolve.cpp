@@ -20,11 +20,11 @@ TEST_P(LinearSolverFixture, TestCase1)
     int status = oif_solve_linear_system(implh, A, b, roots);
     EXPECT_EQ(status, 0);
 
-    int M = A->dimensions[0];
-    int N = A->dimensions[1];
-    for (size_t i = 0; i < M; ++i) {
+    intptr_t M = A->dimensions[0];
+    intptr_t N = A->dimensions[1];
+    for (int i = 0; i < M; ++i) {
         float scalar_product = 0.0;
-        for (size_t j = 0; j < N; ++j) {
+        for (int j = 0; j < N; ++j) {
             scalar_product += A->data[i * N + j] * roots->data[j];
         }
         EXPECT_FLOAT_EQ(scalar_product, b->data[i]);
