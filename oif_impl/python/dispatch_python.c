@@ -23,6 +23,8 @@ static int IMPL_COUNTER = 0;
 
 static bool is_python_initialized_by_us = false;
 
+static char prefix[] = "dispatch_python";
+
 PyObject *
 instantiate_callback_class(void)
 {
@@ -35,7 +37,7 @@ instantiate_callback_class(void)
 
     if (pModule == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[backend_python] Faile to load callback module\n");
+        fprintf(stderr, "[%s] Failed to load callback module\n", prefix);
         exit(1);
     }
 
@@ -43,9 +45,9 @@ instantiate_callback_class(void)
     if (CALLBACK_CLASS_P == NULL) {
         PyErr_Print();
         fprintf(stderr,
-                "[backend_python] Cannot proceed as callback class %s could "
+                "[%s] Cannot proceed as callback class %s could "
                 "not be instantiated\n",
-                class_name);
+                prefix, class_name);
     }
     Py_INCREF(CALLBACK_CLASS_P);
     Py_DECREF(pModule);
@@ -59,13 +61,13 @@ convert_oif_callback(OIFCallback *p)
     const char *id = "123";
     PyObject *fn_p = PyCapsule_New(p->fn_p_c, id, NULL);
     if (fn_p == NULL) {
-        fprintf(stderr, "[dispatch_python] Could not create PyCapsule\n");
+        fprintf(stderr, "[%s] Could not create PyCapsule\n", prefix);
     }
-    fprintf(stderr, "[dispatch_python] HARDCODE!!!!!!\n");
+    fprintf(stderr, "[%s] HARDCODE!!!!!!\n", prefix);
     unsigned int nargs = 3;
     PyObject *obj = Py_BuildValue("(N, I)", fn_p, nargs);
     if (obj == NULL) {
-        fprintf(stderr, "[backend_python] Could not build arguments\n");
+        fprintf(stderr, "[%s] Could not build arguments\n", prefix);
     }
     return obj;
 }
@@ -74,7 +76,7 @@ ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
     if (Py_IsInitialized()) {
-        fprintf(stderr, "[backend_python] Backend is already initialized\n");
+        fprintf(stderr, "[%s] Backend is already initialized\n", prefix);
     }
     else {
         Py_Initialize();
@@ -91,20 +93,20 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     sprintf(libpython_name, "libpython%d.%d.so", PY_MAJOR_VERSION, PY_MINOR_VERSION);
     void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
     if (libpython == NULL) {
-        fprintf(stderr, "[backend_python] Cannot open python library\n");
+        fprintf(stderr, "[%s] Cannot open python library\n", prefix);
         exit(EXIT_FAILURE);
     }
 
     PyRun_SimpleString(
         "import sys; "
-        "print('[backend_python]', sys.executable); "
-        "print('[backend_python]', sys.version)");
+        "print('[dispatch_python]', sys.executable); "
+        "print('[dispatch_python]', sys.version)");
 
     import_array2("Failed to initialize NumPy C API", NULL);
 
     PyRun_SimpleString(
         "import numpy; "
-        "print('[backend_python] NumPy version: ', numpy.__version__)");
+        "print('[dispatch_python] NumPy version: ', numpy.__version__)");
 
     char moduleName[512] = "\0";
     char className[512] = "\0";
@@ -131,14 +133,14 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     PyObject *pFileName, *pModule;
     PyObject *pClass, *pInstance;
     PyObject *pInitArgs;
-    fprintf(stderr, "[backend_python] Provided module name: '%s'\n", moduleName);
-    fprintf(stderr, "[backend_python] Provided class name: '%s'\n", className);
+    fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix, moduleName);
+    fprintf(stderr, "[%s] Provided class name: '%s'\n", prefix, className);
     pFileName = PyUnicode_FromString(moduleName);
     if (pFileName == NULL) {
         fprintf(stderr,
-                "[dispatch_python::load_impl] Provided moduleName '%s' "
+                "[%s::load_impl] Provided moduleName '%s' "
                 "could not be resolved to file name\n",
-                moduleName);
+                prefix, moduleName);
         return NULL;
     }
     pModule = PyImport_Import(pFileName);
@@ -146,7 +148,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     if (pModule == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[backend_python] Failed to load module \"%s\"\n", moduleName);
+        fprintf(stderr, "[%s] Failed to load module \"%s\"\n", prefix, moduleName);
         return NULL;
     }
 
@@ -155,7 +157,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     pInstance = PyObject_CallObject(pClass, pInitArgs);
     if (pInstance == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[backend_python] Failed to instantiate class %s\n", className);
+        fprintf(stderr, "[%s] Failed to instantiate class %s\n", prefix, className);
         Py_DECREF(pClass);
         return NULL;
     }
@@ -166,8 +168,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     PythonImplInfo *impl_info = malloc(sizeof(*impl_info));
     if (impl_info == NULL) {
         fprintf(stderr,
-                "[dispatch_python] Could not allocate memory for Python "
-                "implementation information\n");
+                "[%s] Could not allocate memory for Python "
+                "implementation information\n", prefix);
         return NULL;
     }
     impl_info->pInstance = pInstance;
@@ -182,7 +184,7 @@ int
 call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
     if (impl_info->dh != OIF_LANG_PYTHON) {
-        fprintf(stderr, "[dispatch_python] Provided implementation is not in Python\n");
+        fprintf(stderr, "[%s] Provided implementation is not in Python\n", prefix);
         return -1;
     }
     PythonImplInfo *impl = (PythonImplInfo *)impl_info;
@@ -222,8 +224,8 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 }
                 else if (p->src == OIF_LANG_C) {
                     fprintf(stderr,
-                            "[dispatch_python] Check what callback to "
-                            "wrap via src field\n");
+                            "[%s] Check what callback to "
+                            "wrap via src field\n", prefix);
                     if (impl->pCallbackClass == NULL) {
                         impl->pCallbackClass = instantiate_callback_class();
                     }
@@ -231,20 +233,20 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     pValue = PyObject_CallObject(impl->pCallbackClass, callback_args);
                     if (pValue == NULL) {
                         fprintf(stderr,
-                                "[backend_python] Could not instantiate "
-                                "Callback class for wrapping C functions\n");
+                                "[%s] Could not instantiate "
+                                "Callback class for wrapping C functions\n", prefix);
                     }
                 }
                 else {
-                    fprintf(stderr, "[dispatch_python] Cannot determine callback source\n");
+                    fprintf(stderr, "[%s] Cannot determine callback source\n", prefix);
                     pValue = NULL;
                 }
                 if (!PyCallable_Check(pValue)) {
                     fprintf(stderr,
-                            "[dispatch_python] Input argument #%d "
+                            "[%s] Input argument #%d "
                             "has type OIF_CALLBACK "
                             "but it is actually is not callable\n",
-                            i);
+                            prefix, i);
                 }
             }
             else {
@@ -254,9 +256,9 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 Py_DECREF(pArgs);
                 Py_DECREF(pFunc);
                 fprintf(stderr,
-                        "[backend_python] Cannot convert input argument #%d with "
+                        "[%s] Cannot convert input argument #%d with "
                         "provided type id %d\n",
-                        i, in_args->arg_types[i]);
+                        prefix, i, in_args->arg_types[i]);
                 return 1;
             }
             PyTuple_SetItem(pArgs, i, pValue);
@@ -280,7 +282,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             if (!pValue) {
                 Py_DECREF(pArgs);
                 Py_DECREF(pFunc);
-                fprintf(stderr, "[backend_python] Cannot convert out_arg %d of type %d\n", i,
+                fprintf(stderr, "[%s] Cannot convert out_arg %d of type %d\n", prefix, i,
                         out_args->arg_types[i]);
                 return 1;
             }
@@ -296,16 +298,16 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         else {
             Py_DECREF(pFunc);
             PyErr_Print();
-            fprintf(stderr, "Call failed\n");
+            fprintf(stderr, "[%s] Call failed\n", prefix);
             return 2;
         }
     }
     else {
         if (PyErr_Occurred()) {
-            fprintf(stderr, "[dispatch_python] ");
+            fprintf(stderr, "[%s] An error occurred during the call\n", prefix);
             PyErr_Print();
         }
-        fprintf(stderr, "[dispatch_python] Cannot find function \"%s\"\n", method);
+        fprintf(stderr, "[%s] Cannot find function \"%s\"\n", prefix, method);
         Py_XDECREF(pFunc);
         return -1;
     }
@@ -319,8 +321,8 @@ unload_impl(ImplInfo *impl_info_)
 {
     if (impl_info_->dh != OIF_LANG_PYTHON) {
         fprintf(stderr,
-                "[dispatch_python] unload_impl received non-Python "
-                "implementation argument\n");
+                "[%s] unload_impl received non-Python "
+                "implementation argument\n", prefix);
         return -1;
     }
     PythonImplInfo *impl_info = (PythonImplInfo *)impl_info_;
@@ -332,7 +334,7 @@ unload_impl(ImplInfo *impl_info_)
     if (is_python_initialized_by_us && (IMPL_COUNTER == 0)) {
         int status = Py_FinalizeEx();
         if (status < 0) {
-            fprintf(stderr, "[dispatch_python] Py_FinalizeEx with status %d\n", status);
+            fprintf(stderr, "[%s] Py_FinalizeEx with status %d\n", prefix, status);
             return status;
         }
     }
