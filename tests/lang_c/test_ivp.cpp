@@ -155,19 +155,20 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase)
     OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
     ImplHandle implh = oif_init_impl("ivp", impl, 1, 0);
+    ASSERT_GT(implh, 0);
 
     int status;
     status = oif_ivp_set_initial_value(implh, y0, t0);
-    EXPECT_EQ(status, 0);
+    ASSERT_EQ(status, 0);
     status = oif_ivp_set_user_data(implh, problem);
-    EXPECT_EQ(status, 0);
+    ASSERT_EQ(status, 0);
     status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
-    EXPECT_EQ(status, 0);
+    ASSERT_EQ(status, 0);
 
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
     for (auto t : t_span) {
         status = oif_ivp_integrate(implh, t, y);
-        EXPECT_EQ(status, 0);
+        ASSERT_EQ(status, 0);
         problem->verify(t, y);
     }
 
@@ -177,5 +178,5 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase)
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsFixture,
                          testing::Combine(
-                             testing::Values("sundials_cvode"),
+                             testing::Values("sundials_cvode", "scipy_ode_dopri5"),
                              testing::Values(new ScalarExpDecayProblem(), new LinearOscillatorProblem(), new OrbitEquationsProblem())));
