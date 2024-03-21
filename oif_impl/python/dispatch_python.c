@@ -75,6 +75,8 @@ convert_oif_callback(OIFCallback *p)
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
+    (void) version_major;
+    (void) version_minor;
     if (Py_IsInitialized()) {
         fprintf(stderr, "[%s] Backend is already initialized\n", prefix);
     }
@@ -195,11 +197,11 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     pFunc = PyObject_GetAttrString(impl->pInstance, method);
 
     if (pFunc && PyCallable_Check(pFunc)) {
-        int num_args = in_args->num_args + out_args->num_args;
+        size_t num_args = in_args->num_args + out_args->num_args;
         PyObject *pArgs = PyTuple_New(num_args);
 
         // Convert input arguments.
-        for (int i = 0; i < in_args->num_args; ++i) {
+        for (size_t i = 0; i < in_args->num_args; ++i) {
             if (in_args->arg_types[i] == OIF_FLOAT64) {
                 pValue = PyFloat_FromDouble(*(double *)in_args->arg_values[i]);
             }
@@ -243,7 +245,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 }
                 if (!PyCallable_Check(pValue)) {
                     fprintf(stderr,
-                            "[%s] Input argument #%d "
+                            "[%s] Input argument #%zu "
                             "has type OIF_CALLBACK "
                             "but it is actually is not callable\n",
                             prefix, i);
@@ -256,7 +258,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 Py_DECREF(pArgs);
                 Py_DECREF(pFunc);
                 fprintf(stderr,
-                        "[%s] Cannot convert input argument #%d with "
+                        "[%s] Cannot convert input argument #%zu with "
                         "provided type id %d\n",
                         prefix, i, in_args->arg_types[i]);
                 return 1;
@@ -264,7 +266,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             PyTuple_SetItem(pArgs, i, pValue);
         }
         // Convert output arguments.
-        for (int i = 0; i < out_args->num_args; ++i) {
+        for (size_t i = 0; i < out_args->num_args; ++i) {
             if (out_args->arg_types[i] == OIF_INT) {
                 pValue = PyLong_FromLong(*(int *)out_args->arg_values[i]);
             }
@@ -282,7 +284,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             if (!pValue) {
                 Py_DECREF(pArgs);
                 Py_DECREF(pFunc);
-                fprintf(stderr, "[%s] Cannot convert out_arg %d of type %d\n", prefix, i,
+                fprintf(stderr, "[%s] Cannot convert out_arg %zu of type %d\n", prefix, i,
                         out_args->arg_types[i]);
                 return 1;
             }
