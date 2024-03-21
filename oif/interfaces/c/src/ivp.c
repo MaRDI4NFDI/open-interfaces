@@ -55,7 +55,8 @@ oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0)
     return status;
 }
 
-int oif_ivp_set_user_data(ImplHandle implh, void *user_data)
+int
+oif_ivp_set_user_data(ImplHandle implh, void *user_data)
 {
     OIFArgType in_arg_types[] = {OIF_VOID_P};
     void *in_arg_values[] = {&user_data};

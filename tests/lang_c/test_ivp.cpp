@@ -1,5 +1,6 @@
 #include <cmath>
-#include <cstdio>
+#include <cstring>
+#include <iostream>
 
 #include "testutils.h"
 #include <gtest/gtest.h>
@@ -7,15 +8,39 @@
 #include "oif/c_bindings.h"
 #include "oif/interfaces/ivp.h"
 
+using namespace std;
+
 const double EPS = 0.9;
 
 class ODEProblem {
 public:
+    // Thank you, clang-tidy, but I can handle public data alright.
+    // Supress warning about non-private data members in classes.
+    // NOLINTBEGIN
     int N;
     double *y0;
+    // NOLINTEND
 
     ODEProblem(int N) : N(N) {
         y0 = new double[N];
+    }
+
+    ODEProblem(const ODEProblem &other) {
+        N = other.N;
+        y0 = new double[N];
+        memcpy(y0, other.y0, sizeof(*y0) * N);
+    }
+
+    ODEProblem &operator=(const ODEProblem &other) {
+        if (this == &other) {
+            return *this;
+        }
+
+        this->N = other.N;
+        this->y0 = new double[N];
+        memcpy(y0, other.y0, sizeof(*y0) * this->N);
+
+        return *this;
     }
 
     ~ODEProblem() {
@@ -79,7 +104,7 @@ class LinearOscillatorProblem : public ODEProblem {
         EXPECT_NEAR(y->data[1], y_exact_1, 1e-12);
     }
     private:
-    double omega = M_PI;
+    const double omega = M_PI;
 };
 
 class OrbitEquationsProblem : public ODEProblem {
@@ -134,7 +159,7 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase)
     int status;
     status = oif_ivp_set_initial_value(implh, y0, t0);
     EXPECT_EQ(status, 0);
-    status = oif_ivp_set_user_data(implh, &problem);
+    status = oif_ivp_set_user_data(implh, problem);
     EXPECT_EQ(status, 0);
     status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
     EXPECT_EQ(status, 0);
