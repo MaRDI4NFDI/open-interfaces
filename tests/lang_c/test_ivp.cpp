@@ -174,6 +174,7 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase)
 
     oif_free_array_f64(y0);
     oif_free_array_f64(y);
+    oif_unload_impl(implh);
 }
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsFixture,
