@@ -1,10 +1,11 @@
 import numpy as np
+from oif.impl.ivp import IVPInterface
 from scipy import integrate
 
 _prefix = "scipy_ode_dopri5"
 
 
-class Dopri5:
+class Dopri5(IVPInterface):
     def __init__(self):
         self.rhs = None  # Right-hand side function.
         self.N = 0  # Problem dimension.
@@ -35,11 +36,24 @@ class Dopri5:
         )
         self.s.set_initial_value(self.y0, self.t0)
 
+        if hasattr(self, "user_data"):
+            self.s.set_f_params(self.user_data)
+            self.s.set_jac_params(self.user_data)
+
         return 0
 
     def set_tolerances(self, rtol, atol):
         self.s.set_integrator("dopri5", rtol=rtol, atol=atol, nsteps=1000)
-        self.s.set_initial_value(self.y0, self.t0)
+        if hasattr(self, "y0"):
+            self.s.set_initial_value(self.y0, self.t0)
+        return 0
+
+    def set_user_data(self, user_data):
+        if self.s is not None:
+            self.s.set_f_params(user_data)
+            self.s.set_jac_params(user_data)
+        else:
+            self.user_data = user_data
 
     def integrate(self, t, y):
         y[:] = self.s.integrate(t)

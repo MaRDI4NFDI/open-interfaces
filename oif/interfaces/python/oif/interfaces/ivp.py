@@ -35,6 +35,9 @@ class IVP:
         )
         self._binding.call("set_rhs_fn", (self.wrapper,), ())
 
+    def set_user_data(self, user_data: object):
+        self._binding.call("set_user_data", (user_data,), ())
+
     def set_tolerances(self, rtol: float, atol: float):
         self._binding.call("set_tolerances", (rtol, atol), ())
 
