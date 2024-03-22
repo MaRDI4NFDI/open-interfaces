@@ -8,6 +8,28 @@
 #include <oif/dispatch.h>
 #include <oif/dispatch_api.h>
 
+/**
+ * Duplicate a given null-terminated string along with memory allocation.
+ *
+ * It is the user responsibility to free the allocated memory.
+ * This function is basically a copy of `strdup` because it is not in ISO C.
+ *
+ * @return The pointer to the duplicated null-terminated string or NULL in case
+ * of an error.
+ */
+static char *
+str_duplicate(const char src[static 1])
+{
+    size_t len = strlen(src);
+    char *dest = malloc(len * sizeof(*dest));
+    if (dest == NULL) {
+        fprintf(stderr, "[str_duplicate] Could not allocate memory\n");
+        return NULL;
+    }
+    strcpy(dest, src);
+    return dest;
+}
+
 typedef struct {
     ImplInfo base;
     void *impl_lib;
@@ -19,6 +41,8 @@ static int IMPL_COUNTER = 0;
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
+    (void) version_major;
+    (void) version_minor;
     // For C implementations, `impl_details` must contain the name
     // of the shared library with the methods implemented as functions.
     void *impl_lib = dlopen(impl_details, RTLD_LOCAL | RTLD_LAZY);
@@ -36,7 +60,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         return NULL;
     }
     impl_info->impl_lib = impl_lib;
-    impl_info->impl_details = strdup(impl_details);
+    impl_info->impl_details = str_duplicate(impl_details);
+    assert(impl_info->impl_details != NULL);
     fprintf(stderr, "[dispatch_c] load_impl impl_info->impl_details = %s\n",
             impl_info->impl_details);
 
@@ -71,26 +96,39 @@ unload_impl(ImplInfo *impl_info_)
 int
 call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
+    int result = 1;
+    ffi_cif cif;
+    ffi_type **arg_types = NULL;
+    void **arg_values = NULL;
+
     if (impl_info->dh != OIF_LANG_C) {
         fprintf(stderr, "[dispatch_c] Provided implementation is not implemented in C\n");
         return -1;
     }
+
     CImplInfo *impl = (CImplInfo *)impl_info;
     void *service_lib = impl->impl_lib;
     void *func = dlsym(service_lib, method);
     if (func == NULL) {
         fprintf(stderr, "[dispatch_c] Cannot load interface '%s'\n", method);
         fprintf(stderr, "[dispatch_c] dlerror() = %s\n", dlerror());
-        exit(EXIT_FAILURE);
+        goto cleanup;
     }
 
     size_t num_in_args = in_args->num_args;
     size_t num_out_args = out_args->num_args;
-    size_t num_total_args = num_in_args + num_out_args;
+    unsigned int num_total_args = (unsigned int) (num_in_args + num_out_args);
 
-    ffi_cif cif;
-    ffi_type **arg_types = malloc(num_total_args * sizeof(ffi_type *));
-    void **arg_values = malloc(num_total_args * sizeof(void *));
+    arg_types = malloc(num_total_args * sizeof(ffi_type *));
+    if (arg_types == NULL) {
+        fprintf(stderr, "[dispatch_c] Could not allocate memory for FFI types\n");
+        goto cleanup;
+    }
+    arg_values = malloc(num_total_args * sizeof(void *));
+    if (arg_values == NULL) {
+        fprintf(stderr, "[dispatch_c] Could not allocate memory for FFI values\n");
+        goto cleanup;
+    }
 
     // Merge input and output argument types together in `arg_types` array.
     for (size_t i = 0; i < num_in_args; ++i) {
@@ -113,7 +151,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             fflush(stdout);
             fprintf(stderr, "[dispatch_c] Unknown input arg type: %d\n",
                     in_args->arg_types[i]);
-            exit(EXIT_FAILURE);
+            goto cleanup;
         }
     }
     for (size_t i = num_in_args; i < num_total_args; ++i) {
@@ -124,10 +162,9 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             arg_types[i] = &ffi_type_pointer;
         }
         else {
-            fflush(stdout);
             fprintf(stderr, "[dispatch_c] Unknown output arg type: %d\n",
                     out_args->arg_types[i - num_in_args]);
-            exit(EXIT_FAILURE);
+            goto cleanup;
         }
     }
 
@@ -136,7 +173,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[dispatch_c] ffi_prep_cif was not OK");
-        exit(EXIT_FAILURE);
+        goto cleanup;
     }
 
     // Merge input and output argument values together in `arg_values` array.
@@ -147,11 +184,15 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         arg_values[i] = out_args->arg_values[i - num_in_args];
     }
 
-    int result;
     ffi_call(&cif, FFI_FN(func), &result, arg_values);
 
-    free(arg_values);
-    free(arg_types);
+cleanup:
+    if (arg_values != NULL) {
+        free(arg_values);
+    }
+    if (arg_types != NULL) {
+        free(arg_types);
+    }
 
     return result;
 }
