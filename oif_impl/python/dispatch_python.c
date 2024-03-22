@@ -75,6 +75,14 @@ convert_oif_callback(OIFCallback *p)
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
+    PyObject *pFileName, *pModule;
+    PyObject *pClass, *pInstance;
+    PyObject *pFunc;
+    PyObject *pInitArgs;
+    PyObject *pArgs;
+    PyObject *pValue;
+    int status;
+
     (void) version_major;
     (void) version_minor;
     if (Py_IsInitialized()) {
@@ -91,8 +99,48 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     // NumPy initialization fails.
     // Details:
     // https://stackoverflow.com/questions/49784583/numpy-import-fails-on-multiarray-extension-library-when-called-from-embedded-pyt
-    char libpython_name[32];
+    char libpython_name[1024];
+    pFileName = PyUnicode_DecodeFSDefault("sysconfig");
+    if (pFileName == NULL) {
+        fprintf(stderr, "[%s] Could not find `sysconfig` module file\n", prefix);
+        return NULL;
+    }
+    pModule = PyImport_Import(pFileName);
+    Py_DECREF(pFileName);
+
+    if (pModule == NULL) {
+        fprintf(stderr, "[%s] Could not import `sysconfig` module\n", prefix);
+        return NULL;
+    }
+    pFunc = PyObject_GetAttrString(pModule, "get_config_var");
+    if (pFunc == NULL || !PyCallable_Check(pFunc)) {
+        fprintf(stderr, "[%s] Could not find function `sysconfig.get_config_var`\n", prefix);
+        return NULL;
+    }
+    pArgs = PyTuple_New(1);
+    pValue = Py_BuildValue("s", "LIBDIR");
+    status = PyTuple_SetItem(pArgs, 0, pValue);
+    if (status != 0) {
+        fprintf(stderr, "[%s] Could not build arguments for executing `sysconfig.get_config_var`\n", prefix);
+        return NULL;
+    }
+    pValue = PyObject_CallObject(pFunc, pArgs);
+    Py_DECREF(pArgs);
+    if (pValue == NULL) {
+        fprintf(stderr, "[%s] Could not execute `sysconfig.get_config_var`\n", prefix);
+        return NULL;
+    }
+    const char *libpython_path = PyUnicode_AsUTF8(pValue);
+    Py_DECREF(pValue);
+    if (libpython_path == NULL) {
+        fprintf(stderr, "[%s] Could not convert path to `libpython`\n", prefix);
+        return NULL;
+    }
+    libpython_path = "/home/dima/.conda/envs/um02-open-interfaces/lib";
+    fprintf(stderr, "[%s] Path to libpython is %s\n", prefix, libpython_path);
+
     sprintf(libpython_name, "libpython%d.%d.so", PY_MAJOR_VERSION, PY_MINOR_VERSION);
+    fprintf(stderr, "[%s] Loading %s\n", prefix, libpython_name);
     void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
     if (libpython == NULL) {
         fprintf(stderr, "[%s] Cannot open python library\n", prefix);
@@ -132,9 +180,6 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         }
     }
 
-    PyObject *pFileName, *pModule;
-    PyObject *pClass, *pInstance;
-    PyObject *pInitArgs;
     fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix, moduleName);
     fprintf(stderr, "[%s] Provided class name: '%s'\n", prefix, className);
     pFileName = PyUnicode_FromString(moduleName);
