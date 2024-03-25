@@ -58,8 +58,12 @@ oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0)
 int
 oif_ivp_set_user_data(ImplHandle implh, void *user_data)
 {
-    OIFArgType in_arg_types[] = {OIF_VOID_P};
-    void *in_arg_values[] = {&user_data};
+    OIFArgType in_arg_types[] = {OIF_USER_DATA};
+    OIFUserData oif_user_data = {
+        .src = OIF_LANG_C,
+        .c = user_data,
+    };
+    void *in_arg_values[] = {&oif_user_data};
     size_t n = sizeof(in_arg_values) / sizeof(in_arg_values[0]);
     OIFArgs in_args = {
         .num_args = n,

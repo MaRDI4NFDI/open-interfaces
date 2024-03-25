@@ -16,7 +16,7 @@ typedef enum {
     OIF_FLOAT64 = 3,
     // OIF_FLOAT32_P = 4,
     OIF_ARRAY_F64 = 5,
-    OIF_VOID_P = 6,
+    OIF_USER_DATA = 6,
     OIF_CALLBACK = 7,
 } OIFArgType;
 
@@ -51,6 +51,18 @@ typedef struct {
     void *fn_p_py;  // Function pointer in Python
     void *fn_p_c;   // Function pointer in C
 } OIFCallback;
+
+/**
+ * Structure that holds a pointer to user data in one of its fields
+ * depending on the language.
+ * All the fields can be NULL except the field `src` that must be set
+ * to the constant of the language of the data origin.
+ */
+typedef struct {
+    int src;        // Language of the data origin (one of `OIF_LANG_*` constants)
+    void *c;        // Pointer to data in C
+    void *py;       // Pointer to `PyObject` that holds the data in Python
+} OIFUserData;
 
 enum {
     OIF_ERROR = -1,
