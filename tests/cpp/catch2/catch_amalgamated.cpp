@@ -549,12 +549,13 @@ Config::Config(ConfigData const &data) : m_data(data) {
   if (m_data.reporterSpecifications.empty()) {
     m_data.reporterSpecifications.push_back({
 #if defined(CATCH_CONFIG_DEFAULT_REPORTER)
-      CATCH_CONFIG_DEFAULT_REPORTER,
+        CATCH_CONFIG_DEFAULT_REPORTER,
 #else
-      "console",
+        "console",
 #endif
-          {}, {}, {}
-    });
+        {},
+        {},
+        {}});
   }
 
 #if !defined(CATCH_PLATFORM_WINDOWS_UWP)
@@ -1035,12 +1036,11 @@ void Session::showHelp() const {
                 << std::flush;
 }
 void Session::libIdentify() {
-  Catch::cout() << std::left << std::setw(16) << "description: "
-                << "A Catch2 test executable\n"
-                << std::left << std::setw(16) << "category: "
-                << "testframework\n"
-                << std::left << std::setw(16) << "framework: "
-                << "Catch2\n"
+  Catch::cout() << std::left << std::setw(16)
+                << "description: " << "A Catch2 test executable\n"
+                << std::left << std::setw(16)
+                << "category: " << "testframework\n"
+                << std::left << std::setw(16) << "framework: " << "Catch2\n"
                 << std::left << std::setw(16) << "version: " << libraryVersion()
                 << '\n'
                 << std::flush;
@@ -3884,8 +3884,8 @@ auto makeStream(std::string const &filename) -> Detail::unique_ptr<IStream> {
 
 namespace Catch {
 
-auto operator<<(std::ostream &os, LazyExpression const &lazyExpr)
-    -> std::ostream & {
+auto operator<<(std::ostream &os,
+                LazyExpression const &lazyExpr) -> std::ostream & {
   if (lazyExpr.m_isNegated)
     os << '!';
 
@@ -7830,8 +7830,8 @@ public:
       return "** internal error **"_sr;
     }
   }
-  friend auto operator<<(std::ostream &os, Duration const &duration)
-      -> std::ostream & {
+  friend auto operator<<(std::ostream &os,
+                         Duration const &duration) -> std::ostream & {
     return os << duration.value() << ' ' << duration.unitsAsString();
   }
 };
@@ -8918,8 +8918,7 @@ void JunitReporter::writeAssertion(AssertionStats const &stats) {
 
     ReusableStringStream rss;
     if (stats.totals.assertions.total() > 0) {
-      rss << "FAILED"
-          << ":\n";
+      rss << "FAILED" << ":\n";
       if (result.hasExpression()) {
         rss << "  ";
         rss << result.getExpressionInMacro();
@@ -9612,13 +9611,13 @@ void TeamCityReporter::assertionEnded(AssertionStats const &assertionStats) {
 
     if (currentTestCaseInfo->okToFail()) {
       msg << "- failure ignore as test marked as 'ok to fail'\n";
-      m_stream << "##teamcity[testIgnored"
-               << " name='" << escape(currentTestCaseInfo->name) << '\''
-               << " message='" << escape(msg.str()) << '\'' << "]\n";
+      m_stream << "##teamcity[testIgnored" << " name='"
+               << escape(currentTestCaseInfo->name) << '\'' << " message='"
+               << escape(msg.str()) << '\'' << "]\n";
     } else {
-      m_stream << "##teamcity[testFailed"
-               << " name='" << escape(currentTestCaseInfo->name) << '\''
-               << " message='" << escape(msg.str()) << '\'' << "]\n";
+      m_stream << "##teamcity[testFailed" << " name='"
+               << escape(currentTestCaseInfo->name) << '\'' << " message='"
+               << escape(msg.str()) << '\'' << "]\n";
     }
   }
   m_stream.flush();
