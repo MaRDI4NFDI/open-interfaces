@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <dlfcn.h>
 #include <ffi.h>
 #include <stdio.h>
