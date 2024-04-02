@@ -10,6 +10,7 @@ class Dopri5(IVPInterface):
         self.rhs = None  # Right-hand side function.
         self.N = 0  # Problem dimension.
         self.s = None
+        self.user_data = None
 
     def set_initial_value(self, y0: np.ndarray, t0: float):
         _p = f"[{_prefix}::set_initial_value]"
@@ -36,9 +37,9 @@ class Dopri5(IVPInterface):
         )
         self.s.set_initial_value(self.y0, self.t0)
 
-        if hasattr(self, "user_data"):
-            self.s.set_f_params(self.user_data)
-            self.s.set_jac_params(self.user_data)
+        # if hasattr(self, "user_data"):
+        #     self.s.set_f_params(self.user_data)
+        #     self.s.set_jac_params(self.user_data)
 
         return 0
 
@@ -49,11 +50,12 @@ class Dopri5(IVPInterface):
         return 0
 
     def set_user_data(self, user_data):
-        if self.s is not None:
-            self.s.set_f_params(user_data)
-            self.s.set_jac_params(user_data)
-        else:
-            self.user_data = user_data
+        # if self.s is not None:
+        #     self.s.set_f_params(user_data)
+        #     self.s.set_jac_params(user_data)
+        # else:
+        #     self.user_data = user_data
+        self.user_data = user_data
 
     def integrate(self, t, y):
         y[:] = self.s.integrate(t)
@@ -62,5 +64,5 @@ class Dopri5(IVPInterface):
 
     def _rhs_fn_wrapper(self, t, y):
         """Callback that satisfies scipy.ode.dopri5 expectations."""
-        self.rhs(t, y, self.ydot)
+        self.rhs(t, y, self.ydot, self.user_data)
         return self.ydot

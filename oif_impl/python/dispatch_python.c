@@ -64,7 +64,7 @@ convert_oif_callback(OIFCallback *p)
         fprintf(stderr, "[%s] Could not create PyCapsule\n", prefix);
     }
     fprintf(stderr, "[%s] HARDCODE!!!!!!\n", prefix);
-    unsigned int nargs = 3;
+    unsigned int nargs = 4;
     PyObject *obj = Py_BuildValue("(N, I)", fn_p, nargs);
     if (obj == NULL) {
         fprintf(stderr, "[%s] Could not build arguments\n", prefix);
@@ -136,9 +136,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         fprintf(stderr, "[%s] Could not convert path to `libpython`\n", prefix);
         return NULL;
     }
-    libpython_path = "/home/dima/.conda/envs/um02-open-interfaces/lib";
-    fprintf(stderr, "[%s] Path to libpython is %s\n", prefix, libpython_path);
 
+    fprintf(stderr, "[%s] libpython path: %s\n", prefix, libpython_path);
     sprintf(libpython_name, "libpython%d.%d.so", PY_MAJOR_VERSION, PY_MINOR_VERSION);
     fprintf(stderr, "[%s] Loading %s\n", prefix, libpython_name);
     void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
@@ -147,16 +146,24 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         exit(EXIT_FAILURE);
     }
 
-    PyRun_SimpleString(
+    status = PyRun_SimpleString(
         "import sys; "
         "print('[dispatch_python]', sys.executable); "
         "print('[dispatch_python]', sys.version)");
+    if (status < 0) {
+        fprintf(stderr, "[%s] An error occurred when initializating Python\n", prefix);
+        return NULL;
+    }
 
     import_array2("Failed to initialize NumPy C API", NULL);
 
-    PyRun_SimpleString(
+    status = PyRun_SimpleString(
         "import numpy; "
         "print('[dispatch_python] NumPy version: ', numpy.__version__)");
+    if (status < 0) {
+        fprintf(stderr, "[%s] An error occurred when initializating Python\n", prefix);
+        return NULL;
+    }
 
     char moduleName[512] = "\0";
     char className[512] = "\0";
@@ -294,6 +301,23 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                             "has type OIF_CALLBACK "
                             "but it is actually is not callable\n",
                             prefix, i);
+                }
+            }
+            else if (in_args->arg_types[i] == OIF_USER_DATA) {
+                OIFUserData *user_data = (OIFUserData *) in_args->arg_values[i];
+                if (user_data->src == OIF_LANG_C) {
+                    /* Treat the argument as a raw pointer. */
+                    pValue = PyCapsule_New(user_data->c, NULL, NULL);
+                }
+                else if (user_data->src == OIF_LANG_PYTHON) {
+                    pValue = user_data->py;
+                } else {
+                    fprintf(
+                         stderr,
+                         "[%s] Cannot handle user data with src %d\n",
+                         prefix, user_data->src
+                    );
+                    pValue = NULL;
                 }
             }
             else {

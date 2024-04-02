@@ -64,7 +64,8 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
 
     self->fn_p = PyCapsule_GetPointer(capsule, "123");
 
-    nargs = 3;
+    assert(nargs==4);
+    nargs = 4;
     self->nargs = nargs;
 
     self->oif_arg_types = malloc(sizeof(OIFArgType) * nargs);
@@ -75,6 +76,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
     self->oif_arg_types[0] = OIF_FLOAT64;
     self->oif_arg_types[1] = OIF_ARRAY_F64;
     self->oif_arg_types[2] = OIF_ARRAY_F64;
+    self->oif_arg_types[3] = OIF_USER_DATA;
 
     self->cif_p = malloc(sizeof(ffi_cif));
     if (self->cif_p == NULL) {
@@ -111,6 +113,10 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
             self->arg_types[i] = &ffi_type_pointer;
             self->arg_values[i] = malloc(sizeof(OIFArrayF64 **));
             narray_args++;
+        }
+        else if (self->oif_arg_types[i] == OIF_USER_DATA) {
+            self->arg_types[i] = &ffi_type_pointer;
+            self->arg_values[i] = malloc(sizeof(void *));
         }
         else {
             fprintf(stderr, "[_callback] Unknown input arg type: %d\n",
@@ -243,8 +249,11 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
             *pp = oif_arrays[j];
             j++;
         }
+        else if (arg_type_ids[i] == OIF_USER_DATA) {
+            void **p_user_data = arg_values[i];
+            *p_user_data = PyCapsule_GetPointer(arg, NULL);
+        }
         else {
-            fflush(stdout);
             fprintf(stderr, "[_callback] Unknown input arg type: %d\n", arg_type_ids[i]);
             return NULL;
         }
