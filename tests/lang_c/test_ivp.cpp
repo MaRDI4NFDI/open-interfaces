@@ -13,7 +13,7 @@ using namespace std;
 const double EPS = 0.9;
 
 class ODEProblem {
-public:
+   public:
     // Thank you, clang-tidy, but I can handle public data alright.
     // Supress warning about non-private data members in classes.
     // NOLINTBEGIN
@@ -21,17 +21,18 @@ public:
     double *y0;
     // NOLINTEND
 
-    ODEProblem(int N) : N(N) {
-        y0 = new double[N];
-    }
+    ODEProblem(int N) : N(N) { y0 = new double[N]; }
 
-    ODEProblem(const ODEProblem &other) {
+    ODEProblem(const ODEProblem &other)
+    {
         N = other.N;
         y0 = new double[N];
         memcpy(y0, other.y0, sizeof(*y0) * N);
     }
 
-    ODEProblem &operator=(const ODEProblem &other) {
+    ODEProblem &
+    operator=(const ODEProblem &other)
+    {
         if (this == &other) {
             return *this;
         }
@@ -43,29 +44,29 @@ public:
         return *this;
     }
 
-    ~ODEProblem() {
-        delete[] y0;
-    }
+    ~ODEProblem() { delete[] y0; }
 
-    static int rhs_wrapper(double t, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_data) {
-        ODEProblem *problem = reinterpret_cast<ODEProblem*>(user_data);
+    static int
+    rhs_wrapper(double t, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_data)
+    {
+        ODEProblem *problem = reinterpret_cast<ODEProblem *>(user_data);
         problem->rhs(t, y, ydot, NULL);
         return 0;
     }
 
-    virtual int rhs(double t, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_data) = 0;
+    virtual int
+    rhs(double t, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_data) = 0;
 
-    virtual void verify(double t, OIFArrayF64 *y) = 0;
+    virtual void
+    verify(double t, OIFArrayF64 *y) = 0;
 };
 
 class ScalarExpDecayProblem : public ODEProblem {
    public:
-    ScalarExpDecayProblem() : ODEProblem(1) {
-        y0[0] = 1.0;
-    }
+    ScalarExpDecayProblem() : ODEProblem(1) { y0[0] = 1.0; }
 
     int
-    rhs(double /* t */, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void */* user_data */) override
+    rhs(double /* t */, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void * /* user_data */) override
     {
         int size = y->dimensions[0];
         for (int i = 0; i < size; ++i) {
@@ -82,14 +83,15 @@ class ScalarExpDecayProblem : public ODEProblem {
 };
 
 class LinearOscillatorProblem : public ODEProblem {
-    public:
-    LinearOscillatorProblem() : ODEProblem(2) {
+   public:
+    LinearOscillatorProblem() : ODEProblem(2)
+    {
         y0[0] = 1.0;
         y0[1] = 0.5;
     }
 
     int
-    rhs(double /* t */, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void */* user_data */) override
+    rhs(double /* t */, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void * /* user_data */) override
     {
         rhs_out->data[0] = y->data[1];
         rhs_out->data[1] = -omega * omega * y->data[0];
@@ -103,13 +105,15 @@ class LinearOscillatorProblem : public ODEProblem {
         double y_exact_1 = -y0[0] * omega * sin(omega * t) + y0[1] * cos(omega * t);
         EXPECT_NEAR(y->data[1], y_exact_1, 1e-12);
     }
-    private:
+
+   private:
     const double omega = M_PI;
 };
 
 class OrbitEquationsProblem : public ODEProblem {
-    public:
-    OrbitEquationsProblem() : ODEProblem(4) {
+   public:
+    OrbitEquationsProblem() : ODEProblem(4)
+    {
         y0[0] = 1 - eps;
         y0[1] = 0.0;
         y0[2] = 0.0;
@@ -117,7 +121,7 @@ class OrbitEquationsProblem : public ODEProblem {
     }
 
     int
-    rhs(double /* t */, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void */* user_data */) override
+    rhs(double /* t */, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void * /* user_data */) override
     {
         double r = sqrt(y->data[0] * y->data[0] + y->data[1] * y->data[1]);
         rhs_out->data[0] = y->data[2];
@@ -138,11 +142,13 @@ class OrbitEquationsProblem : public ODEProblem {
         EXPECT_NEAR(y->data[2], -sin(u) / (1 - eps * cos(u)), 1e-10);
         EXPECT_NEAR(y->data[3], sqrt(1 - pow(eps, 2)) * cos(u) / (1 - eps * cos(u)), 1e-10);
     }
+
    private:
-   double eps = 0.9L;
+    double eps = 0.9L;
 };
 
-struct IvpImplementationsFixture : public testing::TestWithParam<std::tuple<const char *, ODEProblem *>> {};
+struct IvpImplementationsFixture
+    : public testing::TestWithParam<std::tuple<const char *, ODEProblem *>> {};
 
 TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase)
 {
@@ -178,6 +184,8 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase)
 }
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsFixture,
-                         testing::Combine(
-                             testing::Values("sundials_cvode", "scipy_ode_dopri5"),
-                             testing::Values(new ScalarExpDecayProblem(), new LinearOscillatorProblem(), new OrbitEquationsProblem())));
+                         testing::Combine(testing::Values("sundials_cvode",
+                                                          "scipy_ode_dopri5"),
+                                          testing::Values(new ScalarExpDecayProblem(),
+                                                          new LinearOscillatorProblem(),
+                                                          new OrbitEquationsProblem())));

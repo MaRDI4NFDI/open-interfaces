@@ -180,10 +180,10 @@ set_user_data(void *user_data)
 {
     int status = CVodeSetUserData(cvode_mem, user_data);
     if (status == CV_MEM_NULL) {
-        fprintf(
-            stderr,
-            "%s Could not set user data as "
-            "CVODE memory block is not yet initialized\n", prefix);
+        fprintf(stderr,
+                "%s Could not set user data as "
+                "CVODE memory block is not yet initialized\n",
+                prefix);
         return 1;
     }
     assert(status == CV_SUCCESS);

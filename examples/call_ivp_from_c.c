@@ -29,8 +29,8 @@ parse_impl(int argc, char *argv[])
 int
 rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void *user_data)
 {
-    (void) t; /* Unused */
-    (void) user_data;  /* Unused */
+    (void)t;         /* Unused */
+    (void)user_data; /* Unused */
     intptr_t size = y->dimensions[0];
     for (int i = 0; i < size; ++i) {
         rhs_out->data[i] = -y->data[i];

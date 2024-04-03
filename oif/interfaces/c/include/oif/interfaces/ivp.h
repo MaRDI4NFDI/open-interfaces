@@ -36,4 +36,3 @@ oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y);
 #ifdef __cplusplus
 }
 #endif
-

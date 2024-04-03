@@ -64,7 +64,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
 
     self->fn_p = PyCapsule_GetPointer(capsule, "123");
 
-    assert(nargs==4);
+    assert(nargs == 4);
     nargs = 4;
     self->nargs = nargs;
 

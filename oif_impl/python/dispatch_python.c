@@ -83,8 +83,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     PyObject *pValue;
     int status;
 
-    (void) version_major;
-    (void) version_minor;
+    (void)version_major;
+    (void)version_minor;
     if (Py_IsInitialized()) {
         fprintf(stderr, "[%s] Backend is already initialized\n", prefix);
     }
@@ -121,7 +121,9 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     pValue = Py_BuildValue("s", "LIBDIR");
     status = PyTuple_SetItem(pArgs, 0, pValue);
     if (status != 0) {
-        fprintf(stderr, "[%s] Could not build arguments for executing `sysconfig.get_config_var`\n", prefix);
+        fprintf(stderr,
+                "[%s] Could not build arguments for executing `sysconfig.get_config_var`\n",
+                prefix);
         return NULL;
     }
     pValue = PyObject_CallObject(pFunc, pArgs);
@@ -223,7 +225,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     if (impl_info == NULL) {
         fprintf(stderr,
                 "[%s] Could not allocate memory for Python "
-                "implementation information\n", prefix);
+                "implementation information\n",
+                prefix);
         return NULL;
     }
     impl_info->pInstance = pInstance;
@@ -279,7 +282,8 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 else if (p->src == OIF_LANG_C) {
                     fprintf(stderr,
                             "[%s] Check what callback to "
-                            "wrap via src field\n", prefix);
+                            "wrap via src field\n",
+                            prefix);
                     if (impl->pCallbackClass == NULL) {
                         impl->pCallbackClass = instantiate_callback_class();
                     }
@@ -288,7 +292,8 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     if (pValue == NULL) {
                         fprintf(stderr,
                                 "[%s] Could not instantiate "
-                                "Callback class for wrapping C functions\n", prefix);
+                                "Callback class for wrapping C functions\n",
+                                prefix);
                     }
                 }
                 else {
@@ -304,19 +309,17 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 }
             }
             else if (in_args->arg_types[i] == OIF_USER_DATA) {
-                OIFUserData *user_data = (OIFUserData *) in_args->arg_values[i];
+                OIFUserData *user_data = (OIFUserData *)in_args->arg_values[i];
                 if (user_data->src == OIF_LANG_C) {
                     /* Treat the argument as a raw pointer. */
                     pValue = PyCapsule_New(user_data->c, NULL, NULL);
                 }
                 else if (user_data->src == OIF_LANG_PYTHON) {
                     pValue = user_data->py;
-                } else {
-                    fprintf(
-                         stderr,
-                         "[%s] Cannot handle user data with src %d\n",
-                         prefix, user_data->src
-                    );
+                }
+                else {
+                    fprintf(stderr, "[%s] Cannot handle user data with src %d\n", prefix,
+                            user_data->src);
                     pValue = NULL;
                 }
             }
@@ -393,7 +396,8 @@ unload_impl(ImplInfo *impl_info_)
     if (impl_info_->dh != OIF_LANG_PYTHON) {
         fprintf(stderr,
                 "[%s] unload_impl received non-Python "
-                "implementation argument\n", prefix);
+                "implementation argument\n",
+                prefix);
         return -1;
     }
     PythonImplInfo *impl_info = (PythonImplInfo *)impl_info_;
@@ -401,15 +405,21 @@ unload_impl(ImplInfo *impl_info_)
     Py_DECREF(impl_info->pInstance);
     Py_XDECREF(impl_info->pCallbackClass);
     IMPL_COUNTER--;
-
-    if (is_python_initialized_by_us && (IMPL_COUNTER == 0)) {
-        int status = Py_FinalizeEx();
-        if (status < 0) {
-            fprintf(stderr, "[%s] Py_FinalizeEx with status %d\n", prefix, status);
-            return status;
-        }
-    }
     free(impl_info);
+
+    /*
+     * We cannot finalize embedded Python at all as then it will be
+     * a segmentation fault next time we try to initialize it and NumPy.
+     * It is mentioned here:
+     * https://cython.readthedocs.io/en/latest/src/tutorial/embedding.html
+     */
+    /* if (is_python_initialized_by_us && (IMPL_COUNTER == 0)) { */
+    /*     int status = Py_FinalizeEx(); */
+    /*     if (status < 0) { */
+    /*         fprintf(stderr, "[%s] Py_FinalizeEx with status %d\n", prefix, status); */
+    /*         return status; */
+    /*     } */
+    /* } */
 
     return 0;
 }

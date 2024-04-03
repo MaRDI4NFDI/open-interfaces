@@ -42,8 +42,8 @@ static int IMPL_COUNTER = 0;
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
-    (void) version_major;
-    (void) version_minor;
+    (void)version_major;
+    (void)version_minor;
     // For C implementations, `impl_details` must contain the name
     // of the shared library with the methods implemented as functions.
     void *impl_lib = dlopen(impl_details, RTLD_LOCAL | RTLD_LAZY);
@@ -118,7 +118,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
 
     size_t num_in_args = in_args->num_args;
     size_t num_out_args = out_args->num_args;
-    unsigned int num_total_args = (unsigned int) (num_in_args + num_out_args);
+    unsigned int num_total_args = (unsigned int)(num_in_args + num_out_args);
 
     arg_types = malloc(num_total_args * sizeof(ffi_type *));
     if (arg_types == NULL) {
@@ -142,7 +142,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         else if (in_args->arg_types[i] == OIF_USER_DATA) {
             arg_types[i] = NULL;
             arg_types[i] = &ffi_type_pointer;
-            OIFUserData *user_data = (OIFUserData *) in_args->arg_values[i];
+            OIFUserData *user_data = (OIFUserData *)in_args->arg_values[i];
             if (user_data->src == OIF_LANG_C) {
                 in_args->arg_values[i] = &user_data->c;
             }
@@ -150,7 +150,9 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 in_args->arg_values[i] = &user_data->py;
             }
             else {
-                fprintf(stderr, "[dispatch_c] Cannot handle OIFUserData because of the unsupported language.\n");
+                fprintf(stderr,
+                        "[dispatch_c] Cannot handle OIFUserData because of the unsupported "
+                        "language.\n");
                 goto cleanup;
             }
         }

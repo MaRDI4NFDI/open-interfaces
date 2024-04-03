@@ -12,4 +12,3 @@ oif_solve_qeq(ImplHandle implh, double a, double b, double c, OIFArrayF64 *roots
 #ifdef __cplusplus
 }
 #endif
-
