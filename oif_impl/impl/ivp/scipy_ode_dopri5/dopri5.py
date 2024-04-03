@@ -44,6 +44,8 @@ class Dopri5(IVPInterface):
         return 0
 
     def set_tolerances(self, rtol, atol):
+        if self.s is None:
+            raise RuntimeError("`set_rhs_fn` must be called before `set_tolerances`")
         self.s.set_integrator("dopri5", rtol=rtol, atol=atol, nsteps=1000)
         if hasattr(self, "y0"):
             self.s.set_initial_value(self.y0, self.t0)
