@@ -77,6 +77,8 @@ def make_oif_callback(
             ctypes_argtypes.append(ctypes.c_double)
         elif argt == OIF_ARRAY_F64:
             ctypes_argtypes.append(ctypes.POINTER(OIFArrayF64))
+        elif argt == OIF_USER_DATA:
+            ctypes_argtypes.append(ctypes.c_void_p)
         else:
             raise ValueError(f"Cannot convert argument type {argt}")
 
@@ -104,6 +106,12 @@ def make_oif_callback(
 def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype):
     """Call `fn` converting OIF data types to native Python data types."""
 
+    def _pyobject_from_pointer(v):
+        if v is None:
+            return v
+        else:
+            return ctypes.cast(v, ctypes.py_object).value
+
     type_conversion = {
         OIF_INT: lambda v: v,
         OIF_FLOAT64: lambda v: v,
@@ -116,6 +124,9 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
         OIF_ARRAY_F64: lambda v: _conversion.numpy_array_from_oif_array_f64(
             ctypes.addressof(v.contents)
         ),
+        # ctypes receives a pointer to PyObject as Python int,
+        # and this is how we convert it back to PyObject.
+        OIF_USER_DATA: _pyobject_from_pointer,
     }
     py_arg_values = [None] * len(arg_types)
 
@@ -133,6 +144,10 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
         return result
 
     return wrapper
+
+
+def make_oif_user_data(data: object) -> OIFUserData:
+    return OIFUserData(OIF_LANG_PYTHON, None, ctypes.c_void_p(id(data)))
 
 
 class OIFPyBinding:
@@ -173,6 +188,10 @@ class OIFPyBinding:
                 argp = ctypes.pointer(arg)
                 arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
                 arg_types.append(OIF_CALLBACK)
+            elif isinstance(arg, OIFUserData):
+                argp = ctypes.pointer(arg)
+                arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
+                arg_types.append(OIF_USER_DATA)
             else:
                 raise ValueError(f"Cannot convert argument {arg} of type{type(arg)}")
 

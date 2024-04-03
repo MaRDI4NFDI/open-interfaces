@@ -22,7 +22,7 @@ def _parse_args():
     return Args(**vars(args))
 
 
-def rhs(t, y, ydot):
+def rhs(t, y, ydot, user_data):
     ydot[:] = -y
 
 

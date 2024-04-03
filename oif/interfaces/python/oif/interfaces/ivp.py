@@ -3,9 +3,11 @@ from oif.core import (
     OIF_ARRAY_F64,
     OIF_FLOAT64,
     OIF_INT,
+    OIF_USER_DATA,
     OIFPyBinding,
     init_impl,
     make_oif_callback,
+    make_oif_user_data,
     unload_impl,
 )
 
@@ -31,12 +33,13 @@ class IVP:
             raise RuntimeError("'set_initial_value' must be called before 'set_rhs_fn'")
 
         self.wrapper = make_oif_callback(
-            rhs_fn, (OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64), OIF_INT
+            rhs_fn, (OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64, OIF_USER_DATA), OIF_INT
         )
         self._binding.call("set_rhs_fn", (self.wrapper,), ())
 
     def set_user_data(self, user_data: object):
-        self._binding.call("set_user_data", (user_data,), ())
+        self.user_data = make_oif_user_data(user_data)
+        self._binding.call("set_user_data", (self.user_data,), ())
 
     def set_tolerances(self, rtol: float, atol: float):
         self._binding.call("set_tolerances", (rtol, atol), ())
