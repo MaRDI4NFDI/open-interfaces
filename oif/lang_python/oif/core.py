@@ -14,6 +14,8 @@ OIF_FLOAT32_P = 4
 OIF_ARRAY_F64 = 5
 OIF_STR = 6
 OIF_CALLBACK = 7
+OIF_USER_DATA = 8
+
 
 OIF_LANG_C = 1
 OIF_LANG_CXX = 2
@@ -54,13 +56,12 @@ class OIFCallback(ctypes.Structure):
     ]
 
 
-# class OIFCallback(ctypes.Structure):
-#     _fields_ = [
-#         ("fn", ctypes.CFUNCTYPE),
-#         ("num_args", ctypes.c_size_t),
-#         ("argtypes", ctypes.POINTER(OIFArgType)),
-#         ("restype", OIFArgType),
-#     ]
+class OIFUserData(ctypes.Structure):
+    _fields_ = [
+        ("src", ctypes.c_int),
+        ("c", ctypes.c_void_p),
+        ("py", ctypes.c_void_p),
+    ]
 
 
 def make_oif_callback(

@@ -16,8 +16,9 @@ typedef enum {
     OIF_FLOAT64 = 3,
     // OIF_FLOAT32_P = 4,
     OIF_ARRAY_F64 = 5,
-    OIF_USER_DATA = 6,
+    OIF_STR = 6,
     OIF_CALLBACK = 7,
+    OIF_USER_DATA = 8,
 } OIFArgType;
 
 enum {
