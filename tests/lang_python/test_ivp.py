@@ -12,7 +12,7 @@ class IVPProblem(ABC):
     y0: np.ndarray
 
     @abstractmethod
-    def rhs(self, t, y, ydot):
+    def rhs(self, t, y, ydot, user_data):
         r"""Right-hand side function for a system of ODEs: \dot y(t) = f(t, y)."""
         pass
 
@@ -28,7 +28,7 @@ class ScalarExpDecayProblem(IVPProblem):
     t0 = 0.0
     y0 = np.array([1.0])
 
-    def rhs(self, _, y, ydot):
+    def rhs(self, _, y, ydot, __):
         ydot[:] = -y
 
     def exact(self, t):
@@ -49,7 +49,7 @@ class LinearOscillatorProblem(IVPProblem):
     y0 = np.array([1.0, 0.5])
     omega = np.pi
 
-    def rhs(self, t, y, ydot):
+    def rhs(self, _, y, ydot, __):
         ydot[0] = y[1]
         ydot[1] = -(self.omega**2) * y[0]
 
@@ -77,7 +77,7 @@ class OrbitEquationsProblem(IVPProblem):
     t0 = 0.0
     y0 = np.array([1 - eps, 0.0, 0.0, np.sqrt((1 + eps) / (1 - eps))])
 
-    def rhs(self, t, y, ydot):
+    def rhs(self, _, y, ydot, __):
         r = np.sqrt(y[0] ** 2 + y[1] ** 2)
         ydot[0] = y[2]
         ydot[1] = y[3]
@@ -103,6 +103,27 @@ class OrbitEquationsProblem(IVPProblem):
                 np.sqrt(1 - eps**2) * np.sin(u),
                 -np.sin(u) / (1 - eps * np.cos(u)),
                 (np.sqrt(1 - eps**2) * np.cos(u)) / (1 - eps * np.cos(u)),
+            ]
+        )
+
+
+class IVPProblemWithUserData(IVPProblem):
+    t0 = 0.0
+    y0 = np.array([0.0, 1.0])
+    user_data_cache = None
+
+    def rhs(self, _, y, ydot, user_data: tuple):
+        self.user_data_cache = user_data
+        a, b = user_data
+        ydot[0] = y[0] + a
+        ydot[1] = b * y[1]
+
+    def exact(self, t):
+        a, b = self.user_data_cache
+        return np.array(
+            [
+                a * (np.exp(t) - 1),
+                np.exp(b * t),
             ]
         )
 
@@ -157,6 +178,23 @@ class TestIVP:
 
         for k in range(1, len(errors)):
             assert errors[k - 1] >= errors[k]
+
+    def test_4__check_that_user_data_can_be_used(self, s):
+        p = IVPProblemWithUserData()
+        s.set_initial_value(list(p.y0), int(p.t0))
+        s.set_user_data((12, 2.7))
+        s.set_rhs_fn(p.rhs)
+        s.set_tolerances(1e-6, 1e-8)
+
+        t1 = p.t0 + 1
+        times = np.linspace(p.t0, t1, num=11)
+
+        for t in times[1:]:
+            s.integrate(t)
+
+        final_value = s.y
+        true_value = p.exact(t1)
+        npt.assert_allclose(final_value, true_value, 1e-5, 1e-6)
 
 
 @pytest.fixture(
