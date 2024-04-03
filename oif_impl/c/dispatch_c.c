@@ -139,8 +139,13 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
             arg_types[i] = &ffi_type_pointer;
         }
+        else if (in_args->arg_types[i] == OIF_CALLBACK) {
+            arg_types[i] = &ffi_type_pointer;
+            // We need to take a pointer to a pointer according to the FFI
+            // convention, hence the & operator.
+            in_args->arg_values[i] = &((OIFCallback *)in_args->arg_values[i])->fn_p_c;
+        }
         else if (in_args->arg_types[i] == OIF_USER_DATA) {
-            arg_types[i] = NULL;
             arg_types[i] = &ffi_type_pointer;
             OIFUserData *user_data = (OIFUserData *)in_args->arg_values[i];
             if (user_data->src == OIF_LANG_C) {
@@ -155,12 +160,6 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                         "language.\n");
                 goto cleanup;
             }
-        }
-        else if (in_args->arg_types[i] == OIF_CALLBACK) {
-            arg_types[i] = &ffi_type_pointer;
-            // We need to take a pointer to a pointer according to the FFI
-            // convention, hence the & operator.
-            in_args->arg_values[i] = &((OIFCallback *)in_args->arg_values[i])->fn_p_c;
         }
         else {
             fflush(stdout);
