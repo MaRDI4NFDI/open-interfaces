@@ -179,12 +179,6 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
     PythonWrapperForCCallbackObject *self = (PythonWrapperForCCallbackObject *)myself;
     PyObject *retval = NULL;
 
-    // We need to initialize PyArray_API (table of function pointers)
-    // in every translation unit (separate .c file).
-    // See the details in the accepted solution here:
-    // https://stackoverflow.com/q/47026900/1095202
-    import_array();
-
     /* if (!PyArg_ParseTuple(args, "O!", &PyTuple_Type, &py_args)) { */
     /*     fprintf(stderr, "[_callback] Could not parse function arguments\n");
      */
@@ -343,6 +337,12 @@ PyMODINIT_FUNC
 PyInit__callback(void)
 {
     PyObject *m;
+
+    // We need to initialize PyArray_API (table of function pointers)
+    // in every translation unit (separate .c file).
+    // See the details in the accepted solution here:
+    // https://stackoverflow.com/q/47026900/1095202
+    import_array();
 
     if (PyType_Ready(&PythonWrapperForCCallbackType) < 0) {
         fprintf(stderr, "[_callback] Type is not ready\n");
