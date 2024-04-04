@@ -13,7 +13,7 @@ def _parse_args():
     p = argparse.ArgumentParser()
     p.add_argument(
         "impl",
-        choices=["c_qeq_solver", "py_qeq_solver"],
+        choices=["c_qeq_solver", "py_qeq_solver", "jl_qeq_solver"],
         default="c_qeq_solver",
         nargs="?",
     )

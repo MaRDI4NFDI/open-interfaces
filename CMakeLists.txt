@@ -18,6 +18,9 @@ endif()
 # find and load them.
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+# Add additional cmake module to find packages.
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 add_subdirectory(vendor)
 
 add_subdirectory(oif)

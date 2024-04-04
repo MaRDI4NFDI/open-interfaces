@@ -18,8 +18,9 @@
 #include "oif/dispatch.h"
 #include "oif/dispatch_api.h"
 
-char OIF_DISPATCH_C_SO[] = "liboif_dispatch_c.so";
-char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
+static char OIF_DISPATCH_C_SO[] = "liboif_dispatch_c.so";
+static char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
+static char OIF_DISPATCH_JULIA_SO[] = "liboif_dispatch_julia.so";
 
 static const char *OIF_IMPL_ROOT_DIR;
 
@@ -164,6 +165,10 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     else if (strcmp(backend_name, "python") == 0) {
         dh = OIF_LANG_PYTHON;
         dispatch_lang_so = OIF_DISPATCH_PYTHON_SO;
+    }
+    else if (strcmp(backend_name, "julia") == 0) {
+        dh = OIF_LANG_JULIA;
+        dispatch_lang_so = OIF_DISPATCH_JULIA_SO;
     }
     else {
         fprintf(stderr, "[dispatch] Implementation has unknown backend: '%s'\n", backend_name);
