@@ -11,10 +11,10 @@ typedef struct {
     ImplInfo base;
 } JuliaImplInfo;
 
-
 ImplInfo *
-load_impl(const char *impl_details, size_t version_major, size_t version_minor) {
-    (void) impl_details;
+load_impl(const char *impl_details, size_t version_major, size_t version_minor)
+{
+    (void)impl_details;
     (void)version_major;
     (void)version_minor;
     JuliaImplInfo *result = NULL;
@@ -23,11 +23,16 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor) 
 
     result = malloc(sizeof *result);
     if (result == NULL) {
-        fprintf(stderr, "[%s] Could not allocate memory for Julia implementation information\n", prefix_);
+        fprintf(stderr,
+                "[%s] Could not allocate memory for Julia implementation information\n",
+                prefix_);
         goto cleanup;
     }
 
-    fprintf(stderr, "[%s] I want to inform you that we successfully loaded stub of a Julia implementation!\n", prefix_);
+    fprintf(stderr,
+            "[%s] I want to inform you that we successfully loaded stub of a Julia "
+            "implementation!\n",
+            prefix_);
 
 cleanup:
 
@@ -43,12 +48,13 @@ unload_impl(ImplInfo *impl_info)
     return 0;
 }
 
-int call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+int
+call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
-    (void) impl_info;
-    (void) method;
-    (void) in_args;
-    (void) out_args;
+    (void)impl_info;
+    (void)method;
+    (void)in_args;
+    (void)out_args;
     fprintf(stderr, "[%s] Stub for call_impl is invoked\n", prefix_);
     return 0;
 }
