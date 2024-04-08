@@ -1,9 +1,11 @@
+#include <assert.h>
 #include <dlfcn.h>
 #include <stdio.h>
 #include <julia.h>
 
 #include <oif/api.h>
 #include <oif/dispatch_api.h>
+#include <oif/_platform.h>
 
 static char *prefix_ = "dispatch_julia";
 
@@ -20,6 +22,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     JuliaImplInfo *result = NULL;
 
     jl_init();
+
+    static_assert(sizeof(int) == 4, "The code is written in assumption that C int is 32-bit");
 
     result = malloc(sizeof *result);
     if (result == NULL) {
