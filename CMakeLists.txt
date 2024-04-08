@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.18)
 
 project(oif-toy-example LANGUAGES C CXX)
 
+# Enforce using `-std=c11`, without any extensions like `gnu11`.
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("Disable optimizations for Debug build type")
