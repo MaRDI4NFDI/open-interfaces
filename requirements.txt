@@ -161,7 +161,7 @@ packaging==24.0
     #   ipykernel
     #   pytest
     #   sphinx
-parso==0.8.3
+parso==0.8.4
     # via jedi
 pexpect==4.8.0
     # via ipython
