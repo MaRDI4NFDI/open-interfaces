@@ -299,7 +299,7 @@ traitlets==5.14.2
     #   nbformat
 typer[all]==0.5.0
     # via check-reqs
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via
     #   astroid
     #   myst-nb
