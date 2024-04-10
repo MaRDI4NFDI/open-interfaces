@@ -120,6 +120,39 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     (void)method;
     (void)in_args;
     (void)out_args;
-    fprintf(stderr, "[%s] Stub for call_impl is invoked\n", prefix_);
-    return 0;
+    int result = -1;
+
+
+    jl_value_t *val = jl_eval_string("@cfunction(QeqSolver.solve!, Int32, (Float64, Float64, Float64, Ptr{Float64}))");
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+    printf("HERE 0\n");
+    int (*func_jl)(double, double, double, double *) = jl_unbox_voidpointer(val);
+    if (func_jl == NULL) {
+        fprintf(
+            stderr,
+            "[%s] We could not obtain a pointer to C-compatible Julia function\n",
+            prefix_
+        );
+    }
+    printf("HERE 1\n");
+    double roots[2] = {99.0, 25.0};
+    int status = (int) func_jl(1.0, 5.0, 4.0, roots);
+    assert(status == 0);
+    fprintf(stderr, "[%s] We called QeqSolver.solve\n", prefix_);
+    fprintf(stderr, "roots1 = %f, roots2 = %f\n", roots[0], roots[1]);
+    result = 0;
+    goto finally;
+
+catch:
+    // Handle the error
+    jl_value_t *exception = jl_exception_occurred();
+    // Print or handle the error as needed
+    jl_printf(jl_stderr_stream(), "[%s] ", prefix_);
+    jl_value_t *exception_str = jl_call1(jl_get_function(jl_base_module, "string"), exception);
+    jl_printf(jl_stderr_stream(), "%s\n", jl_string_ptr(exception_str));
+
+finally:
+    return result;
 }
