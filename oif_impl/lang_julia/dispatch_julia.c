@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <dlfcn.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -55,8 +56,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     char include_statement[1024];
     sprintf(include_statement, "include(\"oif_impl/impl/%s\")", module_filename);
     printf("Executing in julia: %s\n", include_statement);
-    char using_statement[1024];
-    sprintf(using_statement, "using .%s", module_name);
+    char import_statement[1024];
+    sprintf(import_statement, "import .%s", module_name);
 
     jl_value_t *retval;
     retval = jl_eval_string(include_statement);
@@ -66,7 +67,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     jl_static_show(jl_stdout_stream(), retval);
     jl_printf(jl_stdout_stream(), "\n");
 
-    retval = jl_eval_string(using_statement);
+    retval = jl_eval_string(import_statement);
     if (jl_exception_occurred()) {
         goto catch;
     }
@@ -122,35 +123,66 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     (void)out_args;
     int result = -1;
 
-
-    jl_value_t *val = jl_eval_string("@cfunction(QeqSolver.solve!, Int32, (Float64, Float64, Float64, Ptr{Float64}))");
-    if (jl_exception_occurred()) {
-        goto catch;
-    }
-
-    int (*func_jl)(double, double, double, double *) = jl_unbox_voidpointer(val);
-    if (func_jl == NULL) {
-        fprintf(
-            stderr,
-            "[%s] We could not obtain a pointer to C-compatible Julia function\n",
-            prefix_
-        );
-    }
+    int32_t nargs = 4;
     double roots[2] = {99.0, 25.0};
-    int status = (int) func_jl(1.0, 5.0, 4.0, roots);
-    assert(status == 0);
+
+    jl_value_t *mod = jl_eval_string("QeqSolver");
+    jl_function_t *fn_sqrt = jl_get_function(jl_base_module, "sqrt");
+    jl_static_show(jl_stdout_stream(), fn_sqrt);
+    printf("\n");
+    jl_function_t *fn = jl_get_function(mod, "solve!");
+    /* if (!jl_typeis(fn, jl_function_type)) { */
+    /*     exc = jl_exception_occurred(); */
+    /*     jl_call2( */
+    /*         jl_get_function(jl_base_module, "showerror"), */
+    /*         jl_stderr_obj(), */
+    /*         exc */
+    /*     ); */
+    /*     goto finally; */
+    /* } */
+
+    jl_value_t *arg1 = jl_box_float64(1.0);
+    jl_value_t *arg2 = jl_box_float64(5.0);
+    jl_value_t *arg3 = jl_box_float64(4.0);
+    double data[] = {1.0, 2.0, 3.0};
+    jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
+    size_t dims_[] = {2,};
+    jl_value_t *dims = (jl_value_t *) dims_; // ????? HOW?
+    bool own_buffer = false;
+    jl_array_t *arg4 = jl_ptr_to_array(arr_type, roots, dims, own_buffer);
+    jl_value_t *args[] = {arg1, arg2, arg3, (jl_value_t *)arg4};
+
+    jl_value_t *retval_ = jl_call(fn, args, nargs);
+    if (jl_exception_occurred()) {
+        jl_value_t *exc = jl_exception_occurred();
+        jl_value_t *sprint_fun = jl_get_function(jl_base_module, "sprint");
+        jl_value_t *showerror_fun = jl_get_function(jl_base_module, "showerror");
+
+        const char *exc_msg = jl_string_ptr(jl_call2(sprint_fun, showerror_fun, exc));
+        printf("[%s] ERROR: %s\n", prefix_, exc_msg);
+        jl_exception_clear();
+        goto cleanup;
+    }
+    int64_t retval = jl_unbox_int64(retval_);
+    printf("After calling solve, we received int64_t value: %zd\n", retval);
+    /* jl_value_t *retval = jl_call1(fn, arg1); */
+    /* printf("After calling twofold on %f, we recieved: %f\n", jl_unbox_float64(arg1), jl_unbox_float64(retval)); */
+    assert(retval == 0);
+
     fprintf(stderr, "[%s] We called QeqSolver.solve\n", prefix_);
     fprintf(stderr, "roots1 = %f, roots2 = %f\n", roots[0], roots[1]);
     result = 0;
     goto finally;
 
-catch:
-    // Handle the error
-    jl_value_t *exception = jl_exception_occurred();
-    // Print or handle the error as needed
-    jl_printf(jl_stderr_stream(), "[%s] ", prefix_);
-    jl_value_t *exception_str = jl_call1(jl_get_function(jl_base_module, "string"), exception);
-    jl_printf(jl_stderr_stream(), "%s\n", jl_string_ptr(exception_str));
+cleanup:
+    // Do nothing right now.
+/* catch: */
+/*     // Handle the error */
+/*     jl_value_t *exception = jl_exception_occurred(); */
+/*     // Print or handle the error as needed */
+/*     jl_printf(jl_stderr_stream(), "[%s] ", prefix_); */
+/*     jl_value_t *exception_str = jl_call1(jl_get_function(jl_base_module, "string"), exception); */
+/*     jl_printf(jl_stderr_stream(), "%s\n", jl_string_ptr(exception_str)); */
 
 finally:
     return result;
