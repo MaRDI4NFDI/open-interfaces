@@ -127,7 +127,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     if (jl_exception_occurred()) {
         goto catch;
     }
-    printf("HERE 0\n");
+
     int (*func_jl)(double, double, double, double *) = jl_unbox_voidpointer(val);
     if (func_jl == NULL) {
         fprintf(
@@ -136,7 +136,6 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             prefix_
         );
     }
-    printf("HERE 1\n");
     double roots[2] = {99.0, 25.0};
     int status = (int) func_jl(1.0, 5.0, 4.0, roots);
     assert(status == 0);
