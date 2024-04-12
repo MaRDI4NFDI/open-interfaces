@@ -124,32 +124,20 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     int result = -1;
 
     int32_t nargs = 4;
-    double roots[2] = {99.0, 25.0};
 
-    jl_value_t *mod = jl_eval_string("QeqSolver");
-    jl_function_t *fn_sqrt = jl_get_function(jl_base_module, "sqrt");
-    jl_static_show(jl_stdout_stream(), fn_sqrt);
-    printf("\n");
+    jl_module_t *mod = (jl_module_t *)jl_eval_string("QeqSolver");
     jl_function_t *fn = jl_get_function(mod, "solve!");
-    /* if (!jl_typeis(fn, jl_function_type)) { */
-    /*     exc = jl_exception_occurred(); */
-    /*     jl_call2( */
-    /*         jl_get_function(jl_base_module, "showerror"), */
-    /*         jl_stderr_obj(), */
-    /*         exc */
-    /*     ); */
-    /*     goto finally; */
-    /* } */
 
     jl_value_t *arg1 = jl_box_float64(1.0);
     jl_value_t *arg2 = jl_box_float64(5.0);
     jl_value_t *arg3 = jl_box_float64(4.0);
-    double data[] = {1.0, 2.0, 3.0};
+
+    double roots[2] = {99.0, 25.0};
     jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
-    size_t dims_[] = {2,};
-    jl_value_t *dims = (jl_value_t *) dims_; // ????? HOW?
+    jl_value_t *dims = jl_eval_string("(2,)");
     bool own_buffer = false;
-    jl_array_t *arg4 = jl_ptr_to_array(arr_type, roots, dims, own_buffer);
+    jl_array_t *arg4 = jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer);
+
     jl_value_t *args[] = {arg1, arg2, arg3, (jl_value_t *)arg4};
 
     jl_value_t *retval_ = jl_call(fn, args, nargs);
@@ -164,9 +152,6 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         goto cleanup;
     }
     int64_t retval = jl_unbox_int64(retval_);
-    printf("After calling solve, we received int64_t value: %zd\n", retval);
-    /* jl_value_t *retval = jl_call1(fn, arg1); */
-    /* printf("After calling twofold on %f, we recieved: %f\n", jl_unbox_float64(arg1), jl_unbox_float64(retval)); */
     assert(retval == 0);
 
     fprintf(stderr, "[%s] We called QeqSolver.solve\n", prefix_);
