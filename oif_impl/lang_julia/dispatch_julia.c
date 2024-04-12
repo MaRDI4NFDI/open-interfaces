@@ -17,6 +17,18 @@ typedef struct {
     const char *module_name;
 } JuliaImplInfo;
 
+static void
+handle_exception_(void)
+{
+    jl_value_t *exc = jl_exception_occurred();
+    jl_value_t *sprint_fun = jl_get_function(jl_base_module, "sprint");
+    jl_value_t *showerror_fun = jl_get_function(jl_base_module, "showerror");
+
+    const char *exc_msg = jl_string_ptr(jl_call2(sprint_fun, showerror_fun, exc));
+    printf("[%s] ERROR: %s\n", prefix_, exc_msg);
+    jl_exception_clear();
+}
+
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
@@ -91,12 +103,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     goto cleanup;
 
 catch:
-        // Handle the error
-        jl_value_t *exception = jl_exception_occurred();
-        // Print or handle the error as needed
-        jl_printf(jl_stderr_stream(), "[%s] ", prefix_);
-        jl_value_t *exception_str = jl_call1(jl_get_function(jl_base_module, "string"), exception);
-        jl_printf(jl_stderr_stream(), "%s\n", jl_string_ptr(exception_str));
+    handle_exception_();
 
 cleanup:
 
@@ -142,13 +149,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
 
     jl_value_t *retval_ = jl_call(fn, args, nargs);
     if (jl_exception_occurred()) {
-        jl_value_t *exc = jl_exception_occurred();
-        jl_value_t *sprint_fun = jl_get_function(jl_base_module, "sprint");
-        jl_value_t *showerror_fun = jl_get_function(jl_base_module, "showerror");
-
-        const char *exc_msg = jl_string_ptr(jl_call2(sprint_fun, showerror_fun, exc));
-        printf("[%s] ERROR: %s\n", prefix_, exc_msg);
-        jl_exception_clear();
+        handle_exception_();
         goto cleanup;
     }
     int64_t retval = jl_unbox_int64(retval_);
