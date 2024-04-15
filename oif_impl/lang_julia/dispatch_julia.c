@@ -2,6 +2,7 @@
 #include <dlfcn.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include <julia.h>
@@ -15,6 +16,7 @@ static char *prefix_ = "dispatch_julia";
 typedef struct {
     ImplInfo base;
     const char *module_name;
+    jl_module_t *module;
 } JuliaImplInfo;
 
 static void
@@ -86,6 +88,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     jl_static_show(jl_stdout_stream(), retval);
     jl_printf(jl_stdout_stream(), "\n");
 
+    jl_module_t *module = (jl_module_t *)jl_eval_string("QeqSolver");
 
     result = malloc(sizeof *result);
     if (result == NULL) {
@@ -95,11 +98,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         goto cleanup;
     }
     result->module_name = module_name;
+    result->module = module;
 
-    fprintf(stderr,
-            "[%s] I want to inform you that we successfully loaded stub of a Julia "
-            "implementation!\n",
-            prefix_);
     goto cleanup;
 
 catch:
@@ -122,32 +122,102 @@ unload_impl(ImplInfo *impl_info_)
 }
 
 int
-call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
-    (void)impl_info;
-    (void)method;
-    (void)in_args;
-    (void)out_args;
     int result = -1;
 
-    int32_t nargs = 4;
+    if (impl_info_->dh != OIF_LANG_JULIA) {
+        fprintf(stderr, "[%s] Provided implementation is not in Julia\n", prefix_);
+        return -1;
+    }
+    JuliaImplInfo *impl_info = (JuliaImplInfo *)impl_info_;
 
-    jl_module_t *mod = (jl_module_t *)jl_eval_string("QeqSolver");
-    jl_function_t *fn = jl_get_function(mod, "solve!");
+    assert(in_args->num_args < INT32_MAX);
+    assert(out_args->num_args < INT32_MAX);
+    int32_t in_num_args = (int32_t)in_args->num_args;
+    int32_t out_num_args = (int32_t)out_args->num_args;
+    int32_t num_args = in_num_args + out_num_args;
 
-    jl_value_t *arg1 = jl_box_float64(1.0);
-    jl_value_t *arg2 = jl_box_float64(5.0);
-    jl_value_t *arg3 = jl_box_float64(4.0);
+    jl_value_t **julia_args = calloc(num_args, sizeof(jl_value_t *));
+    if (julia_args == NULL) {
+        goto finally;
+    }
 
     double roots[2] = {99.0, 25.0};
-    jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
-    jl_value_t *dims = jl_eval_string("(2,)");
-    bool own_buffer = false;
-    jl_array_t *arg4 = jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer);
 
-    jl_value_t *args[] = {arg1, arg2, arg3, (jl_value_t *)arg4};
+    for (int32_t i = 0; i < in_num_args; ++i) {
+        if (in_args->arg_types[i] == OIF_FLOAT64) {
+            julia_args[i] = jl_box_float64(*(double *) in_args->arg_values[i]);
+        }
+        else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
+            jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
+            jl_value_t *dims = jl_eval_string("(2,)");
+            bool own_buffer = false;
+            julia_args[i] = (jl_value_t *)jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer); 
+        } else {
+            fprintf(
+                stderr,
+                "[%s] Cannot convert input argument #%d with "
+                "provided type id %d\n",
+                prefix_, i, in_args->arg_types[i]
+            );
+            goto cleanup;
+        }
+    }
 
-    jl_value_t *retval_ = jl_call(fn, args, nargs);
+    for (int32_t i = in_num_args; i < num_args; ++i) {
+        if (out_args->arg_types[i - in_num_args] == OIF_FLOAT64) {
+            julia_args[i] = jl_box_float64(*(float *) in_args->arg_values[i]);
+        }
+        else if (out_args->arg_types[i - in_num_args] == OIF_ARRAY_F64) {
+            jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
+            jl_value_t *dims = jl_eval_string("(2,)");
+            bool own_buffer = false;
+            julia_args[i] = (jl_value_t *)jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer); 
+        }
+        else {
+            fprintf(
+                stderr,
+                "[%s] Cannot convert output argument #%d with "
+                "provided type id %d\n",
+                prefix_, i, in_args->arg_types[i]
+            );
+            goto cleanup;
+        }
+    }
+
+    jl_function_t *fn;
+    fn = jl_get_function(impl_info->module, "solve!");
+    // It is customary for the Julia code to suffix function names with '!'
+    // if they modify their arguments.
+    // Because the Open Interfaces do not add '!' to the function names,
+    // we need to check if the function with the '!' suffix exists.
+    /* char non_pure_method[1024]; */
+    /* strcpy(non_pure_method, method); */
+    /* strcat(non_pure_method, "!"); */
+    /* printf("Check for '%s'\n", non_pure_method); */
+    /* fn = jl_get_function(module, non_pure_method); */
+    /* if (fn == NULL) { */
+    /*     fprintf( */
+    /*         stderr, */
+    /*         "[%s] " */
+    /*     ); */
+
+    /* } */
+    /* if (out_num_args == 0) { */
+    /*     printf("Check for %s\n", method); */
+    /*     fn = jl_get_function(module, method); */
+    /* } */
+    /* else { */
+    /*     printf("Cehck for %s\n", non_pure_method); */
+    /*     fn = jl_get_function(module, non_pure_method); */
+    /* } */
+    /* if (!jl_isa(fn, (jl_value_t *)jl_function_type)) { */
+    /*     fprintf(stderr, "[%s] Could not find the function '%s' or '%s!' in the implementation\n", prefix_, method, method); */
+    /*     goto cleanup; */
+    /* } */
+
+    jl_value_t *retval_ = jl_call(fn, julia_args, num_args);
     if (jl_exception_occurred()) {
         handle_exception_();
         goto cleanup;
@@ -161,7 +231,14 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     goto finally;
 
 cleanup:
-    // Do nothing right now.
+    if (julia_args != NULL) {
+        for (int i = 0; i < num_args; ++i) {
+            if (julia_args[i] != NULL) {
+                free(julia_args[i]);
+            }
+        }
+        free(julia_args);
+    }
 /* catch: */
 /*     // Handle the error */
 /*     jl_value_t *exception = jl_exception_occurred(); */
