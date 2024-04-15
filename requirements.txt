@@ -78,7 +78,7 @@ greenlet==3.0.3
     # via sqlalchemy
 identify==2.5.35
     # via pre-commit
-idna==3.4
+idna==3.7
     # via requests
 imagesize==1.4.1
     # via sphinx
