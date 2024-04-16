@@ -187,35 +187,35 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     }
 
     jl_function_t *fn;
-    fn = jl_get_function(impl_info->module, "solve!");
     // It is customary for the Julia code to suffix function names with '!'
     // if they modify their arguments.
     // Because the Open Interfaces do not add '!' to the function names,
     // we need to check if the function with the '!' suffix exists.
-    /* char non_pure_method[1024]; */
-    /* strcpy(non_pure_method, method); */
-    /* strcat(non_pure_method, "!"); */
-    /* printf("Check for '%s'\n", non_pure_method); */
-    /* fn = jl_get_function(module, non_pure_method); */
-    /* if (fn == NULL) { */
-    /*     fprintf( */
-    /*         stderr, */
-    /*         "[%s] " */
-    /*     ); */
-
-    /* } */
-    /* if (out_num_args == 0) { */
-    /*     printf("Check for %s\n", method); */
-    /*     fn = jl_get_function(module, method); */
-    /* } */
-    /* else { */
-    /*     printf("Cehck for %s\n", non_pure_method); */
-    /*     fn = jl_get_function(module, non_pure_method); */
-    /* } */
-    /* if (!jl_isa(fn, (jl_value_t *)jl_function_type)) { */
-    /*     fprintf(stderr, "[%s] Could not find the function '%s' or '%s!' in the implementation\n", prefix_, method, method); */
-    /*     goto cleanup; */
-    /* } */
+    if (out_num_args == 0) {
+        fn = jl_get_function(impl_info->module, method);
+        if (fn == NULL) {
+            fprintf(
+                stderr,
+                "[%s] Could not find method '%s' in implementation with id %d\n",
+                prefix_, method, impl_info->base.implh
+            );
+            goto cleanup;
+        }
+    }
+    else {
+        char non_pure_method[64];
+        strcpy(non_pure_method, method);
+        strcat(non_pure_method, "!");
+        fn = jl_get_function(impl_info->module, non_pure_method);
+        if (fn == NULL) {
+            fprintf(
+                stderr,
+                "[%s] Could not find method '%s!' in implementation with id %d\n",
+                prefix_, method, impl_info->base.implh
+            );
+            goto cleanup;
+        }
+    }
 
     jl_value_t *retval_ = jl_call(fn, julia_args, num_args);
     if (jl_exception_occurred()) {
@@ -228,14 +228,9 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     fprintf(stderr, "[%s] We called QeqSolver.solve\n", prefix_);
     fprintf(stderr, "roots1 = %f, roots2 = %f\n", roots[0], roots[1]);
     result = 0;
-    goto finally;
 
 cleanup:
     if (julia_args != NULL) {
-        for (int i = 0; i < num_args; ++i) {
-            if (julia_args[i] != NULL) {
-                free(julia_args[i]);
-            }
         }
         free(julia_args);
     }

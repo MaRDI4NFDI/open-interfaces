@@ -1,7 +1,7 @@
 module QeqSolver
 export solve!
 
-function solve!(a, b, c, roots)
+function solve_qeq!(a, b, c, roots)
     if a == 0
         roots[1] = -c / b
         roots[2] = -c / b
