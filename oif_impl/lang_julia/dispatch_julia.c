@@ -241,13 +241,6 @@ cleanup:
         }
         free(julia_args);
     }
-/* catch: */
-/*     // Handle the error */
-/*     jl_value_t *exception = jl_exception_occurred(); */
-/*     // Print or handle the error as needed */
-/*     jl_printf(jl_stderr_stream(), "[%s] ", prefix_); */
-/*     jl_value_t *exception_str = jl_call1(jl_get_function(jl_base_module, "string"), exception); */
-/*     jl_printf(jl_stderr_stream(), "%s\n", jl_string_ptr(exception_str)); */
 
 finally:
     return result;
