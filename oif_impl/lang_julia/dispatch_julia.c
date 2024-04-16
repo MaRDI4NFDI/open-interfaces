@@ -138,11 +138,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     int32_t out_num_args = (int32_t)out_args->num_args;
     int32_t num_args = in_num_args + out_num_args;
 
-    int32_t num_stacked_args = 0;
-    jl_value_t **julia_args = calloc(num_args, sizeof(jl_value_t *));
-    if (julia_args == NULL) {
-        goto finally;
-    }
+    jl_value_t **julia_args;
+    JL_GC_PUSHARGS(julia_args, num_args);
 
     double roots[2] = {99.0, 25.0};
 
@@ -164,8 +161,6 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             );
             goto cleanup;
         }
-        JL_GC_PUSH1(&julia_args[i]);
-        num_stacked_args++;
     }
 
     for (int32_t i = in_num_args; i < num_args; ++i) {
@@ -187,8 +182,6 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             );
             goto cleanup;
         }
-        JL_GC_PUSH1(&julia_args[i]);
-        num_stacked_args++;
     }
 
     jl_function_t *fn;
@@ -235,12 +228,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     result = 0;
 
 cleanup:
-    if (julia_args != NULL) {
-        for (int32_t i = 0; i < num_stacked_args; ++i) {
-            JL_GC_POP();
-        }
-        free(julia_args);
-    }
+    JL_GC_POP();
 
 finally:
     return result;
