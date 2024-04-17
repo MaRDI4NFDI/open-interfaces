@@ -175,8 +175,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     goto cleanup;
 
-catch:
-    handle_exception_();
+    catch : handle_exception_();
 
 cleanup:
 
@@ -187,7 +186,7 @@ int
 unload_impl(ImplInfo *impl_info_)
 {
     assert(impl_info_->dh == OIF_LANG_JULIA);
-    JuliaImplInfo *impl_info = (JuliaImplInfo *) impl_info_;
+    JuliaImplInfo *impl_info = (JuliaImplInfo *)impl_info_;
     free(impl_info);
 
     jl_atexit_hook(0);
@@ -218,43 +217,44 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     for (int32_t i = 0; i < in_num_args; ++i) {
         if (in_args->arg_types[i] == OIF_FLOAT64) {
-            julia_args[i] = jl_box_float64(*(double *) in_args->arg_values[i]);
+            julia_args[i] = jl_box_float64(*(double *)in_args->arg_values[i]);
         }
         else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
             OIFArrayF64 *oif_array = *(OIFArrayF64 **)in_args->arg_values[i];
             jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
-            jl_value_t *dims = build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
+            jl_value_t *dims =
+                build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
             bool own_buffer = false;
-            julia_args[i] = (jl_value_t *)jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer); 
-        } else {
-            fprintf(
-                stderr,
-                "[%s] Cannot convert input argument #%d with "
-                "provided type id %d\n",
-                prefix_, i, in_args->arg_types[i]
-            );
+            julia_args[i] =
+                (jl_value_t *)jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer);
+        }
+        else {
+            fprintf(stderr,
+                    "[%s] Cannot convert input argument #%d with "
+                    "provided type id %d\n",
+                    prefix_, i, in_args->arg_types[i]);
             goto cleanup;
         }
     }
 
     for (int32_t i = in_num_args; i < num_args; ++i) {
         if (out_args->arg_types[i - in_num_args] == OIF_FLOAT64) {
-            julia_args[i] = jl_box_float64(*(float *) in_args->arg_values[i]);
+            julia_args[i] = jl_box_float64(*(float *)in_args->arg_values[i]);
         }
         else if (out_args->arg_types[i - in_num_args] == OIF_ARRAY_F64) {
             OIFArrayF64 *oif_array = *(OIFArrayF64 **)out_args->arg_values[i - in_num_args];
             jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
-            jl_value_t *dims = build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
+            jl_value_t *dims =
+                build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
             bool own_buffer = false;
-            julia_args[i] = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data, (jl_value_t *)dims, own_buffer); 
+            julia_args[i] = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
+                                                          (jl_value_t *)dims, own_buffer);
         }
         else {
-            fprintf(
-                stderr,
-                "[%s] Cannot convert output argument #%d with "
-                "provided type id %d\n",
-                prefix_, i, in_args->arg_types[i]
-            );
+            fprintf(stderr,
+                    "[%s] Cannot convert output argument #%d with "
+                    "provided type id %d\n",
+                    prefix_, i, in_args->arg_types[i]);
             goto cleanup;
         }
     }
@@ -267,11 +267,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     if (out_num_args == 0) {
         fn = jl_get_function(impl_info->module, method);
         if (fn == NULL) {
-            fprintf(
-                stderr,
-                "[%s] Could not find method '%s' in implementation with id %d\n",
-                prefix_, method, impl_info->base.implh
-            );
+            fprintf(stderr, "[%s] Could not find method '%s' in implementation with id %d\n",
+                    prefix_, method, impl_info->base.implh);
             goto cleanup;
         }
     }
@@ -281,11 +278,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         strcat(non_pure_method, "!");
         fn = jl_get_function(impl_info->module, non_pure_method);
         if (fn == NULL) {
-            fprintf(
-                stderr,
-                "[%s] Could not find method '%s!' in implementation with id %d\n",
-                prefix_, method, impl_info->base.implh
-            );
+            fprintf(stderr, "[%s] Could not find method '%s!' in implementation with id %d\n",
+                    prefix_, method, impl_info->base.implh);
             goto cleanup;
         }
     }
