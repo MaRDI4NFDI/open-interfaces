@@ -15,6 +15,10 @@ static char *prefix_ = "dispatch_julia";
 
 enum { BUFFER_SIZE_ = 32 };
 
+static const char *OIF_IMPL_ROOT_DIR = NULL;
+
+static bool INITIALIZED_ = false;
+
 typedef struct {
     ImplInfo base;
     const char *module_name;
@@ -31,6 +35,24 @@ handle_exception_(void)
     const char *exc_msg = jl_string_ptr(jl_call2(sprint_fun, showerror_fun, exc));
     printf("[%s] ERROR: %s\n", prefix_, exc_msg);
     jl_exception_clear();
+}
+
+static int
+init_module_(void)
+{
+    OIF_IMPL_ROOT_DIR = getenv("OIF_IMPL_ROOT_DIR");
+    if (OIF_IMPL_ROOT_DIR == NULL) {
+        fprintf(stderr,
+                "[dispatch] Environment variable 'OIF_IMPL_ROOT_DIR' must be "
+                "set so that implementations can be found. Cannot proceed\n");
+        return -1;
+    }
+
+    jl_init();
+    static_assert(sizeof(int) == 4, "The code is written in assumption that C int is 32-bit");
+
+    INITIALIZED_ = true;
+    return 0;
 }
 
 /**
@@ -107,13 +129,15 @@ cleanup:
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
-    (void)impl_details;
+    if (! INITIALIZED_) {
+        int status = init_module_();
+        if (status) {
+            return NULL;
+        }
+    }
     (void)version_major;
     (void)version_minor;
     JuliaImplInfo *result = NULL;
-
-    jl_init();
-    static_assert(sizeof(int) == 4, "The code is written in assumption that C int is 32-bit");
 
     char module_filename[512] = "\0";
     char module_name[512] = "\0";
@@ -141,7 +165,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix_, module_name);
 
     char include_statement[1024];
-    sprintf(include_statement, "include(\"oif_impl/impl/%s\")", module_filename);
+    sprintf(include_statement, "include(\"%s/oif_impl/impl/%s\")", OIF_IMPL_ROOT_DIR, module_filename);
     printf("Executing in julia: %s\n", include_statement);
     char import_statement[1024];
     sprintf(import_statement, "import .%s", module_name);
