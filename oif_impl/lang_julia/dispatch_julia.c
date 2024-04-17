@@ -13,6 +13,8 @@
 
 static char *prefix_ = "dispatch_julia";
 
+enum { BUFFER_SIZE_ = 32 };
+
 typedef struct {
     ImplInfo base;
     const char *module_name;
@@ -29,6 +31,90 @@ handle_exception_(void)
     const char *exc_msg = jl_string_ptr(jl_call2(sprint_fun, showerror_fun, exc));
     printf("[%s] ERROR: %s\n", prefix_, exc_msg);
     jl_exception_clear();
+}
+
+
+static size_t
+my_strcpy(char dst[static 1], const char *src, size_t size_dst)
+{
+    char *dst_right = dst + size_dst;
+
+    size_t chars_written = 0;
+    while (dst < dst_right && dst != NULL && *src != '\0') {
+        *dst = *src;
+        dst++;
+        src++;
+        chars_written++;
+    }
+
+    if (dst != NULL) {
+        *dst = '\0';
+    }
+    return chars_written;
+}
+
+/**
+ * Build a Julia tuple from an `intptr_t` array.
+ *
+ * Due to complicated Julia C API, the tuple is created via `jl_eval_string`.
+ *
+ * @param dimensions Array with elements that are non-negative numbers
+ * @param ndims Number of the elements in the array
+ * @return Julia tuple on success, `NULL` otherwise
+ */
+static jl_value_t *
+build_julia_tuple_from_size_t_array(intptr_t *dimensions, size_t ndims) {
+    char *tuple_string = malloc(sizeof(char) * 1024);
+    char *cursor = tuple_string;
+    char *right_bound = &tuple_string[1024-1];
+    my_strcpy(tuple_string, "(", right_bound - cursor);
+    cursor++;
+    char buffer[BUFFER_SIZE_];
+    size_t chars_written;
+    jl_value_t *tuple = NULL;
+    uintptr_t diff;
+
+    for (size_t i = 0; i < ndims; ++i) {
+        chars_written = snprintf(buffer, BUFFER_SIZE_, "%zu", dimensions[i]);
+        if (chars_written >= BUFFER_SIZE_) {
+            goto report_too_long;
+        }
+        diff = right_bound - cursor;
+        chars_written = my_strcpy(cursor, buffer, diff);
+        if (chars_written >= diff) {
+            goto report_too_long;
+        }
+        cursor += chars_written;
+        if (i < ndims - 1 || ndims == 1) {
+            chars_written = my_strcpy(cursor, ",", right_bound - cursor);
+            diff = right_bound - cursor;
+            if (chars_written >= diff) {
+                goto report_too_long;
+            }
+            cursor++;
+        }
+    }
+    diff = right_bound - cursor;
+    chars_written = my_strcpy(cursor, ")", diff);
+    if (chars_written >= diff) {
+        fprintf(stderr, "ERROR: the string to copy is too long\n");
+        exit(1);
+    }
+
+    tuple = jl_eval_string(tuple_string);
+    if (jl_exception_occurred()) {
+        const char *p = jl_string_ptr(jl_eval_string("sprint(showerror, ccall(:jl_exception_occurred, Any, ()))"));
+        fprintf(stderr, "%s\n", p);
+    }
+    goto cleanup;
+
+report_too_long:
+    fprintf(stderr, "[build_julia_tuple_from_size_t_array] The string representation of the julia tuple does not fit in the buffer\n");
+
+cleanup:
+    free(tuple_string);
+
+    return tuple;
 }
 
 ImplInfo *
@@ -148,8 +234,9 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             julia_args[i] = jl_box_float64(*(double *) in_args->arg_values[i]);
         }
         else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
+            OIFArrayF64 *oif_array = *(OIFArrayF64 **)in_args->arg_values[i];
             jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
-            jl_value_t *dims = jl_eval_string("(2,)");
+            jl_value_t *dims = build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
             bool own_buffer = false;
             julia_args[i] = (jl_value_t *)jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer); 
         } else {
@@ -168,10 +255,11 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             julia_args[i] = jl_box_float64(*(float *) in_args->arg_values[i]);
         }
         else if (out_args->arg_types[i - in_num_args] == OIF_ARRAY_F64) {
+            OIFArrayF64 *oif_array = *(OIFArrayF64 **)out_args->arg_values[i - in_num_args];
             jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
-            jl_value_t *dims = jl_eval_string("(2,)");
+            jl_value_t *dims = build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
             bool own_buffer = false;
-            julia_args[i] = (jl_value_t *)jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer); 
+            julia_args[i] = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data, (jl_value_t *)dims, own_buffer); 
         }
         else {
             fprintf(
@@ -222,9 +310,6 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     }
     int64_t retval = jl_unbox_int64(retval_);
     assert(retval == 0);
-
-    fprintf(stderr, "[%s] We called QeqSolver.solve\n", prefix_);
-    fprintf(stderr, "roots1 = %f, roots2 = %f\n", roots[0], roots[1]);
     result = 0;
 
 cleanup:
