@@ -235,7 +235,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     int32_t num_args = in_num_args + out_num_args;
 
     jl_value_t **julia_args;
-    JL_GC_PUSHARGS(julia_args, num_args);
+    JL_GC_PUSHARGS(julia_args, num_args);  // NOLINT
 
     double roots[2] = {99.0, 25.0};
 
@@ -320,6 +320,5 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 cleanup:
     JL_GC_POP();
 
-finally:
     return result;
 }
