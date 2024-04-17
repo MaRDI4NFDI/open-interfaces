@@ -5,7 +5,7 @@ from oif.interfaces.qeq_solver import QeqSolver
 
 
 class TestQeqSolver:
-    @pytest.fixture(params=["py_qeq_solver", "c_qeq_solver"])
+    @pytest.fixture(params=["py_qeq_solver", "c_qeq_solver", "jl_qeq_solver"])
     def s(self, request):
         return QeqSolver(request.param)
 
