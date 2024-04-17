@@ -18,9 +18,4 @@ function solve_qeq!(a, b, c, roots)
 
     return 0
 end
-
-function solve!(a, b, c, roots_ptr::Ptr{Float64})::Cint
-    roots = unsafe_wrap(Array, roots_ptr, 2)
-    return solve!(a, b, c, roots)
-end
 end

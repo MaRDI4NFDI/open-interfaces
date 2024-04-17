@@ -185,7 +185,10 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     jl_static_show(jl_stdout_stream(), retval);
     jl_printf(jl_stdout_stream(), "\n");
 
-    jl_module_t *module = (jl_module_t *)jl_eval_string("QeqSolver");
+    jl_module_t *module = (jl_module_t *)jl_eval_string(module_name);
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
 
     result = malloc(sizeof *result);
     if (result == NULL) {
@@ -199,7 +202,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     goto cleanup;
 
-    catch : handle_exception_();
+catch:
+    handle_exception_();
 
 cleanup:
 
@@ -239,7 +243,9 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     double roots[2] = {99.0, 25.0};
 
+    printf("call_impl, method = %s\n", method);
     for (int32_t i = 0; i < in_num_args; ++i) {
+        printf("I am processing input argument #%d\n", i);
         if (in_args->arg_types[i] == OIF_FLOAT64) {
             julia_args[i] = jl_box_float64(*(double *)in_args->arg_values[i]);
         }
@@ -251,6 +257,24 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             bool own_buffer = false;
             julia_args[i] =
                 (jl_value_t *)jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer);
+        }
+        else if (in_args->arg_types[i] == OIF_CALLBACK) {
+            OIFCallback *p = in_args->arg_values[i];
+            if (p->src == OIF_LANG_JULIA) {
+                fprintf(
+                    stderr,
+                    "[%s] This code path is not implemented yet\n",
+                    prefix_
+                );
+                exit(1);
+            }
+            else {
+                jl_value_t *fn_callback = jl_get_function(impl_info->module, "callback");   
+                assert(fn_callback != NULL);
+                assert(p->fn_p_c != NULL);
+                jl_value_t *wrapper = jl_call1(fn_callback, p->fn_p_c);
+                julia_args[i] = wrapper;
+            }
         }
         else {
             fprintf(stderr,
