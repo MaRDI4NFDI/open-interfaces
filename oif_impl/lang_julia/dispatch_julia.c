@@ -28,6 +28,7 @@ typedef struct {
     ImplInfo base;
     char module_name[64];
     jl_module_t *module;
+    jl_value_t *self;
 } JuliaImplInfo;
 
 static void
@@ -244,7 +245,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         fprintf(stderr,
                 "[%s] Could not allocate memory for Julia implementation information\n",
                 prefix_);
-        goto cleanup;
+        goto finally;
     }
     status = snprintf(result->module_name, JULIA_MAX_MODULE_NAME_, "%s", module_name);
     if (status < 0 || status >= JULIA_MAX_MODULE_NAME_) {
@@ -252,19 +253,29 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
             stderr, "[%s] Module names in Julia cannot be longer than %d characters\n",
             prefix_, JULIA_MAX_MODULE_NAME_ - 1
         );
-        free(result);
-        result = NULL;
-        goto cleanup;
+        goto catch;
     }
     result->module = module;
 
-    goto cleanup;
+    char self_statement[512];
+    strcpy(self_statement, module_name);
+    strcat(self_statement, ".Self()");
+    jl_value_t *self = jl_eval_string(self_statement);
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+    result->self = self;
+
+    goto finally;
 
 catch:
     handle_exception_();
 
 cleanup:
+    free(result);
+    result = NULL;
 
+finally:
     return (ImplInfo *)result;
 }
 
@@ -294,18 +305,19 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     assert(out_args->num_args < INT32_MAX);
     int32_t in_num_args = (int32_t)in_args->num_args;
     int32_t out_num_args = (int32_t)out_args->num_args;
-    int32_t num_args = in_num_args + out_num_args;
+    int32_t num_args = in_num_args + out_num_args + 1;
 
     jl_value_t **julia_args;
     JL_GC_PUSHARGS(julia_args, num_args);  // NOLINT
 
-    double roots[2] = {99.0, 25.0};
+    julia_args[0] = impl_info->self;
 
     printf("call_impl, method = %s\n", method);
+    jl_value_t *cur_julia_arg;
     for (int32_t i = 0; i < in_num_args; ++i) {
         printf("I am processing input argument #%d\n", i);
         if (in_args->arg_types[i] == OIF_FLOAT64) {
-            julia_args[i] = jl_box_float64(*(double *)in_args->arg_values[i]);
+            cur_julia_arg = jl_box_float64(*(double *)in_args->arg_values[i]);
         }
         else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
             OIFArrayF64 *oif_array = *(OIFArrayF64 **)in_args->arg_values[i];
@@ -313,8 +325,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             jl_value_t *dims =
                 build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
             bool own_buffer = false;
-            julia_args[i] =
-                (jl_value_t *)jl_ptr_to_array(arr_type, roots, (jl_value_t *)dims, own_buffer);
+            cur_julia_arg =
+                (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data, (jl_value_t *)dims, own_buffer);
         }
         else if (in_args->arg_types[i] == OIF_CALLBACK) {
             OIFCallback *p = in_args->arg_values[i];
@@ -328,7 +340,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             }
             else {
                 jl_value_t *wrapper = make_wrapper_over_c_callback(p);
-                julia_args[i] = wrapper;
+                cur_julia_arg = wrapper;
             }
         }
         else {
@@ -338,19 +350,20 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                     prefix_, i, in_args->arg_types[i]);
             goto cleanup;
         }
+        julia_args[i + 1] = cur_julia_arg;
     }
 
-    for (int32_t i = in_num_args; i < num_args; ++i) {
-        if (out_args->arg_types[i - in_num_args] == OIF_FLOAT64) {
-            julia_args[i] = jl_box_float64(*(float *)in_args->arg_values[i]);
+    for (int32_t i = 0; i < out_num_args; ++i) {
+        if (out_args->arg_types[i] == OIF_FLOAT64) {
+            cur_julia_arg = jl_box_float64(*(float *)out_args->arg_values[i]);
         }
-        else if (out_args->arg_types[i - in_num_args] == OIF_ARRAY_F64) {
-            OIFArrayF64 *oif_array = *(OIFArrayF64 **)out_args->arg_values[i - in_num_args];
+        else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
+            OIFArrayF64 *oif_array = *(OIFArrayF64 **)out_args->arg_values[i];
             jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
             jl_value_t *dims =
                 build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
             bool own_buffer = false;
-            julia_args[i] = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
+            cur_julia_arg = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
                                                           (jl_value_t *)dims, own_buffer);
         }
         else {
@@ -360,6 +373,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                     prefix_, i, in_args->arg_types[i]);
             goto cleanup;
         }
+
+        julia_args[i + 1 + in_num_args] = cur_julia_arg;
     }
 
     jl_function_t *fn;

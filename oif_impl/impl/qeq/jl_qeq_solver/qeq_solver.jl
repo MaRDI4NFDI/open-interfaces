@@ -1,7 +1,11 @@
 module QeqSolver
 export solve!
 
-function solve_qeq!(a, b, c, roots)
+# This solver does not actually require any context, so Self is empty.
+mutable struct Self
+end
+
+function solve_qeq!(self::Self, a::Float64, b::Float64, c::Float64, roots::Vector{Float64})
     if a == 0
         roots[1] = -c / b
         roots[2] = -c / b
