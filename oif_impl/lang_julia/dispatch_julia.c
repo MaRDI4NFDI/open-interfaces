@@ -13,15 +13,20 @@
 
 static char *prefix_ = "dispatch_julia";
 
-enum { BUFFER_SIZE_ = 32 };
+enum {
+    BUFFER_SIZE_ = 32,
+    JULIA_MAX_MODULE_NAME_,
+};
 
 static const char *OIF_IMPL_ROOT_DIR = NULL;
 
 static bool INITIALIZED_ = false;
 
+static jl_module_t *CALLBACK_MODULE_;
+
 typedef struct {
     ImplInfo base;
-    const char *module_name;
+    char module_name[64];
     jl_module_t *module;
 } JuliaImplInfo;
 
@@ -126,11 +131,55 @@ cleanup:
     return tuple;
 }
 
+static jl_value_t *
+make_wrapper_over_c_callback(OIFCallback *p)
+{
+    jl_value_t *wrapper = NULL;
+    if (CALLBACK_MODULE_ == NULL) {
+        char include_statement[512];
+        int nchars_written = snprintf(include_statement, 512, "include(\"%s/oif_impl/lang_julia/callback.jl\")", OIF_IMPL_ROOT_DIR);
+        if (nchars_written >= 512-1) {
+            fprintf(
+                stderr,
+                "[%s] Could not execute include statement for `callback.jl` "
+                "while the provided buffer is only 512 characters, and %d "
+                "characters are supposed to be written\n",
+                prefix_, nchars_written + 1
+            );
+        }
+        jl_eval_string(include_statement);
+        if (jl_exception_occurred()) {
+            handle_exception_();
+            goto cleanup;
+        }
+        jl_eval_string("import .CallbackWrapper");
+        if (jl_exception_occurred()) {
+            handle_exception_();
+            goto cleanup;
+        }
+        CALLBACK_MODULE_ = (jl_module_t *)jl_eval_string("CallbackWrapper");
+        if (jl_exception_occurred()) {
+            handle_exception_();
+            goto cleanup;
+        }
+    }
+
+    jl_function_t *fn_callback = jl_get_function(CALLBACK_MODULE_, "make_wrapper_over_c_callback");   
+    assert(fn_callback != NULL);
+    assert(p->fn_p_c != NULL);
+    jl_value_t *fn_p_c_wrapped = jl_box_voidpointer(p->fn_p_c);
+    wrapper = jl_call1(fn_callback, fn_p_c_wrapped);
+
+cleanup:
+    return wrapper;
+}
+
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
+    int status = 0;
     if (! INITIALIZED_) {
-        int status = init_module_();
+        status = init_module_();
         if (status) {
             return NULL;
         }
@@ -197,7 +246,16 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
                 prefix_);
         goto cleanup;
     }
-    result->module_name = module_name;
+    status = snprintf(result->module_name, JULIA_MAX_MODULE_NAME_, "%s", module_name);
+    if (status < 0 || status >= JULIA_MAX_MODULE_NAME_) {
+        fprintf(
+            stderr, "[%s] Module names in Julia cannot be longer than %d characters\n",
+            prefix_, JULIA_MAX_MODULE_NAME_ - 1
+        );
+        free(result);
+        result = NULL;
+        goto cleanup;
+    }
     result->module = module;
 
     goto cleanup;
@@ -269,10 +327,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                 exit(1);
             }
             else {
-                jl_value_t *fn_callback = jl_get_function(impl_info->module, "callback");   
-                assert(fn_callback != NULL);
-                assert(p->fn_p_c != NULL);
-                jl_value_t *wrapper = jl_call1(fn_callback, p->fn_p_c);
+                jl_value_t *wrapper = make_wrapper_over_c_callback(p);
                 julia_args[i] = wrapper;
             }
         }

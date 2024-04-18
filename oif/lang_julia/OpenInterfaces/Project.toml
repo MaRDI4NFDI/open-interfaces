@@ -1,0 +1,4 @@
+name = "OpenInterfaces"
+uuid = "07cfd324-e924-40a7-85fa-5e46307e7ad7"
+authors = ["Dmitry Kabanov <dmitry.kabanov@uni-muenster.de>"]
+version = "0.1.0"
