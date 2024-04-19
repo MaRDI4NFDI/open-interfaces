@@ -382,25 +382,25 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     // if they modify their arguments.
     // Because the Open Interfaces do not add '!' to the function names,
     // we need to check if the function with the '!' suffix exists.
-    if (out_num_args == 0) {
+    /* if (out_num_args == 0) { */
         fn = jl_get_function(impl_info->module, method);
         if (fn == NULL) {
             fprintf(stderr, "[%s] Could not find method '%s' in implementation with id %d\n",
                     prefix_, method, impl_info->base.implh);
             goto cleanup;
         }
-    }
-    else {
-        char non_pure_method[64];
-        strcpy(non_pure_method, method);
-        strcat(non_pure_method, "!");
-        fn = jl_get_function(impl_info->module, non_pure_method);
-        if (fn == NULL) {
-            fprintf(stderr, "[%s] Could not find method '%s!' in implementation with id %d\n",
-                    prefix_, method, impl_info->base.implh);
-            goto cleanup;
-        }
-    }
+    /* } */
+    /* else { */
+    /*     char non_pure_method[64]; */
+    /*     strcpy(non_pure_method, method); */
+    /*     strcat(non_pure_method, "!"); */
+    /*     fn = jl_get_function(impl_info->module, non_pure_method); */
+    /*     if (fn == NULL) { */
+    /*         fprintf(stderr, "[%s] Could not find method '%s!' in implementation with id %d\n", */
+    /*                 prefix_, method, impl_info->base.implh); */
+    /*         goto cleanup; */
+    /*     } */
+    /* } */
 
     jl_value_t *retval_ = jl_call(fn, julia_args, num_args);
     if (jl_exception_occurred()) {
