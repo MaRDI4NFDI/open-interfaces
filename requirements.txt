@@ -62,7 +62,7 @@ docutils==0.20.1
     #   breathe
     #   myst-parser
     #   sphinx
-exceptiongroup==1.2.0
+exceptiongroup==1.2.1
     # via
     #   ipython
     #   pytest
