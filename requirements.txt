@@ -249,7 +249,7 @@ snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.5
     # via beautifulsoup4
-sphinx==7.2.6
+sphinx==7.3.7
     # via
     #   -r requirements.in
     #   breathe
@@ -283,6 +283,7 @@ tomli==2.0.1
     #   pip-tools
     #   pyproject-hooks
     #   pytest
+    #   sphinx
 tornado==6.3.3
     # via
     #   ipykernel
