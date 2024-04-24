@@ -5,7 +5,7 @@ export solve!
 mutable struct Self
 end
 
-function solve_qeq!(self::Self, a::Float64, b::Float64, c::Float64, roots::Vector{Float64})
+function solve_qeq(self::Self, a::Float64, b::Float64, c::Float64, roots::Vector{Float64})
     if a == 0
         roots[1] = -c / b
         roots[2] = -c / b
