@@ -271,7 +271,6 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 catch:
     handle_exception_();
 
-cleanup:
     free(result);
     result = NULL;
 
@@ -312,10 +311,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     julia_args[0] = impl_info->self;
 
-    printf("call_impl, method = %s\n", method);
     jl_value_t *cur_julia_arg;
     for (int32_t i = 0; i < in_num_args; ++i) {
-        printf("I am processing input argument #%d\n", i);
         if (in_args->arg_types[i] == OIF_FLOAT64) {
             cur_julia_arg = jl_box_float64(*(double *)in_args->arg_values[i]);
         }
@@ -407,9 +404,28 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         handle_exception_();
         goto cleanup;
     }
-    int64_t retval = jl_unbox_int64(retval_);
-    assert(retval == 0);
-    result = 0;
+
+    if (retval_ == jl_nothing) {
+        result = 0;
+    } else {
+        if (jl_typeis(retval_, jl_int64_type)) {
+            result = (int) jl_unbox_int64(retval_);
+        }
+        else if (jl_typeis(retval_, jl_int32_type)) {
+            result = jl_unbox_int32(retval_);
+        }
+        else {
+            fprintf(
+                stderr,
+                "[%s] Return value from calling a Julia implementation's "
+                "method '%s' is not of one of the following types "
+                "{nothing, int32, int64} and cannot be converted.\n",
+                prefix_, method
+            );
+            goto cleanup;
+        }
+    }
+    assert(result == 0);
 
 cleanup:
     JL_GC_POP();
