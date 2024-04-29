@@ -136,7 +136,7 @@ mdurl==0.1.2
     # via markdown-it-py
 myst-nb==1.0.0
     # via -r requirements.in
-myst-parser==2.0.0
+myst-parser==3.0.1
     # via
     #   -r requirements.in
     #   myst-nb
