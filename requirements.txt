@@ -190,7 +190,7 @@ pygments==2.16.1
     #   ipython
     #   rich
     #   sphinx
-pyproject-hooks==1.0.0
+pyproject-hooks==1.1.0
     # via
     #   build
     #   pip-tools
@@ -281,7 +281,6 @@ tomli==2.0.1
     # via
     #   build
     #   pip-tools
-    #   pyproject-hooks
     #   pytest
 tornado==6.3.3
     # via
