@@ -15,30 +15,30 @@ mutable struct Self
     end
 end
 
-function set_initial_value(self::Self, y0, t0)
+function set_initial_value(self::Self, y0, t0)::Int
     self.t0 = t0
     self.y0 = y0
     return 0
 end
 
-function set_rhs_fn(self::Self, rhs)
+function set_rhs_fn(self::Self, rhs)::Int
     self.rhs = rhs
 
     if !isempty(self.y0)
         if !isdefined(self, :user_data)
             self.problem = ODEProblem(
-                rhs_wrapper(rhs), self.y0, (self.t0, Inf)
+                _rhs_wrapper(rhs), self.y0, (self.t0, Inf)
             )
         else
             self.problem = ODEProblem(
-                rhs_wrapper(rhs), self.y0, (self.t0, Inf), self.user_data
+                _rhs_wrapper(rhs), self.y0, (self.t0, Inf), self.user_data
             )
         end
         self.integrator = init(self.problem, Tsit5())
     else
         throw(MethodError("Method `set_initial_value` must be called before `set_rhs_fn`"))
     end
-    println("End of set_rhs_fn")
+    return 0
 end
 
 function set_tolerances(self::Self, rtol::Float64, atol::Float64)::Int
@@ -56,7 +56,7 @@ function set_user_data(self::Self, user_data)::Int
     self.user_data = user_data
 end
 
-function rhs_wrapper(rhs)
+function _rhs_wrapper(rhs)
     function wrapper(du, u, p, t)
         return rhs(t, u, du, p)
     end
