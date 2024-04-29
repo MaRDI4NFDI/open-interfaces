@@ -164,15 +164,15 @@ public: // named queries
   int compare(StringRef rhs) const;
 };
 
-constexpr auto operator""_sr(char const *rawChars, std::size_t size) noexcept
-    -> StringRef {
+constexpr auto operator""_sr(char const *rawChars,
+                             std::size_t size) noexcept -> StringRef {
   return StringRef(rawChars, size);
 }
 } // namespace Catch
 
-constexpr auto operator""_catch_sr(char const *rawChars,
-                                   std::size_t size) noexcept
-    -> Catch::StringRef {
+constexpr auto
+operator""_catch_sr(char const *rawChars,
+                    std::size_t size) noexcept -> Catch::StringRef {
   return Catch::StringRef(rawChars, size);
 }
 
@@ -964,8 +964,8 @@ public:
 
   explicit operator bool() const { return m_transientExpression != nullptr; }
 
-  friend auto operator<<(std::ostream &os, LazyExpression const &lazyExpr)
-      -> std::ostream &;
+  friend auto operator<<(std::ostream &os,
+                         LazyExpression const &lazyExpr) -> std::ostream &;
 };
 
 } // namespace Catch
@@ -2928,9 +2928,9 @@ template <typename T> std::string rawMemoryToString(const T &object) {
 
 template <typename T> class IsStreamInsertable {
   template <typename Stream, typename U>
-  static auto test(int)
-      -> decltype(std::declval<Stream &>() << std::declval<U>(),
-                  std::true_type());
+  static auto test(int) -> decltype(std::declval<Stream &>()
+                                        << std::declval<U>(),
+                                    std::true_type());
 
   template <typename, typename> static auto test(...) -> std::false_type;
 
@@ -4744,9 +4744,9 @@ class ParserBase {
 public:
   virtual ~ParserBase() = default;
   virtual auto validate() const -> Result { return Result::ok(); }
-  virtual auto parse(std::string const &exeName,
-                     TokenStream const &tokens) const
-      -> InternalParseResult = 0;
+  virtual auto
+  parse(std::string const &exeName,
+        TokenStream const &tokens) const -> InternalParseResult = 0;
   virtual size_t cardinality() const;
 
   InternalParseResult parse(Args const &args) const;
@@ -4921,8 +4921,8 @@ public:
 
   void writeToStream(std::ostream &os) const;
 
-  friend auto operator<<(std::ostream &os, Parser const &parser)
-      -> std::ostream & {
+  friend auto operator<<(std::ostream &os,
+                         Parser const &parser) -> std::ostream & {
     parser.writeToStream(os);
     return os;
   }
@@ -5283,8 +5283,8 @@ public:
       typename RhsT,
       std::enable_if_t<
           !std::is_arithmetic<std::remove_reference_t<RhsT>>::value, int> = 0>
-  friend auto operator==(ExprLhs &&lhs, RhsT &&rhs)
-      -> BinaryExpr<LhsT, RhsT const &> {
+  friend auto operator==(ExprLhs &&lhs,
+                         RhsT &&rhs) -> BinaryExpr<LhsT, RhsT const &> {
     return {compareEqual(lhs.m_lhs, rhs), lhs.m_lhs, "=="_sr, rhs};
   }
   template <typename RhsT,
@@ -5297,8 +5297,8 @@ public:
       typename RhsT,
       std::enable_if_t<
           !std::is_arithmetic<std::remove_reference_t<RhsT>>::value, int> = 0>
-  friend auto operator!=(ExprLhs &&lhs, RhsT &&rhs)
-      -> BinaryExpr<LhsT, RhsT const &> {
+  friend auto operator!=(ExprLhs &&lhs,
+                         RhsT &&rhs) -> BinaryExpr<LhsT, RhsT const &> {
     return {compareNotEqual(lhs.m_lhs, rhs), lhs.m_lhs, "!="_sr, rhs};
   }
   template <typename RhsT,
@@ -5313,12 +5313,12 @@ public:
       std::enable_if_t<                                                        \
           !std::is_arithmetic<std::remove_reference_t<RhsT>>::value, int> = 0> \
   friend auto operator op(ExprLhs &&lhs, RhsT &&rhs)                           \
-      -> BinaryExpr<LhsT, RhsT const &> {                                      \
+      ->BinaryExpr<LhsT, RhsT const &> {                                       \
     return {static_cast<bool>(lhs.m_lhs op rhs), lhs.m_lhs, #op##_sr, rhs};    \
   }                                                                            \
   template <typename RhsT,                                                     \
             std::enable_if_t<std::is_arithmetic<RhsT>::value, int> = 0>        \
-  friend auto operator op(ExprLhs &&lhs, RhsT rhs) -> BinaryExpr<LhsT, RhsT> { \
+  friend auto operator op(ExprLhs &&lhs, RhsT rhs)->BinaryExpr<LhsT, RhsT> {   \
     return {static_cast<bool>(lhs.m_lhs op rhs), lhs.m_lhs, #op##_sr, rhs};    \
   }
 
@@ -5333,16 +5333,16 @@ public:
 #undef CATCH_INTERNAL_DEFINE_EXPRESSION_OPERATOR
 
   template <typename RhsT>
-  friend auto operator&&(ExprLhs &&, RhsT &&)
-      -> BinaryExpr<LhsT, RhsT const &> {
+  friend auto operator&&(ExprLhs &&,
+                         RhsT &&) -> BinaryExpr<LhsT, RhsT const &> {
     static_assert(always_false<RhsT>::value,
                   "operator&& is not supported inside assertions, "
                   "wrap the expression inside parentheses, or decompose it");
   }
 
   template <typename RhsT>
-  friend auto operator||(ExprLhs &&, RhsT &&)
-      -> BinaryExpr<LhsT, RhsT const &> {
+  friend auto operator||(ExprLhs &&,
+                         RhsT &&) -> BinaryExpr<LhsT, RhsT const &> {
     static_assert(always_false<RhsT>::value,
                   "operator|| is not supported inside assertions, "
                   "wrap the expression inside parentheses, or decompose it");
@@ -7903,8 +7903,8 @@ table(std::initializer_list<std::tuple<std::decay_t<Ts>...>> tuples) {
 template <typename T> struct as {};
 
 template <typename T, typename... Gs>
-auto makeGenerators(GeneratorWrapper<T> &&generator, Gs &&...moreGenerators)
-    -> Generators<T> {
+auto makeGenerators(GeneratorWrapper<T> &&generator,
+                    Gs &&...moreGenerators) -> Generators<T> {
   return Generators<T>(CATCH_MOVE(generator), CATCH_FORWARD(moreGenerators)...);
 }
 template <typename T>
@@ -7912,8 +7912,8 @@ auto makeGenerators(GeneratorWrapper<T> &&generator) -> Generators<T> {
   return Generators<T>(CATCH_MOVE(generator));
 }
 template <typename T, typename... Gs>
-auto makeGenerators(T &&val, Gs &&...moreGenerators)
-    -> Generators<std::decay_t<T>> {
+auto makeGenerators(T &&val,
+                    Gs &&...moreGenerators) -> Generators<std::decay_t<T>> {
   return makeGenerators(value(CATCH_FORWARD(val)),
                         CATCH_FORWARD(moreGenerators)...);
 }
@@ -10307,8 +10307,8 @@ void handleExceptionMatchExpr(AssertionHandler &handler,
                               StringRef matcherString);
 
 template <typename ArgT, typename MatcherT>
-auto makeMatchExpr(ArgT &&arg, MatcherT const &matcher, StringRef matcherString)
-    -> MatchExpr<ArgT, MatcherT> {
+auto makeMatchExpr(ArgT &&arg, MatcherT const &matcher,
+                   StringRef matcherString) -> MatchExpr<ArgT, MatcherT> {
   return MatchExpr<ArgT, MatcherT>(CATCH_FORWARD(arg), matcher, matcherString);
 }
 
