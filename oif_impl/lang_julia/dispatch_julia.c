@@ -58,15 +58,6 @@ init_module_(void)
         return -1;
     }
 
-    /* void *libjulia = dlopen("libjulia.so", RTLD_GLOBAL); */
-    /* if (libjulia == NULL) { */
-    /*     fprintf( */
-    /*         stderr, */
-    /*         "[%s] Could not open libjulia.so\n", */
-    /*         prefix_ */
-    /*     ); */
-    /*     exit(1); */
-    /* } */
     jl_init();
     static_assert(sizeof(int) == 4, "The code is written in assumption that C int is 32-bit");
 

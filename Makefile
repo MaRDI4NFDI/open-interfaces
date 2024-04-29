@@ -14,7 +14,7 @@ export OIF_IMPL_ROOT_DIR := $(PWD)
 
 .PHONY : all
 all :
-	cmake -S . -B build.debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \
+	cmake -S . -B build.debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && \
 	cmake --build build.debug && \
 	rm -f build && \
 	ln -sv build.debug build
