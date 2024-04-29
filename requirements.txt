@@ -306,7 +306,7 @@ typing-extensions==4.10.0
     #   sqlalchemy
 urllib3==2.2.1
     # via requests
-virtualenv==20.25.1
+virtualenv==20.26.0
     # via pre-commit
 wcwidth==0.2.13
     # via prompt-toolkit
