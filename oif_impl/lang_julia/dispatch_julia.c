@@ -31,15 +31,19 @@ typedef struct {
     jl_value_t *self;
 } JuliaImplInfo;
 
+
 static void
 handle_exception_(void)
 {
     jl_value_t *exc = jl_exception_occurred();
-    jl_value_t *sprint_fun = jl_get_function(jl_base_module, "sprint");
-    jl_value_t *showerror_fun = jl_get_function(jl_base_module, "showerror");
+    jl_value_t *sprint_fn = jl_get_function(jl_base_module, "sprint");
+    jl_value_t *showerror_fn = jl_get_function(jl_base_module, "showerror");
+    jl_value_t *catch_backtrace_fn = jl_get_function(jl_base_module, "catch_backtrace");
 
-    const char *exc_msg = jl_string_ptr(jl_call2(sprint_fun, showerror_fun, exc));
+    jl_value_t *backtrace = jl_call0(catch_backtrace_fn);
+    const char *exc_msg = jl_string_ptr(jl_call3(sprint_fn, showerror_fn, exc, backtrace));
     printf("[%s] ERROR: %s\n", prefix_, exc_msg);
+
     jl_exception_clear();
 }
 
@@ -54,6 +58,15 @@ init_module_(void)
         return -1;
     }
 
+    /* void *libjulia = dlopen("libjulia.so", RTLD_GLOBAL); */
+    /* if (libjulia == NULL) { */
+    /*     fprintf( */
+    /*         stderr, */
+    /*         "[%s] Could not open libjulia.so\n", */
+    /*         prefix_ */
+    /*     ); */
+    /*     exit(1); */
+    /* } */
     jl_init();
     static_assert(sizeof(int) == 4, "The code is written in assumption that C int is 32-bit");
 
@@ -216,7 +229,6 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     char include_statement[1024];
     sprintf(include_statement, "include(\"%s/oif_impl/impl/%s\")", OIF_IMPL_ROOT_DIR, module_filename);
-    printf("Executing in julia: %s\n", include_statement);
     char import_statement[1024];
     sprintf(import_statement, "import .%s", module_name);
 
@@ -225,15 +237,11 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     if (jl_exception_occurred()) {
         goto catch;
     }
-    jl_static_show(jl_stdout_stream(), retval);
-    jl_printf(jl_stdout_stream(), "\n");
 
     retval = jl_eval_string(import_statement);
     if (jl_exception_occurred()) {
         goto catch;
     }
-    jl_static_show(jl_stdout_stream(), retval);
-    jl_printf(jl_stdout_stream(), "\n");
 
     jl_module_t *module = (jl_module_t *)jl_eval_string(module_name);
     if (jl_exception_occurred()) {
@@ -375,29 +383,12 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     }
 
     jl_function_t *fn;
-    // It is customary for the Julia code to suffix function names with '!'
-    // if they modify their arguments.
-    // Because the Open Interfaces do not add '!' to the function names,
-    // we need to check if the function with the '!' suffix exists.
-    /* if (out_num_args == 0) { */
-        fn = jl_get_function(impl_info->module, method);
-        if (fn == NULL) {
-            fprintf(stderr, "[%s] Could not find method '%s' in implementation with id %d\n",
-                    prefix_, method, impl_info->base.implh);
-            goto cleanup;
-        }
-    /* } */
-    /* else { */
-    /*     char non_pure_method[64]; */
-    /*     strcpy(non_pure_method, method); */
-    /*     strcat(non_pure_method, "!"); */
-    /*     fn = jl_get_function(impl_info->module, non_pure_method); */
-    /*     if (fn == NULL) { */
-    /*         fprintf(stderr, "[%s] Could not find method '%s!' in implementation with id %d\n", */
-    /*                 prefix_, method, impl_info->base.implh); */
-    /*         goto cleanup; */
-    /*     } */
-    /* } */
+    fn = jl_get_function(impl_info->module, method);
+    if (fn == NULL) {
+        fprintf(stderr, "[%s] Could not find method '%s' in implementation with id %d\n",
+                prefix_, method, impl_info->base.implh);
+        goto cleanup;
+    }
 
     jl_value_t *retval_ = jl_call(fn, julia_args, num_args);
     if (jl_exception_occurred()) {
