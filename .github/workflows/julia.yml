@@ -34,7 +34,7 @@ jobs:
               with:
                   version: ${{ matrix.version }}
             - run: julia -e 'using InteractiveUtils; versioninfo(verbose=true)'
-            - uses: julia-actions/cache@v1
+            - uses: julia-actions/cache@v2
             - uses: actions/setup-python@v4
               with:
                   # 3.9 current max for which bin wheel on windows exist
