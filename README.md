@@ -1,10 +1,23 @@
-# Description
+# MaRDI Open Interfaces
 
-This repository contains toy example that I am working on to understand
-how to develop `open-interface` project within MaRDI initiative.
+MaRDI Open Interfaces is a project aiming to improve interoperability
+in scientific computing by removing two hurdles that computational scientists
+usually face in their daily work.
 
-This toy example investigates how to connect users using Python with software
-written in C and Python using a broker library in-between.
+These hurdles are the following.
+First, numerical solvers are often implemented in different programming
+languages.
+Second, these solvers have potentially significantly diverging interfaces
+in terms of function names, order of function arguments, and the invokation
+order.
+Therefore, when a computational scientist wants to switch from one solver
+to another, it could take non-negligible effort in code modification
+and testing for the correctness.
+
+Open Interfaces aim to alleviate these problems by providing automatic data
+marshalling between different languages and a set of interfaces for typical
+numerical problems such as integration of differential equations and 
+optimization.
 
 
 ## Installation for development
