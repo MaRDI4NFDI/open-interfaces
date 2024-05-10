@@ -16,7 +16,7 @@ and testing for the correctness.
 
 Open Interfaces aim to alleviate these problems by providing automatic data
 marshalling between different languages and a set of interfaces for typical
-numerical problems such as integration of differential equations and 
+numerical problems such as integration of differential equations and
 optimization.
 
 
