@@ -31,7 +31,6 @@ typedef struct {
     jl_value_t *self;
 } JuliaImplInfo;
 
-
 static void
 handle_exception_(void)
 {
@@ -142,15 +141,15 @@ make_wrapper_over_c_callback(OIFCallback *p)
     jl_value_t *wrapper = NULL;
     if (CALLBACK_MODULE_ == NULL) {
         char include_statement[512];
-        int nchars_written = snprintf(include_statement, 512, "include(\"%s/oif_impl/lang_julia/callback.jl\")", OIF_IMPL_ROOT_DIR);
-        if (nchars_written >= 512-1) {
-            fprintf(
-                stderr,
-                "[%s] Could not execute include statement for `callback.jl` "
-                "while the provided buffer is only 512 characters, and %d "
-                "characters are supposed to be written\n",
-                prefix_, nchars_written + 1
-            );
+        int nchars_written =
+            snprintf(include_statement, 512, "include(\"%s/oif_impl/lang_julia/callback.jl\")",
+                     OIF_IMPL_ROOT_DIR);
+        if (nchars_written >= 512 - 1) {
+            fprintf(stderr,
+                    "[%s] Could not execute include statement for `callback.jl` "
+                    "while the provided buffer is only 512 characters, and %d "
+                    "characters are supposed to be written\n",
+                    prefix_, nchars_written + 1);
         }
         jl_eval_string(include_statement);
         if (jl_exception_occurred()) {
@@ -169,7 +168,8 @@ make_wrapper_over_c_callback(OIFCallback *p)
         }
     }
 
-    jl_function_t *fn_callback = jl_get_function(CALLBACK_MODULE_, "make_wrapper_over_c_callback");   
+    jl_function_t *fn_callback =
+        jl_get_function(CALLBACK_MODULE_, "make_wrapper_over_c_callback");
     assert(fn_callback != NULL);
     assert(p->fn_p_c != NULL);
     jl_value_t *fn_p_c_wrapped = jl_box_voidpointer(p->fn_p_c);
@@ -183,7 +183,7 @@ ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
     int status = 0;
-    if (! INITIALIZED_) {
+    if (!INITIALIZED_) {
         status = init_module_();
         if (status) {
             return NULL;
@@ -219,7 +219,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix_, module_name);
 
     char include_statement[1024];
-    sprintf(include_statement, "include(\"%s/oif_impl/impl/%s\")", OIF_IMPL_ROOT_DIR, module_filename);
+    sprintf(include_statement, "include(\"%s/oif_impl/impl/%s\")", OIF_IMPL_ROOT_DIR,
+            module_filename);
     char import_statement[1024];
     sprintf(import_statement, "import .%s", module_name);
 
@@ -248,10 +249,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     }
     status = snprintf(result->module_name, JULIA_MAX_MODULE_NAME_, "%s", module_name);
     if (status < 0 || status >= JULIA_MAX_MODULE_NAME_) {
-        fprintf(
-            stderr, "[%s] Module names in Julia cannot be longer than %d characters\n",
-            prefix_, JULIA_MAX_MODULE_NAME_ - 1
-        );
+        fprintf(stderr, "[%s] Module names in Julia cannot be longer than %d characters\n",
+                prefix_, JULIA_MAX_MODULE_NAME_ - 1);
         goto catch;
     }
     result->module = module;
@@ -267,8 +266,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     goto finally;
 
-catch:
-    handle_exception_();
+    catch : handle_exception_();
 
     free(result);
     result = NULL;
@@ -321,17 +319,13 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             jl_value_t *dims =
                 build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
             bool own_buffer = false;
-            cur_julia_arg =
-                (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data, (jl_value_t *)dims, own_buffer);
+            cur_julia_arg = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
+                                                          (jl_value_t *)dims, own_buffer);
         }
         else if (in_args->arg_types[i] == OIF_CALLBACK) {
             OIFCallback *p = in_args->arg_values[i];
             if (p->src == OIF_LANG_JULIA) {
-                fprintf(
-                    stderr,
-                    "[%s] This code path is not implemented yet\n",
-                    prefix_
-                );
+                fprintf(stderr, "[%s] This code path is not implemented yet\n", prefix_);
                 exit(1);
             }
             else {
@@ -389,21 +383,20 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     if (retval_ == jl_nothing) {
         result = 0;
-    } else {
+    }
+    else {
         if (jl_typeis(retval_, jl_int64_type)) {
-            result = (int) jl_unbox_int64(retval_);
+            result = (int)jl_unbox_int64(retval_);
         }
         else if (jl_typeis(retval_, jl_int32_type)) {
             result = jl_unbox_int32(retval_);
         }
         else {
-            fprintf(
-                stderr,
-                "[%s] Return value from calling a Julia implementation's "
-                "method '%s' is not of one of the following types "
-                "{nothing, int32, int64} and cannot be converted.\n",
-                prefix_, method
-            );
+            fprintf(stderr,
+                    "[%s] Return value from calling a Julia implementation's "
+                    "method '%s' is not of one of the following types "
+                    "{nothing, int32, int64} and cannot be converted.\n",
+                    prefix_, method);
             goto cleanup;
         }
     }

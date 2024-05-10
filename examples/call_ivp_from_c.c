@@ -16,8 +16,7 @@ parse_impl(int argc, char *argv[])
     }
     else {
         if ((strcmp(argv[1], "scipy_ode_dopri5") == 0) ||
-            (strcmp(argv[1], "sundials_cvode") == 0) ||
-            (strcmp(argv[1], "jl_diffeq") == 0)) {
+            (strcmp(argv[1], "sundials_cvode") == 0) || (strcmp(argv[1], "jl_diffeq") == 0)) {
             return argv[1];
         }
         else {
