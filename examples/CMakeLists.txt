@@ -20,3 +20,11 @@ target_include_directories(call_ivp_from_c
 target_include_directories(call_ivp_from_c
                            PRIVATE ${CMAKE_SOURCE_DIR}/oif/interfaces/c/include)
 target_link_libraries(call_ivp_from_c PRIVATE oif_c)
+
+add_executable(call_ivp_from_c_burgers_eq call_ivp_from_c_burgers_eq.c)
+target_include_directories(call_ivp_from_c
+                           PRIVATE ${CMAKE_SOURCE_DIR}/oif/include)
+target_include_directories(call_ivp_from_c
+                           PRIVATE ${CMAKE_SOURCE_DIR}/oif/interfaces/c/include)
+target_link_libraries(call_ivp_from_c_burgers_eq PRIVATE oif_c)
+target_link_libraries(call_ivp_from_c_burgers_eq PRIVATE m)
