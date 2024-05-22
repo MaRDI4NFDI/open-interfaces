@@ -1,3 +1,14 @@
+/**
+ * To plot the solution, use the following Python code:
+ * import matplotlib.pyplot as plt
+ * import numpy as np
+ *
+ * u = np.loadtxt("solution.txt")
+ *
+ * plt.figure()
+ * plt.plot(u, "-")
+ * plt.show()
+ */
 #include <assert.h>
 #include <math.h>
 #include <stdint.h>
