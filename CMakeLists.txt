@@ -11,6 +11,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 endif()
 
+# Incorporate additions by X/Open 7, that includes POSIX 17 additions
+# and allow to use things like the `M_PI` constant in the code
+# without warnings from static analyzers.
+add_compile_definitions(_XOPEN_SOURCE=700)
+
 # DOWNLOAD_EXTRACT_TIMESTAMP = TRUE
 if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
