@@ -65,21 +65,23 @@ rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void *user_data)
 {
     (void)t;         /* Unused */
     (void)user_data; /* Unused */
+    int retval = 1;
     intptr_t N = y->dimensions[0];
+    assert(N > 1);
 
     double *u = y->data;
     double *udot = rhs_out->data;
 
     double dx = *((double *) user_data);
 
-    double *f = malloc(N * sizeof(double));
-    if (f == NULL) {
+    double *flux = malloc(N * sizeof(double));
+    if (flux == NULL) {
         fprintf(stderr, "Could not allocate memory for the flux array\n");
-        return 1;
+        return retval;
     }
 
     for (int i = 0; i < N; ++i) {
-        f[i] = 0.5 * pow(u[i], 2.0);
+        flux[i] = 0.5 * pow(u[i], 2.0);
     }
 
     double local_sound_speed = 0.0;
@@ -89,27 +91,38 @@ rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void *user_data)
         }
     }
 
-    double *f_hat = malloc((N - 1) * sizeof(double));
-    if (f_hat == NULL) {
-        fprintf(stderr, "Could not allocate memory for f_hat\n");
-        return 1;
+    double *flux_hat = malloc((N - 1) * sizeof(double));
+    if (flux_hat == NULL) {
+        fprintf(stderr, "Could not allocate memory for flux_hat\n");
+        retval = 1;
+        goto cleanup;
     }
 
     for (int i = 0; i < N - 1; ++i) {
-        f_hat[i] = 0.5 * (f[i] + f[i + 1]) -
-                   0.5 * local_sound_speed * (u[i + 1] - u[i]);
+        flux_hat[i] = 0.5 * (flux[i] + flux[i + 1]) -
+            0.5 * local_sound_speed * (u[i + 1] - u[i]);
     }
 
     for (int i = 1; i < N - 1; ++i) {
-        udot[i] = -1.0 / dx * (f_hat[i] - f_hat[i - 1]);
+        udot[i] = -1.0 / dx * (flux_hat[i] - flux_hat[i - 1]);
     }
-    double f_rb = 0.5 * (f[0] + f[N-1]) -
+    double f_rb = 0.5 * (flux[0] + flux[N-1]) -
         0.5 * local_sound_speed * (u[0] - u[N-1]);
     double f_lb = f_rb;
-    udot[0] = -1.0 / dx * (f_hat[0] - f_lb);
-    udot[N - 1] = -1.0 / dx * (f_rb - f_hat[N-2]);
+    udot[0] = -1.0 / dx * (flux_hat[0] - f_lb);
+    udot[N - 1] = -1.0 / dx * (f_rb - flux_hat[N-2]);
 
-    return 0;
+    retval = 0;
+
+cleanup:
+    if (flux != NULL) {
+        free(flux);
+    }
+    if (flux_hat != NULL) {
+        free(flux_hat);
+    }
+
+    return retval;
 }
 
 int
