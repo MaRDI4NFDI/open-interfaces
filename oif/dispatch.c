@@ -24,6 +24,14 @@ static char OIF_DISPATCH_JULIA_SO[] = "liboif_dispatch_julia.so";
 
 static const char *OIF_IMPL_ROOT_DIR;
 
+static char *OIF_LANG_FROM_LANG_ID[] = {
+    [OIF_LANG_C] = "C",
+    [OIF_LANG_CXX] = "C++",
+    [OIF_LANG_PYTHON] = "Python",
+    [OIF_LANG_JULIA] = "Julia",
+    [OIF_LANG_R] = "R",
+};
+
 /**
  * Array of handles to the dynamically loaded libraries
  * for the language-specific dispatches.
@@ -225,9 +233,9 @@ unload_interface_impl(ImplHandle implh)
     DispatchHandle dh = impl_info->dh;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
         fprintf(stderr,
-                "[dispatch] Cannot unload interface implementation for language "
-                "id: '%u'\n",
-                dh);
+                "[dispatch] Cannot unload interface implementation "
+                "for language '%s'\n",
+                OIF_LANG_FROM_LANG_ID[dh]);
         exit(EXIT_FAILURE);
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
@@ -236,9 +244,9 @@ unload_interface_impl(ImplHandle implh)
     unload_impl_fn = dlsym(lib_handle, "unload_impl");
     if (unload_impl_fn == NULL) {
         fprintf(stderr,
-                "[dispatch] Cannot find function 'unload_impl' for lang"
-                "id: '%u'\n",
-                dh);
+                "[dispatch] Cannot find function 'unload_impl' "
+                "for language '%s'\n",
+                OIF_LANG_FROM_LANG_ID[dh]);
         return -1;
     }
     unload_impl_fn(impl_info);
@@ -256,9 +264,9 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
     DispatchHandle dh = impl_info->dh;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
         fprintf(stderr,
-                "[dispatch] Cannot call interface implementation for language "
-                "id: '%u'",
-                dh);
+                "[dispatch] Cannot call interface implementation "
+                "for language '%s'\n",
+                OIF_LANG_FROM_LANG_ID[dh]);
         exit(EXIT_FAILURE);
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
@@ -268,8 +276,8 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
     if (call_impl_fn == NULL) {
         fprintf(stderr,
                 "[dispatch] Could not load function 'call_impl' "
-                "for language id '%u'\n",
-                dh);
+                "for language '%s'\n",
+                OIF_LANG_FROM_LANG_ID[dh]);
         return -1;
     }
     status = call_impl_fn(impl_info, method, in_args, out_args);
