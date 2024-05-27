@@ -25,11 +25,8 @@ static char OIF_DISPATCH_JULIA_SO[] = "liboif_dispatch_julia.so";
 static const char *OIF_IMPL_ROOT_DIR;
 
 static char *OIF_LANG_FROM_LANG_ID[] = {
-    [OIF_LANG_C] = "C",
-    [OIF_LANG_CXX] = "C++",
-    [OIF_LANG_PYTHON] = "Python",
-    [OIF_LANG_JULIA] = "Julia",
-    [OIF_LANG_R] = "R",
+    [OIF_LANG_C] = "C",         [OIF_LANG_CXX] = "C++", [OIF_LANG_PYTHON] = "Python",
+    [OIF_LANG_JULIA] = "Julia", [OIF_LANG_R] = "R",
 };
 
 /**
