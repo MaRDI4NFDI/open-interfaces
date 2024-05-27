@@ -19,6 +19,19 @@ marshalling between different languages and a set of interfaces for typical
 numerical problems such as integration of differential equations and
 optimization.
 
+## Data flow
+
+![Architecture of MaRDI Open Interfaces](assets/arch.png)
+
+This figure shows the architecture of the software in MaRDI Open Interfaces.
+There are two principal decoupled parts. The left part is user-facing
+and allows a user to request an implementation of some numerical procedure
+and then invoke different functions in this implementation to conduct
+computations using a unified interface that hides discrepancies between
+different implementations.
+The other one is hidden and works with an implementation of the interface.
+Particularly, it loads the implementation and its adapter and converts
+user data to the native data for the implementation.
 
 ## Installation for development
 
