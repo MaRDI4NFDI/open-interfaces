@@ -39,11 +39,11 @@ parse_impl(int argc, char *argv[])
 }
 
 static int
-compute_initial_condition_(size_t N, OIFArrayF64 *u0, double *dx, double *dt_max)
+compute_initial_condition_(size_t N, OIFArrayF64 *u0, OIFArrayF64 *grid, double *dx, double *dt_max)
 {
     double a = 0.0;
     double b = 2.0;
-    double *x = malloc(N * sizeof(double));
+    double *x = grid->data;
     *dx = (b - a) / N;
     
     for (int i = 0; i < N; ++i) {
@@ -133,74 +133,83 @@ main(int argc, char *argv[])
     printf("where the system comes from inviscid 1D Burgers' equation\n");
     printf("Implementation: %s\n", impl);
 
+    int retval = 0;
     int N = 101;
     double t0 = 0.0;
     double t_final = 2.0;
     OIFArrayF64 *y0 = oif_create_array_f64(1, (intptr_t[1]){N});
-
+    // Solution vector.
+    OIFArrayF64 *y = oif_create_array_f64(1, (intptr_t[1]){N});
+    // Grid
+    OIFArrayF64 *grid = oif_create_array_f64(1, (intptr_t[1]){N});
     double dx;
     double dt_max;
     int status = 1;  // Aux variable to check for errors.
 
-    status = compute_initial_condition_(N, y0, &dx, &dt_max);
+
+    status = compute_initial_condition_(N, y0, grid, &dx, &dt_max);
     assert(status == 0);
 
     ImplHandle implh = oif_init_impl("ivp", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
         fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
-        return EXIT_FAILURE;
+        retval = EXIT_FAILURE;
+        goto cleanup;
     }
 
     status = oif_ivp_set_initial_value(implh, y0, t0);
     if (status) {
         fprintf(stderr, "oif_ivp_set_set_initial_value returned error\n");
-        return EXIT_FAILURE;
+        retval = EXIT_FAILURE;
+        goto cleanup;
     }
     status = oif_ivp_set_rhs_fn(implh, rhs);
     if (status) {
         fprintf(stderr, "oif_ivp_set_rhs_fn returned error\n");
-        return EXIT_FAILURE;
+        retval = EXIT_FAILURE;
+        goto cleanup;
     }
 
     status = oif_ivp_set_user_data(implh, &dx);
     if (status) {
         fprintf(stderr, "oif_ivp_set_user_data return error\n");
-        return EXIT_FAILURE;
+        retval = EXIT_FAILURE;
+        goto cleanup;
     }
 
-    // Solution vector.
-    OIFArrayF64 *y = oif_create_array_f64(1, (intptr_t[1]){N});
     // Time step.
     double dt = dt_max;
     int n_time_steps = (int) (t_final / dt + 1);
     for (int i = 0; i < n_time_steps; ++i) {
-        printf("%d\n", i);
         double t = t0 + (i + 1) * dt;
         if (t > t_final) {
             t = t_final;
         }
         status = oif_ivp_integrate(implh, t, y);
         if (status) {
-            oif_free_array_f64(y0);
-            oif_free_array_f64(y);
             fprintf(stderr, "oif_ivp_integrate returned error\n");
-            return EXIT_FAILURE;
+            retval = EXIT_FAILURE;
+            goto cleanup;
         }
     }
 
-    FILE *fp = fopen("solution.txt", "w");
+    FILE *fp = fopen("solution.txt", "w+e");
     if (fp == NULL) {
         fprintf(stderr, "Could not open file for writing\n");
-        return 1;
+        retval = EXIT_FAILURE;
+        goto cleanup;
     }
     for (int i = 0; i < N; ++i) {
-        fprintf(fp, "%.8f\n", y->data[i]);
+        fprintf(fp, "%.8f %.8f\n", grid->data[i], y->data[i]);
     }
     fclose(fp);
+    printf("Solution is written to file `solution.txt`\n");
 
+cleanup:
     oif_free_array_f64(y0);
     oif_free_array_f64(y);
+    oif_free_array_f64(grid);
 
-    return 0;
+    return retval;
 }
 
