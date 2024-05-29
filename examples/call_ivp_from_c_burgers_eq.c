@@ -39,6 +39,17 @@ parse_impl(int argc, char *argv[])
     }
 }
 
+char *
+parse_output_filename(int argc, char *argv[])
+{
+    if (argc == 1 || argc == 2) {
+        return "solution.txt";
+    }
+    else {
+        return argv[2];
+    }
+}
+
 static int
 compute_initial_condition_(size_t N, OIFArrayF64 *u0, OIFArrayF64 *grid, double *dx,
                            double *dt_max)
@@ -130,6 +141,7 @@ int
 main(int argc, char *argv[])
 {
     char *impl = parse_impl(argc, argv);
+    const char *output_filename = parse_output_filename(argc, argv);
     printf("Calling from C an open interface for solving y'(t) = f(t, y)\n");
     printf("where the system comes from inviscid 1D Burgers' equation\n");
     printf("Implementation: %s\n", impl);
@@ -192,9 +204,9 @@ main(int argc, char *argv[])
         }
     }
 
-    FILE *fp = fopen("solution.txt", "w+e");
+    FILE *fp = fopen(output_filename, "w+e");
     if (fp == NULL) {
-        fprintf(stderr, "Could not open file for writing\n");
+        fprintf(stderr, "Could not open file '%s' for writing\n", output_filename);
         retval = EXIT_FAILURE;
         goto cleanup;
     }
@@ -202,7 +214,7 @@ main(int argc, char *argv[])
         fprintf(fp, "%.8f %.8f\n", grid->data[i], y->data[i]);
     }
     fclose(fp);
-    printf("Solution is written to file `solution.txt`\n");
+    printf("Solution was written to file `%s`\n", output_filename);
 
 cleanup:
     oif_free_array_f64(y0);
