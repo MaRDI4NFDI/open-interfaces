@@ -9,7 +9,7 @@ mutable struct Self
     rhs
     problem
     integrator
-    user_data::Tuple
+    user_data
     function Self()
         return new(0.0, [])
     end
@@ -52,8 +52,9 @@ function integrate(self::Self, t::Float64, y::Vector{Float64})::Int
     return 0
 end
 
-function set_user_data(self::Self, user_data)::Int
+function set_user_data(self::Self, user_data)
     self.user_data = user_data
+    return 0
 end
 
 function _rhs_wrapper(rhs)
