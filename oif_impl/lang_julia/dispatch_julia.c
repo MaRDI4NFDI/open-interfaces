@@ -310,6 +310,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     jl_value_t *cur_julia_arg;
     for (int32_t i = 0; i < in_num_args; ++i) {
+        cur_julia_arg = NULL;
         if (in_args->arg_types[i] == OIF_FLOAT64) {
             cur_julia_arg = jl_box_float64(*(double *)in_args->arg_values[i]);
         }
@@ -333,7 +334,35 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                 cur_julia_arg = wrapper;
             }
         }
-        else {
+        else if (in_args->arg_types[i] == OIF_USER_DATA) {
+            OIFUserData *user_data = in_args->arg_values[i];
+            if (user_data->src == OIF_LANG_C) {
+                // Treat the argument as a raw pointer.
+                cur_julia_arg = jl_box_voidpointer(user_data->c);
+            }
+            else if (user_data->src == OIF_LANG_PYTHON) {
+                fprintf(
+                        stderr,
+                        "[%s] Dealing with OIF_USER_DATA type "
+                        "from Python Not implemented\n",
+                        prefix_
+                );
+            }
+            else if (user_data->src == OIF_LANG_JULIA) {
+                fprintf(
+                        stderr,
+                        "[%s] Dealing with OIF_USER_DATA type "
+                        "from Julia Not implemented\n",
+                        prefix_
+                );
+            }
+            else {
+                fprintf(stderr, "[%s] Cannot handle user data with src "
+                        "language id '%d'\n", prefix_, user_data->src);
+                cur_julia_arg = NULL;
+            }
+        }
+        if (cur_julia_arg == NULL) {
             fprintf(stderr,
                     "[%s] Cannot convert input argument #%d with "
                     "provided type id %d\n",
