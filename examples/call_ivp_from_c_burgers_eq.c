@@ -163,16 +163,15 @@ main(int argc, char *argv[])
         retval = EXIT_FAILURE;
         goto cleanup;
     }
-    status = oif_ivp_set_rhs_fn(implh, rhs);
-    if (status) {
-        fprintf(stderr, "oif_ivp_set_rhs_fn returned error\n");
-        retval = EXIT_FAILURE;
-        goto cleanup;
-    }
-
     status = oif_ivp_set_user_data(implh, &dx);
     if (status) {
         fprintf(stderr, "oif_ivp_set_user_data return error\n");
+        retval = EXIT_FAILURE;
+        goto cleanup;
+    }
+    status = oif_ivp_set_rhs_fn(implh, rhs);
+    if (status) {
+        fprintf(stderr, "oif_ivp_set_rhs_fn returned error\n");
         retval = EXIT_FAILURE;
         goto cleanup;
     }
