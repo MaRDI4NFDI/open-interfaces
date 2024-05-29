@@ -384,23 +384,31 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     if (retval_ == jl_nothing) {
         result = 0;
     }
-    else {
-        if (jl_typeis(retval_, jl_int64_type)) {
-            result = (int)jl_unbox_int64(retval_);
-        }
-        else if (jl_typeis(retval_, jl_int32_type)) {
-            result = jl_unbox_int32(retval_);
-        }
-        else {
-            fprintf(stderr,
-                    "[%s] Return value from calling a Julia implementation's "
-                    "method '%s' is not of one of the following types "
-                    "{nothing, int32, int64} and cannot be converted.\n",
-                    prefix_, method);
-            goto cleanup;
-        }
+    else if (jl_typeis(retval_, jl_int64_type)) {
+        result = (int)jl_unbox_int64(retval_);
     }
-    assert(result == 0);
+    else if (jl_typeis(retval_, jl_int32_type)) {
+        result = jl_unbox_int32(retval_);
+    }
+    else {
+        fprintf(stderr,
+                "[%s] Return value from calling a Julia implementation's "
+                "method '%s' is not of one of the following types "
+                "{nothing, int32, int64} and cannot be converted. "
+                "Make sure that the method returns zero or `nothing` "
+                "if there were no errors.\n",
+                prefix_, method);
+        goto cleanup;
+    }
+
+    if (result != 0) {
+        fprintf(stderr,
+            "[%s] Return value from calling a Julia's implementation's "
+            "method '%s' is non-zero, therefore, there was an error "
+            "during the call; check the above messages for the actual "
+            "error message\n", prefix_, method
+        );
+    }
 
 cleanup:
     JL_GC_POP();
