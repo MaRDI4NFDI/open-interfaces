@@ -268,7 +268,9 @@ def run_all_impl(args):
                 elapsed_time = _run_once(impl, N, plot_solution=False)
                 tts_list[impl][N].append(elapsed_time)
 
-    analyze(tts_list)
+    tts_stats = compute_stats(tts_list)
+    print_stats(tts_stats)
+    plot(tts_stats)
 
     with open(RESULT_DATA_PICKLE, "wb") as fh:
         pickle.dump(tts_list, fh)
@@ -276,7 +278,7 @@ def run_all_impl(args):
     return tts_list
 
 
-def analyze(tts_list):
+def compute_stats(tts_list):
     print("================================================================")
     print("Statistics:")
     tts_stats = {}
@@ -292,6 +294,10 @@ def analyze(tts_list):
             tts_stats[impl][N]["tts_ave"] = tts_ave
             tts_stats[impl][N]["tts_std"] = tts_std
 
+    return tts_stats
+
+
+def print_stats(tts_stats):
     col_sep = 5 * " "
     print(
         "{:^24s} ".format("N")
@@ -310,6 +316,8 @@ def analyze(tts_list):
             )
         )
 
+
+def plot(tts_stats):
     plt.figure()
     for impl in IMPL_LIST:
         tts_ave = [tts_stats[impl][N]["tts_ave"] for N in RESOLUTIONS]
