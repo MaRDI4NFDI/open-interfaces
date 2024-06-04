@@ -265,6 +265,10 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
                                                    arr->data);
             }
+            else if (in_args->arg_types[i] == OIF_STR) {
+                char *c_str = *((char **) in_args->arg_values[i]);
+                pValue = PyUnicode_FromString(c_str);
+            }
             else if (in_args->arg_types[i] == OIF_CALLBACK) {
                 OIFCallback *p = in_args->arg_values[i];
                 if (p->src == OIF_LANG_PYTHON) {
