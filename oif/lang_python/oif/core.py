@@ -184,6 +184,11 @@ class OIFPyBinding:
                 )
                 arg_values.append(oif_array_p_p)
                 arg_types.append(OIF_ARRAY_F64)
+            elif isinstance(arg, str):
+                arg_p = ctypes.pointer(ctypes.c_char_p(arg.encode()))
+                arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
+                arg_values.append(arg_void_p)
+                arg_types.append(OIF_STR)
             elif isinstance(arg, OIFCallback):
                 argp = ctypes.pointer(arg)
                 arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
