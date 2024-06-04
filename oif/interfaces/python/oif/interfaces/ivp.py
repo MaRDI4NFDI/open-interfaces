@@ -47,6 +47,9 @@ class IVP:
     def integrate(self, t):
         self._binding.call("integrate", (t,), (self.y,))
 
+    def set_integrator(self, integrator_name):
+        self._binding.call("set_integrator", (integrator_name,), ())
+
     def print_stats(self):
         self._binding.call("print_stats", (), ())
 

@@ -196,6 +196,23 @@ class TestIVP:
         true_value = p.exact(t1)
         npt.assert_allclose(final_value, true_value, 1e-5, 1e-6)
 
+    def test_5__check_that_we_can_set_integrator(self, p):
+        s = IVP("scipy_ode_dopri5")
+        dt = 0.25
+
+        s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
+
+        s.integrate(p.t0 + dt)
+        value_1 = s.y
+
+        s.set_integrator("vode")
+        s.set_initial_value(p.y0, p.t0)
+        s.integrate(p.t0 + dt)
+        value_2 = s.y
+
+        npt.assert_allclose(value_1, value_2, 1e-5, 1e-6)
+
 
 @pytest.fixture(
     params=[
