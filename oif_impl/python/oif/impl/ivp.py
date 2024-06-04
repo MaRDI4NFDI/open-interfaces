@@ -24,3 +24,7 @@ class IVPInterface(abc.ABC):
     @abc.abstractmethod
     def set_user_data(self, user_data: object) -> Union[int, None]:
         """Specify additional data that will be used for right-hand side function."""
+
+    @abc.abstractmethod
+    def set_integrator(self, integrator_name: str) -> Union[int, None]:
+        """Set integrator, if the name is recognizable."""

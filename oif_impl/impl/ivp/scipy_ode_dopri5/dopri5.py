@@ -11,6 +11,8 @@ class Dopri5(IVPInterface):
         self.N = 0  # Problem dimension.
         self.s = None
         self.user_data = None
+        self.rtol = 1e-15
+        self.atol = 1e-15
 
     def set_initial_value(self, y0: np.ndarray, t0: float):
         _p = f"[{_prefix}::set_initial_value]"
@@ -33,7 +35,7 @@ class Dopri5(IVPInterface):
         assert len(self._rhs_fn_wrapper(42.0, x)) == len(x), msg
 
         self.s = integrate.ode(self._rhs_fn_wrapper).set_integrator(
-            "dopri5", atol=1e-15, rtol=1e-15, nsteps=1000
+            "dopri5", atol=self.atol, rtol=self.rtol, nsteps=1000
         )
         self.s.set_initial_value(self.y0, self.t0)
 
@@ -47,6 +49,8 @@ class Dopri5(IVPInterface):
         if self.s is None:
             raise RuntimeError("`set_rhs_fn` must be called before `set_tolerances`")
         self.s.set_integrator("dopri5", rtol=rtol, atol=atol, nsteps=1000)
+        self.rtol = rtol
+        self.atol = atol
         if hasattr(self, "y0"):
             self.s.set_initial_value(self.y0, self.t0)
         return 0
@@ -62,6 +66,22 @@ class Dopri5(IVPInterface):
     def integrate(self, t, y):
         y[:] = self.s.integrate(t)
         assert self.s.successful()
+        return 0
+
+    def set_integrator(self, integrator_name):
+        if self.s is None:
+            raise RuntimeError("`set_integrator` must be called after `set_rhs_fn`")
+        integrator = integrate._ode.find_integrator(integrator_name)
+        if integrator is None:
+            raise RuntimeError(
+                "`set_integrator` received unknown integrator "
+                "name {:s}".format(integrator_name)
+            )
+        self.s.set_integrator(
+            integrator_name, rtol=self.rtol, atol=self.atol, nsteps=1000
+        )
+        if hasattr(self, "y0"):
+            self.s.set_initial_value(self.y0, self.t0)
         return 0
 
     def _rhs_fn_wrapper(self, t, y):
