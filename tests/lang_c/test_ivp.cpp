@@ -185,7 +185,7 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase)
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsFixture,
                          testing::Combine(testing::Values("sundials_cvode",
-                                                          "scipy_ode_dopri5"),
+                                                          "scipy_ode"),
                                           testing::Values(new ScalarExpDecayProblem(),
                                                           new LinearOscillatorProblem(),
                                                           new OrbitEquationsProblem())));

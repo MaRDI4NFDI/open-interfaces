@@ -2,10 +2,10 @@ import numpy as np
 from oif.impl.ivp import IVPInterface
 from scipy import integrate
 
-_prefix = "scipy_ode_dopri5"
+_prefix = "scipy_ode"
 
 
-class Dopri5(IVPInterface):
+class ScipyODE(IVPInterface):
     def __init__(self):
         self.rhs = None  # Right-hand side function.
         self.N = 0  # Problem dimension.
