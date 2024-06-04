@@ -197,7 +197,7 @@ class TestIVP:
         npt.assert_allclose(final_value, true_value, 1e-5, 1e-6)
 
     def test_5__check_that_we_can_set_integrator(self, p):
-        s = IVP("scipy_ode_dopri5")
+        s = IVP("scipy_ode")
         dt = 0.25
 
         s.set_initial_value(p.y0, p.t0)
@@ -214,7 +214,7 @@ class TestIVP:
         npt.assert_allclose(value_1, value_2, 1e-5, 1e-6)
 
     def test_6__check_that_set_integrator_works_only_after_setting_rhs(self):
-        s = IVP("scipy_ode_dopri5")
+        s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
         s.set_initial_value(p.y0, p.t0)
 
@@ -222,7 +222,7 @@ class TestIVP:
             s.set_integrator("vode")
 
     def test_7__unknown_integrator_name__should_raise_exception(self):
-        s = IVP("scipy_ode_dopri5")
+        s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
         s.set_initial_value(p.y0, p.t0)
 
@@ -232,7 +232,7 @@ class TestIVP:
 
 @pytest.fixture(
     params=[
-        "scipy_ode_dopri5",
+        "scipy_ode",
         "sundials_cvode",
     ]
 )
