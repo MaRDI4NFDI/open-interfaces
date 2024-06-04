@@ -213,6 +213,22 @@ class TestIVP:
 
         npt.assert_allclose(value_1, value_2, 1e-5, 1e-6)
 
+    def test_6__check_that_set_integrator_works_only_after_setting_rhs(self):
+        s = IVP("scipy_ode_dopri5")
+        p = ScalarExpDecayProblem()
+        s.set_initial_value(p.y0, p.t0)
+
+        with pytest.raises(RuntimeError):
+            s.set_integrator("vode")
+
+    def test_7__unknown_integrator_name__should_raise_exception(self):
+        s = IVP("scipy_ode_dopri5")
+        p = ScalarExpDecayProblem()
+        s.set_initial_value(p.y0, p.t0)
+
+        with pytest.raises(RuntimeError):
+            s.set_integrator("i-am-not-known-integrator")
+
 
 @pytest.fixture(
     params=[
