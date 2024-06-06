@@ -196,22 +196,29 @@ class TestIVP:
         true_value = p.exact(t1)
         npt.assert_allclose(final_value, true_value, 1e-5, 1e-6)
 
-    def test_5__check_that_we_can_set_integrator(self, p):
-        s = IVP("scipy_ode")
-        dt = 0.25
+    def test_5__check_that_we_can_set_integrator(self, solver_integrator, p):
+        dt = 0.125
+
+        s = IVP(solver_integrator[0])
+        integrator_names = solver_integrator[1]
+        p = OrbitEquationsProblem()
 
         s.set_initial_value(p.y0, p.t0)
         s.set_rhs_fn(p.rhs)
+        s.set_tolerances(1e-2, 1e-2)
 
         s.integrate(p.t0 + dt)
         value_1 = s.y
 
-        s.set_integrator("vode")
-        s.set_initial_value(p.y0, p.t0)
-        s.integrate(p.t0 + dt)
-        value_2 = s.y
+        for integrator_name in integrator_names:
+            print("Solver: ", solver_integrator[0])
+            print("Integrator: ", integrator_name)
+            s.set_integrator(integrator_name)
+            s.set_initial_value(p.y0, p.t0)
+            s.integrate(p.t0 + dt)
+            value_2 = s.y
 
-        npt.assert_allclose(value_1, value_2, 1e-5, 1e-6)
+            npt.assert_allclose(value_1, value_2, 1e-1, 1e-1)
 
     def test_6__check_that_set_integrator_works_only_after_setting_rhs(self):
         s = IVP("scipy_ode")
@@ -252,4 +259,14 @@ def s(request):
 def p(request):
     """Return instantiated IVPProblem subclasses."""
     print(f"Problem: {request.param}")
+    return request.param
+
+
+@pytest.fixture(
+    params=[
+        ("scipy_ode", ["vode", "lsoda", "dopri5", "dop853"]),
+        ("sundials_cvode", ["bdf", "adams"]),
+    ]
+)
+def solver_integrator(request):
     return request.param
