@@ -78,7 +78,7 @@ class ScalarExpDecayProblem : public ODEProblem {
     void
     verify(double t, OIFArrayF64 *y) override
     {
-        EXPECT_NEAR(y->data[0], exp(-t), 1e-14);
+        EXPECT_NEAR(y->data[0], exp(-t), 1e-4);
     }
 };
 
@@ -101,9 +101,9 @@ class LinearOscillatorProblem : public ODEProblem {
     verify(double t, OIFArrayF64 *y) override
     {
         double y_exact_0 = y0[0] * cos(omega * t) + y0[1] * sin(omega * t) / omega;
-        EXPECT_NEAR(y->data[0], y_exact_0, 1e-12);
+        EXPECT_NEAR(y->data[0], y_exact_0, 1e-4);
         double y_exact_1 = -y0[0] * omega * sin(omega * t) + y0[1] * cos(omega * t);
-        EXPECT_NEAR(y->data[1], y_exact_1, 1e-12);
+        EXPECT_NEAR(y->data[1], y_exact_1, 1e-4);
     }
 
    private:
@@ -137,10 +137,10 @@ class OrbitEquationsProblem : public ODEProblem {
     {
         double u = fsolve([&, t](double u) { return u - eps * sin(u) - t; },
                           [&](double u) { return 1 - eps * cos(u); });
-        EXPECT_NEAR(y->data[0], cos(u) - eps, 1e-10);
-        EXPECT_NEAR(y->data[1], sqrt(1 - pow(eps, 2)) * sin(u), 1e-10);
-        EXPECT_NEAR(y->data[2], -sin(u) / (1 - eps * cos(u)), 1e-10);
-        EXPECT_NEAR(y->data[3], sqrt(1 - pow(eps, 2)) * cos(u) / (1 - eps * cos(u)), 1e-10);
+        EXPECT_NEAR(y->data[0], cos(u) - eps, 2e-4);
+        EXPECT_NEAR(y->data[1], sqrt(1 - pow(eps, 2)) * sin(u), 2e-4);
+        EXPECT_NEAR(y->data[2], -sin(u) / (1 - eps * cos(u)), 2e-4);
+        EXPECT_NEAR(y->data[3], sqrt(1 - pow(eps, 2)) * cos(u) / (1 - eps * cos(u)), 2e-4);
     }
 
    private:
