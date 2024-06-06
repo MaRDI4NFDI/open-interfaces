@@ -10,6 +10,7 @@
  */
 #include <assert.h>
 #include <limits.h>
+#include <string.h>
 
 #include <cvode/cvode.h>
 #include <nvector/nvector_serial.h>
@@ -21,12 +22,9 @@
 
 #include "oif/api.h"
 #include "oif_impl/ivp.h"
+#include "oif_impl/_util.h"
 
 const char *prefix = "[ivp::sundials_cvode]";
-
-// Signature for the right-hand side that is provided by the `IVP` interface
-// of the Open Interfaces.
-static oif_ivp_rhs_fn_t OIF_RHS_FN;
 
 // Signature for the right-hand side function that CVode expects.
 static int
@@ -36,7 +34,7 @@ cvode_rhs(sunrealtype t, N_Vector u, N_Vector u_dot, void *user_data);
 // Sundials context
 static SUNContext sunctx;
 // CVode memory block.
-void *cvode_mem;
+void *cvode_mem = NULL;
 
 /** Number of equations */
 sunindextype N;
@@ -50,66 +48,35 @@ sunindextype N;
 #define SUN_COMM_NULL NULL
 #endif
 
-int
-set_initial_value(OIFArrayF64 *y0_in, double t0_in)
+N_Vector self_y0 = NULL;
+sunrealtype self_t0;
+sunrealtype self_rtol = 1e-6;   // relative tolerance
+sunrealtype self_atol = 1e-12;  // absolute tolerance
+int integrator = CV_ADAMS;
+// Signature for the right-hand side that is provided by the `IVP` interface
+// of the Open Interfaces.
+static oif_ivp_rhs_fn_t OIF_RHS_FN = NULL;
+
+
+static int
+init_(void)
 {
-    if ((y0_in == NULL) || (y0_in->data == NULL)) {
-        fprintf(stderr, "`set_initial_value` received NULL argument\n");
-        exit(1);
-    }
-    int status;                  // Check errors
-    sunrealtype abstol = 1e-15;  // absolute tolerance
-    sunrealtype reltol = 1e-15;  // relative tolerance
-
-    // 1. Initialize parallel or multi-threaded environment, if appropriate.
-    // No, it is not appropriate here as we work with serial code :-)
-
-    // 2. Create the Sundials context object.
-    status = SUNContext_Create(SUN_COMM_NULL, &sunctx);
-    if (status) {
-        fprintf(stderr, "%s An error occurred when creating SUNContext", prefix);
-        return 1;
-    }
-
-    // 3. Set problem dimensions, etc.
-    if (sizeof(SUNDIALS_INDEX_TYPE) == sizeof(int)) {
-        if (y0_in->dimensions[0] > INT_MAX) {
-            fprintf(stderr,
-                    "[sundials_cvode] Dimensions of the array are larger "
-                    "than the internal Sundials type 'sunindextype'\n");
-            return 1;
-        }
-        else {
-            N = (sunindextype)y0_in->dimensions[0];
-        }
-    }
-    else {
-        fprintf(stderr,
-                "[sundials_cvode] Assumption that the internal Sundials type "
-                "'sundindextype' is 'int' is violated. Cannot proceed\n");
-        return 2;
-    }
-
-    // 4. Set vector of initial values.
-    N_Vector y0 = N_VMake_Serial(N, y0_in->data, sunctx);  // Problem vector.
-    // Sanity check that `sunrealtype` is actually the same as OIF_FLOAT64.
-    assert(NV_Ith_S(y0, 0) == y0_in->data[0]);
-
-    sunrealtype t0 = t0_in;
-    assert(t0 == t0_in);
-
+    int status;
     // 5. Create CVODE object.
-    cvode_mem = CVodeCreate(CV_ADAMS, sunctx);
+    if (cvode_mem != NULL) {
+        CVodeFree(&cvode_mem);
+    }
 
+    cvode_mem = CVodeCreate(integrator, sunctx);
     // 6. Initialize CVODE solver.
-    status = CVodeInit(cvode_mem, cvode_rhs, t0, y0);
+    status = CVodeInit(cvode_mem, cvode_rhs, self_t0, self_y0);
     if (status) {
         fprintf(stderr, "%s CVodeInit call failed", prefix);
         return 1;
     }
 
     // 7. Specify integration tolerances.
-    CVodeSStolerances(cvode_mem, reltol, abstol);
+    CVodeSStolerances(cvode_mem, self_rtol, self_atol);
 
     // 8. Create matrix object
     /* A = SUNDenseMatrix(N, N, sunctx); */
@@ -156,7 +123,7 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
 
     // 12. Set optional inputs
     // 13. Create nonlinear solver object (optional)
-    SUNNonlinearSolver NLS = SUNNonlinSol_FixedPoint(y0, 0, sunctx);
+    SUNNonlinearSolver NLS = SUNNonlinSol_FixedPoint(self_y0, 0, sunctx);
     if (NLS == NULL) {
         fprintf(stderr, "%s Could not create Fixed Point Nonlinear solver\n", prefix);
         return 7;
@@ -170,7 +137,57 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     // 15. Set nonlinear solver optional inputs (optional)
     // 16. Specify rootfinding problem (optional)
 
-    N_VDestroy_Serial(y0);
+    return 0;
+}
+
+
+int
+set_initial_value(OIFArrayF64 *y0_in, double t0_in)
+{
+    if ((y0_in == NULL) || (y0_in->data == NULL)) {
+        fprintf(stderr, "`set_initial_value` received NULL argument\n");
+        exit(1);
+    }
+    int status;                  // Check errors
+
+    // 1. Initialize parallel or multi-threaded environment, if appropriate.
+    // No, it is not appropriate here as we work with serial code :-)
+
+    // 2. Create the Sundials context object.
+    status = SUNContext_Create(SUN_COMM_NULL, &sunctx);
+    if (status) {
+        fprintf(stderr, "%s An error occurred when creating SUNContext", prefix);
+        return 1;
+    }
+
+    // 3. Set problem dimensions, etc.
+    if (sizeof(SUNDIALS_INDEX_TYPE) == sizeof(int)) {
+        if (y0_in->dimensions[0] > INT_MAX) {
+            fprintf(stderr,
+                    "[sundials_cvode] Dimensions of the array are larger "
+                    "than the internal Sundials type 'sunindextype'\n");
+            return 1;
+        }
+        else {
+            N = (sunindextype)y0_in->dimensions[0];
+        }
+    }
+    else {
+        fprintf(stderr,
+                "[sundials_cvode] Assumption that the internal Sundials type "
+                "'sundindextype' is 'int' is violated. Cannot proceed\n");
+        return 2;
+    }
+
+    // 4. Set vector of initial values.
+    self_y0 = N_VMake_Serial(N, y0_in->data, sunctx);  // Problem vector.
+    // Sanity check that `sunrealtype` is actually the same as OIF_FLOAT64.
+    assert(NV_Ith_S(self_y0, 0) == y0_in->data[0]);
+
+    sunrealtype self_t0 = t0_in;
+    assert(self_t0 == t0_in);
+
+    init_();
 
     return 0;
 }
@@ -204,7 +221,34 @@ set_rhs_fn(oif_ivp_rhs_fn_t rhs)
 int
 set_tolerances(double rtol, double atol)
 {
+    self_rtol = rtol;
+    self_atol = atol;
     CVodeSStolerances(cvode_mem, rtol, atol);
+    return 0;
+}
+
+int
+set_integrator(const char *integrator_name)
+{
+    if (oif_strcmp_nocase(integrator_name, "bdf") == 0) {
+        integrator = CV_BDF;
+    }
+    else if (oif_strcmp_nocase(integrator_name, "adams") == 0) {
+        integrator = CV_ADAMS;
+    }
+    else {
+        fprintf(
+            stderr,
+            "[%s] Supported values for integrator name are `bdf` and `adams`\n",
+            prefix
+        );
+        return 1;
+    }
+
+    if (self_y0 != NULL) {
+        init_();
+    }
+
     return 0;
 }
 
