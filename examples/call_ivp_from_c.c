@@ -12,15 +12,15 @@ char *
 parse_impl(int argc, char *argv[])
 {
     if (argc == 1) {
-        return "scipy_ode_dopri5";
+        return "scipy_ode";
     }
     else {
-        if ((strcmp(argv[1], "scipy_ode_dopri5") == 0) ||
+        if ((strcmp(argv[1], "scipy_ode") == 0) ||
             (strcmp(argv[1], "sundials_cvode") == 0) || (strcmp(argv[1], "jl_diffeq") == 0)) {
             return argv[1];
         }
         else {
-            fprintf(stderr, "USAGE: %s [scipy_ode_dopri5 | sundials_cvode]\n", argv[0]);
+            fprintf(stderr, "USAGE: %s [scipy_ode | sundials_cvode | jl_diffeq]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
     }
