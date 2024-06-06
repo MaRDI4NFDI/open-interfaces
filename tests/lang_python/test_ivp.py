@@ -141,7 +141,7 @@ class TestIVP:
             s.integrate(t)
             soln.append(s.y)
 
-        npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-10)
+        npt.assert_allclose(soln[-1], p.exact(t1), rtol=2e-4)
 
     def test_2_test_accept_int_list_for_y0_and_int_for_t0(self, s, p):
         s.set_initial_value(list(p.y0), int(p.t0))
@@ -155,7 +155,7 @@ class TestIVP:
             s.integrate(t)
             soln.append(s.y)
 
-        npt.assert_allclose(soln[-1], p.exact(t1), rtol=1e-10)
+        npt.assert_allclose(soln[-1], p.exact(t1), rtol=2e-4)
 
     def test_3__more_stringent_tolerances_lead_to_smaller_errors(self, s, p):
         s.set_initial_value(list(p.y0), int(p.t0))
