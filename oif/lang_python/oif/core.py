@@ -1,7 +1,9 @@
 import ctypes
+from io import BytesIO
 from typing import Callable, NewType, Union
 
 import _conversion
+import msgpack
 import numpy as np
 
 UInt = NewType("UInt", int)
@@ -15,6 +17,7 @@ OIF_ARRAY_F64 = 5
 OIF_STR = 6
 OIF_CALLBACK = 7
 OIF_USER_DATA = 8
+OIF_CONFIG_DICT = 9
 
 
 OIF_LANG_C = 1
@@ -150,6 +153,28 @@ def make_oif_user_data(data: object) -> OIFUserData:
     return OIFUserData(OIF_LANG_PYTHON, None, ctypes.c_void_p(id(data)))
 
 
+def _serialize_config_dict(arg: dict) -> bytes:
+    buffer = BytesIO()
+    for k in arg.keys():
+        v1 = k
+        v3 = arg[k]
+        if isinstance(v3, int):
+            v2 = OIF_INT
+        elif isinstance(v3, float):
+            v2 = OIF_FLOAT64
+        elif isinstance(v3, str):
+            v2 = OIF_STR
+        else:
+            raise TypeError("Supported types for dictionaries are: int, float, str")
+
+        buffer.write(msgpack.packb(v1, use_bin_type=True))
+        buffer.write(msgpack.packb(v2, use_bin_type=True))
+        buffer.write(msgpack.packb(v3, use_bin_type=True))
+    buffer.seek(0)
+
+    return buffer.getvalue()
+
+
 class OIFPyBinding:
     def __init__(self, implh, interface, impl):
         self.implh = implh
@@ -197,6 +222,12 @@ class OIFPyBinding:
                 argp = ctypes.pointer(arg)
                 arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
                 arg_types.append(OIF_USER_DATA)
+            elif isinstance(arg, dict):
+                print("Passed dict: ", arg)
+                arg_serialized = _serialize_config_dict(arg)
+                argp = id(arg_serialized)
+                arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
+                arg_types.append(OIF_CONFIG_DICT)
             else:
                 raise ValueError(f"Cannot convert argument {arg} of type{type(arg)}")
 

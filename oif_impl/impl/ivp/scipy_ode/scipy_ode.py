@@ -11,8 +11,8 @@ class ScipyODE(IVPInterface):
         self.N = 0  # Problem dimension.
         self.s = None
         self.user_data = None
-        self.rtol = 1e-15
-        self.atol = 1e-15
+        self.integrator = "dopri5"
+        self.integrator_params = {"rtol": 1e-6, "atol": 1e-12}
 
     def set_initial_value(self, y0: np.ndarray, t0: float):
         _p = f"[{_prefix}::set_initial_value]"
@@ -35,20 +35,16 @@ class ScipyODE(IVPInterface):
         assert len(self._rhs_fn_wrapper(42.0, x)) == len(x), msg
 
         self.s = integrate.ode(self._rhs_fn_wrapper).set_integrator(
-            "dopri5", atol=self.atol, rtol=self.rtol, nsteps=1000
+            self.integrator, **self.integrator_params
         )
         self.s.set_initial_value(self.y0, self.t0)
-
-        # if hasattr(self, "user_data"):
-        #     self.s.set_f_params(self.user_data)
-        #     self.s.set_jac_params(self.user_data)
 
         return 0
 
     def set_tolerances(self, rtol, atol):
         if self.s is None:
             raise RuntimeError("`set_rhs_fn` must be called before `set_tolerances`")
-        self.s.set_integrator("dopri5", rtol=rtol, atol=atol, nsteps=1000)
+        self.s.set_integrator(self.integrator, rtol=rtol, atol=atol, nsteps=1000)
         self.rtol = rtol
         self.atol = atol
         if hasattr(self, "y0"):
@@ -56,11 +52,6 @@ class ScipyODE(IVPInterface):
         return 0
 
     def set_user_data(self, user_data):
-        # if self.s is not None:
-        #     self.s.set_f_params(user_data)
-        #     self.s.set_jac_params(user_data)
-        # else:
-        #     self.user_data = user_data
         self.user_data = user_data
 
     def integrate(self, t, y):
@@ -68,7 +59,7 @@ class ScipyODE(IVPInterface):
         assert self.s.successful()
         return 0
 
-    def set_integrator(self, integrator_name):
+    def set_integrator(self, integrator_name, integrator_params):
         if self.s is None:
             raise RuntimeError("`set_integrator` must be called after `set_rhs_fn`")
         integrator = integrate._ode.find_integrator(integrator_name)
@@ -77,14 +68,15 @@ class ScipyODE(IVPInterface):
                 "`set_integrator` received unknown integrator "
                 "name {:s}".format(integrator_name)
             )
-        self.s.set_integrator(
-            integrator_name, rtol=self.rtol, atol=self.atol, nsteps=1000
-        )
+        if integrator_params is not None:
+            self.integrator_params = self.integrator_params | integrator_params
+            print(self.integrator_params)
+        self.s.set_integrator(integrator_name, **integrator_params)
         if hasattr(self, "y0"):
             self.s.set_initial_value(self.y0, self.t0)
         return 0
 
     def _rhs_fn_wrapper(self, t, y):
-        """Callback that satisfies scipy.ode.dopri5 expectations."""
+        """Callback that satisfies signature expected by Open Interfaces."""
         self.rhs(t, y, self.ydot, self.user_data)
         return self.ydot

@@ -19,6 +19,7 @@ typedef enum {
     OIF_STR = 6,
     OIF_CALLBACK = 7,
     OIF_USER_DATA = 8,
+    OIF_CONFIG_DICT = 9,
 } OIFArgType;
 
 enum {
