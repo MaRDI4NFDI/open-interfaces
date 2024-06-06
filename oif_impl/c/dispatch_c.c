@@ -164,6 +164,10 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 goto cleanup;
             }
         }
+        else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
+            fprintf(stderr, "[dispatch_c] Fix me\n");
+            arg_types[i] = &ffi_type_pointer;
+        }
         else {
             fflush(stdout);
             fprintf(stderr, "[dispatch_c] Unknown input arg type: %d\n",

@@ -55,6 +55,30 @@ instantiate_callback_class(void)
     return CALLBACK_CLASS_P;
 }
 
+static
+PyObject *
+get_deserialization_function(void)
+{
+    char *moduleName = "_serialization";
+    PyObject *pFileName = PyUnicode_FromString(moduleName);
+    PyObject *pModule = PyImport_Import(pFileName);
+    Py_DECREF(pFileName);
+
+    if (pModule == NULL) {
+        PyErr_Print();
+        fprintf(stderr, "[%s] Failed to load `serialization` module\n", prefix);
+        exit(1);
+    }
+
+    PyObject *pFunc = PyObject_GetAttrString(pModule, "deserialize");
+    if (pFunc == NULL) {
+        PyErr_Print();
+        fprintf(stderr, "[%s] Could not find function `deserialize`\n", prefix);
+    }
+
+    return pFunc;
+}
+
 PyObject *
 convert_oif_callback(OIFCallback *p)
 {
@@ -249,6 +273,9 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     PyObject *pFunc;
     PyObject *pValue;
 
+    if (strcmp(method, "set_integrator") == 0) {
+        printf("We are calling set_integrator method\n");
+    }
     pFunc = PyObject_GetAttrString(impl->pInstance, method);
 
     if (pFunc && PyCallable_Check(pFunc)) {
@@ -326,6 +353,13 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                             user_data->src);
                     pValue = NULL;
                 }
+            }
+            else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
+                PyObject *deserialize_fn = get_deserialization_function();
+                PyObject *serialized_dict = in_args->arg_values[i];
+                PyObject *deserialize_args = Py_BuildValue("(O)", serialized_dict);
+                pValue = PyObject_CallObject(deserialize_fn, deserialize_args);
+                Py_DECREF(deserialize_args);
             }
             else {
                 pValue = NULL;
