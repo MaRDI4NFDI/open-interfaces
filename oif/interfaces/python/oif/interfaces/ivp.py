@@ -1,3 +1,5 @@
+from typing import Callable
+
 import numpy as np
 from oif.core import (
     OIF_ARRAY_F64,
@@ -11,6 +13,8 @@ from oif.core import (
     unload_impl,
 )
 
+rhs_fn_t = Callable[[float, np.ndarray, np.ndarray, object], int]
+
 
 class IVP:
     def __init__(self, impl: str):
@@ -20,7 +24,7 @@ class IVP:
         self.y0: np.ndarray
         self.y: np.ndarray
 
-    def set_initial_value(self, y0, t0):
+    def set_initial_value(self, y0: np.ndarray, t0: float):
         y0 = np.asarray(y0, dtype=np.float64)
         self.y0 = y0
         self.y = np.empty_like(y0)
@@ -28,7 +32,7 @@ class IVP:
         t0 = float(t0)
         self._binding.call("set_initial_value", (y0, t0), ())
 
-    def set_rhs_fn(self, rhs_fn):
+    def set_rhs_fn(self, rhs_fn: rhs_fn_t):
         if self.N <= 0:
             raise RuntimeError("'set_initial_value' must be called before 'set_rhs_fn'")
 
@@ -44,10 +48,10 @@ class IVP:
     def set_tolerances(self, rtol: float, atol: float):
         self._binding.call("set_tolerances", (rtol, atol), ())
 
-    def integrate(self, t):
+    def integrate(self, t: float):
         self._binding.call("integrate", (t,), (self.y,))
 
-    def set_integrator(self, integrator_name):
+    def set_integrator(self, integrator_name: str):
         self._binding.call("set_integrator", (integrator_name,), ())
 
     def print_stats(self):
