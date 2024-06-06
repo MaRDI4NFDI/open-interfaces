@@ -236,6 +236,25 @@ class TestIVP:
         with pytest.raises(RuntimeError):
             s.set_integrator("i-am-not-known-integrator")
 
+    def test_8__config_dict__should_accept_alright(self):
+        s = IVP("scipy_ode")
+        p = ScalarExpDecayProblem()
+        s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
+
+        params = {"method": "bdf", "order": 1}
+        s.set_integrator("vode", params)
+
+    def test_9__malformed_config_dict__should_raise(self):
+        s = IVP("scipy_ode")
+        p = ScalarExpDecayProblem()
+        s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
+
+        with pytest.raises(RuntimeError):
+            params = {"method": "bdf", "wrong-param-name": 1}
+            s.set_integrator("vode", params)
+
 
 @pytest.fixture(
     params=[
