@@ -323,6 +323,9 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             cur_julia_arg = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
                                                           (jl_value_t *)dims, own_buffer);
         }
+        else if (in_args->arg_types[i] == OIF_STR) {
+            cur_julia_arg = jl_cstr_to_string(*((char **) in_args->arg_values[i]));
+        }
         else if (in_args->arg_types[i] == OIF_CALLBACK) {
             OIFCallback *p = in_args->arg_values[i];
             if (p->src == OIF_LANG_JULIA) {
@@ -361,6 +364,9 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                         "language id '%d'\n", prefix_, user_data->src);
                 cur_julia_arg = NULL;
             }
+        }
+        else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
+            cur_julia_arg = jl_box_voidpointer(in_args->arg_values[i]);
         }
         if (cur_julia_arg == NULL) {
             fprintf(stderr,
