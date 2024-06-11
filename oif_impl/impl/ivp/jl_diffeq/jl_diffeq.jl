@@ -1,14 +1,14 @@
 module JlDiffEq
-export Self, set_initial_value, set_rhs_fn, set_tolerances, integrate, set_user_data
+export Self, set_initial_value, set_rhs_fn, set_tolerances, integrate, set_user_data, set_integrator
 
-using OrdinaryDiffEq: ODEProblem, Tsit5, init, step!
+using OrdinaryDiffEq
 
 mutable struct Self
     t0::Float64
     y0::Vector{Float64}
     rhs
     problem
-    integrator
+    solver
     user_data
     function Self()
         return new(0.0, [])
@@ -34,9 +34,9 @@ function set_rhs_fn(self::Self, rhs)::Int
                 _rhs_wrapper(rhs), self.y0, (self.t0, Inf), self.user_data
             )
         end
-        self.integrator = init(self.problem, Tsit5())
+        self.solver = init(self.problem, Tsit5())
     else
-        throw(MethodError("Method `set_initial_value` must be called before `set_rhs_fn`"))
+        error("Method `set_initial_value` must be called before `set_rhs_fn`")
     end
     return 0
 end
@@ -47,13 +47,24 @@ function set_tolerances(self::Self, rtol::Float64, atol::Float64)::Int
 end
 
 function integrate(self::Self, t::Float64, y::Vector{Float64})::Int
-    step!(self.integrator, t - self.integrator.t, true)
-    y[:] = self.integrator.u
+    step!(self.solver, t - self.solver.t, true)
+    y[:] = self.solver.u
     return 0
 end
 
 function set_user_data(self::Self, user_data)
     self.user_data = user_data
+    return 0
+end
+
+function set_integrator(self::Self, integrator_name::String, params)
+    println("Requested integrator is '$integrator_name'")
+    integrator_symbol = Symbol(integrator_name)
+    if !isdefined(OrdinaryDiffEq, integrator_symbol)
+        error("[jl_diffeq] Could not find integrator '$integrator_name'")
+    end
+    integrator = getfield(OrdinaryDiffEq, integrator_symbol)(autodiff=false)
+    self.solver = init(self.problem, integrator)
     return 0
 end
 
