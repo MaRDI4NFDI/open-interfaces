@@ -122,6 +122,8 @@ init_(void)
     /* } */
 
     // 12. Set optional inputs
+    long int mxsteps = 30000;
+    status = CVodeSetMaxNumSteps(cvode_mem, mxsteps);
     // 13. Create nonlinear solver object (optional)
     SUNNonlinearSolver NLS = SUNNonlinSol_FixedPoint(self_y0, 0, sunctx);
     if (NLS == NULL) {
