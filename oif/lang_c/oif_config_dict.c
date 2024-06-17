@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
+#include <cwpack.h>
 #include <hashmap.h>
 
 #include <oif/api.h>
@@ -11,6 +11,8 @@
 
 struct oif_config_dict_t {
     HASHMAP(char, OIFConfigEntry) map;
+    cw_pack_context *pc;
+    size_t size;
 };
 
 static size_t SIZE_ = 65;
@@ -22,6 +24,7 @@ OIFConfigDict *oif_config_dict_init(void)
     assert(dict != NULL);
 
     hashmap_init(&dict->map, hashmap_hash_string, strcmp);
+    dict->size = 0;
 
     return dict;
 }
@@ -54,6 +57,8 @@ void oif_config_dict_add_int(OIFConfigDict *dict, const char *key, int value)
     memcpy(entry->value, &value, sizeof(int));
 
     int result = hashmap_put(&dict->map, key, entry);
+    dict->size++;
+    assert(dict->size < SIZE_);
 }
 
 void oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double value)
@@ -72,11 +77,13 @@ void oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double val
     memcpy(entry->value, &value, sizeof(double));
 
     int result = hashmap_put(&dict->map, key, entry);
+    dict->size++;
+    assert(dict->size < SIZE_);
 }
 
 const char **oif_config_dict_get_keys(OIFConfigDict *dict)
 {
-    const char **keys = malloc(SIZE_ * sizeof(char *));
+    const char **keys = malloc(dict->size * sizeof(char *));
     if (keys == NULL) {
         fprintf(stderr, "Could not allocate memory for keys\n");
         exit(1);
@@ -135,3 +142,80 @@ double oif_config_dict_get_double(OIFConfigDict *dict, const char *key)
     return double_value;
 }
 
+void oif_config_dict_serialize(OIFConfigDict *dict)
+{
+    cw_pack_context *pc = malloc(sizeof(*pc));
+    if (pc == NULL) {
+        fprintf(
+            stderr,
+            "Could not allocate memory required for serializing a config dictionary\n"
+        );
+    }
+    char buffer[512];
+    cw_pack_context_init(pc, buffer, 512, 0);
+
+    cw_pack_map_size(pc, dict->size);
+
+    const char *key;
+    OIFConfigEntry *entry;
+    hashmap_foreach(key, entry, &dict->map) {
+        printf("Packing '%s'\n", key);
+        cw_pack_str(pc, key, strlen(key));
+        if (entry->type == OIF_INT) {
+            int64_t i64_value = *(int *) entry->value;
+            cw_pack_signed(pc, i64_value);
+        }
+        else if (entry->type == OIF_FLOAT64) {
+            cw_pack_double(pc, *(double *) entry->value);
+        }
+        else {
+            fprintf(
+                stderr,
+                "Unsupported type for serialization\n"
+            );
+            exit(1);
+        }
+    }
+
+    if (pc->return_code != CWP_RC_OK) {
+        fprintf(
+            stderr,
+            "Serialization of config dictionary was not successful. pc->return_code = %d\n", pc->return_code
+        );
+        exit(1);
+    }
+
+    dict->pc = pc;
+}
+
+OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
+{
+    OIFConfigDict *new_dict = oif_config_dict_init();
+    cw_unpack_context uctx;
+
+    cw_unpack_context_init(&uctx, dict->pc->start, dict->pc->current - dict->pc->start, 0);
+
+    const char *key;
+    while (uctx.return_code != CWP_RC_END_OF_INPUT) {
+        cw_unpack_next(&uctx);
+        key = uctx.item.as.str.start;
+        printf("uctx.item = %p\n", &(uctx.item));
+        cw_unpack_next(&uctx);
+        printf("uctx.item = %p\n", &(uctx.item));
+        if (uctx.item.type == CWP_ITEM_NEGATIVE_INTEGER) {
+            oif_config_dict_add_int(new_dict, key, uctx.item.as.i64);
+        }
+        else if (uctx.item.type == CWP_ITEM_DOUBLE) {
+            oif_config_dict_add_double(new_dict, key, uctx.item.as.long_real);
+        }
+        else {
+            fprintf(
+                stderr,
+                "[oif_config_dict_deserialize] Unknown type: %d\n", uctx.item.type
+            );
+            exit(1);
+        }
+    }
+
+    return new_dict;
+}

@@ -23,7 +23,8 @@ const char **oif_config_dict_get_keys(OIFConfigDict *dict);
 bool oif_config_dict_key_exists(OIFConfigDict *dict, const char *key);
 int oif_config_dict_get_int(OIFConfigDict *dict, const char *key);
 double oif_config_dict_get_double(OIFConfigDict *dict, const char *key);
-
+void oif_config_dict_serialize(OIFConfigDict *dict);
+OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict);
 
 #ifdef __cplusplus
 }
