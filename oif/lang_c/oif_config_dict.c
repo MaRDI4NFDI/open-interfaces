@@ -18,12 +18,29 @@ struct oif_config_dict_t {
 static size_t SIZE_ = 65;
 
 
+static char *copy_key_(const char *key)
+{
+    char *key_copy = malloc(strlen(key) * sizeof(char));
+    if (key_copy == NULL) {
+        fprintf(stderr, "Could not allocate memory for a key copy\n");
+        exit(1);
+    }
+    strcpy(key_copy, key);
+    return key_copy;
+}
+
+static void free_key_(char *key) {
+    free(key);
+}
+
+
 OIFConfigDict *oif_config_dict_init(void)
 {
     OIFConfigDict *dict = malloc(sizeof(OIFConfigDict));
     assert(dict != NULL);
 
     hashmap_init(&dict->map, hashmap_hash_string, strcmp);
+    hashmap_set_key_alloc_funcs(&dict->map, copy_key_, free_key_);
     dict->size = 0;
 
     return dict;
