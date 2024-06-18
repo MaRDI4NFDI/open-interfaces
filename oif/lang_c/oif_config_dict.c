@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <limits.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -159,6 +160,20 @@ double oif_config_dict_get_double(OIFConfigDict *dict, const char *key)
     return double_value;
 }
 
+void oif_config_dict_print(OIFConfigDict *dict) {
+    const char *key;
+    OIFConfigEntry *entry;
+
+    hashmap_foreach(key, entry, &dict->map) {
+        if (entry->type == OIF_INT) {
+            printf("Key = '%s', value = '%d'\n", key, *(int *) entry->value);
+        }
+        else if (entry->type == OIF_FLOAT64) {
+            printf("Key = '%s', value = '%f'\n", key, *(double *) entry->value);
+        }
+    }
+}
+
 void oif_config_dict_serialize(OIFConfigDict *dict)
 {
     cw_pack_context *pc = malloc(sizeof(*pc));
@@ -176,7 +191,6 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
     const char *key;
     OIFConfigEntry *entry;
     hashmap_foreach(key, entry, &dict->map) {
-        printf("Packing '%s'\n", key);
         cw_pack_str(pc, key, strlen(key));
         if (entry->type == OIF_INT) {
             int64_t i64_value = *(int *) entry->value;
@@ -212,15 +226,54 @@ OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
 
     cw_unpack_context_init(&uctx, dict->pc->start, dict->pc->current - dict->pc->start, 0);
 
-    const char *key;
-    while (uctx.return_code != CWP_RC_END_OF_INPUT) {
+    char key[1024];
+    size_t len;
+
+    // Serialized dictionary packed as a map, therefore, we need to start
+    // with unpacking the map.
+    cw_unpack_next(&uctx);
+    assert(uctx.item.type == CWP_ITEM_MAP);
+
+    // Unpack key-value pairs.
+    while (uctx.return_code != CWP_RC_END_OF_INPUT && cw_look_ahead(&uctx) != CWP_NOT_AN_ITEM) {
         cw_unpack_next(&uctx);
-        key = uctx.item.as.str.start;
-        printf("uctx.item = %p\n", &(uctx.item));
+        if (uctx.return_code) {
+            goto unpack_error;
+        }
+        if (uctx.item.type != CWP_ITEM_STR) {
+            fprintf(
+                stderr,
+                "[oif_config_dict_deserialize] Expected a string\n"
+            );
+            goto cleanup;
+        }
+        len = uctx.item.as.str.length;
+        strncpy(key, uctx.item.as.str.start, len);
+        key[len] = '\0';
+
         cw_unpack_next(&uctx);
-        printf("uctx.item = %p\n", &(uctx.item));
-        if (uctx.item.type == CWP_ITEM_NEGATIVE_INTEGER) {
-            oif_config_dict_add_int(new_dict, key, uctx.item.as.i64);
+        if (uctx.return_code) {
+            goto unpack_error;
+        }
+        if (uctx.item.type == CWP_ITEM_POSITIVE_INTEGER) {
+            int64_t i64_value = uctx.item.as.i64;
+            if (i64_value <= INT32_MAX) {
+                oif_config_dict_add_int(new_dict, key, (int32_t) uctx.item.as.i64);
+            }
+            else {
+                fprintf(stderr, "Serialized positive integer is not 32-bit wide\n");
+                goto cleanup;
+            }
+        }
+        else if (uctx.item.type == CWP_ITEM_NEGATIVE_INTEGER) {
+            int64_t i64_value = uctx.item.as.i64;
+            if (i64_value >= INT32_MIN) {
+                oif_config_dict_add_int(new_dict, key, (int32_t) uctx.item.as.i64);
+            }
+            else {
+                fprintf(stderr, "Serialized negative integer is not 32-bit wide\n");
+                goto cleanup;
+            }
         }
         else if (uctx.item.type == CWP_ITEM_DOUBLE) {
             oif_config_dict_add_double(new_dict, key, uctx.item.as.long_real);
@@ -230,9 +283,29 @@ OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
                 stderr,
                 "[oif_config_dict_deserialize] Unknown type: %d\n", uctx.item.type
             );
-            exit(1);
+            goto cleanup;
         }
     }
 
+    oif_config_dict_print(new_dict);
+
+    goto finally;
+
+unpack_error:
+    fprintf(
+        stderr,
+        "During deserialization of OIFConfigDict object, "
+        "an error occurred. Error code is %d and can be checked "
+        "in `cwpack.h`\n",
+        uctx.return_code
+    );
+
+cleanup:
+    if (new_dict != NULL) {
+        oif_config_dict_free(new_dict);
+        new_dict = NULL;
+    }
+
+finally:
     return new_dict;
 }
