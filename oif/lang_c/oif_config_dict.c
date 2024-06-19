@@ -9,6 +9,7 @@
 
 #include <oif/api.h>
 #include <oif/config_dict.h>
+#include "util.h"
 
 struct oif_config_dict_t {
     HASHMAP(char, OIFConfigEntry) map;
@@ -77,6 +78,7 @@ void oif_config_dict_add_int(OIFConfigDict *dict, const char *key, int value)
     memcpy(entry->value, &value, sizeof(int));
 
     int result = hashmap_put(&dict->map, key, entry);
+    assert(result == 0);
     dict->size++;
     assert(dict->size < SIZE_);
 }
@@ -97,6 +99,7 @@ void oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double val
     memcpy(entry->value, &value, sizeof(double));
 
     int result = hashmap_put(&dict->map, key, entry);
+    assert(result == 0);
     dict->size++;
     assert(dict->size < SIZE_);
 }
@@ -184,16 +187,17 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
             stderr,
             "Could not allocate memory required for serializing a config dictionary\n"
         );
+        exit(1);
     }
     char buffer[BUF_SIZE_];
     cw_pack_context_init(pc, buffer, BUF_SIZE_, 0);
 
-    cw_pack_map_size(pc, dict->size);
+    cw_pack_map_size(pc, u32_from_size_t(dict->size));
 
     const char *key;
     OIFConfigEntry *entry;
     hashmap_foreach(key, entry, &dict->map) {
-        cw_pack_str(pc, key, strlen(key));
+        cw_pack_str(pc, key, u32_from_size_t(strlen(key)));
         if (entry->type == OIF_INT) {
             int64_t i64_value = *(int *) entry->value;
             cw_pack_signed(pc, i64_value);
