@@ -17,6 +17,8 @@ struct oif_config_dict_t {
 };
 
 static size_t SIZE_ = 65;
+#define MAX_KEY_LENGTH_ 1024
+#define BUF_SIZE_ 8192
 
 
 static char *copy_key_(const char *key)
@@ -183,8 +185,8 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
             "Could not allocate memory required for serializing a config dictionary\n"
         );
     }
-    char buffer[512];
-    cw_pack_context_init(pc, buffer, 512, 0);
+    char buffer[BUF_SIZE_];
+    cw_pack_context_init(pc, buffer, BUF_SIZE_, 0);
 
     cw_pack_map_size(pc, dict->size);
 
@@ -226,7 +228,7 @@ OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
 
     cw_unpack_context_init(&uctx, dict->pc->start, dict->pc->current - dict->pc->start, 0);
 
-    char key[1024];
+    char key[MAX_KEY_LENGTH_];
     size_t len;
 
     // Serialized dictionary packed as a map, therefore, we need to start
