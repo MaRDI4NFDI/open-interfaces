@@ -17,6 +17,7 @@ struct oif_config_dict_t {
     cw_pack_context *pc;
     size_t size;
     uint8_t *buffer;
+    size_t buffer_length;
 };
 
 static size_t SIZE_ = 65;
@@ -263,6 +264,7 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
     }
 
     dict->pc = pc;
+    dict->buffer_length = pc->current - pc->start;
 
     goto cleanup;
 
