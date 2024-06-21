@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,11 +16,13 @@ struct oif_config_dict_t {
     HASHMAP(char, OIFConfigEntry) map;
     cw_pack_context *pc;
     size_t size;
+    uint8_t *buffer;
 };
 
 static size_t SIZE_ = 65;
 #define MAX_KEY_LENGTH_ 1024
-#define BUF_SIZE_ 8192
+#define BUF_SIZE_ 128
+
 
 
 static char *copy_key_(const char *key)
@@ -38,6 +41,19 @@ static void free_key_(char *key) {
 }
 
 
+inline static
+uint8_t *reallocate_buffer_(uint8_t *buffer, size_t new_buffer_size)
+{
+    uint8_t *tmp = realloc(buffer, new_buffer_size * sizeof(*buffer));
+    if (tmp == NULL) {
+        fprintf(stderr, "Could not reallocate memory\n");
+        exit(1);
+    }
+
+    return tmp;
+}
+
+
 OIFConfigDict *oif_config_dict_init(void)
 {
     OIFConfigDict *dict = malloc(sizeof(OIFConfigDict));
@@ -46,6 +62,7 @@ OIFConfigDict *oif_config_dict_init(void)
     hashmap_init(&dict->map, hashmap_hash_string, strcmp);
     hashmap_set_key_alloc_funcs(&dict->map, copy_key_, free_key_);
     dict->size = 0;
+    dict->buffer = NULL;
 
     return dict;
 }
@@ -59,6 +76,7 @@ void oif_config_dict_free(OIFConfigDict *dict)
     }
 
     hashmap_cleanup(&dict->map);
+    free(dict->buffer);
     free(dict);
 }
 
@@ -189,40 +207,75 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
         );
         exit(1);
     }
-    char buffer[BUF_SIZE_];
-    cw_pack_context_init(pc, buffer, BUF_SIZE_, 0);
 
-    cw_pack_map_size(pc, u32_from_size_t(dict->size));
+    size_t buffer_size = BUF_SIZE_;
+    uint8_t *buffer = malloc(buffer_size * sizeof(uint8_t));
+    if (buffer == NULL) {
+        fprintf(stderr, "Could not allocate memory\n");
+        exit(1);
+    }
+    dict->buffer = buffer;
 
-    const char *key;
-    OIFConfigEntry *entry;
-    hashmap_foreach(key, entry, &dict->map) {
-        cw_pack_str(pc, key, u32_from_size_t(strlen(key)));
-        if (entry->type == OIF_INT) {
-            int64_t i64_value = *(int *) entry->value;
-            cw_pack_signed(pc, i64_value);
+    bool has_succeeded = false;
+
+    while (has_succeeded != true) {
+        cw_pack_context_init(pc, buffer, buffer_size * sizeof(uint8_t), NULL);
+        cw_pack_map_size(pc, u32_from_size_t(dict->size));
+
+        const char *key;
+        OIFConfigEntry *entry;
+        hashmap_foreach(key, entry, &dict->map) {
+            cw_pack_str(pc, key, u32_from_size_t(strlen(key)));
+
+            if (entry->type == OIF_INT) {
+                int64_t i64_value = *(int *) entry->value;
+                cw_pack_signed(pc, i64_value);
+            }
+            else if (entry->type == OIF_FLOAT64) {
+                cw_pack_double(pc, *(double *) entry->value);
+            }
+            else {
+                fprintf(stderr, "Unsupported type for serialization\n");
+                exit(1);
+            }
         }
-        else if (entry->type == OIF_FLOAT64) {
-            cw_pack_double(pc, *(double *) entry->value);
+
+
+        if (pc->return_code == CWP_RC_OK) {
+            has_succeeded = true;
+        }
+        else if (pc->return_code == CWP_RC_BUFFER_OVERFLOW) {
+            buffer_size *= 2;
+            buffer = reallocate_buffer_(buffer, buffer_size);
+            dict->buffer = buffer;
+
+            // Adjust cwpack context to the new buffer.
+            unsigned long written = pc->current - pc->start;
+            pc->start = buffer;
+            pc->current = pc->start + written;
+            pc->end = pc->start + buffer_size * sizeof(*buffer);
+            pc->return_code = CWP_RC_OK;
         }
         else {
-            fprintf(
-                stderr,
-                "Unsupported type for serialization\n"
-            );
-            exit(1);
+            // We do not handle other possible problems.
+            goto report_error_and_exit;
         }
-    }
-
-    if (pc->return_code != CWP_RC_OK) {
-        fprintf(
-            stderr,
-            "Serialization of config dictionary was not successful. pc->return_code = %d\n", pc->return_code
-        );
-        exit(1);
     }
 
     dict->pc = pc;
+
+    goto cleanup;
+
+report_error_and_exit:
+    fprintf(
+        stderr,
+        "Serialization of config dictionary was not successful. "
+        "pc->return_code = %d\n", pc->return_code
+    );
+    exit(1);
+
+cleanup:
+    return;
 }
 
 OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
@@ -292,8 +345,6 @@ OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
             goto cleanup;
         }
     }
-
-    oif_config_dict_print(new_dict);
 
     goto finally;
 
