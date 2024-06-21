@@ -66,6 +66,8 @@ typedef struct {
     void *py;  // Pointer to `PyObject` that holds the data in Python
 } OIFUserData;
 
+#include <oif/config_dict.h>
+
 enum {
     OIF_ERROR = -1,
     OIF_IMPL_INIT_ERROR = -2,
