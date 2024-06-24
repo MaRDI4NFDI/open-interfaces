@@ -185,9 +185,13 @@ double oif_config_dict_get_double(OIFConfigDict *dict, const char *key)
     return double_value;
 }
 
-void oif_config_dict_print(OIFConfigDict *dict) {
+void oif_config_dict_print(const OIFConfigDict *dict) {
     const char *key;
     OIFConfigEntry *entry;
+
+    if (dict->size == 0) {
+        printf("Config dict has no entries\n");
+    }
 
     hashmap_foreach(key, entry, &dict->map) {
         if (entry->type == OIF_INT) {
