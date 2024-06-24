@@ -26,6 +26,7 @@ double oif_config_dict_get_double(OIFConfigDict *dict, const char *key);
 void oif_config_dict_serialize(OIFConfigDict *dict);
 int oif_config_dict_deserialize(OIFConfigDict *dict);
 int oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from);
+void oif_config_dict_print(const OIFConfigDict *dict);
 
 #ifdef __cplusplus
 }
