@@ -64,6 +64,7 @@ OIFConfigDict *oif_config_dict_init(void)
     hashmap_set_key_alloc_funcs(&dict->map, copy_key_, free_key_);
     dict->size = 0;
     dict->buffer = NULL;
+    dict->buffer_length = 0;
 
     return dict;
 }
@@ -280,12 +281,23 @@ cleanup:
     return;
 }
 
-OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
+int
+oif_config_dict_deserialize(OIFConfigDict *dict)
 {
-    OIFConfigDict *new_dict = oif_config_dict_init();
-    cw_unpack_context uctx;
+    int result = 0;
 
-    cw_unpack_context_init(&uctx, dict->pc->start, dict->pc->current - dict->pc->start, 0);
+    if (dict->size != 0) {
+        fprintf(stderr, "Config dictionary already defined\n");
+        return 1;
+    }
+
+    if (dict->buffer == NULL || dict->buffer_length == 0) {
+        fprintf(stderr, "Config dictionary cannot be deserialized\n");
+        return 1;
+    }
+
+    cw_unpack_context uctx;
+    cw_unpack_context_init(&uctx, dict->buffer, dict->buffer_length, 0);
 
     char key[MAX_KEY_LENGTH_];
     size_t len;
@@ -319,7 +331,7 @@ OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
         if (uctx.item.type == CWP_ITEM_POSITIVE_INTEGER) {
             int64_t i64_value = uctx.item.as.i64;
             if (i64_value <= INT32_MAX) {
-                oif_config_dict_add_int(new_dict, key, (int32_t) uctx.item.as.i64);
+                oif_config_dict_add_int(dict, key, (int32_t) uctx.item.as.i64);
             }
             else {
                 fprintf(stderr, "Serialized positive integer is not 32-bit wide\n");
@@ -329,7 +341,7 @@ OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
         else if (uctx.item.type == CWP_ITEM_NEGATIVE_INTEGER) {
             int64_t i64_value = uctx.item.as.i64;
             if (i64_value >= INT32_MIN) {
-                oif_config_dict_add_int(new_dict, key, (int32_t) uctx.item.as.i64);
+                oif_config_dict_add_int(dict, key, (int32_t) uctx.item.as.i64);
             }
             else {
                 fprintf(stderr, "Serialized negative integer is not 32-bit wide\n");
@@ -337,7 +349,7 @@ OIFConfigDict *oif_config_dict_deserialize(OIFConfigDict *dict)
             }
         }
         else if (uctx.item.type == CWP_ITEM_DOUBLE) {
-            oif_config_dict_add_double(new_dict, key, uctx.item.as.long_real);
+            oif_config_dict_add_double(dict, key, uctx.item.as.long_real);
         }
         else {
             fprintf(
@@ -360,11 +372,29 @@ unpack_error:
     );
 
 cleanup:
-    if (new_dict != NULL) {
-        oif_config_dict_free(new_dict);
-        new_dict = NULL;
-    }
+    result = 1;
 
 finally:
-    return new_dict;
+    return result;
+}
+
+int
+oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from)
+{
+    if (to->buffer != NULL) {
+        fprintf(
+            stderr,
+            "Config dictionary cannot be copied as the serialization buffer "
+            "at the destination was already initialized\n"
+        );
+        return 1;
+    }
+    to->buffer = malloc(from->buffer_length * sizeof(*from->buffer));
+    if (to->buffer == NULL) {
+        fprintf(stderr, "Memory error\n");
+        exit(1);
+    }
+    memcpy(to->buffer, from->buffer, from->buffer_length);
+    to->buffer_length = from->buffer_length;
+    return 0;
 }
