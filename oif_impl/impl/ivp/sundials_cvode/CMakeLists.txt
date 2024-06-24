@@ -6,4 +6,5 @@ target_include_directories(oif_ivp_sundials_cvode
                            PRIVATE ${CMAKE_SOURCE_DIR}/oif/include)
 target_include_directories(oif_ivp_sundials_cvode
                            PRIVATE ${CMAKE_SOURCE_DIR}/oif_impl/c/include)
+target_link_libraries(oif_ivp_sundials_cvode PRIVATE oif_c_data_structures)
 target_link_libraries(oif_ivp_sundials_cvode PRIVATE SUNDIALS::cvode)
