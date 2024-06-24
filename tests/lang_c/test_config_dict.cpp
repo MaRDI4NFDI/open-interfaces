@@ -50,7 +50,10 @@ TEST(OIFConfigDictTest, SerializeDeserializeBasicCase)
     oif_config_dict_add_double(dict, "double_option", 2.718);
 
     oif_config_dict_serialize(dict);
-    OIFConfigDict *new_dict = oif_config_dict_deserialize(dict);
+    OIFConfigDict *new_dict = oif_config_dict_init();
+    oif_config_dict_copy_serialization(new_dict, dict);
+    int status = oif_config_dict_deserialize(new_dict);
+    ASSERT_EQ(status, 0);
 
     ASSERT_EQ(oif_config_dict_get_int(new_dict, "int_option"), 42);
     ASSERT_EQ(oif_config_dict_get_int(new_dict, "int_neg_option"), -12345);
@@ -81,7 +84,10 @@ TEST(OIFConfigDictTest, SerializeDeserializeVeryLongStringCase)
     }
 
     oif_config_dict_serialize(dict);
-    OIFConfigDict *new_dict = oif_config_dict_deserialize(dict);
+    OIFConfigDict *new_dict = oif_config_dict_init();
+    oif_config_dict_copy_serialization(new_dict, dict);
+    int status = oif_config_dict_deserialize(new_dict);
+    ASSERT_EQ(status, 0);
 
     for (size_t i = 0; i < N; ++i) {
         sprintf(buffer, "int_option_%zu", i);
