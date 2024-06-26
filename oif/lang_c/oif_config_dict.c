@@ -71,8 +71,10 @@ OIFConfigDict *oif_config_dict_init(void)
     return dict;
 }
 
-void oif_config_dict_free(OIFConfigDict *dict)
+void oif_config_dict_free(void *_dict)
 {
+    OIFConfigDict *dict = _dict;
+    assert(dict->type == OIF_CONFIG_DICT);
     const char *key;
     OIFConfigEntry *entry;
     hashmap_foreach(key, entry, &dict->map) {

@@ -16,7 +16,7 @@ typedef struct oif_config_entry_t {
 } OIFConfigEntry;
 
 OIFConfigDict *oif_config_dict_init(void);
-void oif_config_dict_free(OIFConfigDict *dict);
+void oif_config_dict_free(void *dict);
 void oif_config_dict_add_int(OIFConfigDict *dict, const char *key, int value);
 void oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double value);
 const char **oif_config_dict_get_keys(OIFConfigDict *dict);
