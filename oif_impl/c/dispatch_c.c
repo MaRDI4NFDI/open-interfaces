@@ -6,8 +6,9 @@
 #include <string.h>
 
 #include <oif/api.h>
-#include <oif/dispatch.h>
 #include <oif/dispatch_api.h>
+#include <oif/allocation_tracker.h>
+#include "oif/config_dict.h"
 
 /**
  * Duplicate a given null-terminated string along with memory allocation.
@@ -101,6 +102,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     ffi_cif cif;
     ffi_type **arg_types = NULL;
     void **arg_values = NULL;
+    AllocationTracker *tracker = NULL;
 
     if (impl_info->dh != OIF_LANG_C) {
         fprintf(stderr, "[dispatch_c] Provided implementation is not implemented in C\n");
@@ -130,6 +132,9 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         fprintf(stderr, "[dispatch_c] Could not allocate memory for FFI values\n");
         goto cleanup;
     }
+
+    tracker = allocation_tracker_init();
+    assert(tracker != NULL);
 
     // Merge input and output argument types together in `arg_types` array.
     for (size_t i = 0; i < num_in_args; ++i) {
@@ -165,8 +170,26 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             }
         }
         else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
-            fprintf(stderr, "[dispatch_c] Fix me\n");
+            OIFConfigDict *dict = *(OIFConfigDict **) in_args->arg_values[i];
+            // We cannot simply assign `&new_dict` to `in_args->arg_values[i]`
+            // as it gets trashed as soon as we leave this block.
+            // Yes, C programming is amusing.
+            OIFConfigDict *new_dict = oif_config_dict_init();
+
+            oif_config_dict_copy_serialization(new_dict, dict);
+            oif_config_dict_deserialize(new_dict);
+
+            // We need to obtain a pointer as it is required by `libffi`.
+            OIFConfigDict **new_dict_p = malloc(sizeof(void *));
+            if (new_dict_p == NULL) {
+                fprintf(stderr, "Could not allocate memory\n");
+                exit(1);
+            }
+            *new_dict_p = new_dict;
+            in_args->arg_values[i] = new_dict_p;
             arg_types[i] = &ffi_type_pointer;
+            allocation_tracker_add(tracker, new_dict, oif_config_dict_free);
+            allocation_tracker_add(tracker, new_dict_p, NULL);
         }
         else {
             fflush(stdout);
@@ -175,6 +198,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             goto cleanup;
         }
     }
+
     for (size_t i = num_in_args; i < num_total_args; ++i) {
         if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
@@ -213,6 +237,10 @@ cleanup:
     }
     if (arg_types != NULL) {
         free(arg_types);
+    }
+
+    if (tracker != NULL) {
+        allocation_tracker_free(tracker);
     }
 
     return result;
