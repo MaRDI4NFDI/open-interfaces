@@ -69,6 +69,7 @@ class OIFUserData(ctypes.Structure):
 
 class OIFConfigDict(ctypes.Structure):
     _fields_ = [
+        ("type", ctypes.c_int),  # Type for sanity checks (OIF_CONFIG_DICT)
         ("src", ctypes.c_int),  # one of OIF_LANG_* constants
         ("size", ctypes.c_size_t),  # Current number of elements in the map
         ("buffer", ctypes.c_char_p),  # Buffer that is used by the pc
