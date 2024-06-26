@@ -13,6 +13,7 @@
 #include "util.h"
 
 struct oif_config_dict_t {
+    int type;
     int src;  // Source of the dictionary (one of OIF_LANG_* constants).
     size_t size;  // Current number of elements in the map.
     uint8_t *buffer;  // Buffer that is used by the pc.
@@ -62,11 +63,14 @@ OIFConfigDict *oif_config_dict_init(void)
     OIFConfigDict *dict = malloc(sizeof(OIFConfigDict));
     assert(dict != NULL);
 
-    hashmap_init(&dict->map, hashmap_hash_string, strcmp);
-    hashmap_set_key_alloc_funcs(&dict->map, copy_key_, free_key_);
+    dict->type = OIF_CONFIG_DICT;
+    dict->src = OIF_LANG_C;
     dict->size = 0;
     dict->buffer = NULL;
     dict->buffer_length = 0;
+    hashmap_init(&dict->map, hashmap_hash_string, strcmp);
+    hashmap_set_key_alloc_funcs(&dict->map, copy_key_, free_key_);
+    dict->pc = NULL;
 
     return dict;
 }
@@ -190,7 +194,7 @@ double oif_config_dict_get_double(OIFConfigDict *dict, const char *key)
 }
 
 void oif_config_dict_print(const OIFConfigDict *dict) {
-    const char *key;
+    char *key;
     OIFConfigEntry *entry;
 
     if (dict->size == 0) {
@@ -230,7 +234,7 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
 
     while (has_succeeded != true) {
         cw_pack_context_init(pc, buffer, buffer_size * sizeof(uint8_t), NULL);
-        cw_pack_map_size(pc, u32_from_size_t(dict->size));
+        /* cw_pack_map_size(pc, u32_from_size_t(dict->size)); */
 
         const char *key;
         OIFConfigEntry *entry;
@@ -312,8 +316,8 @@ oif_config_dict_deserialize(OIFConfigDict *dict)
 
     // Serialized dictionary packed as a map, therefore, we need to start
     // with unpacking the map.
-    cw_unpack_next(&uctx);
-    assert(uctx.item.type == CWP_ITEM_MAP);
+    /* cw_unpack_next(&uctx); */
+    /* assert(uctx.item.type == CWP_ITEM_MAP); */
 
     // Unpack key-value pairs.
     while (uctx.return_code != CWP_RC_END_OF_INPUT && cw_look_ahead(&uctx) != CWP_NOT_AN_ITEM) {
