@@ -128,8 +128,17 @@ init_(void)
     /* } */
 
     // 12. Set optional inputs
-    long int mxsteps = 30000;
-    status = CVodeSetMaxNumSteps(cvode_mem, mxsteps);
+    if (config != NULL) {
+        if (oif_config_dict_key_exists(config, "max_num_steps")) {
+            int max_num_steps = oif_config_dict_get_int(config, "max_num_steps");
+            status = CVodeSetMaxNumSteps(cvode_mem, max_num_steps);
+            if (status) {
+                fprintf(stderr, "%s Could not set max number of steps\n", prefix);
+                return 1;
+            }
+        }
+    }
+
     // 13. Create nonlinear solver object (optional)
     SUNNonlinearSolver NLS = SUNNonlinSol_FixedPoint(self_y0, 0, sunctx);
     if (NLS == NULL) {
