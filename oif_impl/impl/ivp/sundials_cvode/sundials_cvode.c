@@ -53,9 +53,15 @@ sunrealtype self_t0;
 sunrealtype self_rtol = 1e-6;   // relative tolerance
 sunrealtype self_atol = 1e-12;  // absolute tolerance
 int integrator = CV_ADAMS;
+OIFConfigDict *config = NULL;
 // Signature for the right-hand side that is provided by the `IVP` interface
 // of the Open Interfaces.
 static oif_ivp_rhs_fn_t OIF_RHS_FN = NULL;
+
+static const char *AVAILABLE_OPTIONS_[] = {
+    "max_num_steps",
+    NULL,
+};
 
 
 static int
@@ -230,7 +236,7 @@ set_tolerances(double rtol, double atol)
 }
 
 int
-set_integrator(const char *integrator_name)
+set_integrator(const char *integrator_name, OIFConfigDict *config_)
 {
     if (oif_strcmp_nocase(integrator_name, "bdf") == 0) {
         integrator = CV_BDF;
@@ -245,6 +251,26 @@ set_integrator(const char *integrator_name)
             prefix
         );
         return 1;
+    }
+
+    config = config_;
+    const char **keys = oif_config_dict_get_keys(config);
+    for (int i = 0; keys[i] != NULL; i++) {
+        bool found = false;
+        for (int j = 0; AVAILABLE_OPTIONS_[j] != NULL; j++) {
+            if (strcmp(keys[i], AVAILABLE_OPTIONS_[j]) == 0) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            fprintf(
+                stderr,
+                "[%s] Passed option '%s' is not one of the available options\n",
+                prefix, keys[i]
+            );
+            return 1;
+        }
     }
 
     if (self_y0 != NULL) {
