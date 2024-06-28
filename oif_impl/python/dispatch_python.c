@@ -273,9 +273,6 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     PyObject *pFunc;
     PyObject *pValue;
 
-    if (strcmp(method, "set_integrator") == 0) {
-        printf("We are calling set_integrator method\n");
-    }
     pFunc = PyObject_GetAttrString(impl->pInstance, method);
 
     if (pFunc && PyCallable_Check(pFunc)) {
