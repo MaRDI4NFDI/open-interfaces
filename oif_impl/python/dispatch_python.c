@@ -355,11 +355,15 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 }
             }
             else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
+                OIFConfigDict *dict = *((OIFConfigDict **) in_args->arg_values[i]);
                 PyObject *deserialize_fn = get_deserialization_function();
-                PyObject *serialized_dict = in_args->arg_values[i];
+                const char *buffer = oif_config_dict_get_serialized(dict);
+                size_t length = oif_config_dict_get_serialized_object_length(dict);
+                PyObject *serialized_dict = Py_BuildValue("y#", buffer, length);
                 PyObject *deserialize_args = Py_BuildValue("(O)", serialized_dict);
                 pValue = PyObject_CallObject(deserialize_fn, deserialize_args);
                 Py_DECREF(deserialize_args);
+                Py_DECREF(serialized_dict);
             }
             else {
                 pValue = NULL;
