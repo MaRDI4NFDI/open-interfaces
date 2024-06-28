@@ -410,3 +410,12 @@ oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from)
     to->buffer_length = from->buffer_length;
     return 0;
 }
+
+
+const char *oif_config_dict_get_serialized(OIFConfigDict *dict) {
+    return (char *) dict->buffer;
+}
+
+size_t oif_config_dict_get_serialized_object_length(OIFConfigDict *dict) {
+    return dict->buffer_length;
+}
