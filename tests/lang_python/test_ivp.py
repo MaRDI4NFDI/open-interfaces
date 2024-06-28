@@ -128,6 +128,18 @@ class IVPProblemWithUserData(IVPProblem):
         )
 
 
+class MildlyStiffODESystem(IVPProblem):
+    t0 = 0.0
+    y0 = np.array([1.0, 0.0])
+
+    def rhs(self, t, y, ydot, user_data: tuple):
+        ydot[0] = -16 * y[0] + 12 * y[1] + 16 * np.cos(t) - 13 * np.sin(t)
+        ydot[1] = 12 * y[0] - 9 * y[1] - 11 * np.cos(t) + 9 * np.sin(t)
+
+    def exact(self, t):
+        return np.array([np.cos(t), np.sin(t)])
+
+
 class TestIVP:
     def test_1(self, s, p):
         s.set_initial_value(p.y0, p.t0)
@@ -236,7 +248,9 @@ class TestIVP:
         with pytest.raises(RuntimeError):
             s.set_integrator("i-am-not-known-integrator")
 
-    def test_8__config_dict__should_accept_alright(self):
+
+class TestIVPConfigDict:
+    def test_1__config_dict_scipy_ode__should_accept_alright(self):
         s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
         s.set_initial_value(p.y0, p.t0)
@@ -245,7 +259,7 @@ class TestIVP:
         params = {"method": "bdf", "order": 1}
         s.set_integrator("vode", params)
 
-    def test_9__malformed_config_dict__should_raise(self):
+    def test_2__malformed_config_dict_scipy_ode__should_raise(self):
         s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
         s.set_initial_value(p.y0, p.t0)
@@ -254,6 +268,58 @@ class TestIVP:
         with pytest.raises(RuntimeError):
             params = {"method": "bdf", "wrong-param-name": 1}
             s.set_integrator("vode", params)
+
+    def test_3__malformed_config_dict_scipy_ode__should_raise(self):
+        s = IVP("scipy_ode")
+        p = ScalarExpDecayProblem()
+        s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
+
+        with pytest.raises(RuntimeError):
+            params = {"method": "bdf", "wrong-param-name": 1}
+            s.set_integrator("vode", params)
+
+    def test_4__config_dict_scipy_ode__should_be_stable_with_enough_nsteps(self):
+        s = IVP("scipy_ode")
+        p = MildlyStiffODESystem()
+        s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
+
+        t1 = p.t0 + 1
+
+        # Set very small number of steps, so that integrator fails.
+        with pytest.raises(RuntimeError):
+            s.set_integrator("dopri5", {"nsteps": 1})
+            s.integrate(t1)
+
+        # Set large number of steps, so that integrator succeeds.
+        s.set_integrator("dopri5", {"nsteps": 10_000})
+        s.integrate(t1)
+
+    def test_5__config_dict_cvode__fails_when_max_num_steps_too_small(self):
+        s = IVP("sundials_cvode")
+        p = MildlyStiffODESystem()
+        s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
+
+        s.set_integrator("bdf", {"max_num_steps": 50})
+
+        t1 = p.t0 + 1
+        times = np.linspace(p.t0, t1, num=2)
+
+        with pytest.raises(RuntimeError):
+            for t in times[1:]:
+                s.integrate(t)
+
+    def test_6__config_dict_cvode__fails_with_false_options(self):
+        s = IVP("sundials_cvode")
+        p = MildlyStiffODESystem()
+        s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
+
+        # Should error on the unknown option.
+        with pytest.raises(RuntimeError):
+            s.set_integrator("bdf", {"max_num_steps_typo": 50})
 
 
 @pytest.fixture(
