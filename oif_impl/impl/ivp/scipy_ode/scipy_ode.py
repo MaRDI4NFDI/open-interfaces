@@ -71,7 +71,14 @@ class ScipyODE(IVPInterface):
         if integrator_params is not None:
             self.integrator_params = self.integrator_params | integrator_params
             print(self.integrator_params)
-        self.s.set_integrator(integrator_name, **integrator_params)
+        try:
+            self.s.set_integrator(integrator_name, **integrator_params)
+        except TypeError:
+            raise RuntimeError(
+                "Provided options {} are not accepted by integrator {}".format(
+                    integrator_params, integrator_name
+                )
+            )
         if hasattr(self, "y0"):
             self.s.set_initial_value(self.y0, self.t0)
         return 0
