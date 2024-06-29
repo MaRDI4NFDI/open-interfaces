@@ -304,8 +304,8 @@ oif_config_dict_deserialize(OIFConfigDict *dict)
     }
 
     if (dict->buffer == NULL || dict->buffer_length == 0) {
-        fprintf(stderr, "Config dictionary cannot be deserialized\n");
-        return 1;
+        fprintf(stderr, "Config dictionary is empty\n");
+        return 0;
     }
 
     cw_unpack_context uctx;
