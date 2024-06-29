@@ -188,7 +188,14 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             *new_dict_p = new_dict;
             in_args->arg_values[i] = new_dict_p;
             arg_types[i] = &ffi_type_pointer;
-            allocation_tracker_add(tracker, new_dict, oif_config_dict_free);
+            // Note that the ownership to OIFConfigDict is passed to the callee
+            // as it is highly likely that they need to save the dictionary
+            // somewhere and use it in another function as initialialization
+            // of solvers is often spread out between several different
+            // function invocations.
+            // Hence, the callee is responsible to free the memory
+            // after they do not need it anymore.
+            /* allocation_tracker_add(tracker, new_dict, oif_config_dict_free); */
             allocation_tracker_add(tracker, new_dict_p, NULL);
         }
         else {
