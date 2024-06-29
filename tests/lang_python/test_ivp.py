@@ -1,3 +1,4 @@
+import warnings
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -287,10 +288,13 @@ class TestIVPConfigDict:
 
         t1 = p.t0 + 1
 
+        # We need to filter integration errors to avoid spurious output.
+        warnings.simplefilter("error")
         # Set very small number of steps, so that integrator fails.
         with pytest.raises(RuntimeError):
             s.set_integrator("dopri5", {"nsteps": 1})
             s.integrate(t1)
+        warnings.resetwarnings()
 
         # Set large number of steps, so that integrator succeeds.
         s.set_integrator("dopri5", {"nsteps": 10_000})
