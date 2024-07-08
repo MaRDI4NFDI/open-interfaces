@@ -33,6 +33,12 @@ oif_ivp_set_user_data(ImplHandle implh, void *user_data);
 int
 oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y);
 
+/**
+ * Set integrator and optionally its parameters.
+ */
+int
+oif_ivp_set_integrator(ImplHandle implh, char *integrator_name, OIFConfigDict *config);
+
 #ifdef __cplusplus
 }
 #endif

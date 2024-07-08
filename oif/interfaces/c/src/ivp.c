@@ -106,3 +106,31 @@ oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y)
 
     return status;
 }
+
+int
+oif_ivp_set_integrator(ImplHandle implh, char *integrator_name, OIFConfigDict *dict)
+{
+    if (dict != NULL) {
+        oif_config_dict_serialize(dict);
+    }
+    OIFArgType in_arg_types[] = {OIF_STR, OIF_CONFIG_DICT};
+    void *in_arg_values[] = {&integrator_name, &dict};
+    size_t in_num_args = sizeof(in_arg_types) / sizeof(*in_arg_types);
+    OIFArgs in_args = {
+        .num_args = in_num_args,
+        .arg_types = in_arg_types,
+        .arg_values = in_arg_values,
+    };
+
+    OIFArgType out_arg_types[] = {};
+    void *out_arg_values[] = {};
+    size_t out_num_args = sizeof(out_arg_values) / sizeof(*out_arg_values);
+    OIFArgs out_args = {
+        .num_args = out_num_args,
+        .arg_types = out_arg_types,
+        .arg_values = out_arg_values,
+    };
+
+    int status = call_interface_impl(implh, "set_integrator", &in_args, &out_args);
+    return status;
+}
