@@ -147,10 +147,10 @@ class OrbitEquationsProblem : public ODEProblem {
     double eps = 0.9L;
 };
 
-struct IvpImplementationsFixture
+struct IvpImplementationsTimesODEProblemsFixture
     : public testing::TestWithParam<std::tuple<const char *, ODEProblem *>> {};
 
-TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase)
+TEST_P(IvpImplementationsTimesODEProblemsFixture, ScalarExpDecayTestCase)
 {
     const char *impl = std::get<0>(GetParam());
     ODEProblem *problem = std::get<1>(GetParam());
@@ -183,7 +183,8 @@ TEST_P(IvpImplementationsFixture, ScalarExpDecayTestCase)
     oif_unload_impl(implh);
 }
 
-INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsFixture,
+
+INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
                          testing::Combine(testing::Values("sundials_cvode",
                                                           "scipy_ode"),
                                           testing::Values(new ScalarExpDecayProblem(),
