@@ -171,32 +171,34 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         }
         else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
             OIFConfigDict *dict = *(OIFConfigDict **) in_args->arg_values[i];
-            // We cannot simply assign `&new_dict` to `in_args->arg_values[i]`
-            // as it gets trashed as soon as we leave this block.
-            // Yes, C programming is amusing.
-            OIFConfigDict *new_dict = oif_config_dict_init();
-
-            oif_config_dict_copy_serialization(new_dict, dict);
-            oif_config_dict_deserialize(new_dict);
-
-            // We need to obtain a pointer as it is required by `libffi`.
-            OIFConfigDict **new_dict_p = malloc(sizeof(void *));
-            if (new_dict_p == NULL) {
-                fprintf(stderr, "Could not allocate memory\n");
-                exit(1);
-            }
-            *new_dict_p = new_dict;
-            in_args->arg_values[i] = new_dict_p;
             arg_types[i] = &ffi_type_pointer;
-            // Note that the ownership to OIFConfigDict is passed to the callee
-            // as it is highly likely that they need to save the dictionary
-            // somewhere and use it in another function as initialialization
-            // of solvers is often spread out between several different
-            // function invocations.
-            // Hence, the callee is responsible to free the memory
-            // after they do not need it anymore.
-            /* allocation_tracker_add(tracker, new_dict, oif_config_dict_free); */
-            allocation_tracker_add(tracker, new_dict_p, NULL);
+            if (dict != NULL) {
+                // We cannot simply assign `&new_dict` to `in_args->arg_values[i]`
+                // as it gets trashed as soon as we leave this block.
+                // Yes, C programming is amusing.
+                OIFConfigDict *new_dict = oif_config_dict_init();
+
+                oif_config_dict_copy_serialization(new_dict, dict);
+                oif_config_dict_deserialize(new_dict);
+
+                // We need to obtain a pointer as it is required by `libffi`.
+                OIFConfigDict **new_dict_p = malloc(sizeof(void *));
+                if (new_dict_p == NULL) {
+                    fprintf(stderr, "Could not allocate memory\n");
+                    exit(1);
+                }
+                *new_dict_p = new_dict;
+                in_args->arg_values[i] = new_dict_p;
+                // Note that the ownership to OIFConfigDict is passed
+                // to the callee as it is highly likely that they need
+                // to save the dictionary somewhere and use it in another
+                // function as initialization of solvers is often spread out
+                // between several different function invocations.
+                // Hence, the callee is responsible to free the memory
+                // after they do not need it anymore.
+                /* allocation_tracker_add(tracker, new_dict, oif_config_dict_free); */
+                allocation_tracker_add(tracker, new_dict_p, NULL);
+            }
         }
         else {
             fflush(stdout);
