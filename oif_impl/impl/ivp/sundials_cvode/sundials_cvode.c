@@ -40,6 +40,7 @@ void *cvode_mem = NULL;
 sunindextype N;
 
 int set_user_data(void *user_data);
+
 /*
  * In Sundials 7.0, `SUNContext_Create` accepts `SUNComm` instead of `void *`
  * as the first argument.
@@ -273,22 +274,24 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
     }
 
     config = config_;
-    const char **keys = oif_config_dict_get_keys(config);
-    for (int i = 0; keys[i] != NULL; i++) {
-        bool found = false;
-        for (int j = 0; AVAILABLE_OPTIONS_[j] != NULL; j++) {
-            if (strcmp(keys[i], AVAILABLE_OPTIONS_[j]) == 0) {
-                found = true;
-                break;
+    if (config != NULL) {
+        const char **keys = oif_config_dict_get_keys(config);
+        for (int i = 0; keys[i] != NULL; i++) {
+            bool found = false;
+            for (int j = 0; AVAILABLE_OPTIONS_[j] != NULL; j++) {
+                if (strcmp(keys[i], AVAILABLE_OPTIONS_[j]) == 0) {
+                    found = true;
+                    break;
+                }
             }
-        }
-        if (!found) {
-            fprintf(
-                stderr,
-                "[%s] Passed option '%s' is not one of the available options\n",
-                prefix, keys[i]
-            );
-            return 1;
+            if (!found) {
+                fprintf(
+                    stderr,
+                    "[%s] Passed option '%s' is not one of the available options\n",
+                    prefix, keys[i]
+                );
+                return 1;
+            }
         }
     }
 
