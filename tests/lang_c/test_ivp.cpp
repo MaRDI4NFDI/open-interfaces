@@ -223,6 +223,38 @@ TEST_P(ImplTimesIntegratorsFixture, Test1)
     delete problem;
 }
 
+TEST(SetIntegratorConfigDictTests, TestSundialsCVODE01)
+{
+    const char *impl = "sundials_cvode";
+    ODEProblem *problem = new ScalarExpDecayProblem();
+    double t0 = 0.0;
+    double t1 = 0.1;
+    intptr_t dims[] = {
+        problem->N,
+    };
+    OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
+    OIFArrayF64 *y = oif_create_array_f64(1, dims);
+    ImplHandle implh = oif_init_impl("ivp", impl, 1, 0);
+    ASSERT_GT(implh, 0);
+
+    int status;
+    status = oif_ivp_set_initial_value(implh, y0, t0);
+    ASSERT_EQ(status, 0);
+    status = oif_ivp_set_user_data(implh, problem);
+    ASSERT_EQ(status, 0);
+    status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
+    ASSERT_EQ(status, 0);
+
+    OIFConfigDict *dict = oif_config_dict_init();
+    oif_config_dict_add_int(dict, "max_num_steps", 1000);
+    status = oif_ivp_set_integrator(implh, (char *)"bdf", dict);
+    ASSERT_EQ(status, 0);
+
+    oif_ivp_integrate(implh, t1, y);
+
+    delete problem;
+}
+
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
                          testing::Combine(testing::Values("sundials_cvode",
                                                           "scipy_ode"),
