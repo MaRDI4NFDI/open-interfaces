@@ -31,3 +31,9 @@ oif_ivp_set_user_data(void *user_data);
  */
 int
 oif_ivp_integrate(double t, OIFArrayF64 *y);
+
+/**
+ * Set integrator and optionally its parameters.
+ */
+int
+oif_ivp_set_integrator(const char *integrator_name, OIFConfigDict *config);
