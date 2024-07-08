@@ -39,6 +39,7 @@ void *cvode_mem = NULL;
 /** Number of equations */
 sunindextype N;
 
+int set_user_data(void *user_data);
 /*
  * In Sundials 7.0, `SUNContext_Create` accepts `SUNComm` instead of `void *`
  * as the first argument.
@@ -54,6 +55,7 @@ sunrealtype self_rtol = 1e-6;   // relative tolerance
 sunrealtype self_atol = 1e-12;  // absolute tolerance
 int integrator = CV_ADAMS;
 OIFConfigDict *config = NULL;
+void *self_user_data = NULL;
 // Signature for the right-hand side that is provided by the `IVP` interface
 // of the Open Interfaces.
 static oif_ivp_rhs_fn_t OIF_RHS_FN = NULL;
@@ -139,6 +141,13 @@ init_(void)
         }
     }
 
+    if (self_user_data != NULL) {
+        status = set_user_data(self_user_data);
+        if (status) {
+            return 1;
+        }
+    }
+
     // 13. Create nonlinear solver object (optional)
     SUNNonlinearSolver NLS = SUNNonlinSol_FixedPoint(self_y0, 0, sunctx);
     if (NLS == NULL) {
@@ -212,6 +221,7 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
 int
 set_user_data(void *user_data)
 {
+    self_user_data = user_data;
     int status = CVodeSetUserData(cvode_mem, user_data);
     if (status == CV_MEM_NULL) {
         fprintf(stderr,
