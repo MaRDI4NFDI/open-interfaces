@@ -157,6 +157,42 @@ struct SolverIntegratorsCombination {
 
 struct ImplTimesIntegratorsFixture : public testing::TestWithParam<SolverIntegratorsCombination> {};
 
+class SundialsCVODEConfigDictTest : public testing::Test {
+    protected:
+        SundialsCVODEConfigDictTest() {
+            const char *impl = "sundials_cvode";
+            problem = new ScalarExpDecayProblem();
+            double t0 = 0.0;
+            intptr_t dims[] = {
+                problem->N,
+            };
+            y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
+            y = oif_create_array_f64(1, dims);
+            implh = oif_init_impl("ivp", impl, 1, 0);
+            EXPECT_GT(implh, 0);
+
+            int status;
+            status = oif_ivp_set_initial_value(implh, y0, t0);
+            EXPECT_EQ(status, 0);
+            status = oif_ivp_set_user_data(implh, problem);
+            EXPECT_EQ(status, 0);
+            status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
+            EXPECT_EQ(status, 0);
+        }
+
+        ~SundialsCVODEConfigDictTest() {
+            oif_free_array_f64(y0);
+            oif_free_array_f64(y);
+            delete problem;
+        }
+
+    ImplHandle implh;
+    ODEProblem *problem;
+    double t1 = 0.1;
+    OIFArrayF64 *y0;
+    OIFArrayF64 *y;
+};
+
 TEST_P(IvpImplementationsTimesODEProblemsFixture, ScalarExpDecayTestCase)
 {
     const char *impl = std::get<0>(GetParam());
@@ -223,36 +259,34 @@ TEST_P(ImplTimesIntegratorsFixture, Test1)
     delete problem;
 }
 
-TEST(SetIntegratorConfigDictTests, TestSundialsCVODE01)
+TEST_F(SundialsCVODEConfigDictTest, Test01)
 {
-    const char *impl = "sundials_cvode";
-    ODEProblem *problem = new ScalarExpDecayProblem();
-    double t0 = 0.0;
-    double t1 = 0.1;
-    intptr_t dims[] = {
-        problem->N,
-    };
-    OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
-    OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_init_impl("ivp", impl, 1, 0);
-    ASSERT_GT(implh, 0);
-
-    int status;
-    status = oif_ivp_set_initial_value(implh, y0, t0);
-    ASSERT_EQ(status, 0);
-    status = oif_ivp_set_user_data(implh, problem);
-    ASSERT_EQ(status, 0);
-    status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
-    ASSERT_EQ(status, 0);
-
     OIFConfigDict *dict = oif_config_dict_init();
     oif_config_dict_add_int(dict, "max_num_steps", 1000);
-    status = oif_ivp_set_integrator(implh, (char *)"bdf", dict);
+    int status = oif_ivp_set_integrator(implh, (char *)"bdf", dict);
     ASSERT_EQ(status, 0);
 
     oif_ivp_integrate(implh, t1, y);
+}
 
-    delete problem;
+TEST_F(SundialsCVODEConfigDictTest, Test02)
+{
+    OIFConfigDict *dict = oif_config_dict_init();
+    oif_config_dict_add_int(dict, "max_num_steps", 1000);
+    int status = oif_ivp_set_integrator(implh, (char *)"adams", dict);
+    ASSERT_EQ(status, 0);
+
+    oif_ivp_integrate(implh, t1, y);
+}
+
+TEST_F(SundialsCVODEConfigDictTest, Test03)
+{
+    OIFConfigDict *dict = oif_config_dict_init();
+    oif_config_dict_add_int(dict, "max_num_steps_wrong", 1000);
+    int status = oif_ivp_set_integrator(implh, (char *)"adams", dict);
+    ASSERT_NE(status, 0);
+
+    oif_ivp_integrate(implh, t1, y);
 }
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
