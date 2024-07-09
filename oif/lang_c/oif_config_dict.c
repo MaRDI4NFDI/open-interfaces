@@ -10,7 +10,7 @@
 
 #include <oif/api.h>
 #include <oif/config_dict.h>
-#include "util.h"
+#include <oif/util.h>
 
 struct oif_config_dict_t {
     int type;
@@ -84,7 +84,6 @@ void oif_config_dict_free(void *_dict)
     hashmap_foreach(key, entry, &dict->map) {
         free(entry->value);
     }
-
     hashmap_cleanup(&dict->map);
     free(dict->buffer);
     free(dict);
@@ -125,6 +124,26 @@ void oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double val
         exit(1);
     }
     memcpy(entry->value, &value, sizeof(double));
+
+    int result = hashmap_put(&dict->map, key, entry);
+    assert(result == 0);
+    dict->size++;
+    assert(dict->size < SIZE_);
+}
+
+void oif_config_dict_add_str(OIFConfigDict *dict, const char *key, const char *value)
+{
+    OIFConfigEntry *entry = malloc(sizeof(OIFConfigEntry));
+    if (entry == NULL) {
+        fprintf(stderr, "Could not add an entry to the config dictionary\n");
+        exit(1);
+    }
+    entry->type = OIF_STR;
+    entry->value = oif_util_str_duplicate(value);
+    if (entry->value == NULL) {
+        fprintf(stderr, "Could not allocate memory for adding a string entry\n");
+        exit(1);
+    }
 
     int result = hashmap_put(&dict->map, key, entry);
     assert(result == 0);
@@ -208,6 +227,13 @@ void oif_config_dict_print(const OIFConfigDict *dict) {
         else if (entry->type == OIF_FLOAT64) {
             printf("Key = '%s', value = '%f'\n", key, *(double *) entry->value);
         }
+        else if (entry->type == OIF_STR) {
+            printf("Key = '%s', value = '%s'\n", key, (char *) entry->value);
+        }
+        else {
+            fprintf(stderr, "Unknown type\n");
+            exit(1);
+        }
     }
 }
 
@@ -247,6 +273,10 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
             }
             else if (entry->type == OIF_FLOAT64) {
                 cw_pack_double(pc, *(double *) entry->value);
+            }
+            else if (entry->type == OIF_STR) {
+                cw_pack_str(pc, (char *) entry->value,
+                        oif_util_u32_from_size_t(strlen(entry->value)));
             }
             else {
                 fprintf(stderr, "Unsupported type for serialization\n");
@@ -362,6 +392,9 @@ oif_config_dict_deserialize(OIFConfigDict *dict)
         }
         else if (uctx.item.type == CWP_ITEM_DOUBLE) {
             oif_config_dict_add_double(dict, key, uctx.item.as.long_real);
+        }
+        else if (uctx.item.type == CWP_ITEM_STR) {
+            oif_config_dict_add_str(dict, key, uctx.item.as.str.start);
         }
         else {
             fprintf(
