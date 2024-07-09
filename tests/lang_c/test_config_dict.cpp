@@ -3,7 +3,6 @@
 #include <oif/api.h>
 #include <oif/config_dict.h>
 
-
 TEST(OIFConfigDictTest, SimpleCase)
 {
     OIFConfigDict *dict = oif_config_dict_init();
@@ -26,7 +25,6 @@ TEST(OIFConfigDictTest, TraverseCase)
 
     oif_config_dict_free(dict);
 }
-
 
 TEST(OIFConfigDictTest, GetValues)
 {
@@ -79,8 +77,8 @@ TEST(OIFConfigDictTest, SerializeDeserializeVeryLongStringCase)
         oif_config_dict_add_int(dict, buffer, -i);
     }
     for (size_t i = 0; i < N; ++i) {
-        sprintf(buffer, "double_option_%.6f", 3.14*i);
-        oif_config_dict_add_double(dict, buffer, 3.14*i);
+        sprintf(buffer, "double_option_%.6f", 3.14 * i);
+        oif_config_dict_add_double(dict, buffer, 3.14 * i);
     }
 
     oif_config_dict_serialize(dict);

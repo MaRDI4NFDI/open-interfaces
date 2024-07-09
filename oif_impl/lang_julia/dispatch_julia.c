@@ -324,7 +324,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                                                           (jl_value_t *)dims, own_buffer);
         }
         else if (in_args->arg_types[i] == OIF_STR) {
-            cur_julia_arg = jl_cstr_to_string(*((char **) in_args->arg_values[i]));
+            cur_julia_arg = jl_cstr_to_string(*((char **)in_args->arg_values[i]));
         }
         else if (in_args->arg_types[i] == OIF_CALLBACK) {
             OIFCallback *p = in_args->arg_values[i];
@@ -344,24 +344,22 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                 cur_julia_arg = jl_box_voidpointer(user_data->c);
             }
             else if (user_data->src == OIF_LANG_PYTHON) {
-                fprintf(
-                        stderr,
+                fprintf(stderr,
                         "[%s] Dealing with OIF_USER_DATA type "
                         "from Python Not implemented\n",
-                        prefix_
-                );
+                        prefix_);
             }
             else if (user_data->src == OIF_LANG_JULIA) {
-                fprintf(
-                        stderr,
+                fprintf(stderr,
                         "[%s] Dealing with OIF_USER_DATA type "
                         "from Julia Not implemented\n",
-                        prefix_
-                );
+                        prefix_);
             }
             else {
-                fprintf(stderr, "[%s] Cannot handle user data with src "
-                        "language id '%d'\n", prefix_, user_data->src);
+                fprintf(stderr,
+                        "[%s] Cannot handle user data with src "
+                        "language id '%d'\n",
+                        prefix_, user_data->src);
                 cur_julia_arg = NULL;
             }
         }
@@ -438,11 +436,11 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     if (result != 0) {
         fprintf(stderr,
-            "[%s] Return value from calling a Julia's implementation's "
-            "method '%s' is non-zero, therefore, there was an error "
-            "during the call; check the above messages for the actual "
-            "error message\n", prefix_, method
-        );
+                "[%s] Return value from calling a Julia's implementation's "
+                "method '%s' is non-zero, therefore, there was an error "
+                "during the call; check the above messages for the actual "
+                "error message\n",
+                prefix_, method);
     }
 
 cleanup:

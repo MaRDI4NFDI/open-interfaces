@@ -1,8 +1,7 @@
 #pragma once
 #include <stdlib.h>
 
-
-typedef void (cleanup_fn)(void *p);
+typedef void(cleanup_fn)(void *p);
 
 typedef struct allocation_tracker_t AllocationTracker;
 

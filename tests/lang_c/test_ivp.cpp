@@ -158,36 +158,39 @@ struct SolverIntegratorsCombination {
     std::vector<const char *> integrators;
 };
 
-struct ImplTimesIntegratorsFixture : public testing::TestWithParam<SolverIntegratorsCombination> {};
+struct ImplTimesIntegratorsFixture
+    : public testing::TestWithParam<SolverIntegratorsCombination> {};
 
 class SundialsCVODEConfigDictTest : public testing::Test {
-    protected:
-        SundialsCVODEConfigDictTest() {
-            const char *impl = "sundials_cvode";
-            problem = new ScalarExpDecayProblem();
-            double t0 = 0.0;
-            intptr_t dims[] = {
-                problem->N,
-            };
-            y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
-            y = oif_create_array_f64(1, dims);
-            implh = oif_init_impl("ivp", impl, 1, 0);
-            EXPECT_GT(implh, 0);
+   protected:
+    SundialsCVODEConfigDictTest()
+    {
+        const char *impl = "sundials_cvode";
+        problem = new ScalarExpDecayProblem();
+        double t0 = 0.0;
+        intptr_t dims[] = {
+            problem->N,
+        };
+        y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
+        y = oif_create_array_f64(1, dims);
+        implh = oif_init_impl("ivp", impl, 1, 0);
+        EXPECT_GT(implh, 0);
 
-            int status;
-            status = oif_ivp_set_initial_value(implh, y0, t0);
-            EXPECT_EQ(status, 0);
-            status = oif_ivp_set_user_data(implh, problem);
-            EXPECT_EQ(status, 0);
-            status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
-            EXPECT_EQ(status, 0);
-        }
+        int status;
+        status = oif_ivp_set_initial_value(implh, y0, t0);
+        EXPECT_EQ(status, 0);
+        status = oif_ivp_set_user_data(implh, problem);
+        EXPECT_EQ(status, 0);
+        status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
+        EXPECT_EQ(status, 0);
+    }
 
-        ~SundialsCVODEConfigDictTest() {
-            oif_free_array_f64(y0);
-            oif_free_array_f64(y);
-            delete problem;
-        }
+    ~SundialsCVODEConfigDictTest()
+    {
+        oif_free_array_f64(y0);
+        oif_free_array_f64(y);
+        delete problem;
+    }
 
     ImplHandle implh;
     ODEProblem *problem;
@@ -197,33 +200,35 @@ class SundialsCVODEConfigDictTest : public testing::Test {
 };
 
 class ScipyODEConfigDictTest : public testing::Test {
-    protected:
-        ScipyODEConfigDictTest() {
-            const char *impl = "scipy_ode";
-            problem = new ScalarExpDecayProblem();
-            double t0 = 0.0;
-            intptr_t dims[] = {
-                problem->N,
-            };
-            y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
-            y = oif_create_array_f64(1, dims);
-            implh = oif_init_impl("ivp", impl, 1, 0);
-            EXPECT_GT(implh, 0);
+   protected:
+    ScipyODEConfigDictTest()
+    {
+        const char *impl = "scipy_ode";
+        problem = new ScalarExpDecayProblem();
+        double t0 = 0.0;
+        intptr_t dims[] = {
+            problem->N,
+        };
+        y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
+        y = oif_create_array_f64(1, dims);
+        implh = oif_init_impl("ivp", impl, 1, 0);
+        EXPECT_GT(implh, 0);
 
-            int status;
-            status = oif_ivp_set_initial_value(implh, y0, t0);
-            EXPECT_EQ(status, 0);
-            status = oif_ivp_set_user_data(implh, problem);
-            EXPECT_EQ(status, 0);
-            status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
-            EXPECT_EQ(status, 0);
-        }
+        int status;
+        status = oif_ivp_set_initial_value(implh, y0, t0);
+        EXPECT_EQ(status, 0);
+        status = oif_ivp_set_user_data(implh, problem);
+        EXPECT_EQ(status, 0);
+        status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
+        EXPECT_EQ(status, 0);
+    }
 
-        ~ScipyODEConfigDictTest() {
-            oif_free_array_f64(y0);
-            oif_free_array_f64(y);
-            delete problem;
-        }
+    ~ScipyODEConfigDictTest()
+    {
+        oif_free_array_f64(y0);
+        oif_free_array_f64(y);
+        delete problem;
+    }
 
     ImplHandle implh;
     ODEProblem *problem;
@@ -233,20 +238,16 @@ class ScipyODEConfigDictTest : public testing::Test {
 };
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
-                         testing::Combine(testing::Values("sundials_cvode",
-                                                          "scipy_ode"),
+                         testing::Combine(testing::Values("sundials_cvode", "scipy_ode"),
                                           testing::Values(new ScalarExpDecayProblem(),
                                                           new LinearOscillatorProblem(),
                                                           new OrbitEquationsProblem())));
 
 INSTANTIATE_TEST_SUITE_P(
-    IvpChangeIntegratorsTests,
-    ImplTimesIntegratorsFixture,
-    testing::Values(
-        SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}},
-        SolverIntegratorsCombination{"scipy_ode", {"vode", "lsoda", "dopri5", "dop853"}}
-    )
-);
+    IvpChangeIntegratorsTests, ImplTimesIntegratorsFixture,
+    testing::Values(SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}},
+                    SolverIntegratorsCombination{"scipy_ode",
+                                                 {"vode", "lsoda", "dopri5", "dop853"}}));
 
 // END fixtures
 // ----------------------------------------------------------------------------

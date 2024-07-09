@@ -55,8 +55,7 @@ instantiate_callback_class(void)
     return CALLBACK_CLASS_P;
 }
 
-static
-PyObject *
+static PyObject *
 get_deserialization_function(void)
 {
     char *moduleName = "_serialization";
@@ -290,7 +289,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                                                    arr->data);
             }
             else if (in_args->arg_types[i] == OIF_STR) {
-                char *c_str = *((char **) in_args->arg_values[i]);
+                char *c_str = *((char **)in_args->arg_values[i]);
                 pValue = PyUnicode_FromString(c_str);
             }
             else if (in_args->arg_types[i] == OIF_CALLBACK) {
@@ -352,7 +351,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 }
             }
             else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
-                OIFConfigDict *dict = *((OIFConfigDict **) in_args->arg_values[i]);
+                OIFConfigDict *dict = *((OIFConfigDict **)in_args->arg_values[i]);
                 if (dict != NULL) {
                     PyObject *deserialize_fn = get_deserialization_function();
                     const char *buffer = oif_config_dict_get_serialized(dict);

@@ -16,8 +16,8 @@ struct allocation_tracker_t {
     size_t capacity;
 };
 
-
-AllocationTracker *allocation_tracker_init(void)
+AllocationTracker *
+allocation_tracker_init(void)
 {
     AllocationTracker *tracker = malloc(sizeof(AllocationTracker));
     if (tracker == NULL) {
@@ -40,8 +40,8 @@ report_error_and_exit:
     exit(1);
 }
 
-
-void allocation_tracker_add(AllocationTracker *tracker, void *pointer, cleanup_fn *func)
+void
+allocation_tracker_add(AllocationTracker *tracker, void *pointer, cleanup_fn *func)
 {
     if (pointer == NULL) {
         fprintf(stderr, "Cannot track a NULL pointer\n");
@@ -63,8 +63,8 @@ void allocation_tracker_add(AllocationTracker *tracker, void *pointer, cleanup_f
     }
 }
 
-
-void allocation_tracker_free(void *tracker_)
+void
+allocation_tracker_free(void *tracker_)
 {
     AllocationTracker *tracker = tracker_;
     assert(tracker->type == ALLOCATION_TRACKER_TYPE);
@@ -76,4 +76,3 @@ void allocation_tracker_free(void *tracker_)
 
     free(tracker);
 }
-
