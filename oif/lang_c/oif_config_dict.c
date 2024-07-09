@@ -239,7 +239,7 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
         const char *key;
         OIFConfigEntry *entry;
         hashmap_foreach(key, entry, &dict->map) {
-            cw_pack_str(pc, key, u32_from_size_t(strlen(key)));
+            cw_pack_str(pc, key, oif_util_u32_from_size_t(strlen(key)));
 
             if (entry->type == OIF_INT) {
                 int64_t i64_value = *(int *) entry->value;
