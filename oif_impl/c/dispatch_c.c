@@ -8,29 +8,8 @@
 #include <oif/api.h>
 #include <oif/dispatch_api.h>
 #include <oif/allocation_tracker.h>
-#include "oif/config_dict.h"
-
-/**
- * Duplicate a given null-terminated string along with memory allocation.
- *
- * It is the user responsibility to free the allocated memory.
- * This function is basically a copy of `strdup` because it is not in ISO C.
- *
- * @return The pointer to the duplicated null-terminated string or NULL in case
- * of an error.
- */
-static char *
-str_duplicate(const char src[static 1])
-{
-    size_t len = strlen(src);
-    char *dest = malloc(len * sizeof(*dest));
-    if (dest == NULL) {
-        fprintf(stderr, "[str_duplicate] Could not allocate memory\n");
-        return NULL;
-    }
-    strcpy(dest, src);
-    return dest;
-}
+#include <oif/config_dict.h>
+#include <oif/util.h>
 
 typedef struct {
     ImplInfo base;
@@ -62,7 +41,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         return NULL;
     }
     impl_info->impl_lib = impl_lib;
-    impl_info->impl_details = str_duplicate(impl_details);
+    impl_info->impl_details = oif_util_str_duplicate(impl_details);
     assert(impl_info->impl_details != NULL);
     fprintf(stderr, "[dispatch_c] load_impl impl_info->impl_details = %s\n",
             impl_info->impl_details);
