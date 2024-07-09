@@ -149,7 +149,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             }
         }
         else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
-            OIFConfigDict *dict = *(OIFConfigDict **) in_args->arg_values[i];
+            OIFConfigDict *dict = *(OIFConfigDict **)in_args->arg_values[i];
             arg_types[i] = &ffi_type_pointer;
             if (dict != NULL) {
                 // We cannot simply assign `&new_dict` to `in_args->arg_values[i]`

@@ -14,11 +14,11 @@
 
 struct oif_config_dict_t {
     int type;
-    int src;  // Source of the dictionary (one of OIF_LANG_* constants).
-    size_t size;  // Current number of elements in the map.
-    uint8_t *buffer;  // Buffer that is used by the pc.
+    int src;               // Source of the dictionary (one of OIF_LANG_* constants).
+    size_t size;           // Current number of elements in the map.
+    uint8_t *buffer;       // Buffer that is used by the pc.
     size_t buffer_length;  // Buffer length, unsurprisingly.
-    void *py_object;  // Should be used by Python to pass dictionary directly.
+    void *py_object;       // Should be used by Python to pass dictionary directly.
     HASHMAP(char, OIFConfigEntry) map;
     cw_pack_context *pc;  // Data structure that holds serialized map.
 };
@@ -27,9 +27,8 @@ static size_t SIZE_ = 65;
 #define MAX_KEY_LENGTH_ 1024
 #define BUF_SIZE_ 128
 
-
-
-static char *copy_key_(const char *key)
+static char *
+copy_key_(const char *key)
 {
     char *key_copy = malloc(strlen(key) * sizeof(char));
     if (key_copy == NULL) {
@@ -40,13 +39,14 @@ static char *copy_key_(const char *key)
     return key_copy;
 }
 
-static void free_key_(char *key) {
+static void
+free_key_(char *key)
+{
     free(key);
 }
 
-
-inline static
-uint8_t *reallocate_buffer_(uint8_t *buffer, size_t new_buffer_size)
+inline static uint8_t *
+reallocate_buffer_(uint8_t *buffer, size_t new_buffer_size)
 {
     uint8_t *tmp = realloc(buffer, new_buffer_size * sizeof(*buffer));
     if (tmp == NULL) {
@@ -57,8 +57,8 @@ uint8_t *reallocate_buffer_(uint8_t *buffer, size_t new_buffer_size)
     return tmp;
 }
 
-
-OIFConfigDict *oif_config_dict_init(void)
+OIFConfigDict *
+oif_config_dict_init(void)
 {
     OIFConfigDict *dict = malloc(sizeof(OIFConfigDict));
     assert(dict != NULL);
@@ -75,21 +75,21 @@ OIFConfigDict *oif_config_dict_init(void)
     return dict;
 }
 
-void oif_config_dict_free(void *_dict)
+void
+oif_config_dict_free(void *_dict)
 {
     OIFConfigDict *dict = _dict;
     assert(dict->type == OIF_CONFIG_DICT);
     const char *key;
     OIFConfigEntry *entry;
-    hashmap_foreach(key, entry, &dict->map) {
-        free(entry->value);
-    }
+    hashmap_foreach(key, entry, &dict->map) { free(entry->value); }
     hashmap_cleanup(&dict->map);
     free(dict->buffer);
     free(dict);
 }
 
-void oif_config_dict_add_int(OIFConfigDict *dict, const char *key, int value)
+void
+oif_config_dict_add_int(OIFConfigDict *dict, const char *key, int value)
 {
     OIFConfigEntry *entry = malloc(sizeof(OIFConfigEntry));
     if (entry == NULL) {
@@ -110,7 +110,8 @@ void oif_config_dict_add_int(OIFConfigDict *dict, const char *key, int value)
     assert(dict->size < SIZE_);
 }
 
-void oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double value)
+void
+oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double value)
 {
     OIFConfigEntry *entry = malloc(sizeof(OIFConfigEntry));
     if (entry == NULL) {
@@ -131,7 +132,8 @@ void oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double val
     assert(dict->size < SIZE_);
 }
 
-void oif_config_dict_add_str(OIFConfigDict *dict, const char *key, const char *value)
+void
+oif_config_dict_add_str(OIFConfigDict *dict, const char *key, const char *value)
 {
     OIFConfigEntry *entry = malloc(sizeof(OIFConfigEntry));
     if (entry == NULL) {
@@ -151,7 +153,8 @@ void oif_config_dict_add_str(OIFConfigDict *dict, const char *key, const char *v
     assert(dict->size < SIZE_);
 }
 
-const char **oif_config_dict_get_keys(OIFConfigDict *dict)
+const char **
+oif_config_dict_get_keys(OIFConfigDict *dict)
 {
     const char **keys = malloc(dict->size * sizeof(char *));
     if (keys == NULL) {
@@ -159,7 +162,7 @@ const char **oif_config_dict_get_keys(OIFConfigDict *dict)
         exit(1);
     }
     const char *key;
- 
+
     HASHMAP_ITER(dict->map) it;
 
     size_t i = 0;
@@ -177,7 +180,8 @@ const char **oif_config_dict_get_keys(OIFConfigDict *dict)
     return keys;
 }
 
-bool oif_config_dict_key_exists(OIFConfigDict *dict, const char *key)
+bool
+oif_config_dict_key_exists(OIFConfigDict *dict, const char *key)
 {
     OIFConfigEntry *entry = hashmap_get(&dict->map, key);
     if (entry == NULL) {
@@ -186,7 +190,8 @@ bool oif_config_dict_key_exists(OIFConfigDict *dict, const char *key)
     return true;
 }
 
-int oif_config_dict_get_int(OIFConfigDict *dict, const char *key)
+int
+oif_config_dict_get_int(OIFConfigDict *dict, const char *key)
 {
     OIFConfigEntry *entry = hashmap_get(&dict->map, key);
     if (entry == NULL) {
@@ -195,11 +200,12 @@ int oif_config_dict_get_int(OIFConfigDict *dict, const char *key)
     }
 
     assert(entry->type == OIF_INT);
-    int int_value = *(int *) entry->value;
+    int int_value = *(int *)entry->value;
     return int_value;
 }
 
-double oif_config_dict_get_double(OIFConfigDict *dict, const char *key)
+double
+oif_config_dict_get_double(OIFConfigDict *dict, const char *key)
 {
     OIFConfigEntry *entry = hashmap_get(&dict->map, key);
     if (entry == NULL) {
@@ -208,11 +214,13 @@ double oif_config_dict_get_double(OIFConfigDict *dict, const char *key)
     }
 
     assert(entry->type == OIF_FLOAT64);
-    double double_value = *(double *) entry->value;
+    double double_value = *(double *)entry->value;
     return double_value;
 }
 
-void oif_config_dict_print(const OIFConfigDict *dict) {
+void
+oif_config_dict_print(const OIFConfigDict *dict)
+{
     char *key;
     OIFConfigEntry *entry;
 
@@ -220,15 +228,16 @@ void oif_config_dict_print(const OIFConfigDict *dict) {
         printf("Config dict has no entries\n");
     }
 
-    hashmap_foreach(key, entry, &dict->map) {
+    hashmap_foreach(key, entry, &dict->map)
+    {
         if (entry->type == OIF_INT) {
-            printf("Key = '%s', value = '%d'\n", key, *(int *) entry->value);
+            printf("Key = '%s', value = '%d'\n", key, *(int *)entry->value);
         }
         else if (entry->type == OIF_FLOAT64) {
-            printf("Key = '%s', value = '%f'\n", key, *(double *) entry->value);
+            printf("Key = '%s', value = '%f'\n", key, *(double *)entry->value);
         }
         else if (entry->type == OIF_STR) {
-            printf("Key = '%s', value = '%s'\n", key, (char *) entry->value);
+            printf("Key = '%s', value = '%s'\n", key, (char *)entry->value);
         }
         else {
             fprintf(stderr, "Unknown type\n");
@@ -237,14 +246,13 @@ void oif_config_dict_print(const OIFConfigDict *dict) {
     }
 }
 
-void oif_config_dict_serialize(OIFConfigDict *dict)
+void
+oif_config_dict_serialize(OIFConfigDict *dict)
 {
     cw_pack_context *pc = malloc(sizeof(*pc));
     if (pc == NULL) {
-        fprintf(
-            stderr,
-            "Could not allocate memory required for serializing a config dictionary\n"
-        );
+        fprintf(stderr,
+                "Could not allocate memory required for serializing a config dictionary\n");
         exit(1);
     }
 
@@ -264,26 +272,26 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
 
         const char *key;
         OIFConfigEntry *entry;
-        hashmap_foreach(key, entry, &dict->map) {
+        hashmap_foreach(key, entry, &dict->map)
+        {
             cw_pack_str(pc, key, oif_util_u32_from_size_t(strlen(key)));
 
             if (entry->type == OIF_INT) {
-                int64_t i64_value = *(int *) entry->value;
+                int64_t i64_value = *(int *)entry->value;
                 cw_pack_signed(pc, i64_value);
             }
             else if (entry->type == OIF_FLOAT64) {
-                cw_pack_double(pc, *(double *) entry->value);
+                cw_pack_double(pc, *(double *)entry->value);
             }
             else if (entry->type == OIF_STR) {
-                cw_pack_str(pc, (char *) entry->value,
-                        oif_util_u32_from_size_t(strlen(entry->value)));
+                cw_pack_str(pc, (char *)entry->value,
+                            oif_util_u32_from_size_t(strlen(entry->value)));
             }
             else {
                 fprintf(stderr, "Unsupported type for serialization\n");
                 exit(1);
             }
         }
-
 
         if (pc->return_code == CWP_RC_OK) {
             has_succeeded = true;
@@ -312,11 +320,10 @@ void oif_config_dict_serialize(OIFConfigDict *dict)
     goto cleanup;
 
 report_error_and_exit:
-    fprintf(
-        stderr,
-        "Serialization of config dictionary was not successful. "
-        "pc->return_code = %d\n", pc->return_code
-    );
+    fprintf(stderr,
+            "Serialization of config dictionary was not successful. "
+            "pc->return_code = %d\n",
+            pc->return_code);
     exit(1);
 
 cleanup:
@@ -350,16 +357,14 @@ oif_config_dict_deserialize(OIFConfigDict *dict)
     /* assert(uctx.item.type == CWP_ITEM_MAP); */
 
     // Unpack key-value pairs.
-    while (uctx.return_code != CWP_RC_END_OF_INPUT && cw_look_ahead(&uctx) != CWP_NOT_AN_ITEM) {
+    while (uctx.return_code != CWP_RC_END_OF_INPUT &&
+           cw_look_ahead(&uctx) != CWP_NOT_AN_ITEM) {
         cw_unpack_next(&uctx);
         if (uctx.return_code) {
             goto unpack_error;
         }
         if (uctx.item.type != CWP_ITEM_STR) {
-            fprintf(
-                stderr,
-                "[oif_config_dict_deserialize] Expected a string\n"
-            );
+            fprintf(stderr, "[oif_config_dict_deserialize] Expected a string\n");
             goto cleanup;
         }
         len = uctx.item.as.str.length;
@@ -373,7 +378,7 @@ oif_config_dict_deserialize(OIFConfigDict *dict)
         if (uctx.item.type == CWP_ITEM_POSITIVE_INTEGER) {
             int64_t i64_value = uctx.item.as.i64;
             if (i64_value <= INT32_MAX) {
-                oif_config_dict_add_int(dict, key, (int32_t) uctx.item.as.i64);
+                oif_config_dict_add_int(dict, key, (int32_t)uctx.item.as.i64);
             }
             else {
                 fprintf(stderr, "Serialized positive integer is not 32-bit wide\n");
@@ -383,7 +388,7 @@ oif_config_dict_deserialize(OIFConfigDict *dict)
         else if (uctx.item.type == CWP_ITEM_NEGATIVE_INTEGER) {
             int64_t i64_value = uctx.item.as.i64;
             if (i64_value >= INT32_MIN) {
-                oif_config_dict_add_int(dict, key, (int32_t) uctx.item.as.i64);
+                oif_config_dict_add_int(dict, key, (int32_t)uctx.item.as.i64);
             }
             else {
                 fprintf(stderr, "Serialized negative integer is not 32-bit wide\n");
@@ -397,10 +402,8 @@ oif_config_dict_deserialize(OIFConfigDict *dict)
             oif_config_dict_add_str(dict, key, uctx.item.as.str.start);
         }
         else {
-            fprintf(
-                stderr,
-                "[oif_config_dict_deserialize] Unknown type: %d\n", uctx.item.type
-            );
+            fprintf(stderr, "[oif_config_dict_deserialize] Unknown type: %d\n",
+                    uctx.item.type);
             goto cleanup;
         }
     }
@@ -408,13 +411,11 @@ oif_config_dict_deserialize(OIFConfigDict *dict)
     goto finally;
 
 unpack_error:
-    fprintf(
-        stderr,
-        "During deserialization of OIFConfigDict object, "
-        "an error occurred. Error code is %d and can be checked "
-        "in `cwpack.h`\n",
-        uctx.return_code
-    );
+    fprintf(stderr,
+            "During deserialization of OIFConfigDict object, "
+            "an error occurred. Error code is %d and can be checked "
+            "in `cwpack.h`\n",
+            uctx.return_code);
 
 cleanup:
     result = 1;
@@ -427,11 +428,9 @@ int
 oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from)
 {
     if (to->buffer != NULL) {
-        fprintf(
-            stderr,
-            "Config dictionary cannot be copied as the serialization buffer "
-            "at the destination was already initialized\n"
-        );
+        fprintf(stderr,
+                "Config dictionary cannot be copied as the serialization buffer "
+                "at the destination was already initialized\n");
         return 1;
     }
     to->buffer = malloc(from->buffer_length * sizeof(*from->buffer));
@@ -444,11 +443,14 @@ oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from)
     return 0;
 }
 
-
-const char *oif_config_dict_get_serialized(OIFConfigDict *dict) {
-    return (char *) dict->buffer;
+const char *
+oif_config_dict_get_serialized(OIFConfigDict *dict)
+{
+    return (char *)dict->buffer;
 }
 
-size_t oif_config_dict_get_serialized_object_length(OIFConfigDict *dict) {
+size_t
+oif_config_dict_get_serialized_object_length(OIFConfigDict *dict)
+{
     return dict->buffer_length;
 }

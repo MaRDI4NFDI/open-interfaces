@@ -4,8 +4,8 @@
 
 #include "oif_impl/_util.h"
 
-
-int oif_strcmp_nocase(const char s1[static 1], const char s2[static 1])
+int
+oif_strcmp_nocase(const char s1[static 1], const char s2[static 1])
 {
     size_t n1 = strlen(s1);
     size_t n2 = strlen(s2);
@@ -22,4 +22,3 @@ int oif_strcmp_nocase(const char s1[static 1], const char s2[static 1])
 
     return 0;
 }
-

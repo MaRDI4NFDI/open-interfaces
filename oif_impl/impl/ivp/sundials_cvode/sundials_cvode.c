@@ -39,7 +39,8 @@ void *cvode_mem = NULL;
 /** Number of equations */
 sunindextype N;
 
-int set_user_data(void *user_data);
+int
+set_user_data(void *user_data);
 
 /*
  * In Sundials 7.0, `SUNContext_Create` accepts `SUNComm` instead of `void *`
@@ -65,7 +66,6 @@ static const char *AVAILABLE_OPTIONS_[] = {
     "max_num_steps",
     NULL,
 };
-
 
 static int
 init_(void)
@@ -167,7 +167,6 @@ init_(void)
     return 0;
 }
 
-
 int
 set_initial_value(OIFArrayF64 *y0_in, double t0_in)
 {
@@ -175,7 +174,7 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
         fprintf(stderr, "`set_initial_value` received NULL argument\n");
         exit(1);
     }
-    int status;                  // Check errors
+    int status;  // Check errors
 
     // 1. Initialize parallel or multi-threaded environment, if appropriate.
     // No, it is not appropriate here as we work with serial code :-)
@@ -265,11 +264,8 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
         integrator = CV_ADAMS;
     }
     else {
-        fprintf(
-            stderr,
-            "[%s] Supported values for integrator name are `bdf` and `adams`\n",
-            prefix
-        );
+        fprintf(stderr, "[%s] Supported values for integrator name are `bdf` and `adams`\n",
+                prefix);
         return 1;
     }
 
@@ -285,11 +281,9 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
                 }
             }
             if (!found) {
-                fprintf(
-                    stderr,
-                    "[%s] Passed option '%s' is not one of the available options\n",
-                    prefix, keys[i]
-                );
+                fprintf(stderr,
+                        "[%s] Passed option '%s' is not one of the available options\n",
+                        prefix, keys[i]);
                 return 1;
             }
         }
