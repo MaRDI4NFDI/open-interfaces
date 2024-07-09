@@ -232,6 +232,22 @@ class ScipyODEConfigDictTest : public testing::Test {
     OIFArrayF64 *y;
 };
 
+INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
+                         testing::Combine(testing::Values("sundials_cvode",
+                                                          "scipy_ode"),
+                                          testing::Values(new ScalarExpDecayProblem(),
+                                                          new LinearOscillatorProblem(),
+                                                          new OrbitEquationsProblem())));
+
+INSTANTIATE_TEST_SUITE_P(
+    IvpChangeIntegratorsTests,
+    ImplTimesIntegratorsFixture,
+    testing::Values(
+        SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}},
+        SolverIntegratorsCombination{"scipy_ode", {"vode", "lsoda", "dopri5", "dop853"}}
+    )
+);
+
 // END fixtures
 // ----------------------------------------------------------------------------
 
@@ -362,19 +378,3 @@ TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
     int status = oif_ivp_set_integrator(implh, (char *)"vode", dict);
     ASSERT_NE(status, 0);
 }
-
-INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
-                         testing::Combine(testing::Values("sundials_cvode",
-                                                          "scipy_ode"),
-                                          testing::Values(new ScalarExpDecayProblem(),
-                                                          new LinearOscillatorProblem(),
-                                                          new OrbitEquationsProblem())));
-
-INSTANTIATE_TEST_SUITE_P(
-    IvpChangeIntegratorsTests,
-    ImplTimesIntegratorsFixture,
-    testing::Values(
-        SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}},
-        SolverIntegratorsCombination{"scipy_ode", {"vode", "lsoda", "dopri5", "dop853"}}
-    )
-);
