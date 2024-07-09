@@ -147,6 +147,9 @@ class OrbitEquationsProblem : public ODEProblem {
     double eps = 0.9L;
 };
 
+// ----------------------------------------------------------------------------
+// BEGIN fixtures
+
 struct IvpImplementationsTimesODEProblemsFixture
     : public testing::TestWithParam<std::tuple<const char *, ODEProblem *>> {};
 
@@ -192,6 +195,45 @@ class SundialsCVODEConfigDictTest : public testing::Test {
     OIFArrayF64 *y0;
     OIFArrayF64 *y;
 };
+
+class ScipyODEConfigDictTest : public testing::Test {
+    protected:
+        ScipyODEConfigDictTest() {
+            const char *impl = "scipy_ode";
+            problem = new ScalarExpDecayProblem();
+            double t0 = 0.0;
+            intptr_t dims[] = {
+                problem->N,
+            };
+            y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
+            y = oif_create_array_f64(1, dims);
+            implh = oif_init_impl("ivp", impl, 1, 0);
+            EXPECT_GT(implh, 0);
+
+            int status;
+            status = oif_ivp_set_initial_value(implh, y0, t0);
+            EXPECT_EQ(status, 0);
+            status = oif_ivp_set_user_data(implh, problem);
+            EXPECT_EQ(status, 0);
+            status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
+            EXPECT_EQ(status, 0);
+        }
+
+        ~ScipyODEConfigDictTest() {
+            oif_free_array_f64(y0);
+            oif_free_array_f64(y);
+            delete problem;
+        }
+
+    ImplHandle implh;
+    ODEProblem *problem;
+    double t1 = 0.1;
+    OIFArrayF64 *y0;
+    OIFArrayF64 *y;
+};
+
+// END fixtures
+// ----------------------------------------------------------------------------
 
 TEST_P(IvpImplementationsTimesODEProblemsFixture, ScalarExpDecayTestCase)
 {
@@ -282,11 +324,43 @@ TEST_F(SundialsCVODEConfigDictTest, Test02)
 TEST_F(SundialsCVODEConfigDictTest, Test03)
 {
     OIFConfigDict *dict = oif_config_dict_init();
-    oif_config_dict_add_int(dict, "max_num_steps_wrong", 1000);
+    oif_config_dict_add_int(dict, "max_num_steps", 1000);
+    oif_config_dict_add_str(dict, "method", "wrong_key");
     int status = oif_ivp_set_integrator(implh, (char *)"adams", dict);
     ASSERT_NE(status, 0);
 
     oif_ivp_integrate(implh, t1, y);
+}
+
+TEST_F(ScipyODEConfigDictTest, ShouldAcceptIntegratorParamsForDopri5)
+{
+    OIFConfigDict *dict = oif_config_dict_init();
+    oif_config_dict_add_int(dict, "nsteps", 1000);
+    int status = oif_ivp_set_integrator(implh, (char *)"dopri5", dict);
+    ASSERT_EQ(status, 0);
+
+    oif_ivp_integrate(implh, t1, y);
+}
+
+TEST_F(ScipyODEConfigDictTest, ShouldAcceptIntegratorParamsForVODE)
+{
+    OIFConfigDict *dict = oif_config_dict_init();
+    oif_config_dict_add_int(dict, "nsteps", 1000);
+    oif_config_dict_add_double(dict, "rtol", 1e-12);
+    oif_config_dict_add_double(dict, "atol", 1e-12);
+    oif_config_dict_add_str(dict, "method", "bdf");
+    int status = oif_ivp_set_integrator(implh, (char *)"vode", dict);
+    ASSERT_EQ(status, 0);
+
+    oif_ivp_integrate(implh, t1, y);
+}
+
+TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
+{
+    OIFConfigDict *dict = oif_config_dict_init();
+    oif_config_dict_add_int(dict, "max_num_steps_wrong_key", 1000);
+    int status = oif_ivp_set_integrator(implh, (char *)"vode", dict);
+    ASSERT_NE(status, 0);
 }
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
