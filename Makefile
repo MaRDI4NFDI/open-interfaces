@@ -21,7 +21,7 @@ all :
 
 .PHONY : test
 test :
-	cd build && ctest
+	cd build && ctest --output-on-failure
 	pytest tests/lang_python
 
 .PHONY : pytest-valgrind
