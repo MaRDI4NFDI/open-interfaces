@@ -44,7 +44,7 @@ def plot():
     for i, impl in enumerate(IMPL_LIST):
         fn = os.path.join(OUTDIR, DATA_FILENAME_TPL.format(impl))
         data = np.loadtxt(fn)
-        t, y1, __ = data[:, 0], data[:, 1], data[:, 2]
+        t, y1 = data[:, 0], data[:, 1]
         plt.plot(t, y1, STYLES[i], label=impl)
 
     plt.xlabel("Time")

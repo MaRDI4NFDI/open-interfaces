@@ -169,18 +169,14 @@ def make_oif_config_dict(arg: dict) -> OIFConfigDict:
     # buffer.write(msgpack.packb(len(arg.keys()), use_bin_type=True))
     for k in arg.keys():
         v1 = k
-        v3 = arg[k]
-        if isinstance(v3, int):
-            v2 = OIF_INT
-        elif isinstance(v3, float):
-            v2 = OIF_FLOAT64
-        elif isinstance(v3, str):
-            v2 = OIF_STR
+        v2 = arg[k]
+        if isinstance(v2, int) or isinstance(v2, float) or isinstance(v2, str):
+            pass
         else:
             raise TypeError("Supported types for dictionaries are: int, float, str")
 
         buffer.write(msgpack.packb(v1, use_bin_type=True))
-        buffer.write(msgpack.packb(v3, use_bin_type=True))
+        buffer.write(msgpack.packb(v2, use_bin_type=True))
     buffer.seek(0)
 
     obj = OIFConfigDict(
