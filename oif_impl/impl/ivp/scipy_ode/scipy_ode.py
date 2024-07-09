@@ -70,7 +70,6 @@ class ScipyODE(IVPInterface):
             )
         if integrator_params is not None:
             self.integrator_params = self.integrator_params | integrator_params
-            print(self.integrator_params)
         try:
             self.s.set_integrator(integrator_name, **integrator_params)
         except TypeError:

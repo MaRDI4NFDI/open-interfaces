@@ -243,7 +243,6 @@ class OIFPyBinding:
                 arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
                 arg_types.append(OIF_USER_DATA)
             elif isinstance(arg, dict):
-                print("Passed dict: ", arg)
                 arg_config_dict = make_oif_config_dict(arg)
                 arg_config_dict_p = ctypes.pointer(arg_config_dict)
                 arg_config_dict_p_p = ctypes.cast(
