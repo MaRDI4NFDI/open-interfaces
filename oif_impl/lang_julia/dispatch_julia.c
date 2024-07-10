@@ -23,6 +23,7 @@ static const char *OIF_IMPL_ROOT_DIR = NULL;
 static bool INITIALIZED_ = false;
 
 static jl_module_t *CALLBACK_MODULE_;
+static jl_module_t *SERIALIZATION_MODULE_;
 
 typedef struct {
     ImplInfo base;
@@ -174,6 +175,51 @@ make_wrapper_over_c_callback(OIFCallback *p)
     assert(p->fn_p_c != NULL);
     jl_value_t *fn_p_c_wrapped = jl_box_voidpointer(p->fn_p_c);
     wrapper = jl_call1(fn_callback, fn_p_c_wrapped);
+
+cleanup:
+    return wrapper;
+}
+
+static jl_value_t *
+deserialize_config_dict(OIFConfigDict *dict)
+{
+    jl_value_t *wrapper = NULL;
+    if (SERIALIZATION_MODULE_ == NULL) {
+        char include_statement[512];
+        int nchars_written =
+            snprintf(include_statement, 512, "include(\"%s/oif_impl/lang_julia/serialization.jl\")",
+                     OIF_IMPL_ROOT_DIR);
+        if (nchars_written >= 512 - 1) {
+            fprintf(stderr,
+                    "[%s] Could not execute include statement for `serialization.jl` "
+                    "while the provided buffer is only 512 characters, and %d "
+                    "characters are supposed to be written\n",
+                    prefix_, nchars_written + 1);
+        }
+        jl_eval_string(include_statement);
+        if (jl_exception_occurred()) {
+            handle_exception_();
+            goto cleanup;
+        }
+        jl_eval_string("import .OIFSerialization");
+        if (jl_exception_occurred()) {
+            handle_exception_();
+            goto cleanup;
+        }
+        SERIALIZATION_MODULE_ = (jl_module_t *)jl_eval_string("OIFSerialization");
+        if (jl_exception_occurred()) {
+            handle_exception_();
+            goto cleanup;
+        }
+    }
+
+    jl_function_t *deserialize_fn =
+        jl_get_function(SERIALIZATION_MODULE_, "deserialize");
+    assert(deserialize_fn != NULL);
+    const char *buffer = oif_config_dict_get_serialized(dict);
+    assert(buffer != NULL);
+    jl_value_t *buffer_c_str = jl_box_voidpointer((void *)buffer);
+    wrapper = jl_call1(deserialize_fn, buffer_c_str);
 
 cleanup:
     return wrapper;
@@ -364,7 +410,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             }
         }
         else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
-            cur_julia_arg = jl_box_voidpointer(in_args->arg_values[i]);
+            OIFConfigDict *dict = *((OIFConfigDict **) in_args->arg_values[i]);
+            cur_julia_arg = deserialize_config_dict(dict);
         }
         if (cur_julia_arg == NULL) {
             fprintf(stderr,
