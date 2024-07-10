@@ -7,3 +7,4 @@ target_include_directories(oif_dispatch_julia
                            PUBLIC $<BUILD_INTERFACE:${Julia_INCLUDE_DIRS}>)
 target_link_libraries(oif_dispatch_julia
                       PRIVATE $<BUILD_INTERFACE:${Julia_LIBRARY}>)
+target_link_libraries(oif_dispatch_julia PRIVATE oif_c_data_structures)
