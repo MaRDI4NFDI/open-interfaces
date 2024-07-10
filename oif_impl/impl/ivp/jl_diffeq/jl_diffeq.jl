@@ -8,12 +8,12 @@ mutable struct Self
     y0::Vector{Float64}
     reltol::Float64
     abstol::Float64
+    integrator
     rhs
-    problem
     solver
     user_data
     function Self()
-        return new(0.0, [], 1e-6, 1e-12)
+        return new(0.0, [], 1e-6, 1e-12, Tsit5())
     end
 end
 
@@ -27,16 +27,7 @@ function set_rhs_fn(self::Self, rhs)::Int
     self.rhs = rhs
 
     if !isempty(self.y0)
-        if !isdefined(self, :user_data)
-            self.problem = ODEProblem(
-                _rhs_wrapper(rhs), self.y0, (self.t0, Inf)
-            )
-        else
-            self.problem = ODEProblem(
-                _rhs_wrapper(rhs), self.y0, (self.t0, Inf), self.user_data
-            )
-        end
-        self.solver = init(self.problem, Tsit5(), reltol = self.reltol, abstol = self.abstol)
+        _init(self)
     else
         error("Method `set_initial_value` must be called before `set_rhs_fn`")
     end
@@ -66,7 +57,9 @@ function set_integrator(self::Self, integrator_name::String, params)
         error("[jl_diffeq] Could not find integrator '$integrator_name'")
     end
     integrator = getfield(OrdinaryDiffEq, integrator_symbol)(autodiff=false)
-    self.solver = init(self.problem, integrator)
+    if !isempty(self.y0) && !isempty(self.rhs)
+        _init(self)
+    end
     return 0
 end
 
@@ -77,4 +70,16 @@ function _rhs_wrapper(rhs)
     return wrapper
 end
 
+function _init(self::Self)
+    if !isdefined(self, :user_data)
+        problem = ODEProblem(
+            _rhs_wrapper(self.rhs), self.y0, (self.t0, Inf)
+        )
+    else
+        problem = ODEProblem(
+            _rhs_wrapper(self.rhs), self.y0, (self.t0, Inf), self.user_data
+        )
+    end
+    self.solver = init(problem, self.integrator, reltol = self.reltol, abstol = self.abstol)
+end
 end
