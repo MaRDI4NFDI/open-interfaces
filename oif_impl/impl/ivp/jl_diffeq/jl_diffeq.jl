@@ -6,12 +6,14 @@ using OrdinaryDiffEq
 mutable struct Self
     t0::Float64
     y0::Vector{Float64}
+    reltol::Float64
+    abstol::Float64
     rhs
     problem
     solver
     user_data
     function Self()
-        return new(0.0, [])
+        return new(0.0, [], 1e-6, 1e-12)
     end
 end
 
@@ -34,7 +36,7 @@ function set_rhs_fn(self::Self, rhs)::Int
                 _rhs_wrapper(rhs), self.y0, (self.t0, Inf), self.user_data
             )
         end
-        self.solver = init(self.problem, Tsit5())
+        self.solver = init(self.problem, Tsit5(), reltol = self.reltol, abstol = self.abstol)
     else
         error("Method `set_initial_value` must be called before `set_rhs_fn`")
     end
