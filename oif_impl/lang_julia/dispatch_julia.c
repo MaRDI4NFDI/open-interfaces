@@ -183,7 +183,7 @@ cleanup:
 static jl_value_t *
 deserialize_config_dict(OIFConfigDict *dict)
 {
-    jl_value_t *wrapper = NULL;
+    jl_value_t *julia_dict = NULL;
     if (SERIALIZATION_MODULE_ == NULL) {
         char include_statement[512];
         int nchars_written =
@@ -223,14 +223,14 @@ deserialize_config_dict(OIFConfigDict *dict)
         handle_exception_();
         goto cleanup;
     }
-    wrapper = jl_call1(deserialize_fn, buffer_c_str);
+    julia_dict = jl_call1(deserialize_fn, buffer_c_str);
     if (jl_exception_occurred()) {
         handle_exception_();
         goto cleanup;
     }
 
 cleanup:
-    return wrapper;
+    return julia_dict;
 }
 
 ImplInfo *
