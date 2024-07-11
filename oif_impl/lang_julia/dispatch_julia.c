@@ -392,10 +392,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                 cur_julia_arg = jl_box_voidpointer(user_data->c);
             }
             else if (user_data->src == OIF_LANG_PYTHON) {
-                fprintf(stderr,
-                        "[%s] Dealing with OIF_USER_DATA type "
-                        "from Python Not implemented\n",
-                        prefix_);
+                cur_julia_arg = jl_box_voidpointer(user_data->py);
             }
             else if (user_data->src == OIF_LANG_JULIA) {
                 fprintf(stderr,
