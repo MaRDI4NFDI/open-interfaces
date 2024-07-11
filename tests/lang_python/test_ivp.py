@@ -327,12 +327,9 @@ class TestIVPConfigDict:
             s.set_integrator("bdf", {"max_num_steps_typo": 50})
 
 
-@pytest.fixture(
-    params=[
-        "scipy_ode",
-        "sundials_cvode",
-    ]
-)
+
+
+@pytest.fixture(params=["scipy_ode", "sundials_cvode", "jl_diffeq"])
 def s(request):
     """Instantiate IVP with the specified implementation."""
     print(f"IVP: {request.param}")
