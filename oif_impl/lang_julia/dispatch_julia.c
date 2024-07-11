@@ -328,7 +328,9 @@ unload_impl(ImplInfo *impl_info_)
     JuliaImplInfo *impl_info = (JuliaImplInfo *)impl_info_;
     free(impl_info);
 
-    jl_atexit_hook(0);
+    // Do not finalize embedded Julia as then it cannot be initialized again.
+    // It is the same situation as with embedded Python.
+    /* jl_atexit_hook(0); */
     return 0;
 }
 
