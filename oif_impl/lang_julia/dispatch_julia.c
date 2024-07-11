@@ -219,7 +219,15 @@ deserialize_config_dict(OIFConfigDict *dict)
     const char *buffer = oif_config_dict_get_serialized(dict);
     assert(buffer != NULL);
     jl_value_t *buffer_c_str = jl_box_voidpointer((void *)buffer);
+    if (jl_exception_occurred()) {
+        handle_exception_();
+        goto cleanup;
+    }
     wrapper = jl_call1(deserialize_fn, buffer_c_str);
+    if (jl_exception_occurred()) {
+        handle_exception_();
+        goto cleanup;
+    }
 
 cleanup:
     return wrapper;
