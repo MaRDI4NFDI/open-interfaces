@@ -34,8 +34,12 @@ function set_rhs_fn(self::Self, rhs)::Int
     return 0
 end
 
-function set_tolerances(self::Self, rtol::Float64, atol::Float64)::Int
-    println("I am setting tolerances: NOT IMPLEMENTED")
+function set_tolerances(self::Self, reltol::Float64, abstol::Float64)::Int
+    self.reltol = reltol
+    self.abstol = abstol
+    if !isempty(self.y0) && isdefined(self, :rhs)
+        _init(self)
+    end
     return 0
 end
 
