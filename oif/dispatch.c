@@ -17,6 +17,7 @@
 #include "oif/api.h"
 #include "oif/dispatch.h"
 #include "oif/dispatch_api.h"
+#include <oif/util.h>
 
 static char OIF_DISPATCH_C_SO[] = "liboif_dispatch_c.so";
 static char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
@@ -209,6 +210,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     impl_info->implh = IMPL_COUNTER_;
     IMPL_COUNTER_++;
     impl_info->dh = dh;
+    impl_info->interface = oif_util_str_duplicate(interface);
     hashmap_put(&IMPL_MAP, &impl_info->implh, impl_info);
     retval = impl_info->implh;
 
@@ -281,8 +283,10 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
 
     if (status) {
         fprintf(stderr,
-                "[dispatch] ERROR: during execution of open interface "
-                "an error occurred\n");
+                "[dispatch] ERROR: during execution of the function "
+                "'%s::%s' an error occurred\n",
+                impl_info->interface, method
+        );
     }
     return status;
 }

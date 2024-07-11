@@ -17,6 +17,7 @@ typedef unsigned int DispatchHandle;
 typedef struct {
     ImplHandle implh;
     DispatchHandle dh;
+    char *interface;
 } ImplInfo;
 
 ImplInfo *
