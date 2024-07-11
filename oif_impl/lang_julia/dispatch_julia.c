@@ -325,8 +325,9 @@ int
 unload_impl(ImplInfo *impl_info_)
 {
     assert(impl_info_->dh == OIF_LANG_JULIA);
-    JuliaImplInfo *impl_info = (JuliaImplInfo *)impl_info_;
-    free(impl_info);
+    // Here, we need to use `setindex!` and `delete!` functions
+    // as explained on the Embedding Julia page.
+    // JuliaImplInfo *impl_info = (JuliaImplInfo *)impl_info_;
 
     // Do not finalize embedded Julia as then it cannot be initialized again.
     // It is the same situation as with embedded Python.

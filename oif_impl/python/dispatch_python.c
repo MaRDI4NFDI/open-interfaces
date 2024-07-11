@@ -451,7 +451,6 @@ unload_impl(ImplInfo *impl_info_)
     Py_DECREF(impl_info->pInstance);
     Py_XDECREF(impl_info->pCallbackClass);
     IMPL_COUNTER--;
-    free(impl_info);
 
     /*
      * We cannot finalize embedded Python at all as then it will be

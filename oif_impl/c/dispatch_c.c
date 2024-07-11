@@ -70,7 +70,6 @@ unload_impl(ImplInfo *impl_info_)
     IMPL_COUNTER--;
 
     free(impl_info->impl_details);
-    free(impl_info);
     return 0;
 }
 
