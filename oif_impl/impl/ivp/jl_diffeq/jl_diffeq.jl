@@ -60,7 +60,7 @@ function set_integrator(self::Self, integrator_name::String, params)
     if !isdefined(OrdinaryDiffEq, integrator_symbol)
         error("[jl_diffeq] Could not find integrator '$integrator_name'")
     end
-    integrator = getfield(OrdinaryDiffEq, integrator_symbol)(autodiff=false)
+    integrator = getfield(OrdinaryDiffEq, integrator_symbol)()
     if !isempty(self.y0) && isdefined(self, :rhs)
         _init(self)
     end
