@@ -2,8 +2,8 @@ module OIFSerialization
 export deserialize
 import MsgPack
 
-function deserialize(sd::Ptr{Cchar})::Dict
-    sd_str = unsafe_string(sd)
+function deserialize(sd::Ptr)::Dict
+    sd_str = unsafe_string(Ptr{Cchar}(sd))
     io = IOBuffer(sd_str)
 
     data = MsgPack.unpack(io)
