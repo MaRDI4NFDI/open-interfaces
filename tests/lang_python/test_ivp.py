@@ -245,6 +245,7 @@ class TestIVP:
         s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
         s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
 
         with pytest.raises(RuntimeError):
             s.set_integrator("i-am-not-known-integrator")
