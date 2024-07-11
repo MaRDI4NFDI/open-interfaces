@@ -270,13 +270,12 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     char import_statement[1024];
     sprintf(import_statement, "import .%s", module_name);
 
-    jl_value_t *retval;
-    retval = jl_eval_string(include_statement);
+    jl_eval_string(include_statement);
     if (jl_exception_occurred()) {
         goto catch;
     }
 
-    retval = jl_eval_string(import_statement);
+    jl_eval_string(import_statement);
     if (jl_exception_occurred()) {
         goto catch;
     }
@@ -312,7 +311,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     goto finally;
 
-    catch : handle_exception_();
+catch:
+    handle_exception_();
 
     free(result);
     result = NULL;
