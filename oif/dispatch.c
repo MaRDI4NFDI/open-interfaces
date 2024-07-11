@@ -248,7 +248,10 @@ unload_interface_impl(ImplHandle implh)
                 OIF_LANG_FROM_LANG_ID[dh]);
         return -1;
     }
+    // Free resources added by subtypes of ImplInfo.
     unload_impl_fn(impl_info);
+    free(impl_info->interface);
+    free(impl_info);
     impl_info = NULL;
 
     return 0;
