@@ -443,10 +443,10 @@ oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from)
     return 0;
 }
 
-const char *
+const uint8_t *
 oif_config_dict_get_serialized(OIFConfigDict *dict)
 {
-    return (char *)dict->buffer;
+    return dict->buffer;
 }
 
 size_t
