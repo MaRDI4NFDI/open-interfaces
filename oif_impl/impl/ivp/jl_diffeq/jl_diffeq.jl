@@ -54,13 +54,14 @@ function set_user_data(self::Self, user_data)
     return 0
 end
 
-function set_integrator(self::Self, integrator_name::String, params)
+function set_integrator(self::Self, integrator_name::String, params::Dict)
     println("Requested integrator is '$integrator_name'")
+    println("params = ", params)
     integrator_symbol = Symbol(integrator_name)
     if !isdefined(OrdinaryDiffEq, integrator_symbol)
         error("[jl_diffeq] Could not find integrator '$integrator_name'")
     end
-    integrator = getfield(OrdinaryDiffEq, integrator_symbol)()
+    integrator = getfield(OrdinaryDiffEq, integrator_symbol)(; params...)
     if !isempty(self.y0) && isdefined(self, :rhs)
         _init(self)
     end
