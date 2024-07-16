@@ -216,7 +216,7 @@ deserialize_config_dict(OIFConfigDict *dict)
     jl_function_t *deserialize_fn =
         jl_get_function(SERIALIZATION_MODULE_, "deserialize");
     assert(deserialize_fn != NULL);
-    const char *buffer = oif_config_dict_get_serialized(dict);
+    const uint8_t *buffer = oif_config_dict_get_serialized(dict);
     assert(buffer != NULL);
     jl_value_t *buffer_c_str = jl_box_voidpointer((void *)buffer);
     if (jl_exception_occurred()) {

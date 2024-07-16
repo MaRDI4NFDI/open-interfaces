@@ -354,7 +354,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 OIFConfigDict *dict = *((OIFConfigDict **)in_args->arg_values[i]);
                 if (dict != NULL) {
                     PyObject *deserialize_fn = get_deserialization_function();
-                    const char *buffer = oif_config_dict_get_serialized(dict);
+                    const uint8_t *buffer = oif_config_dict_get_serialized(dict);
                     size_t length = oif_config_dict_get_serialized_object_length(dict);
                     PyObject *serialized_dict = Py_BuildValue("y#", buffer, length);
                     PyObject *deserialize_args = Py_BuildValue("(O)", serialized_dict);
