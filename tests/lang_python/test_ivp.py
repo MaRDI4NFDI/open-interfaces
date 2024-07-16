@@ -326,7 +326,22 @@ class TestIVPConfigDict:
         with pytest.raises(RuntimeError):
             s.set_integrator("bdf", {"max_num_steps_typo": 50})
 
+    def test_7__config_dict_jl_diffeq__works(self):
+        s = IVP("jl_diffeq")
+        p = MildlyStiffODESystem()
+        s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
 
+        s.set_integrator("Rosenbrock23", {"chunk_size": 10, "autodiff": False})
+
+    def test_8__config_dict_jl_diffeq__fails_when_unknown_options(self):
+        s = IVP("jl_diffeq")
+        p = MildlyStiffODESystem()
+        s.set_initial_value(p.y0, p.t0)
+        s.set_rhs_fn(p.rhs)
+
+        with pytest.raises(RuntimeError):
+            s.set_integrator("DP5", {"unknown_option": 10_000})
 
 
 @pytest.fixture(params=["scipy_ode", "sundials_cvode", "jl_diffeq"])
