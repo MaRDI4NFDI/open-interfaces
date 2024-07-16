@@ -1,5 +1,5 @@
 import abc
-from typing import Callable, Union
+from typing import Callable, Dict, Union
 
 import numpy as np
 
@@ -26,5 +26,7 @@ class IVPInterface(abc.ABC):
         """Specify additional data that will be used for right-hand side function."""
 
     @abc.abstractmethod
-    def set_integrator(self, integrator_name: str) -> Union[int, None]:
+    def set_integrator(
+        self, integrator_name: str, integrator_params: Dict
+    ) -> Union[int, None]:
         """Set integrator, if the name is recognizable."""
