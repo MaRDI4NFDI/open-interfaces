@@ -227,21 +227,24 @@ oif_config_dict_print(const OIFConfigDict *dict)
     if (dict->size == 0) {
         printf("Config dict has no entries\n");
     }
-
-    hashmap_foreach(key, entry, &dict->map)
-    {
-        if (entry->type == OIF_INT) {
-            printf("Key = '%s', value = '%d'\n", key, *(int *)entry->value);
+    else {
+        hashmap_foreach(key, entry, &dict->map)
+        {
+            if (entry->type == OIF_INT) {
+                printf("Key = '%s', value = '%d'\n", key, *(int *)entry->value);
+            }
+            else if (entry->type == OIF_FLOAT64) {
+                printf("Key = '%s', value = '%f'\n", key, *(double *)entry->value);
+            }
+            else if (entry->type == OIF_STR) {
+                printf("Key = '%s', value = '%s'\n", key, (char *)entry->value);
+            }
+            else {
+                fprintf(stderr, "Unknown type\n");
+                exit(1);
+            }
         }
-        else if (entry->type == OIF_FLOAT64) {
-            printf("Key = '%s', value = '%f'\n", key, *(double *)entry->value);
-        }
-        else if (entry->type == OIF_STR) {
-            printf("Key = '%s', value = '%s'\n", key, (char *)entry->value);
-        }
-        else {
-            fprintf(stderr, "Unknown type\n");
-            exit(1);
+    }
         }
     }
 }
