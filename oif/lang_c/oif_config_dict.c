@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <ctype.h>
+
 #include <inttypes.h>
 #include <limits.h>
 #include <string.h>
@@ -245,7 +247,18 @@ oif_config_dict_print(const OIFConfigDict *dict)
             }
         }
     }
+
+    if (dict->buffer_length) {
+        printf("Serialization\n");
+        for (size_t i = 0; i < dict->buffer_length; i++) {
+            if (isprint(dict->buffer[i])) {
+                printf("%c", dict->buffer[i]);
+            }
+            else {
+                printf("\\x%02x", dict->buffer[i]);
+            }
         }
+        printf("\n");
     }
 }
 
