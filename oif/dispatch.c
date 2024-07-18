@@ -288,8 +288,7 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
         fprintf(stderr,
                 "[dispatch] ERROR: during execution of the function "
                 "'%s::%s' an error occurred\n",
-                impl_info->interface, method
-        );
+                impl_info->interface, method);
     }
     return status;
 }
