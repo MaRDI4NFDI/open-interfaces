@@ -186,9 +186,9 @@ deserialize_config_dict(OIFConfigDict *dict)
     jl_value_t *julia_dict = NULL;
     if (SERIALIZATION_MODULE_ == NULL) {
         char include_statement[512];
-        int nchars_written =
-            snprintf(include_statement, 512, "include(\"%s/oif_impl/lang_julia/serialization.jl\")",
-                     OIF_IMPL_ROOT_DIR);
+        int nchars_written = snprintf(include_statement, 512,
+                                      "include(\"%s/oif_impl/lang_julia/serialization.jl\")",
+                                      OIF_IMPL_ROOT_DIR);
         if (nchars_written >= 512 - 1) {
             fprintf(stderr,
                     "[%s] Could not execute include statement for `serialization.jl` "
@@ -213,8 +213,7 @@ deserialize_config_dict(OIFConfigDict *dict)
         }
     }
 
-    jl_function_t *deserialize_fn =
-        jl_get_function(SERIALIZATION_MODULE_, "deserialize");
+    jl_function_t *deserialize_fn = jl_get_function(SERIALIZATION_MODULE_, "deserialize");
     assert(deserialize_fn != NULL);
     const uint8_t *buffer = oif_config_dict_get_serialized(dict);
     assert(buffer != NULL);
@@ -319,8 +318,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     goto finally;
 
-catch:
-    handle_exception_();
+    catch : handle_exception_();
 
     free(result);
     result = NULL;
@@ -418,7 +416,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             }
         }
         else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
-            OIFConfigDict *dict = *((OIFConfigDict **) in_args->arg_values[i]);
+            OIFConfigDict *dict = *((OIFConfigDict **)in_args->arg_values[i]);
             cur_julia_arg = deserialize_config_dict(dict);
         }
         if (cur_julia_arg == NULL) {
