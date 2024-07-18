@@ -1,4 +1,5 @@
 add_library(oif_linsolve_c_lapack SHARED linsolve_impl.c)
+set(BLA_VENDOR Intel10_64_dyn)
 find_package(LAPACK)
 target_link_libraries(oif_linsolve_c_lapack PRIVATE LAPACK::LAPACK)
 target_include_directories(oif_linsolve_c_lapack
