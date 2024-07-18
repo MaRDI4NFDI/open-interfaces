@@ -37,6 +37,10 @@ jobs:
                   miniforge-version: latest
                   mamba-version: '*'
                   python-version: ${{ matrix.python-version }}
+            - name: Setup Julia
+              uses: julia-actions/setup-julia@v2
+              with:
+                version: '1.10'
             - name: Show info
               run: |
                   conda info
@@ -44,6 +48,7 @@ jobs:
                   type g++
                   type python
                   type pip
+                  type julia
                   git status
             - name: Build
               run: |
