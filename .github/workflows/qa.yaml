@@ -10,6 +10,7 @@ on:
 
 env:
     JULIA_PROJECT: .
+    CONDA_ENV_FILE: environment-linux.yaml
 
 jobs:
     qa-ubuntu-conda:
@@ -24,14 +25,14 @@ jobs:
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
-            - name: Cache conda packages
-              uses: actions/cache@v3
-              env:
-                # Increase this value to reset cache if environment.yaml has not changed
-                  CACHE_NUMBER: 1
-              with:
-                  path: ~/conda_pkgs_dir
-                  key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment-linux.yaml') }}
+            # - name: Cache conda packages
+            #   uses: actions/cache@v3
+            #   env:
+            #     # Increase this value to reset cache if environment.yaml has not changed
+            #       CACHE_NUMBER: 1
+            #   with:
+            #       path: ~/conda_pkgs_dir
+            #       key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment-linux.yaml') }}
             - name: Setup conda environment
               uses: conda-incubator/setup-miniconda@v3
               with:
@@ -40,7 +41,23 @@ jobs:
                   miniforge-version: latest
                   mamba-version: '*'
                   python-version: ${{ matrix.python-version }}
-                  use-only-tar-bz2: true
+                  # use-only-tar-bz2: true
+            - name: Get Date
+              id: get-date
+              run: echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+
+            - name: Cache Conda env
+              uses: actions/cache@v3
+              with:
+                path: ${{ env.CONDA }}/envs
+                key: ${{ runner.os }}-conda-${{ steps.get-date.outputs.date }}-${{ hashFiles('environment-linux.yaml') }}
+              id: cache
+
+            - name: Update environment
+              run: |
+                conda env update --file environment-linux.yaml --name test
+              if: steps.cache.outputs.cache-hit != 'true'
+
             - name: Set up Julia
               uses: julia-actions/setup-julia@v2
               with:
