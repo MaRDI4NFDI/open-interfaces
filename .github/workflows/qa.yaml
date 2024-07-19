@@ -40,6 +40,7 @@ jobs:
                   miniforge-version: latest
                   mamba-version: '*'
                   python-version: ${{ matrix.python-version }}
+                  use-only-tar-bz2: true
             - name: Set up Julia
               uses: julia-actions/setup-julia@v2
               with:
