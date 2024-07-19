@@ -27,7 +27,6 @@ dependencies:
     - c-compiler=1.7.0
     - cxx-compiler=1.7.0
     - fortran-compiler
-    - julia=1.7.3
     - mkl
     - openblas
     - sundials
