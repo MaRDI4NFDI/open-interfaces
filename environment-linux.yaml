@@ -23,9 +23,9 @@ dependencies:
           - myst_parser
           - furo  # Sphinx theme
           - msgpack
-    - cmake=3.18
-    - c-compiler=1.7.0
-    - cxx-compiler=1.7.0
+    - cmake
+    - c-compiler
+    - cxx-compiler
     - fortran-compiler
     - mkl
     - openblas
