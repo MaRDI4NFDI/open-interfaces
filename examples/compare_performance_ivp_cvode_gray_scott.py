@@ -22,7 +22,7 @@ RESULT_PERF_NORMALIZED_FILENAME = os.path.join(
 )
 
 
-def _parse_args():
+def parse_args():
     p = argparse.ArgumentParser()
     subparsers = p.add_subparsers(required=True)
     one_impl = subparsers.add_parser("one")
