@@ -119,7 +119,7 @@ class GrayScottProblem:
 
         self.approx = Laplacian2DApproximator(self.N, self.dx, self.dy)
 
-    def compute_rhs(self, t, y: np.ndarray, ydot: np.ndarray) -> None:
+    def compute_rhs(self, t, y: np.ndarray, ydot: np.ndarray, __) -> None:
         s = len(y) // 2
         N = self.N
         assert len(y) == 2 * N**2
@@ -137,6 +137,12 @@ class GrayScottProblem:
         Vdot = np.reshape(ydot[s:], (N, N))
         Udot[:] = Du * deltaU - U * V**2 + F * (1 - U)
         Vdot[:] = Dv * deltaV + U * V**2 - (F + k) * V
+
+    def compute_rhs_native_sundials_cvode(self, t, y, ydot):
+        self.compute_rhs(t, y, ydot, None)
+
+    def compute_rhs_oif(self, t, y, ydot, __):
+        self.compute_rhs(t, y, ydot, None)
 
     def plot_2D_solution(
         self,
