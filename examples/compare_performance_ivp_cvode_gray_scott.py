@@ -388,11 +388,11 @@ def _run_once(args, N=512, tfinal=100, plot_solution=True) -> float:
         print(f"Use native impl {impl}")
         s = ode(
             "cvode",
-            problem.compute_rhs,
+            problem.compute_rhs_native_sundials_cvode,
             lmm_type="ADAMS",
             nonlinsolver="fixedpoint",
-            rtol=1e-15,
-            atol=1e-15,
+            rtol=1e-8,
+            atol=1e-12,
         )
         s.init_step(problem.t0, problem.y0)
 
@@ -402,7 +402,10 @@ def _run_once(args, N=512, tfinal=100, plot_solution=True) -> float:
     elif impl == "sundials_cvode":
         s = IVP(impl)
         s.set_initial_value(problem.y0, problem.t0)
-        s.set_rhs_fn(problem.compute_rhs)
+        # s.set_rhs_fn(problem.compute_rhs)
+        s.set_rhs_fn(problem.compute_rhs_oif)
+        s.set_integrator("adams")
+        s.set_tolerances(rtol=1e-8, atol=1e-12)
 
         soln = [problem.y0]
         for t in times[1:]:
@@ -446,7 +449,7 @@ def _run_once(args, N=512, tfinal=100, plot_solution=True) -> float:
 
 if __name__ == "__main__":
     try:
-        args = _parse_args()
+        args = parse_args()
         args.func(args)
     except KeyboardInterrupt:
         print("Received Ctrl-C. Finishing...")
