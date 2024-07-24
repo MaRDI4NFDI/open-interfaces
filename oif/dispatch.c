@@ -1,5 +1,6 @@
 // Dispatch library that is called from other languages, and dispatches it
 // to the appropriate language-specific dispatch.
+#include <assert.h>
 #include <dlfcn.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,7 +48,9 @@ size_t
 hash_fn(const ImplHandle *key)
 {
     if (*key < 0) {
-        fprintf(stderr, "[dispatch] Was expecting a non-negative number\n");
+        fprintf(
+            stderr,
+            "[dispatch] Was expecting a non-negative number, got %d\n", *key);
         exit(1);
     }
     return *key;
@@ -208,10 +211,14 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         goto cleanup;
     }
     impl_info->implh = IMPL_COUNTER_;
-    IMPL_COUNTER_++;
     impl_info->dh = dh;
     impl_info->interface = oif_util_str_duplicate(interface);
-    hashmap_put(&IMPL_MAP, &impl_info->implh, impl_info);
+    int result = hashmap_put(&IMPL_MAP, &impl_info->implh, impl_info);
+    if (result != 0) {
+        fprintf(stderr, "[dispatch] hashmap_put had error, result %d\n", result);
+        goto cleanup;
+    }
+    IMPL_COUNTER_++;
     retval = impl_info->implh;
 
 cleanup:
@@ -250,9 +257,18 @@ unload_interface_impl(ImplHandle implh)
     }
     // Free resources added by subtypes of ImplInfo.
     unload_impl_fn(impl_info);
+    ImplInfo *result = hashmap_remove(&IMPL_MAP, &implh);
+    if (result == NULL || result->implh != implh) {
+        fprintf(
+            stderr,
+            "[dispatch] Error occured when unloading implementation "
+            "from the implementations table."
+        );
+    }
     free(impl_info->interface);
     free(impl_info);
     impl_info = NULL;
+    printf("[dispatch] Unload implementation with id '%d'\n", implh);
 
     return 0;
 }
