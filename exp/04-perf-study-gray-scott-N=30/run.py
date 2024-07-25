@@ -8,10 +8,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import examples.compare_performance_ivp_cvode_gray_scott as gs
+from helpers import FIGSIZE_TWO_SUBPLOTS_TWO_ROWS
 
 OUTDIR = "exp/04-perf-study-gray-scott-N=30/_output"
 RESULT_DATA_PICKLE = os.path.join(OUTDIR, "ivp_cvode_gs_data.pickle")
 RESULT_PERF_FILENAME = os.path.join(OUTDIR, "ivp_cvode_gs_performance.pdf")
+
+HUMAN_LABELS = {
+    "sundials_cvode": "Open Interfaces",
+    "native_sundials_cvode": "Scikit ODES",
+}
+
+STYLES = ["-o", "--s", ".^"]
 
 
 def main(args):
@@ -41,11 +49,20 @@ def analyze():
 
     gs.print_stats(tts_stats)
 
-    fig, axes = plt.subplots(nrows=2, ncols=1)
-    for impl in gs.IMPL_LIST:
+    fig, axes = plt.subplots(
+        nrows=2, ncols=1, sharex=True, figsize=FIGSIZE_TWO_SUBPLOTS_TWO_ROWS
+    )
+    for i, impl in enumerate(gs.IMPL_LIST):
         tts_ave = [tts_stats[impl][N]["tts_ave"] for N in gs.RESOLUTIONS]
         tts_std = [tts_stats[impl][N]["tts_std"] for N in gs.RESOLUTIONS]
-        axes[0].errorbar(gs.RESOLUTIONS, tts_ave, fmt="-o", yerr=tts_std, label=impl)
+        axes[0].errorbar(
+            gs.RESOLUTIONS,
+            tts_ave,
+            fmt=STYLES[i],
+            yerr=tts_std,
+            label=HUMAN_LABELS[impl],
+        )
+    axes[0].set_ylabel("Run time, seconds")
     axes[0].legend(loc="best")
 
     # Plot relative times (normalized by native performance).
@@ -65,9 +82,12 @@ def analyze():
             gs.RESOLUTIONS,
             tts_ave / tts_ave_native,
             yerr=tts_std_normalized,
-            fmt="-o",
-            label=impl,
+            fmt=STYLES[0],
+            label=HUMAN_LABELS[impl],
         )
+    axes[1].set_xlabel(r"Resolution $N$")
+    axes[1].set_ylabel("Normalized run time")
+    axes[1].set_xticks(gs.RESOLUTIONS)
     plt.tight_layout(pad=0.1)
 
     plt.savefig(RESULT_PERF_FILENAME)
