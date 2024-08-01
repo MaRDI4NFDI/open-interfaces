@@ -9,7 +9,7 @@ TEST(QeqPyQeqSolverTestSuite, LinearCase)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "py_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "py_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 0.0, 2.0, -1.0, roots);
     ASSERT_EQ(status, 0);
@@ -27,7 +27,7 @@ TEST(QeqPyQeqSolverTestSuite, TwoRoots)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "py_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "py_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1.0, 2.0, 1.0, roots);
     ASSERT_EQ(status, 0);
@@ -44,7 +44,7 @@ TEST(QeqPyQeqSolverTestSuite, TwoDistinctRoots)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "py_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "py_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1, 5, -14, roots);
     ASSERT_EQ(status, 0);
@@ -61,7 +61,7 @@ TEST(QeqCQeqSolverTestSuite, LinearCase)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "c_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 0.0, 2.0, -1.0, roots);
     ASSERT_EQ(status, 0);
@@ -78,7 +78,7 @@ TEST(QeqCQeqSolverTestSuite, TwoRoots)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "c_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1.0, 2.0, 1.0, roots);
     ASSERT_EQ(status, 0);
@@ -95,7 +95,7 @@ TEST(QeqCQeqSolverTestSuite, TwoDistinctRoots)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "c_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1, 5, -14, roots);
     ASSERT_EQ(status, 0);
@@ -112,7 +112,7 @@ TEST(QeqCQeqSolverTestSuite, ExtremeRoots)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "c_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "c_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1, -20'000, 1.0, roots);
     ASSERT_EQ(status, 0);
@@ -129,7 +129,7 @@ TEST(QeqJlQeqSolverTestSuite, TwoRoots)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "jl_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "jl_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1.0, 2.0, 1.0, roots);
     ASSERT_EQ(status, 0);
@@ -146,7 +146,7 @@ TEST(QeqJlQeqSolverTestSuite, TwoDistinctRoots)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "jl_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "jl_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1, 5, -14, roots);
     ASSERT_EQ(status, 0);
@@ -163,7 +163,7 @@ TEST(QeqJlQeqSolverTestSuite, ExtremeRoots)
         2,
     };
     OIFArrayF64 *roots = oif_create_array_f64(1, dimensions);
-    ImplHandle implh = oif_init_impl("qeq", "jl_qeq_solver", 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", "jl_qeq_solver", 1, 0);
 
     int status = oif_solve_qeq(implh, 1, -20'000, 1.0, roots);
     ASSERT_EQ(status, 0);

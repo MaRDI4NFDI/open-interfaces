@@ -161,7 +161,7 @@ main(int argc, char *argv[])
     status = compute_initial_condition_(N, y0, grid, &dx, &dt_max);
     assert(status == 0);
 
-    ImplHandle implh = oif_init_impl("ivp", impl, 1, 0);
+    ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
         fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
         retval = EXIT_FAILURE;

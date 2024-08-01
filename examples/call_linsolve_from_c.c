@@ -32,7 +32,7 @@ main(int argc, char *argv[])
     printf("Calling from C an open interface for solving Ax = b \n");
     printf("Implementation: %s\n", impl);
 
-    ImplHandle implh = oif_init_impl("linsolve", impl, 1, 0);
+    ImplHandle implh = oif_load_impl("linsolve", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
         fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
         return EXIT_FAILURE;

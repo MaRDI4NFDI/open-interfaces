@@ -15,7 +15,7 @@ TEST_P(LinearSolverFixture, TestCase1)
     OIFArrayF64 *b = oif_init_array_f64_from_data(1, b_dims, b_data);
     intptr_t roots_dims[] = {2};
     OIFArrayF64 *roots = oif_create_array_f64(1, roots_dims);
-    ImplHandle implh = oif_init_impl("linsolve", GetParam(), 1, 0);
+    ImplHandle implh = oif_load_impl("linsolve", GetParam(), 1, 0);
 
     int status = oif_solve_linear_system(implh, A, b, roots);
     EXPECT_EQ(status, 0);

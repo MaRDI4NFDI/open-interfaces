@@ -16,7 +16,7 @@ extern "C" {
  *         or OIF_IMPL_INIT_ERROR in case of the error
  */
 ImplHandle
-oif_init_impl(const char *interface, const char *impl, int version_major, int version_minor);
+oif_load_impl(const char *interface, const char *impl, int version_major, int version_minor);
 
 int
 oif_unload_impl(ImplHandle implh);

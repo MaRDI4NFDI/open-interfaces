@@ -36,7 +36,7 @@ main(int argc, char *argv[])
     double b = 5.0;
     double c = 4.0;
 
-    ImplHandle implh = oif_init_impl("qeq", impl, 1, 0);
+    ImplHandle implh = oif_load_impl("qeq", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
         fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
         return EXIT_FAILURE;

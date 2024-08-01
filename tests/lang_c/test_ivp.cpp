@@ -173,7 +173,7 @@ class SundialsCVODEConfigDictTest : public testing::Test {
         };
         y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
         y = oif_create_array_f64(1, dims);
-        implh = oif_init_impl("ivp", impl, 1, 0);
+        implh = oif_load_impl("ivp", impl, 1, 0);
         EXPECT_GT(implh, 0);
 
         int status;
@@ -211,7 +211,7 @@ class ScipyODEConfigDictTest : public testing::Test {
         };
         y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
         y = oif_create_array_f64(1, dims);
-        implh = oif_init_impl("ivp", impl, 1, 0);
+        implh = oif_load_impl("ivp", impl, 1, 0);
         EXPECT_GT(implh, 0);
 
         int status;
@@ -238,16 +238,18 @@ class ScipyODEConfigDictTest : public testing::Test {
 };
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
-                         testing::Combine(testing::Values("sundials_cvode", "scipy_ode"),
+                         testing::Combine(testing::Values("sundials_cvode", "scipy_ode",
+                                                          "jl_diffeq"),
                                           testing::Values(new ScalarExpDecayProblem(),
                                                           new LinearOscillatorProblem(),
                                                           new OrbitEquationsProblem())));
 
 INSTANTIATE_TEST_SUITE_P(
     IvpChangeIntegratorsTests, ImplTimesIntegratorsFixture,
-    testing::Values(SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}},
-                    SolverIntegratorsCombination{"scipy_ode",
-                                                 {"vode", "lsoda", "dopri5", "dop853"}}));
+    testing::Values(
+        SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}},
+        SolverIntegratorsCombination{"scipy_ode", {"vode", "lsoda", "dopri5", "dop853"}},
+        SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}));
 
 // END fixtures
 // ----------------------------------------------------------------------------
@@ -262,7 +264,7 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, ScalarExpDecayTestCase)
     };
     OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_init_impl("ivp", impl, 1, 0);
+    ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
     ASSERT_GT(implh, 0);
 
     int status;
@@ -297,7 +299,7 @@ TEST_P(ImplTimesIntegratorsFixture, Test1)
     };
     OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_init_impl("ivp", impl, 1, 0);
+    ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
     ASSERT_GT(implh, 0);
 
     for (auto integrator_name : param.integrators) {

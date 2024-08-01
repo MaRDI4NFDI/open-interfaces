@@ -7,7 +7,7 @@ from oif.core import (
     OIF_INT,
     OIF_USER_DATA,
     OIFPyBinding,
-    init_impl,
+    load_impl,
     make_oif_callback,
     make_oif_user_data,
     unload_impl,
@@ -18,7 +18,7 @@ rhs_fn_t = Callable[[float, np.ndarray, np.ndarray, object], int]
 
 class IVP:
     def __init__(self, impl: str):
-        self._binding: OIFPyBinding = init_impl("ivp", impl, 1, 0)
+        self._binding: OIFPyBinding = load_impl("ivp", impl, 1, 0)
         self.s = None
         self.N: int = 0
         self.y0: np.ndarray
