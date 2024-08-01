@@ -48,7 +48,7 @@ main(int argc, char *argv[])
     double t0 = 0.0;
     OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, (intptr_t[1]){1}, (double[1]){1.0});
 
-    ImplHandle implh = oif_init_impl("ivp", impl, 1, 0);
+    ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
         fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
         return EXIT_FAILURE;

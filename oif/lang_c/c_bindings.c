@@ -6,8 +6,10 @@
 #include <oif/api.h>
 #include <oif/dispatch.h>
 
+#include <oif/c_bindings.h>
+
 ImplHandle
-oif_init_impl(const char *interface, const char *impl, int version_major, int version_minor)
+oif_load_impl(const char *interface, const char *impl, int version_major, int version_minor)
 {
     return load_interface_impl(interface, impl, version_major, version_minor);
 }

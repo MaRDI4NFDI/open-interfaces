@@ -321,7 +321,7 @@ class OIFPyBinding:
         return 0
 
 
-def init_impl(interface: str, impl: str, major: UInt, minor: UInt):
+def load_impl(interface: str, impl: str, major: UInt, minor: UInt):
     load_interface_impl = _wrap_c_function(
         _lib_dispatch,
         "load_interface_impl",
