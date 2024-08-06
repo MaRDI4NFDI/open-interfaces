@@ -2,7 +2,6 @@
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 /**
  * Convert `size_t` input to `uint32_t`.
