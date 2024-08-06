@@ -1,5 +1,8 @@
-#include <oif/util.h>
+#include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
+
+#include <oif/util.h>
 
 uint32_t
 oif_util_u32_from_size_t(size_t val)
@@ -28,4 +31,23 @@ oif_util_str_duplicate(const char *src)
     }
     strcpy(dest, src);
     return dest;
+}
+
+int
+oif_strcmp_nocase(const char s1[static 1], const char s2[static 1])
+{
+    size_t n1 = strlen(s1);
+    size_t n2 = strlen(s2);
+    size_t n3 = n1 < n2 ? n1 : n2;
+
+    for (size_t i = 0; i < n3; ++i) {
+        if (tolower(s1[i]) < tolower(s2[i])) {
+            return -1;
+        }
+        else if (tolower(s1[i]) > tolower(s2[i])) {
+            return 1;
+        }
+    }
+
+    return 0;
 }

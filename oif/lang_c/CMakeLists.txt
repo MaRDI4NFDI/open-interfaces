@@ -10,17 +10,17 @@ target_include_directories(oif_c PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
 target_include_directories(oif_c
                            PUBLIC ${CMAKE_SOURCE_DIR}/oif/interfaces/c/include/)
 target_link_libraries(oif_c PUBLIC oif_c_data_structures)
-target_link_libraries(oif_c PRIVATE oif_util)
+target_link_libraries(oif_c PRIVATE oif_c_util)
 target_link_libraries(oif_c PRIVATE oif_dispatch)
 
 add_library(oif_c_data_structures SHARED oif_config_dict.c allocation_tracker.c
                                          ${cwpack_SOURCE_DIR}/src/cwpack.c)
 target_include_directories(oif_c_data_structures
                            PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
-target_link_libraries(oif_c_data_structures PRIVATE oif_util)
-target_link_libraries(oif_c_data_structures PRIVATE HashMap::HashMap)
 target_include_directories(oif_c_data_structures
                            PRIVATE ${cwpack_SOURCE_DIR}/src)
+target_link_libraries(oif_c_data_structures PRIVATE oif_c_util)
+target_link_libraries(oif_c_data_structures PRIVATE HashMap::HashMap)
 
-add_library(oif_util SHARED oif_util.c)
-target_include_directories(oif_util PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
+add_library(oif_c_util SHARED oif_util.c)
+target_include_directories(oif_c_util PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
