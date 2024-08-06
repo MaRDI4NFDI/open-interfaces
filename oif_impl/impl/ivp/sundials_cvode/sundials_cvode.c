@@ -21,8 +21,8 @@
 #include <sunnonlinsol/sunnonlinsol_fixedpoint.h>
 
 #include "oif/api.h"
+#include "oif/util.h"
 #include "oif_impl/ivp.h"
-#include "oif_impl/_util.h"
 
 const char *prefix = "[ivp::sundials_cvode]";
 
