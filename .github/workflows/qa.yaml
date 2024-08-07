@@ -8,10 +8,6 @@ on:
     pull_request:
         types: ['opened', 'synchronize', 'reopened']
 
-env:
-    JULIA_PROJECT: .
-    CONDA_ENV_FILE: environment-linux.yaml
-
 jobs:
     qa-ubuntu-conda:
         runs-on: ubuntu-latest
@@ -58,6 +54,13 @@ jobs:
             - name: Activate Julia environment
               run: |
                   julia --project=. -e "using Pkg; Pkg.instantiate()"
+            - name: Set up environment variables
+              run: |
+                  source env.sh
+                  echo "OIF_IMPL_ROOT_DIR=$OIF_IMPL_ROOT_DIR" >> $GITHUB_ENV
+                  echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> $GITHUB_ENV
+                  echo "PYTHONPATH=$PYTHONPATH" >> $GITHUB_ENV
+                  echo "JULIA_PROJECT=$JULIA_PROJECT" >> $GITHUB_ENV
             - name: Show info
               run: |
                   conda info
@@ -67,6 +70,10 @@ jobs:
                   type pip
                   type julia
                   git status
+                  echo "OIF_IMPL_ROOT_DIR = ${OIF_IMPL_ROOT_DIR}"
+                  echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
+                  echo "PYTHONPATH = $PYTHONPATH"
+                  echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
             - name: Build
               run: |
                   make
