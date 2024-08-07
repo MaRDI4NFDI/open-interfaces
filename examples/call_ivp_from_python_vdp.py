@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from oif.interfaces.ivp import IVP
 
-RESULD_DATA_FILENAME_TPL = "ivp_py_vdp_eq_{:s}.txt"
-RESULD_FIG_FILENAME_TPL = "ivp_py_vdp_eq_{:s}.pdf"
+RESULT_DATA_FILENAME_TPL = "ivp_py_vdp_eq_{:s}.txt"
+RESULT_FIG_FILENAME_TPL = "ivp_py_vdp_eq_{:s}.pdf"
 
 
 @dataclasses.dataclass
@@ -74,13 +74,12 @@ def main():
     y0 = problem.u0
     s.set_initial_value(y0, t0)
     s.set_rhs_fn(problem.compute_rhs)
-    # s.set_integrator("vode", {"method": "bdf", "nsteps": 40_000})
-    # s.set_integrator("dopri5", {"nsteps": 100_000})
-    # s.set_integrator("vode", {"method": "bdf", "nsteps": 40_000})
+    s.set_tolerances(rtol=1e-8, atol=1e-12)
     if impl == "sundials_cvode":
         s.set_integrator("bdf")
-        s.set_tolerances(1e-1, 1e-1)
+        s.set_integrator("bdf", {"max_num_steps": 30_000})
     elif impl == "scipy_ode":
+        # s.set_integrator("dopri5", {"nsteps": 100_000})
         s.set_integrator("vode", {"method": "bdf", "nsteps": 40_000})
     elif impl == "jl_diffeq":
         s.set_integrator("Rosenbrock23")
@@ -98,14 +97,14 @@ def main():
         i += 1
 
     data = np.hstack((times.reshape((-1, 1)), soln))
-    data_filename = os.path.join(args.outdir, RESULD_DATA_FILENAME_TPL.format(impl))
+    data_filename = os.path.join(args.outdir, RESULT_DATA_FILENAME_TPL.format(impl))
     np.savetxt(data_filename, data)
 
     plt.plot(times, soln[:, 0], "-", label="$y_1$")
     plt.xlabel("Time")
     plt.ylabel("Solution")
     plt.tight_layout(pad=0.1)
-    fig_filename = os.path.join(args.outdir, RESULD_FIG_FILENAME_TPL.format(impl))
+    fig_filename = os.path.join(args.outdir, RESULT_FIG_FILENAME_TPL.format(impl))
     plt.savefig(fig_filename.format(impl))
     plt.show()
     print("Finished")
