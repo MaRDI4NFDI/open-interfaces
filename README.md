@@ -19,6 +19,9 @@ marshalling between different languages and a set of interfaces for typical
 numerical problems such as integration of differential equations and
 optimization.
 
+This project is the part of the [_Mathematical Research Data Initiative
+(MaRDI)_](https://mardi4nfdi.de).
+
 ## Data flow
 
 ![Architecture of the MaRDI Open Interfaces](assets/arch.png)
