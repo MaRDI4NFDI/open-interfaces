@@ -24,7 +24,6 @@ oif_util_u32_from_size_t(size_t val);
 char *
 oif_util_str_duplicate(const char *src);
 
-
 /**
  * Compare two C strings case-insensitively.
  *
