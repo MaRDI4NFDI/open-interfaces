@@ -39,6 +39,12 @@ oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y);
 int
 oif_ivp_set_integrator(ImplHandle implh, char *integrator_name, OIFConfigDict *config);
 
+/**
+ * Get the number of function evaluations during the last call to `oif_ivp_integrate`.
+ */
+int
+oif_ivp_get_n_rhs_evals(ImplHandle implh, int *n_rhs_evals);
+
 #ifdef __cplusplus
 }
 #endif
