@@ -1,5 +1,5 @@
 ---
-name: QA conda
+name: QA
 
 on:
     push:
