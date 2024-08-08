@@ -246,10 +246,10 @@ INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProb
 
 INSTANTIATE_TEST_SUITE_P(
     IvpChangeIntegratorsTests, ImplTimesIntegratorsFixture,
-    testing::Values(
-        SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}},
-        SolverIntegratorsCombination{"scipy_ode", {"vode", "lsoda", "dopri5", "dop853"}},
-        SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}));
+    testing::Values(SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}},
+                    SolverIntegratorsCombination{"scipy_ode",
+                                                 {"vode", "lsoda", "dopri5", "dop853"}},
+                    SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}));
 
 // END fixtures
 // ----------------------------------------------------------------------------

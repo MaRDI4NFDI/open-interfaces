@@ -48,9 +48,7 @@ size_t
 hash_fn(const ImplHandle *key)
 {
     if (*key < 0) {
-        fprintf(
-            stderr,
-            "[dispatch] Was expecting a non-negative number, got %d\n", *key);
+        fprintf(stderr, "[dispatch] Was expecting a non-negative number, got %d\n", *key);
         exit(1);
     }
     return *key;
@@ -259,11 +257,9 @@ unload_interface_impl(ImplHandle implh)
     unload_impl_fn(impl_info);
     ImplInfo *result = hashmap_remove(&IMPL_MAP, &implh);
     if (result == NULL || result->implh != implh) {
-        fprintf(
-            stderr,
-            "[dispatch] Error occured when unloading implementation "
-            "from the implementations table."
-        );
+        fprintf(stderr,
+                "[dispatch] Error occured when unloading implementation "
+                "from the implementations table.");
     }
     free(impl_info->interface);
     free(impl_info);
