@@ -59,6 +59,10 @@ class ScipyODE(IVPInterface):
         assert self.s.successful()
         return 0
 
+    def get_n_rhs_evals(self, n_rhs_evals_arr):
+        n_rhs_evals_arr[0] = self.s._integrator.iwork[16]
+        return 0
+
     def set_integrator(self, integrator_name, integrator_params):
         if self.s is None:
             raise RuntimeError("`set_integrator` must be called after `set_rhs_fn`")

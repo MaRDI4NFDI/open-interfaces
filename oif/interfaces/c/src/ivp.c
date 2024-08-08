@@ -108,6 +108,30 @@ oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y)
 }
 
 int
+oif_ivp_get_n_rhs_evals(ImplHandle implh, int *n_rhs_evals)
+{
+    OIFArgType in_arg_types[] = {};
+    void *in_arg_values[] = {};
+    OIFArgs in_args = {
+        .num_args = 0,
+        .arg_types = in_arg_types,
+        .arg_values = in_arg_values,
+    };
+
+    OIFArgType out_arg_types[] = {OIF_INT};
+    void *out_arg_values[] = {&n_rhs_evals};
+    OIFArgs out_args = {
+        .num_args = 1,
+        .arg_types = out_arg_types,
+        .arg_values = out_arg_values,
+    };
+
+    int status = call_interface_impl(implh, "get_n_rhs_evals", &in_args, &out_args);
+
+    return status;
+}
+
+int
 oif_ivp_set_integrator(ImplHandle implh, char *integrator_name, OIFConfigDict *dict)
 {
     if (dict != NULL) {
