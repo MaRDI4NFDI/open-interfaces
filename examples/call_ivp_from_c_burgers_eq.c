@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <oif/api.h>
 #include <oif/c_bindings.h>
@@ -187,10 +188,22 @@ main(int argc, char *argv[])
         goto cleanup;
     }
 
+    if (strcmp(impl, "scipy_ode") == 0) {
+        status = oif_ivp_set_integrator(implh, "dopri5", NULL);
+    }
+    else if (strcmp(impl, "jl_diffeq") == 0) {
+        status = oif_ivp_set_integrator(implh, "DP5", NULL);
+    }
+    assert(status == 0);
+
+    int n_rhs_evals = 42;
+
+    clock_t tic = clock();
     // Time step.
     double dt = dt_max;
     int n_time_steps = (int)(t_final / dt + 1);
     for (int i = 0; i < n_time_steps; ++i) {
+        n_rhs_evals = 42;
         double t = t0 + (i + 1) * dt;
         if (t > t_final) {
             t = t_final;
@@ -201,7 +214,12 @@ main(int argc, char *argv[])
             retval = EXIT_FAILURE;
             goto cleanup;
         }
+        status = oif_ivp_get_n_rhs_evals(implh, &n_rhs_evals);
+        assert(status == 0);
+        printf("t = %.3f, n_rhs_evals = %d\n", t, n_rhs_evals);
     }
+    clock_t toc = clock();
+    printf("Elapsed time = %.6f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
 
     FILE *fp = fopen(output_filename, "w+e");
     if (fp == NULL) {
