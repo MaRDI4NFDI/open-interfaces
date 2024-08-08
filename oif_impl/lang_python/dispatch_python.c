@@ -386,7 +386,9 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         // Convert output arguments.
         for (size_t i = 0; i < out_args->num_args; ++i) {
             if (out_args->arg_types[i] == OIF_INT) {
-                pValue = PyLong_FromLong(*(int *)out_args->arg_values[i]);
+                int *tmp = *(int **)out_args->arg_values[i];
+                printf("tmp =====  %d\n", *tmp);
+                pValue = PyArray_SimpleNewFromData(1, (intptr_t[1]){1}, NPY_INT32, tmp);
             }
             else if (out_args->arg_types[i] == OIF_FLOAT64) {
                 pValue = PyFloat_FromDouble(*(double *)out_args->arg_values[i]);
