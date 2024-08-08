@@ -1,3 +1,5 @@
+[![QA](https://github.com/MaRDI4NFDI/open-interfaces/actions/workflows/qa.yaml/badge.svg)](https://github.com/MaRDI4NFDI/open-interfaces/actions/workflows/qa.yaml)
+
 # MaRDI Open Interfaces
 
 _MaRDI Open Interfaces_ is a project aiming to improve interoperability
