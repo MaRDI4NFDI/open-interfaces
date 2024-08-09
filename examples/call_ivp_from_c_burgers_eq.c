@@ -53,6 +53,17 @@ parse_output_filename(int argc, char *argv[])
     }
 }
 
+int
+parse_resolution(int argc, char *argv[])
+{
+    if (argc < 3) {
+        return 101;
+    }
+    else {
+        return atoi(argv[3]);
+    }
+}
+
 static int
 compute_initial_condition_(size_t N, OIFArrayF64 *u0, OIFArrayF64 *grid, double *dx,
                            double *dt_max)
@@ -152,7 +163,7 @@ main(int argc, char *argv[])
     printf("Implementation: %s\n", impl);
 
     int retval = 0;
-    int N = 101;
+    const int N = parse_resolution(argc, argv);
     double t0 = 0.0;
     double t_final = 2.0;
     OIFArrayF64 *y0 = oif_create_array_f64(1, (intptr_t[1]){N});
