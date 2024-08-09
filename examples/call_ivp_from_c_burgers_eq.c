@@ -193,6 +193,9 @@ main(int argc, char *argv[])
         goto cleanup;
     }
 
+    status = oif_ivp_set_tolerances(implh, 1e-8, 1e-12);
+    assert(status == 0);
+
     if (strcmp(impl, "scipy_ode") == 0) {
         status = oif_ivp_set_integrator(implh, "dopri5", NULL);
     }
