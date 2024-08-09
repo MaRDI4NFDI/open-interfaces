@@ -21,6 +21,9 @@
 #include <oif/c_bindings.h>
 #include <oif/interfaces/ivp.h>
 
+// Number of right-hand side evaluations.
+static int N_RHS_EVALS = 0;
+
 char *
 parse_impl(int argc, char *argv[])
 {
@@ -126,6 +129,8 @@ rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void *user_data)
 
     retval = 0;
 
+    N_RHS_EVALS++;
+
 cleanup:
     if (flux != NULL) {
         free(flux);
@@ -216,6 +221,7 @@ main(int argc, char *argv[])
     }
     clock_t toc = clock();
     printf("Elapsed time = %.6f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
+    printf("Number of right-hand side evaluations = %d\n", N_RHS_EVALS);
 
     FILE *fp = fopen(output_filename, "w+e");
     if (fp == NULL) {
