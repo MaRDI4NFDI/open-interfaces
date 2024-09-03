@@ -104,9 +104,10 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     strcat(conf_filename, impl);
     strcat(conf_filename, ".conf");
 
-    conf_file = fopen(conf_filename, "re");
+    conf_file = fopen(conf_filename, "r");
     if (conf_file == NULL) {
-        fprintf(stderr, "[dispatch] Cannot load conf file '%s'\n", conf_filename);
+        fprintf(stderr, "[dispatch] Cannot open conf file '%s'\n", conf_filename);
+        perror("Error message is: ");
         return -1;
     }
     else {
