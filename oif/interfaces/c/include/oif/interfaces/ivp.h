@@ -28,6 +28,14 @@ int
 oif_ivp_set_user_data(ImplHandle implh, void *user_data);
 
 /**
+ * Set tolerances for adaptive time integration.
+ * @param rtol Relative tolerance
+ * @param atol Absolute tolerance
+ */
+int
+oif_ivp_set_tolerances(ImplHandle implh, double rtol, double atol);
+
+/**
  * Integrate to time `t` and write the solution to `y`.
  */
 int
