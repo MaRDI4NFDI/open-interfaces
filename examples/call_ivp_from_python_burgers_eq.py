@@ -55,7 +55,7 @@ class BurgersEquationProblem:
     def compute_rhs(self, __, u: np.ndarray, udot: np.ndarray, ___) -> None:
         dx = self.dx
 
-        f = 0.5 * u ** 2
+        f = 0.5 * u**2
         local_ss = np.maximum(np.abs(u[0:-1]), np.abs(u[1:]))
         local_ss = np.max(np.abs(u))
         f_hat = 0.5 * (f[0:-1] + f[1:]) - 0.5 * local_ss * (u[1:] - u[0:-1])
