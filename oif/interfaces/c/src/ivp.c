@@ -84,6 +84,30 @@ oif_ivp_set_user_data(ImplHandle implh, void *user_data)
 }
 
 int
+oif_ivp_set_tolerances(ImplHandle implh, double rtol, double atol)
+{
+    OIFArgType in_arg_types[] = {OIF_FLOAT64, OIF_FLOAT64};
+    void *in_arg_values[] = {&rtol, &atol};
+    OIFArgs in_args = {
+        .num_args = 2,
+        .arg_types = in_arg_types,
+        .arg_values = in_arg_values,
+    };
+
+    OIFArgType out_arg_types[] = {};
+    void *out_arg_values[] = {};
+    OIFArgs out_args = {
+        .num_args = 0,
+        .arg_types = out_arg_types,
+        .arg_values = out_arg_values,
+    };
+
+    int status = call_interface_impl(implh, "set_tolerances", &in_args, &out_args);
+
+    return status;
+}
+
+int
 oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y)
 {
     OIFArgType in_arg_types[] = {OIF_FLOAT64};

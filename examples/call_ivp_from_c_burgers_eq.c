@@ -207,11 +207,16 @@ main(int argc, char *argv[])
     status = oif_ivp_set_tolerances(implh, 1e-8, 1e-12);
     assert(status == 0);
 
+    OIFConfigDict *dict = oif_config_dict_init();
+    oif_config_dict_add_int(dict, "dense", 0);
+    oif_config_dict_add_int(dict, "save_everystep", 0);
+
     if (strcmp(impl, "scipy_ode") == 0) {
         status = oif_ivp_set_integrator(implh, "dopri5", NULL);
     }
     else if (strcmp(impl, "jl_diffeq") == 0) {
         status = oif_ivp_set_integrator(implh, "DP5", NULL);
+        /* status = oif_ivp_set_integrator(implh, "DP5", dict); */
     }
     assert(status == 0);
     double t = 0.0001;

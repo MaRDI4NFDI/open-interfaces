@@ -16,8 +16,8 @@ def _parse_args():
     p = argparse.ArgumentParser()
     p.add_argument(
         "impl",
-        choices=["scipy_ode_dopri5", "sundials_cvode"],
-        default="scipy_ode_dopri5",
+        choices=["scipy_ode", "sundials_cvode"],
+        default="scipy_ode",
         nargs="?",
     )
     args = p.parse_args()
@@ -52,10 +52,10 @@ class BurgersEquationProblem:
         self.t0 = 0.0
         self.tfinal = 2.0
 
-    def compute_rhs(self, __, u: np.ndarray, udot: np.ndarray) -> None:
+    def compute_rhs(self, __, u: np.ndarray, udot: np.ndarray, ___) -> None:
         dx = self.dx
 
-        f = 0.5 * u**2
+        f = 0.5 * u ** 2
         local_ss = np.maximum(np.abs(u[0:-1]), np.abs(u[1:]))
         local_ss = np.max(np.abs(u))
         f_hat = 0.5 * (f[0:-1] + f[1:]) - 0.5 * local_ss * (u[1:] - u[0:-1])
@@ -94,6 +94,7 @@ def main():
     plt.plot(problem.x, soln[0], "--", label="Initial condition")
     plt.plot(problem.x, soln[-1], "-", label="Final solution")
     plt.legend(loc="best")
+    plt.tight_layout(pad=0.1)
     plt.savefig(os.path.join("assets", f"ivp_burgers_soln_{impl}.pdf"))
     print("Finished")
 
