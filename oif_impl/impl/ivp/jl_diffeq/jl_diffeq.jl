@@ -85,6 +85,6 @@ function _init(self::Self)
             _rhs_wrapper(self.rhs), self.y0, (self.t0, Inf), self.user_data
         )
     end
-    self.solver = init(problem, self.integrator, reltol = self.reltol, abstol = self.abstol)
+    self.solver = init(problem, self.integrator, reltol = self.reltol, abstol = self.abstol, save_everystep = false)
 end
 end
