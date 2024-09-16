@@ -51,7 +51,7 @@ repos:
 
     # Sphinx documentation
     - repo: https://github.com/sphinx-contrib/sphinx-lint
-      rev: v0.9.1
+      rev: v1.0.0
       hooks:
           - id: sphinx-lint
             args: [--enable=default-role]
