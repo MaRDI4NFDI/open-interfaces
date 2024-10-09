@@ -1,10 +1,12 @@
 import ctypes
+import time
 from io import BytesIO
 from typing import Callable, NewType, Union
 
 import _conversion
 import msgpack
 import numpy as np
+from line_profiler import profile
 
 UInt = NewType("UInt", int)
 
@@ -29,6 +31,10 @@ OIF_LANG_COUNT = 6
 
 
 _lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
+
+elapsed = 0.0
+
+elapsed_call = 0.0
 
 
 class OIFArgType(ctypes.c_int):
@@ -143,13 +149,11 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
         OIF_USER_DATA: _pyobject_from_pointer,
     }
     py_arg_values = [None] * len(arg_types)
+    assert all(arg_types in type_conversion.keys())
 
     def wrapper(*arg_values):
         for i, (t, v) in enumerate(zip(arg_types, arg_values)):
-            try:
-                py_arg_values[i] = type_conversion[t](v)
-            except KeyError:
-                raise ValueError(f"Unsupported data type {t}")
+            py_arg_values[i] = type_conversion[t](v)
 
         result = fn(*py_arg_values)
         if result is None:
@@ -197,10 +201,25 @@ class OIFPyBinding:
         self.interface = interface
         self.impl = impl
 
+        self._call_interface_impl = _wrap_c_function(
+            _lib_dispatch,
+            "call_interface_impl",
+            ctypes.c_int,
+            [
+                ctypes.c_int,
+                ctypes.c_char_p,
+                ctypes.POINTER(OIFArgs),
+                ctypes.POINTER(OIFArgs),
+            ],
+        )
+
+    @profile
     def call(self, method, user_args, out_user_args):
         num_args = len(user_args)
         arg_types = []
         arg_values = []
+        tic = time.perf_counter()
+
         for arg in user_args:
             if isinstance(arg, int):
                 argp = ctypes.pointer(ctypes.c_int(arg))
@@ -261,6 +280,7 @@ class OIFPyBinding:
         num_out_args = len(out_user_args)
         out_arg_types = []
         out_arg_values = []
+
         for arg in out_user_args:
             if isinstance(arg, int):
                 argp = ctypes.pointer(ctypes.c_int(arg))
@@ -297,18 +317,11 @@ class OIFPyBinding:
         )
         out_packed = OIFArgs(num_out_args, out_arg_types_ctypes, out_arg_values_ctypes)
 
-        call_interface_impl = _wrap_c_function(
-            _lib_dispatch,
-            "call_interface_impl",
-            ctypes.c_int,
-            [
-                ctypes.c_int,
-                ctypes.c_char_p,
-                ctypes.POINTER(OIFArgs),
-                ctypes.POINTER(OIFArgs),
-            ],
-        )
-        status = call_interface_impl(
+        toc = time.perf_counter()
+        global elapsed_call
+        elapsed_call += toc - tic
+
+        status = self._call_interface_impl(
             self.implh,
             method.encode(),
             ctypes.byref(in_args_packed),
