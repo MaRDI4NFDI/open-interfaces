@@ -149,7 +149,7 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
         OIF_USER_DATA: _pyobject_from_pointer,
     }
     py_arg_values = [None] * len(arg_types)
-    assert all(arg_types in type_conversion.keys())
+    assert not (arg_types - type_conversion.keys())
 
     def wrapper(*arg_values):
         for i, (t, v) in enumerate(zip(arg_types, arg_values)):
