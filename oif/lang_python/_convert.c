@@ -99,7 +99,12 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
             }
         }
         else if (c_type == OIF_USER_DATA) {
-            cur_arg = (PyObject *) PyLong_AsVoidPtr(py_cur_arg);
+            if (py_cur_arg == Py_None) {
+                cur_arg = Py_None;
+            }
+            else {
+                cur_arg = (PyObject *) PyLong_AsVoidPtr(py_cur_arg);
+            }
         }
         else {
             fprintf(
@@ -107,7 +112,16 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
                 "[_convert] Cannot convert argument\n"
             );
         }
+        if (cur_arg == NULL) {
+            fprintf(stderr, "[_convert] cur_arg is NULL\n");
+            PyErr_Print();
+        }
         PyList_SetItem(py_args, i, cur_arg);
+    }
+
+    if (PyErr_Occurred()) {
+        fprintf(stderr, "[_convert] Error occurred\n");
+        PyErr_Print();
     }
 finally:
     // Release the GIL
