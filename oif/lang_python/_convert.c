@@ -91,8 +91,6 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
             PyObject *ptr_as_py_long = PyObject_CallObject(addressof_fn, addressof_args);
             double *data = PyLong_AsVoidPtr(ptr_as_py_long);
 
-            printf("data: %p\n", data);
-
             cur_arg = PyArray_SimpleNewFromData(nd, dimensions, NPY_FLOAT64, data);
             if (cur_arg == NULL) {
                 fprintf(stderr, "[_convert] Could not create a new NumPy array\n");
@@ -101,6 +99,7 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
         else if (c_type == OIF_USER_DATA) {
             if (py_cur_arg == Py_None) {
                 cur_arg = Py_None;
+                Py_INCREF(Py_None);
             }
             else {
                 cur_arg = (PyObject *) PyLong_AsVoidPtr(py_cur_arg);

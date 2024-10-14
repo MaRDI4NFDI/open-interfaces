@@ -170,7 +170,6 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
 
         result = fn(*py_arg_values)
         if result is None:
-            assert restype == OIF_INT
             result = 0
         return result
 
