@@ -56,7 +56,6 @@ end
 
 function set_integrator(self::Self, integrator_name::String, params::Dict)
     println("Requested integrator is '$integrator_name'")
-    println("params = ", params)
     integrator_symbol = Symbol(integrator_name)
     if !isdefined(OrdinaryDiffEq, integrator_symbol)
         error("[jl_diffeq] Could not find integrator '$integrator_name'")
