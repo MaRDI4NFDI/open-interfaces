@@ -148,12 +148,25 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
         # and this is how we convert it back to PyObject.
         OIF_USER_DATA: _pyobject_from_pointer,
     }
-    py_arg_values = [None] * len(arg_types)
     assert not (arg_types - type_conversion.keys())
 
+    lib_convert = ctypes.CDLL("liboif_lang_python_convert.so")
+    convert_fn = _wrap_c_function(
+        lib_convert,
+        "python_types_from_oif_types",
+        ctypes.c_int,
+        [ctypes.py_object, ctypes.py_object, ctypes.py_object],
+    )
+
     def wrapper(*arg_values):
-        for i, (t, v) in enumerate(zip(arg_types, arg_values)):
-            py_arg_values[i] = type_conversion[t](v)
+        tic = time.perf_counter()
+        py_arg_values = [None] * len(arg_types)
+        # for i, (t, v) in enumerate(zip(arg_types, arg_values)):
+        #     py_arg_values[i] = type_conversion[t](v)
+        convert_fn(py_arg_values, arg_values, arg_types)
+        toc = time.perf_counter()
+        global elapsed
+        elapsed += toc - tic
 
         result = fn(*py_arg_values)
         if result is None:
