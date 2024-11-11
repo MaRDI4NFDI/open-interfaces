@@ -32,7 +32,7 @@ static size_t SIZE_ = 65;
 static char *
 copy_key_(const char *key)
 {
-    char *key_copy = malloc(strlen(key) * sizeof(char));
+    char *key_copy = malloc((strlen(key) + 1) * sizeof(char));
     if (key_copy == NULL) {
         fprintf(stderr, "Could not allocate memory for a key copy\n");
         exit(1);
