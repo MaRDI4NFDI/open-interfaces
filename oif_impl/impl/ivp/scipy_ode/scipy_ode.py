@@ -86,6 +86,9 @@ class ScipyODE(IVPInterface):
             self.s.set_initial_value(self.y0, self.t0)
         return 0
 
+    def print_stats(self):
+        print("WARNING: `scipy_ode` does not provide statistics")
+
     def _rhs_fn_wrapper(self, t, y):
         """Callback that satisfies signature expected by Open Interfaces."""
         self.rhs(t, y, self.ydot, self.user_data)

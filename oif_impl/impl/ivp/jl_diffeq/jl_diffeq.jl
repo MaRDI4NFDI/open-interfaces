@@ -67,6 +67,10 @@ function set_integrator(self::Self, integrator_name::String, params::Dict)
     return 0
 end
 
+function print_stats(self::Self)
+    println("Number of RHS evals =", self.solver.stats.nf)
+end
+
 function _rhs_wrapper(rhs)
     function wrapper(du, u, p, t)
         return rhs(t, u, du, p)
