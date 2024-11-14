@@ -1,12 +1,10 @@
 import ctypes
-import time
 from io import BytesIO
 from typing import Callable, NewType, Union
 
 import _conversion
 import msgpack
 import numpy as np
-from line_profiler import profile
 
 UInt = NewType("UInt", int)
 
@@ -159,14 +157,10 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
     )
 
     def wrapper(*arg_values):
-        tic = time.perf_counter()
         py_arg_values = [None] * len(arg_types)
         # for i, (t, v) in enumerate(zip(arg_types, arg_values)):
         #     py_arg_values[i] = type_conversion[t](v)
         convert_fn(py_arg_values, arg_values, arg_types)
-        toc = time.perf_counter()
-        global elapsed
-        elapsed += toc - tic
 
         result = fn(*py_arg_values)
         if result is None:
@@ -225,12 +219,10 @@ class OIFPyBinding:
             ],
         )
 
-    @profile
     def call(self, method, user_args, out_user_args):
         num_args = len(user_args)
         arg_types = []
         arg_values = []
-        tic = time.perf_counter()
 
         for arg in user_args:
             if isinstance(arg, int):
@@ -328,10 +320,6 @@ class OIFPyBinding:
             ctypes.POINTER(ctypes.c_void_p),
         )
         out_packed = OIFArgs(num_out_args, out_arg_types_ctypes, out_arg_values_ctypes)
-
-        toc = time.perf_counter()
-        global elapsed_call
-        elapsed_call += toc - tic
 
         status = self._call_interface_impl(
             self.implh,
