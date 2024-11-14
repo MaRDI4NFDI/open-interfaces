@@ -158,9 +158,9 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
 
     def wrapper(*arg_values):
         py_arg_values = [None] * len(arg_types)
-        # for i, (t, v) in enumerate(zip(arg_types, arg_values)):
-        #     py_arg_values[i] = type_conversion[t](v)
-        convert_fn(py_arg_values, arg_values, arg_types)
+        for i, (t, v) in enumerate(zip(arg_types, arg_values)):
+            py_arg_values[i] = type_conversion[t](v)
+        # convert_fn(py_arg_values, arg_values, arg_types)
 
         result = fn(*py_arg_values)
         if result is None:
