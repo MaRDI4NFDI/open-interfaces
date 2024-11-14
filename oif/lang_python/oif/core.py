@@ -148,13 +148,13 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
     }
     assert not (arg_types - type_conversion.keys())
 
-    lib_convert = ctypes.CDLL("liboif_lang_python_convert.so")
-    convert_fn = _wrap_c_function(
-        lib_convert,
-        "python_types_from_oif_types",
-        ctypes.c_int,
-        [ctypes.py_object, ctypes.py_object, ctypes.py_object],
-    )
+    # lib_convert = ctypes.CDLL("liboif_lang_python_convert.so")
+    # convert_fn = _wrap_c_function(
+    #     lib_convert,
+    #     "python_types_from_oif_types",
+    #     ctypes.c_int,
+    #     [ctypes.py_object, ctypes.py_object, ctypes.py_object],
+    # )
 
     def wrapper(*arg_values):
         py_arg_values = [None] * len(arg_types)
