@@ -19,7 +19,8 @@ static PyObject *addressof_fn = NULL;
 static double ELAPSED_ = 0;
 static double ELAPSED_FN_ = 0;
 
-void __attribute__((destructor)) dtor();
+void __attribute__((destructor))
+dtor();
 
 static int
 init_(void)
@@ -52,7 +53,6 @@ init(void)
     init_();
 }
 
-
 int
 python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_types)
 {
@@ -70,7 +70,7 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
     // Ensure we have the GIL
     gstate = PyGILState_Ensure();
 
-    if (! INITIALIZED_) {
+    if (!INITIALIZED_) {
         init_();
     }
 
@@ -87,11 +87,8 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
             cur_arg = py_cur_arg;
         }
         else if (c_type == OIF_ARRAY_F64) {
-            if (! PyObject_HasAttrString(py_cur_arg, "contents")) {
-                fprintf(
-                    stderr,
-                    "[_convert] Pass OIF_ARRAY_F64 is not ctypes object\n"
-                );
+            if (!PyObject_HasAttrString(py_cur_arg, "contents")) {
+                fprintf(stderr, "[_convert] Pass OIF_ARRAY_F64 is not ctypes object\n");
                 exit(EXIT_FAILURE);
             }
 
@@ -123,14 +120,11 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
                 Py_INCREF(Py_None);
             }
             else {
-                cur_arg = (PyObject *) PyLong_AsVoidPtr(py_cur_arg);
+                cur_arg = (PyObject *)PyLong_AsVoidPtr(py_cur_arg);
             }
         }
         else {
-            fprintf(
-                stderr,
-                "[_convert] Cannot convert argument\n"
-            );
+            fprintf(stderr, "[_convert] Cannot convert argument\n");
         }
         if (cur_arg == NULL) {
             fprintf(stderr, "[_convert] cur_arg is NULL\n");
@@ -138,7 +132,6 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
         }
         PyList_SetItem(py_args, i, cur_arg);
     }
-
 
     if (PyErr_Occurred()) {
         fprintf(stderr, "[_convert] Error occurred\n");
@@ -159,7 +152,7 @@ c_wrapper_over_py_callable(void *py_fn, OIFArgs *args)
     PyObject *py_args = PyTuple_New(num_args);
     PyObject *cur_arg = NULL;
 
-    if (! PyCallable_Check((PyObject *) py_fn)) {
+    if (!PyCallable_Check((PyObject *)py_fn)) {
         fprintf(stderr, "[_convert] It is not a Python callable\n");
         return -1;
     }
@@ -169,39 +162,36 @@ c_wrapper_over_py_callable(void *py_fn, OIFArgs *args)
     for (size_t i = 0; i < num_args; ++i) {
         void *c_arg = args->arg_values[i];
         switch (args->arg_types[i]) {
-        case OIF_INT:
-            cur_arg = PyLong_FromLong(*(int *) c_arg);
-            break;
-        case OIF_FLOAT64:
-            cur_arg = PyFloat_FromDouble(*(double *) c_arg);
-            break;
-        case OIF_ARRAY_F64:
-            arr = *(OIFArrayF64 **) c_arg;
-            assert(arr->nd == 1);
-            cur_arg = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64, arr->data);
-            break;
-        case OIF_USER_DATA:
-            cur_arg = Py_None;
-            Py_INCREF(Py_None);
-            /* cur_arg = c_arg; */
-            /* if (cur_arg == Py_None) { */
-            /*     Py_INCREF(Py_None); */
-            /* } */
-            /* else { */
-            /*     fprintf(stderr, "[_convert] Currently, the case with USER_DATA is not handled\n"); */
-            /*     exit(1); */
-            /* } */
-            break;
-        default:
-            fprintf(
-                stderr,
-                "[_convert] BAD\n"
-            );
-
+            case OIF_INT:
+                cur_arg = PyLong_FromLong(*(int *)c_arg);
+                break;
+            case OIF_FLOAT64:
+                cur_arg = PyFloat_FromDouble(*(double *)c_arg);
+                break;
+            case OIF_ARRAY_F64:
+                arr = *(OIFArrayF64 **)c_arg;
+                assert(arr->nd == 1);
+                cur_arg = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
+                                                    arr->data);
+                break;
+            case OIF_USER_DATA:
+                cur_arg = Py_None;
+                Py_INCREF(Py_None);
+                /* cur_arg = c_arg; */
+                /* if (cur_arg == Py_None) { */
+                /*     Py_INCREF(Py_None); */
+                /* } */
+                /* else { */
+                /*     fprintf(stderr, "[_convert] Currently, the case with USER_DATA is not
+                 * handled\n"); */
+                /*     exit(1); */
+                /* } */
+                break;
+            default:
+                fprintf(stderr, "[_convert] BAD\n");
         }
         if (cur_arg == NULL) {
-            fprintf(
-                    stderr, "[_convert] It did not work\n");
+            fprintf(stderr, "[_convert] It did not work\n");
             Py_DECREF(py_args);
             return -1;
         }
@@ -226,8 +216,8 @@ c_wrapper_over_py_callable(void *py_fn, OIFArgs *args)
     return 0;
 }
 
-
-void dtor(void)
+void
+dtor(void)
 {
     printf("Elapsed time in conversion: %.3f seconds\n", ELAPSED_ / CLOCKS_PER_SEC);
     printf("Elapsed time in  func call: %.3f seconds\n", ELAPSED_FN_ / CLOCKS_PER_SEC);
