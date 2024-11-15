@@ -13,6 +13,7 @@ dependencies:
     - fortran-compiler
     - numpy
     - openblas
+    - gtest
     - pytest
     - python-dotenv
     - flake8
