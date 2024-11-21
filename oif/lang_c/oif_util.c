@@ -24,7 +24,7 @@ char *
 oif_util_str_duplicate(const char *src)
 {
     size_t len = strlen(src);
-    char *dest = malloc(len * sizeof(*dest));
+    char *dest = malloc((len + 1) * sizeof(*dest));
     if (dest == NULL) {
         fprintf(stderr, "[str_duplicate] Could not allocate memory\n");
         return NULL;
