@@ -6,7 +6,7 @@ import SciMLBase
 using OpenInterfaces: OIFArrayF64
 
 function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid})::Function
-    function wrapper(t, y, ydot, user_data)::Int
+    function wrapper(t::Float64, y::Vector{Float64}, ydot::Vector{Float64}, user_data)::Int
         if typeof(user_data) == SciMLBase.NullParameters
             user_data = C_NULL
         end
