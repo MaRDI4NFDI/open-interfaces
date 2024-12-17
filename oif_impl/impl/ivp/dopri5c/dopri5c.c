@@ -39,10 +39,14 @@ OIFArrayF64 *self_y4 = NULL;
 OIFArrayF64 *self_y5 = NULL;
 OIFArrayF64 *self_y6 = NULL;
 
+OIFArrayF64 *self_sc = NULL;
+
 OIFConfigDict *config = NULL;
 void *self_user_data = NULL;
 // Signature for the right-hand side that is provided by the `IVP` interface.
 static oif_ivp_rhs_fn_t OIF_RHS_FN = NULL;
+
+static double self_h = 0.0;
 
 static const char *AVAILABLE_OPTIONS_[] = {
     "max_num_steps",
@@ -78,6 +82,57 @@ static int
 init_(void)
 {
     return 0;
+}
+
+static void
+compute_initial_step_() {
+    double h0;
+    double h1;
+
+    OIF_RHS_FN(self_t, self_y, self_k1, self_user_data);
+
+    for (int i = 0; i < self_N; ++i) {
+        self_sc->data[i] = self_atol + self_y->data[i] * self_rtol;
+    }
+
+    double d0 = 0.0L;
+    for (int i = 0; i < self_N; ++i) {
+        d0 += pow(self_y->data[i] / self_sc->data[i], 2);
+    }
+    d0 = sqrt(d0 / self_N);
+
+    double d1 = 0.0L;
+    for (int i = 0; i < self_N; ++i) {
+        d1 += pow(self_k1->data[i] / self_sc->data[i], 2);
+    }
+    d1 = sqrt(d1 / self_N);
+
+    if (d0 < 1e-5 || d1 < 1e-5) {
+        h0 = 1e-6;
+    }
+    else {
+        h0 = 1e-2 * (d0 / d1);
+    }
+
+    for (int i = 0; i < self_N; ++i) {
+        self_y2->data[i] = self_y->data[i] + h0 * self_k1->data[i];
+    }
+    OIF_RHS_FN(self_t + self_h, self_y2, self_k2, self_user_data);
+
+    double d2 = 0.0L;
+    for (int i = 0; i < self_N; ++i) {
+        d2 += pow((self_k2->data[i] - self_k1->data[i]) / self_sc->data[i], 2.0);
+    }
+    d2 = sqrt(d2 / self_N) / h0;
+
+    if (MAX(d1, d2) < 1e-15) {
+        h1 = MAX(1e-6, h0 * 1e-3);
+    }
+    else {
+        h1 = pow(1e-2 / MAX(d1, d2), 1.0L / 5.0L);
+    }
+
+    self_h = MIN(1e2 * h0, h1);
 }
 
 int
@@ -132,6 +187,8 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     self_y5 = oif_create_array_f64(1, y0_in->dimensions);
     self_y6 = oif_create_array_f64(1, y0_in->dimensions);
 
+    self_sc = oif_create_array_f64(1, y0_in->dimensions);
+
     return 0;
 }
 
@@ -150,6 +207,7 @@ set_rhs_fn(oif_ivp_rhs_fn_t rhs)
         return 1;
     }
     OIF_RHS_FN = rhs;
+    compute_initial_step_();
     return 0;
 }
 
@@ -181,60 +239,59 @@ print_stats(void)
  *
  */
 int
-integrate(double t, OIFArrayF64 *y)
+integrate(double t_, OIFArrayF64 *y)
 {
     fprintf(stderr, "[%s] integrate", prefix_);
-    if (t <= self_t) {
+    if (t_ <= self_t) {
         fprintf(stderr, "[%s] Time should be larger than the current time\n", prefix_);
     }
 
-    double h = pow(10.0, 6);
-
-    OIF_RHS_FN(t, y, self_k1, self_user_data);
-
-    while (self_t < t) {
-        if (self_t + h > t) {
-            h = self_t - t;
+    while (self_t < t_) {
+        if (self_t + self_h > t_) {
+            self_h = t_ - self_t;
         }
+
+        // 1st stage
+        OIF_RHS_FN(self_t, y, self_k1, self_user_data);
 
         // 2nd stage
         for (int i = 0; i < self_N; ++i) {
-            self_y2->data[i] = self_y->data[i] + h / 5.0 * self_k1->data[i];
+            self_y2->data[i] = self_y->data[i] + self_h / 5.0 * self_k1->data[i];
         }
-        OIF_RHS_FN(t + h / 5.0, self_y2, self_k2, self_user_data);
+        OIF_RHS_FN(self_t + self_h / 5.0, self_y2, self_k2, self_user_data);
 
         // 3rd stage
         for (int i = 0; i < self_N; ++i) {
-            self_y3->data[i] = self_y->data[i] + h / 40.0 * (
+            self_y3->data[i] = self_y->data[i] + self_h / 40.0 * (
                 3 * self_k1->data[i] + 9 * self_k2->data[i]
             );
         }
-        OIF_RHS_FN(t + 3.0 * h / 10, self_y3, self_k3, self_user_data);
+        OIF_RHS_FN(self_t + 3.0 * self_h / 10, self_y3, self_k3, self_user_data);
 
         // 4th stage
         for (int i = 0; i < self_N; ++i) {
-            self_y4->data[i] = self_y->data[i] + h * (
+            self_y4->data[i] = self_y->data[i] + self_h * (
                 a4[1] * self_k1->data[i] +
                 a4[2] * self_k2->data[i] +
                 a4[3] * self_k3->data[i]
             );
         }
-        OIF_RHS_FN(t + 4.0 * h / 5, self_y4, self_k4, self_user_data);
+        OIF_RHS_FN(self_t + 4.0 * self_h / 5, self_y4, self_k4, self_user_data);
 
         // 5th stage
         for (int i = 0; i < self_N; ++i) {
-            self_y5->data[i] = self_y->data[i] + h * (
+            self_y5->data[i] = self_y->data[i] + self_h * (
                 a5[1] * self_k1->data[i] +
                 a5[2] * self_k2->data[i] +
                 a5[3] * self_k3->data[i] +
                 a5[4] * self_k4->data[i]
             );
         }
-        OIF_RHS_FN(t + 8.0 * h / 9, self_y5, self_k5, self_user_data);
+        OIF_RHS_FN(self_t + 8.0 * self_h / 9, self_y5, self_k5, self_user_data);
 
         // step 6.
         for (int i = 0; i < self_N; ++i) {
-            self_y6->data[i] = self_y->data[i] + h * (
+            self_y6->data[i] = self_y->data[i] + self_h * (
                 a6[1] * self_k1->data[i] +
                 a6[2] * self_k2->data[i] +
                 a6[3] * self_k3->data[i] +
@@ -242,22 +299,22 @@ integrate(double t, OIFArrayF64 *y)
                 a6[5] * self_k5->data[i]
             );
         }
-        OIF_RHS_FN(t + h, self_y6, self_k6, self_user_data);
+        OIF_RHS_FN(self_t + self_h, self_y6, self_k6, self_user_data);
 
         // Estimate less accurate.
         for (size_t i = 0; i < self_y->dimensions[0]; ++i) {
-            self_yt->data[i] = y->data[i] + h * (
+            self_yt->data[i] = y->data[i] + self_h * (
                 a7[1] * self_k1->data[i] + a7[3] * self_k3->data[i] +
                 a7[4] * self_k4->data[i] + a7[5] * self_k5->data[i] +
                 a7[6] * self_k6->data[i]
             );
         }
-        OIF_RHS_FN(t + h, self_yt, self_k2, self_user_data);
+        OIF_RHS_FN(self_t + self_h, self_yt, self_k2, self_user_data);
 
         double err = 0.0;
 
         for (size_t i = 0; i < self_N; ++i) {
-            double var = h * (
+            double var = self_h * (
                 e[1] * self_k1->data[i] + e[2] * self_k2->data[i] +
                 e[3] * self_k3->data[i] + e[4] * self_k4->data[i] +
                 e[5] * self_k5->data[i] + e[6] * self_k6->data[i]
@@ -268,11 +325,10 @@ integrate(double t, OIFArrayF64 *y)
         err = sqrt(err / self_N);
 
         // double FAC11 = err * EXP01;
-        double hnew = h * MIN(FACMAX, MAX(FACMIN, FAC * pow(1.0 / err, 1 / (ORDER_OF_ACC + 1.0))));
-
+        double hnew = self_h * MIN(FACMAX, MAX(FACMIN, FAC * pow(1.0 / err, 1 / (ORDER_OF_ACC + 1.0))));
         if (err < 1.0) {
             // Solution accepted.
-            self_t += h;
+            self_t += self_h;
             OIFArrayF64 *tmp = self_k1;
             self_k1 = self_k2;
             self_k2 = tmp;
@@ -294,7 +350,7 @@ integrate(double t, OIFArrayF64 *y)
             n_rejected++;
         }
 
-        h = hnew;
+        self_h = hnew;
         fprintf(stderr, "[%s::integrate] h = %.16f\n", prefix_, h);
 
         if (n_rejected > 20) {
