@@ -1,5 +1,10 @@
 /**
  * Implementation of the `ivp` interface with hand-written Dormand-Prince 5(4).
+ *
+ * Adaptive time step algorithm, computation of initial time step, and
+ * related constants are from
+ * Hairer et al. Solving Ordinary Differential Equations I, p. 167--169.
+ *
  */
 #include <assert.h>
 #include <limits.h>
@@ -73,7 +78,7 @@ double const FACMAX_DEFAULT = 1.5;
 double const FACMIN = 0.2;
 double const FAC = 0.8;
 double const ORDER_OF_ACC = 4;
-double FACMAX;  // FACMAX depends on step acceptance/rejection (see Hairer, vol. 1, p. 168)
+double FACMAX;
 
 size_t n_rejected = 0;
 
