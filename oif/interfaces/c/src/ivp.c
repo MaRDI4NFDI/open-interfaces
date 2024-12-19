@@ -182,3 +182,22 @@ oif_ivp_set_integrator(ImplHandle implh, char *integrator_name, OIFConfigDict *d
     int status = call_interface_impl(implh, "set_integrator", &in_args, &out_args);
     return status;
 }
+
+int
+oif_ivp_print_stats(ImplHandle implh)
+{
+    OIFArgs in_args = {
+        .num_args = 0,
+        .arg_types = NULL,
+        .arg_values = NULL,
+    };
+
+    OIFArgs out_args = {
+        .num_args = 0,
+        .arg_types = NULL,
+        .arg_values = NULL,
+    };
+
+    int status = call_interface_impl(implh, "print_stats", &in_args, &out_args);
+    return status;
+}

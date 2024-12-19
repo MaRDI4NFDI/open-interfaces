@@ -48,10 +48,10 @@ int
 oif_ivp_set_integrator(ImplHandle implh, char *integrator_name, OIFConfigDict *config);
 
 /**
- * Get the number of function evaluations during the last call to `oif_ivp_integrate`.
+ * Print statistics about integration.
  */
 int
-oif_ivp_get_n_rhs_evals(ImplHandle implh, int *n_rhs_evals);
+oif_ivp_print_stats(ImplHandle implh);
 
 #ifdef __cplusplus
 }
