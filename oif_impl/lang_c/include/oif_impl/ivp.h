@@ -37,3 +37,9 @@ oif_ivp_integrate(double t, OIFArrayF64 *y);
  */
 int
 oif_ivp_set_integrator(const char *integrator_name, OIFConfigDict *config);
+
+/**
+ * Print statistics about integration process.
+ */
+int
+oif_ivp_print_stats();
