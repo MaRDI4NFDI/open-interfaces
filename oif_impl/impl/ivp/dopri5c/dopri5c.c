@@ -255,7 +255,6 @@ print_stats(void)
 int
 integrate(double t_, OIFArrayF64 *y_out)
 {
-    fprintf(stderr, "[%s] integrate", prefix_);
     if (t_ <= self_t) {
         fprintf(stderr, "[%s] Time should be larger than the current time\n", prefix_);
     }
@@ -377,7 +376,6 @@ integrate(double t_, OIFArrayF64 *y_out)
             for (int i = 0; i < self_N; ++i) {
                 self_k1->data[i] = self_k2->data[i];
             }
-            fprintf(stderr, "[%s::integrate] step is accepted\n", prefix_);
 
             for (int i = 0; i < self_N; ++i) {
 
@@ -398,12 +396,10 @@ integrate(double t_, OIFArrayF64 *y_out)
             // Hairer et. al., vol. 1, p. 168.
             /* FACMAX = 1.0; */
             hnew = self_h / MIN(FACC1, FAC11 / SAFE);
-            fprintf(stderr, "[%s::integrate] step is rejected\n", prefix_);
             n_rejected++;
         }
 
         self_h = hnew;
-        fprintf(stderr, "[%s::integrate] h = %.16f\n", prefix_, h);
 
         if (n_rejected > 20) {
             fprintf(stderr, "[%s::integrate] Too many rejected steps\n", prefix_);
