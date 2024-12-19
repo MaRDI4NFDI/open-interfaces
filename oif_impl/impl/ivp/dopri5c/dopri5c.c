@@ -27,8 +27,6 @@ double self_t = 0.0;
 double self_rtol = 1e-6;   // relative tolerance
 double self_atol = 1e-12;  // absolute tolerance
 int self_N = 0;            // Length of the solution vector.
-OIFArrayF64 *self_y = NULL;
-OIFArrayF64 *self_yt = NULL;
 
 // Runge--Kutta stages.
 OIFArrayF64 *self_k1 = NULL;
@@ -38,7 +36,9 @@ OIFArrayF64 *self_k4 = NULL;
 OIFArrayF64 *self_k5 = NULL;
 OIFArrayF64 *self_k6 = NULL;
 
+OIFArrayF64 *self_y = NULL;
 OIFArrayF64 *self_y1 = NULL;
+OIFArrayF64 *self_ysti = NULL;
 
 OIFArrayF64 *self_sc = NULL;
 
@@ -180,15 +180,9 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     self_N = y0_in->dimensions[0];
 
     self_y = oif_create_array_f64(1, y0_in->dimensions);
-    if (self_y == NULL) {
-        fprintf(stderr, "[%s] Could not allocate memory for the solution vector\n", prefix_);
-        exit(1);
-    }
     for (size_t i = 0; i < self_y->dimensions[0]; ++i) {
         self_y->data[i] = y0_in->data[i];
     }
-
-    self_yt = oif_create_array_f64(1, y0_in->dimensions);
 
     self_k1 = oif_create_array_f64(1, y0_in->dimensions);
     self_k2 = oif_create_array_f64(1, y0_in->dimensions);
@@ -198,6 +192,7 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     self_k6 = oif_create_array_f64(1, y0_in->dimensions);
 
     self_y1 = oif_create_array_f64(1, y0_in->dimensions);
+    self_ysti = oif_create_array_f64(1, y0_in->dimensions);
 
     self_sc = oif_create_array_f64(1, y0_in->dimensions);
 
@@ -251,25 +246,30 @@ print_stats(void)
  *
  */
 int
-integrate(double t_, OIFArrayF64 *y)
+integrate(double t_, OIFArrayF64 *y_out)
 {
     fprintf(stderr, "[%s] integrate", prefix_);
     if (t_ <= self_t) {
         fprintf(stderr, "[%s] Time should be larger than the current time\n", prefix_);
     }
 
-    FACC1 = 1.0L / FACMIN;
-    FACC2 = 1.0L / FACMAX;
+    FACOLD = 1e-4;
+    EXP01 = 0.2 - BETA * 0.75;
+    FACC1 = 1.0 / FACMIN;
+    FACC2 = 1.0 / FACMAX;
+
+    size_t nstep = 0;
 
     bool last = false;
     // 1st stage
-    OIF_RHS_FN(self_t, y, self_k1, self_user_data);
+    OIF_RHS_FN(self_t, self_y, self_k1, self_user_data);
 
     while (self_t < t_) {
-        if (self_t + self_h > t_) {
+        if (self_t + self_h >= t_) {
             self_h = t_ - self_t;
             last = true;
         }
+        nstep++;
 
         // 2nd stage
         for (int i = 0; i < self_N; ++i) {
@@ -308,7 +308,7 @@ integrate(double t_, OIFArrayF64 *y)
 
         // step 6.
         for (int i = 0; i < self_N; ++i) {
-            self_y1->data[i] = self_y->data[i] + self_h * (
+            self_ysti->data[i] = self_y->data[i] + self_h * (
                 a6[1] * self_k1->data[i] +
                 a6[2] * self_k2->data[i] +
                 a6[3] * self_k3->data[i] +
@@ -316,11 +316,11 @@ integrate(double t_, OIFArrayF64 *y)
                 a6[5] * self_k5->data[i]
             );
         }
-        OIF_RHS_FN(self_t + self_h, self_y1, self_k6, self_user_data);
+        OIF_RHS_FN(self_t + self_h, self_ysti, self_k6, self_user_data);
 
         // Estimate less accurate.
         for (size_t i = 0; i < self_y->dimensions[0]; ++i) {
-            self_y1->data[i] = y->data[i] + self_h * (
+            self_y1->data[i] = self_y->data[i] + self_h * (
                 a7[1] * self_k1->data[i] + a7[3] * self_k3->data[i] +
                 a7[4] * self_k4->data[i] + a7[5] * self_k5->data[i] +
                 a7[6] * self_k6->data[i]
@@ -345,26 +345,37 @@ integrate(double t_, OIFArrayF64 *y)
         double FAC11 = pow(err, EXP01);
         // Lund stabilization.
         FAC = FAC11 / pow(FACOLD, BETA);
+        // We require FACMIN <= HNEW/H <= FACMAX
         FAC = MAX(FACC2, MIN(FACC1, FAC/SAFE));
         double hnew = self_h / FAC;
 
-        /* double hnew = self_h * MIN(FACMAX, MAX(FACMIN, FAC * pow(1.0 / err, 1 / (ORDER_OF_ACC + 1.0)))); */
         if (err < 1.0) {
-            // Solution accepted.
+            // Step is accepted.
             FACOLD = MAX(err, 1.0e-4);
             self_t += self_h;
-            OIFArrayF64 *tmp = self_k1;
-            self_k1 = self_k2;
-            self_k2 = tmp;
+            /* OIFArrayF64 *tmp = self_k1; */
+            /* self_k1 = self_k2; */
+            /* self_k2 = tmp; */
 
-            tmp = self_y;
-            self_y = self_y1;
-            self_yt = tmp;
+            /* tmp = self_y; */
+            /* self_y = self_y1; */
+            /* self_yt = tmp; */
 
             for (int i = 0; i < self_N; ++i) {
-                y->data[i] = self_y->data[i];
+                self_k1->data[i] = self_k2->data[i];
             }
             fprintf(stderr, "[%s::integrate] step is accepted\n", prefix_);
+
+            for (int i = 0; i < self_N; ++i) {
+
+                self_y->data[i] = self_y1->data[i];
+            }
+
+            /* if (last) { */
+                for (int i = 0; i < self_N; ++i) {
+                    y_out->data[i] = self_y->data[i];
+                }
+            /* } */
             n_rejected = 0;
         }
         else {
