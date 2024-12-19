@@ -165,6 +165,7 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
             "[%s] Accept only one-dimensional arrays (vectors)\n",
             prefix_
         );
+        return 1;
     }
 
     if (self_y) {
