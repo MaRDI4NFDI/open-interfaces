@@ -49,6 +49,9 @@ static oif_ivp_rhs_fn_t OIF_RHS_FN = NULL;
 
 static double self_h = 0.0;
 
+// Number of right-hand side function evaluations.
+static size_t nfcn_ = 0;
+
 static const char *AVAILABLE_OPTIONS_[] = {
     "max_num_steps",
     NULL,
@@ -197,6 +200,8 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
 
     self_sc = oif_create_array_f64(1, y0_in->dimensions);
 
+    nfcn_ = 0;
+
     return 0;
 }
 
@@ -239,6 +244,7 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
 int
 print_stats(void)
 {
+    printf("[%s] Number of right-hand side evaluations = %zu\n", prefix_, nfcn_);
     return 0;
 }
 
@@ -264,6 +270,9 @@ integrate(double t_, OIFArrayF64 *y_out)
     bool last = false;
     // 1st stage
     OIF_RHS_FN(self_t, self_y, self_k1, self_user_data);
+
+    // It is not clear why 2, but this is from the Hairer's code.
+    nfcn_ += 2;
 
     while (self_t < t_) {
         if (self_t + self_h >= t_) {
@@ -329,6 +338,9 @@ integrate(double t_, OIFArrayF64 *y_out)
         }
         OIF_RHS_FN(self_t + self_h, self_y1, self_k2, self_user_data);
 
+        nfcn_ += 6;
+        // --------------------------------------------------------------------
+        // Error estimation.
         double err = 0.0;
 
         for (size_t i = 0; i < self_N; ++i) {
