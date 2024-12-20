@@ -98,12 +98,6 @@ double const ORDER_OF_ACC = 4;
 
 size_t n_rejected = 0;
 
-static int
-init_(void)
-{
-    return 0;
-}
-
 static void
 compute_initial_step_() {
     double h0;
@@ -184,7 +178,7 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     self_N = y0_in->dimensions[0];
 
     self_y = oif_create_array_f64(1, y0_in->dimensions);
-    for (size_t i = 0; i < self_y->dimensions[0]; ++i) {
+    for (int i = 0; i < self_N; ++i) {
         self_y->data[i] = y0_in->data[i];
     }
 
@@ -328,7 +322,7 @@ integrate(double t_, OIFArrayF64 *y_out)
         OIF_RHS_FN(self_t + self_h, self_ysti, self_k6, self_user_data);
 
         // Estimate less accurate.
-        for (size_t i = 0; i < self_y->dimensions[0]; ++i) {
+        for (int i = 0; i < self_N; ++i) {
             self_y1->data[i] = self_y->data[i] + self_h * (
                 a7[1] * self_k1->data[i] + a7[3] * self_k3->data[i] +
                 a7[4] * self_k4->data[i] + a7[5] * self_k5->data[i] +
@@ -342,7 +336,7 @@ integrate(double t_, OIFArrayF64 *y_out)
         // Error estimation.
         double err = 0.0;
 
-        for (size_t i = 0; i < self_N; ++i) {
+        for (int i = 0; i < self_N; ++i) {
             self_k4->data[i] = self_h * (
                 e[1] * self_k1->data[i] +
                 e[3] * self_k3->data[i] + e[4] * self_k4->data[i] +
