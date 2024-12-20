@@ -305,3 +305,12 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
     }
     return status;
 }
+
+
+#if defined(__GNUC__)
+    #if !defined(__OPTIMIZE__)
+        void __attribute__((destructor)) dtor() {
+            fprintf(stderr, "[dispatch] WARNING: running non-optimized build\n");
+        }
+    #endif
+#endif
