@@ -365,28 +365,24 @@ integrate(double t_, OIFArrayF64 *y_out)
             // Step is accepted.
             FACOLD = MAX(err, 1.0e-4);
             self_t += self_h;
-            /* OIFArrayF64 *tmp = self_k1; */
-            /* self_k1 = self_k2; */
-            /* self_k2 = tmp; */
 
-            /* tmp = self_y; */
-            /* self_y = self_y1; */
-            /* self_yt = tmp; */
+            OIFArrayF64 *tmp = NULL;
 
-            for (int i = 0; i < self_N; ++i) {
-                self_k1->data[i] = self_k2->data[i];
-            }
+            // Instead of copying `self_k2` into `self_k1` we just swap pointers.
+            tmp = self_k1;
+            self_k1 = self_k2;
+            self_k2 = tmp;
 
-            for (int i = 0; i < self_N; ++i) {
+            // Instead of copying `self_y1` into `self_y` we just swap pointers.
+            tmp = self_y;
+            self_y = self_y1;
+            self_y1 = tmp;
 
-                self_y->data[i] = self_y1->data[i];
-            }
-
-            /* if (last) { */
+            if (last) {
                 for (int i = 0; i < self_N; ++i) {
                     y_out->data[i] = self_y->data[i];
                 }
-            /* } */
+            }
             n_rejected = 0;
         }
         else {
