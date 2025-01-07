@@ -52,13 +52,6 @@ static double self_h = 0.0;
 // Number of right-hand side function evaluations.
 static size_t nfcn_ = 0;
 
-static const char *AVAILABLE_OPTIONS_[] = {
-    "max_num_steps",
-    NULL,
-};
-
-static double eps = 1e-12;
-
 // Coefficients before time step in expressions like t + c * dt.
 static double C2 = 1.0 / 5.0;
 static double C3 = 3.0 / 10.0;
