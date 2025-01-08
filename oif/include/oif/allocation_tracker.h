@@ -1,5 +1,4 @@
 #pragma once
-#include <stdlib.h>
 
 typedef void(cleanup_fn)(void *p);
 
