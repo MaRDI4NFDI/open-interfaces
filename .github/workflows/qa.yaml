@@ -24,21 +24,20 @@ jobs:
             - name: Setup conda environment
               uses: conda-incubator/setup-miniconda@v3
               with:
+                  python-version: ${{ matrix.python-version }}
+                  miniforge-version: latest
                   activate-environment: test
                   environment-file: environment-linux.yaml
-                  miniforge-version: latest
-                  mamba-version: '*'
-                  python-version: ${{ matrix.python-version }}
             - name: Get Date
               id: get-date
               run: echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
 
-            - name: Cache Conda env
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.CONDA }}/envs
-                  key: ${{ runner.os }}-conda-${{ steps.get-date.outputs.date }}-${{ hashFiles('environment-linux.yaml') }}
-              id: cache
+            # - name: Cache Conda env
+            #   uses: actions/cache@v3
+            #   with:
+            #       path: ~/conda_pkgs_dir
+            #       key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment-linux.yaml') }}
+            #   id: cache
 
             - name: Update environment
               run: |
@@ -65,8 +64,11 @@ jobs:
               run: |
                   conda info
                   type gcc
+                  gcc --version
                   type g++
+                  g++ --version
                   type python
+                  python --version
                   type pip
                   type julia
                   git status
