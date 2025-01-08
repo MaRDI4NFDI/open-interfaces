@@ -74,5 +74,7 @@ allocation_tracker_free(void *tracker_)
         }
     }
 
+    free(tracker->pointers);
+    free(tracker->cleanup_fns);
     free(tracker);
 }
