@@ -61,19 +61,16 @@ static double C5 = 8.0 / 9.0;
 // Leading zeros here are only to match the index to the corresponding vector.
 static double a2[] = {0.0, 0.2};
 static double a3[] = {0.0, 3.0 / 40.0, 9.0 / 40.0};
-static double a4[] = {0, 44.0/45.0, -56.0/15.0, 32.0/9.0};
-static double a5[] = {0, 19372.0/6561.0, -25360.0/2187.0, 64448.0/6561.0, -212.0/729.0};
-static double a6[] = {0, 9017.0/3168.0, -355.0/33.0, 46732.0/5247.0, 49.0/176.0, -5103.0/18656.0};
-static double a7[] = {0, 35.0/384.0, 0.0, 500.0/1113.0, 125.0/192.0, -2187.0/6784.0, 11.0/84.0};
+static double a4[] = {0, 44.0 / 45.0, -56.0 / 15.0, 32.0 / 9.0};
+static double a5[] = {0, 19372.0 / 6561.0, -25360.0 / 2187.0, 64448.0 / 6561.0,
+                      -212.0 / 729.0};
+static double a6[] = {
+    0, 9017.0 / 3168.0, -355.0 / 33.0, 46732.0 / 5247.0, 49.0 / 176.0, -5103.0 / 18656.0};
+static double a7[] = {
+    0, 35.0 / 384.0, 0.0, 500.0 / 1113.0, 125.0 / 192.0, -2187.0 / 6784.0, 11.0 / 84.0};
 static double e[] = {
-    0.0,
-    71.0/57600.0,
-    0.0,
-    -71.0/16695.0,
-    71.0/1920.0,
-    -17253.0/339200.0,
-    22.0/525.0,
-    -1.0 / 40.0,
+    0.0,           71.0 / 57600.0,      0.0,          -71.0 / 16695.0,
+    71.0 / 1920.0, -17253.0 / 339200.0, 22.0 / 525.0, -1.0 / 40.0,
 };
 
 // Step size control parameters.
@@ -84,15 +81,16 @@ double FACC1;
 double FACC2;
 
 double FACOLD = 1e-4;
-double const FACMIN = 0.2;    // In Hairer's code FAC1
-double const FACMAX = 10.0;   // In Hairer's code FAC2
+double const FACMIN = 0.2;   // In Hairer's code FAC1
+double const FACMAX = 10.0;  // In Hairer's code FAC2
 double FAC = 0.8;
 double const ORDER_OF_ACC = 4;
 
 size_t n_rejected = 0;
 
 static void
-compute_initial_step_() {
+compute_initial_step_()
+{
     double h0;
     double h1;
 
@@ -150,11 +148,7 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     self_t = t0_in;
 
     if (y0_in->nd != 1) {
-        fprintf(
-            stderr,
-            "[%s] Accept only one-dimensional arrays (vectors)\n",
-            prefix_
-        );
+        fprintf(stderr, "[%s] Accept only one-dimensional arrays (vectors)\n", prefix_);
         return 1;
     }
 
@@ -222,8 +216,8 @@ set_tolerances(double rtol, double atol)
 int
 set_integrator(const char *integrator_name, OIFConfigDict *config_)
 {
-    (void) integrator_name;
-    (void) config_;
+    (void)integrator_name;
+    (void)config_;
     fprintf(stderr, "[%s] Method `set_integrator` is not supported\n", prefix_);
     return 0;
 }
@@ -275,52 +269,43 @@ integrate(double t_, OIFArrayF64 *y_out)
 
         // 3rd stage
         for (int i = 0; i < self_N; ++i) {
-            self_y1->data[i] = self_y->data[i] + self_h * (
-                a3[1] * self_k1->data[i] + a3[2] * self_k2->data[i]
-            );
+            self_y1->data[i] = self_y->data[i] +
+                               self_h * (a3[1] * self_k1->data[i] + a3[2] * self_k2->data[i]);
         }
         OIF_RHS_FN(self_t + C3 * self_h, self_y1, self_k3, self_user_data);
 
         // 4th stage
         for (int i = 0; i < self_N; ++i) {
-            self_y1->data[i] = self_y->data[i] + self_h * (
-                a4[1] * self_k1->data[i] +
-                a4[2] * self_k2->data[i] +
-                a4[3] * self_k3->data[i]
-            );
+            self_y1->data[i] = self_y->data[i] +
+                               self_h * (a4[1] * self_k1->data[i] + a4[2] * self_k2->data[i] +
+                                         a4[3] * self_k3->data[i]);
         }
         OIF_RHS_FN(self_t + C4 * self_h, self_y1, self_k4, self_user_data);
 
         // 5th stage
         for (int i = 0; i < self_N; ++i) {
-            self_y1->data[i] = self_y->data[i] + self_h * (
-                a5[1] * self_k1->data[i] +
-                a5[2] * self_k2->data[i] +
-                a5[3] * self_k3->data[i] +
-                a5[4] * self_k4->data[i]
-            );
+            self_y1->data[i] = self_y->data[i] +
+                               self_h * (a5[1] * self_k1->data[i] + a5[2] * self_k2->data[i] +
+                                         a5[3] * self_k3->data[i] + a5[4] * self_k4->data[i]);
         }
         OIF_RHS_FN(self_t + C5 * self_h, self_y1, self_k5, self_user_data);
 
         // step 6.
         for (int i = 0; i < self_N; ++i) {
-            self_ysti->data[i] = self_y->data[i] + self_h * (
-                a6[1] * self_k1->data[i] +
-                a6[2] * self_k2->data[i] +
-                a6[3] * self_k3->data[i] +
-                a6[4] * self_k4->data[i] +
-                a6[5] * self_k5->data[i]
-            );
+            self_ysti->data[i] =
+                self_y->data[i] +
+                self_h * (a6[1] * self_k1->data[i] + a6[2] * self_k2->data[i] +
+                          a6[3] * self_k3->data[i] + a6[4] * self_k4->data[i] +
+                          a6[5] * self_k5->data[i]);
         }
         OIF_RHS_FN(self_t + self_h, self_ysti, self_k6, self_user_data);
 
         // Estimate less accurate.
         for (int i = 0; i < self_N; ++i) {
-            self_y1->data[i] = self_y->data[i] + self_h * (
-                a7[1] * self_k1->data[i] + a7[3] * self_k3->data[i] +
-                a7[4] * self_k4->data[i] + a7[5] * self_k5->data[i] +
-                a7[6] * self_k6->data[i]
-            );
+            self_y1->data[i] = self_y->data[i] +
+                               self_h * (a7[1] * self_k1->data[i] + a7[3] * self_k3->data[i] +
+                                         a7[4] * self_k4->data[i] + a7[5] * self_k5->data[i] +
+                                         a7[6] * self_k6->data[i]);
         }
         OIF_RHS_FN(self_t + self_h, self_y1, self_k2, self_user_data);
 
@@ -330,13 +315,11 @@ integrate(double t_, OIFArrayF64 *y_out)
         double err = 0.0;
 
         for (int i = 0; i < self_N; ++i) {
-            self_k4->data[i] = self_h * (
-                e[1] * self_k1->data[i] +
-                e[3] * self_k3->data[i] + e[4] * self_k4->data[i] +
-                e[5] * self_k5->data[i] + e[6] * self_k6->data[i] +
-                e[7] * self_k2->data[i]
-            );
-            double sk = self_atol + self_rtol * MAX(fabs(self_y->data[i]), fabs(self_y1->data[i]));
+            self_k4->data[i] = self_h * (e[1] * self_k1->data[i] + e[3] * self_k3->data[i] +
+                                         e[4] * self_k4->data[i] + e[5] * self_k5->data[i] +
+                                         e[6] * self_k6->data[i] + e[7] * self_k2->data[i]);
+            double sk =
+                self_atol + self_rtol * MAX(fabs(self_y->data[i]), fabs(self_y1->data[i]));
             err += pow(self_k4->data[i] / sk, 2);
         }
         err = sqrt(err / self_N);
@@ -345,7 +328,7 @@ integrate(double t_, OIFArrayF64 *y_out)
         // Lund stabilization.
         FAC = FAC11 / pow(FACOLD, BETA);
         // We require FACMIN <= HNEW/H <= FACMAX
-        FAC = MAX(FACC2, MIN(FACC1, FAC/SAFE));
+        FAC = MAX(FACC2, MIN(FACC1, FAC / SAFE));
         double hnew = self_h / FAC;
 
         if (err < 1.0) {
