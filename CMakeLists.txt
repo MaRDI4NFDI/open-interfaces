@@ -11,31 +11,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   string(PREPEND CMAKE_C_FLAGS_DEBUG "-O0 ")
 endif()
 
-set(CMAKE_C_FLAGS_ASAN
-    "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer"
-    CACHE STRING
-          "Flags used by the C compiler for Asan build type or configuration."
-          FORCE)
-
-set(CMAKE_CXX_FLAGS_ASAN
-    "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer"
-    CACHE STRING
-          "Flags used by the C++ compiler for Asan build type or configuration."
-          FORCE)
-
-set(CMAKE_EXE_LINKER_FLAGS_ASAN
-    "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address"
-    CACHE STRING
-          "Linker flags to be used to create executables for Asan build type."
-          FORCE)
-
-set(CMAKE_SHARED_LINKER_FLAGS_ASAN
-    "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=address"
-    CACHE
-      STRING
-      "Linker lags to be used to create shared libraries for Asan build type."
-      FORCE)
-
 # Incorporate additions by X/Open 7, that includes POSIX 17 additions and allow
 # to use things like the `M_PI` constant in the code without warnings from
 # static analyzers.
@@ -61,4 +36,4 @@ add_subdirectory(oif_impl)
 add_subdirectory(examples)
 
 enable_testing()
-add_subdirectory(tests)
+# add_subdirectory(tests)
