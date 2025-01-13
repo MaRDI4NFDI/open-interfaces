@@ -8,7 +8,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("Disable optimizations for Debug build type")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+  string(PREPEND CMAKE_C_FLAGS_DEBUG "-O0 ")
 endif()
 
 set(CMAKE_C_FLAGS_ASAN
