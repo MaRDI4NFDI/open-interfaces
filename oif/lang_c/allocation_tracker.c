@@ -68,10 +68,8 @@ allocation_tracker_free(void *tracker_)
 {
     AllocationTracker *tracker = tracker_;
     assert(tracker->type == ALLOCATION_TRACKER_TYPE);
-    if (tracker->size) {
-        for (size_t i = 0; i < tracker->size; ++i) {
-            tracker->cleanup_fns[i](tracker->pointers[i]);
-        }
+    for (size_t i = 0; i < tracker->size; ++i) {
+        tracker->cleanup_fns[i](tracker->pointers[i]);
     }
 
     free(tracker->pointers);
