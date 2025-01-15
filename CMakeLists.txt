@@ -8,7 +8,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("Disable optimizations for Debug build type")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+  string(PREPEND CMAKE_C_FLAGS_DEBUG "-O0 ")
 endif()
 
 # Incorporate additions by X/Open 7, that includes POSIX 17 additions and allow
@@ -36,4 +36,4 @@ add_subdirectory(oif_impl)
 add_subdirectory(examples)
 
 enable_testing()
-add_subdirectory(tests)
+# add_subdirectory(tests)

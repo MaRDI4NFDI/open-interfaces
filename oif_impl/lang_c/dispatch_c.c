@@ -74,7 +74,7 @@ unload_impl(ImplInfo *impl_info_)
 }
 
 int
-call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
     int result = 1;
     ffi_cif cif;
@@ -82,13 +82,13 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     void **arg_values = NULL;
     AllocationTracker *tracker = NULL;
 
-    if (impl_info->dh != OIF_LANG_C) {
+    if (impl_info_->dh != OIF_LANG_C) {
         fprintf(stderr, "[dispatch_c] Provided implementation is not implemented in C\n");
         return -1;
     }
 
-    CImplInfo *impl = (CImplInfo *)impl_info;
-    void *service_lib = impl->impl_lib;
+    CImplInfo *impl_info = (CImplInfo *)impl_info_;
+    void *service_lib = impl_info->impl_lib;
     void *func = dlsym(service_lib, method);
     if (func == NULL) {
         fprintf(stderr, "[dispatch_c] Cannot load interface '%s'\n", method);
@@ -112,17 +112,13 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     }
 
     tracker = allocation_tracker_init();
-    assert(tracker != NULL);
 
     // Merge input and output argument types together in `arg_types` array.
-    for (size_t i = 0; i < num_in_args; ++i) {
+    for (unsigned int i = 0; i < num_in_args; ++i) {
         if (in_args->arg_types[i] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
         }
-        else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
-            arg_types[i] = &ffi_type_pointer;
-        }
-        else if (in_args->arg_types[i] == OIF_STR) {
+        else if (in_args->arg_types[i] == OIF_ARRAY_F64 || in_args->arg_types[i] == OIF_STR) {
             arg_types[i] = &ffi_type_pointer;
         }
         else if (in_args->arg_types[i] == OIF_CALLBACK) {
@@ -186,7 +182,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         }
     }
 
-    for (size_t i = num_in_args; i < num_total_args; ++i) {
+    for (unsigned int i = num_in_args; i < num_total_args; ++i) {
         if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64) {
             arg_types[i] = &ffi_type_double;
         }

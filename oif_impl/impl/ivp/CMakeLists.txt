@@ -1,1 +1,2 @@
 add_subdirectory(sundials_cvode)
+add_subdirectory(dopri5c)

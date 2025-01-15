@@ -104,7 +104,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     strcat(conf_filename, impl);
     strcat(conf_filename, ".conf");
 
-    conf_file = fopen(conf_filename, "r");
+    conf_file = fopen(conf_filename, "re");
     if (conf_file == NULL) {
         fprintf(stderr, "[dispatch] Cannot open conf file '%s'\n", conf_filename);
         perror("Error message is: ");
@@ -305,3 +305,13 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
     }
     return status;
 }
+
+#if defined(__GNUC__)
+#if !defined(__OPTIMIZE__)
+void __attribute__((destructor))
+dtor()
+{
+    fprintf(stderr, "[dispatch] WARNING: running non-optimized build\n");
+}
+#endif
+#endif
