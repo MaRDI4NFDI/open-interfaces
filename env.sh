@@ -1,8 +1,13 @@
 # Set project root directory to use absolute paths below.
+export PRJ_ROOT_DIR=""
 if [ "$GITHUB_ACTIONS" = "true" ]; then
-    export PRJ_ROOT_DIR="$GITHUB_WORKSPACE"
+    PRJ_ROOT_DIR="$GITHUB_WORKSPACE"
 else
-    export PRJ_ROOT_DIR="$(dirname $(realpath "$0"))"
+    if [ "$0" = "-bash" ]; then
+        PRJ_ROOT_DIR="$(dirname "$(realpath ${BASH_SOURCE[0]})")"
+    else
+        PRJ_ROOT_DIR="$(dirname "$(realpath "$0")")"
+    fi
 fi
 
 # Set path to implementations
