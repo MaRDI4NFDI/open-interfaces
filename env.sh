@@ -3,14 +3,9 @@ export PRJ_ROOT_DIR=""
 if [ "$GITHUB_ACTIONS" = "true" ]; then
     PRJ_ROOT_DIR="$GITHUB_WORKSPACE"
 else
-<<<<<<< HEAD
-    if [ "$0" = "-bash" ]; then
-        PRJ_ROOT_DIR="$(dirname "$(realpath ${BASH_SOURCE[0]})")"
-=======
     if [ -n "${BASH_SOURCE[0]:-}" ]; then
         # shellcheck disable=SC3000-SC4000
         PRJ_ROOT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
->>>>>>> 62de35a ([misc] Source env.sh correctly in ZSH and Bash)
     else
         PRJ_ROOT_DIR="$(dirname "$(realpath "$0")")"
     fi
