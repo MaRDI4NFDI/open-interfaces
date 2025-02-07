@@ -18,10 +18,6 @@ class IVPInterface(abc.ABC):
         """Specify relative and absolute tolerances, respectively."""
 
     @abc.abstractmethod
-    def integrate(self, t: float, y: np.ndarray) -> Union[int, None]:
-        """Integrate to time `t` and write solution to `y`."""
-
-    @abc.abstractmethod
     def set_user_data(self, user_data: object) -> Union[int, None]:
         """Specify additional data that will be used for right-hand side function."""
 
@@ -30,3 +26,11 @@ class IVPInterface(abc.ABC):
         self, integrator_name: str, integrator_params: Dict
     ) -> Union[int, None]:
         """Set integrator, if the name is recognizable."""
+
+    @abc.abstractmethod
+    def integrate(self, t: float, y: np.ndarray) -> Union[int, None]:
+        """Integrate to time `t` and write solution to `y`."""
+
+    @abc.abstractmethod
+    def print_stats(self):
+        """Print integration statistics."""
