@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "MaRDI Open Interfaces"
-copyright = "2023--2024 MaRDI Open Interfaces authors"
-release = "0.1"
+copyright = "2023--2025 MaRDI Open Interfaces authors"
+release = "2025-01"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -22,6 +22,8 @@ extensions = [
     "myst_parser",
     "sphinx.ext.mathjax",
     "sphinx.ext.imgconverter",
+    "autoapi.extension",  # Generate API documentation from docstrings
+    "sphinx.ext.napoleon",  # Parse NumPy and Google style docstrings
 ]
 
 templates_path = ["_templates"]
@@ -32,6 +34,19 @@ myst_dmath_double_inline = True
 
 # Convert PDFs to PNGs such that images look good on HiDPI displays.
 image_converter_args = ["-density", "600"]
+
+# -- Options for sphinx-autoapi extension -------------------------------------------
+autoapi_dirs = ["../../oif/interfaces/python/oif/interfaces/"]
+autoapi_options = ["show-inheritance", "members", "undoc-members"]
+autoapi_add_toctree_entry = False
+autoapi_keep_files = True
+autoapi_root = "api/api-python"
+autoapi_type = "python"
+
+
+# -- Options for napoleon extension -------------------------------------------
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

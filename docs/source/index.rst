@@ -13,6 +13,7 @@ Welcome to oif-toy-example's documentation!
 
    overview.md
    example-ivp-burgers-equation-in-python.md
+   api/index
    technotes/index.rst
 
 
