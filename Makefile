@@ -36,8 +36,8 @@ clean :
 
 .PHONY : docs
 docs :
-	cd docs && make html
+	cd docs && doxygen && make html
 
 .PHONY : docs-from-scratch
 docs-from-scratch:
-	cd docs && rm -rf build && make html
+	cd docs && rm -rf build && doxygen && make html

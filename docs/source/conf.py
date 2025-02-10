@@ -24,6 +24,7 @@ extensions = [
     "sphinx.ext.imgconverter",
     "autoapi.extension",  # Generate API documentation from docstrings
     "sphinx.ext.napoleon",  # Parse NumPy and Google style docstrings
+    "breathe",  # Generate API documentation from Doxygen XML
 ]
 
 templates_path = ["_templates"]
@@ -43,10 +44,13 @@ autoapi_keep_files = True
 autoapi_root = "api/api-python"
 autoapi_type = "python"
 
-
 # -- Options for napoleon extension -------------------------------------------
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
+
+# -- Options for breathe extension -------------------------------------------
+breathe_projects = {"oif": "../build/doxygen/xml"}
+breathe_default_project = "oif"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
