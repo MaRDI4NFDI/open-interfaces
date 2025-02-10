@@ -7,4 +7,3 @@ C Interfaces
    api-c/ivp.rst
    api-c/linsolve.rst
    api-c/qeq.rst
-

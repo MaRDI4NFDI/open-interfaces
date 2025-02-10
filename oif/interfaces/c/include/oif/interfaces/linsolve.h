@@ -1,9 +1,9 @@
 /**
  * @file
  * This module defines the interface for solving linear systems of equations.
- * 
+ *
  * Problems to be solved are of the form:
- * 
+ *
  * \f[
  *     A x = b,
  * \f]

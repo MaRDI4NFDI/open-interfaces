@@ -1,6 +1,7 @@
 /**
  * @file
- * @brief Interface for solving initial-value problems (IVP) for ordinary differential equations (ODE).
+ * @brief Interface for solving initial-value problems (IVP) for ordinary differential
+ * equations (ODE).
  *
  * This interface defines the interface for solving initial-value problems
  * for ordinary differential equations:
@@ -23,7 +24,8 @@ extern "C" {
  *
  * @param[in] t Current time
  * @param[in] y State vector at time `t`
- * @param[out] ydot Derivative of the state vector, which must be computed during the function call
+ * @param[out] ydot Derivative of the state vector, which must be computed during the function
+ * call
  * @param[in] user_data User data (additional context) required by the right-hand side function
  */
 typedef int (*oif_ivp_rhs_fn_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_data);
