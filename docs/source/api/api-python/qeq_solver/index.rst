@@ -5,7 +5,7 @@ qeq_solver
 
 .. autoapi-nested-parse::
 
-   This module defines the interface for solving a quatratic equation.
+   This module defines the interface for solving a quadratic equation.
 
    The quadratic equation is of the form:
 
