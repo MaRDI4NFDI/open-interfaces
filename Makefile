@@ -35,9 +35,13 @@ clean :
 	$(RM) -r build build.debug build.release
 
 .PHONY : docs
-docs :
+docs : | mk-docs-build-dir
 	cd docs && doxygen && make html
 
 .PHONY : docs-from-scratch
-docs-from-scratch:
+docs-from-scratch: | mk-docs-build-dir
 	cd docs && rm -rf build && doxygen && make html
+
+.PHONY : mk-docs-build-dir
+mk-docs-build-dir:
+	mkdir -p docs/build
