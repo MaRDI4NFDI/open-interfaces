@@ -224,4 +224,3 @@ how Python modules are discovered, are left now unspecified.
 
 Temporary solution is to use `LD_LIBRARY_PATH` and `PYTHONPATH` environment
 variables during the early development stage.
-
