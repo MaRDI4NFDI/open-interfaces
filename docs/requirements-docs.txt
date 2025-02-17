@@ -1,0 +1,5 @@
+sphinx
+myst_parser
+furo                                # Sphinx theme
+sphinxcontrib-napoleon              # Parse Numpy- and Google-style docstrings
+breathe                             # Convert Doxygen XML output to reStructuredText
