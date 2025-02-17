@@ -1,4 +1,4 @@
-# 2024-09-08 Python buffer protocol
+# 2023-09-08 Python buffer protocol
 
 Notes on the Python buffer documentation page:
 <https://docs.python.org/3/c-api/buffer.html>.

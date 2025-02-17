@@ -10,7 +10,7 @@ is direct bindings of the CVODE solver via `scikits.odes` Python package.
 
 We solve 2D Gray--Scott reaction-diffusion system:
 ```{math}
-:label: problem
+:label: 2024-03-12-problem
 
 \begin{align}
 \frac{\partial u}{\partial t} = d_u \nabla^2 u - u v^2 + F (1 - u), \\
@@ -35,7 +35,7 @@ We analyze performance using command
 ```shell
 python examples/compare_performance_ivp_burgers_eq.py all --n_runs 3
 ```
-which solves the problem {eq}`problem` via Open Interfaces's `IVP` interface
+which solves the problem {eq}`2024-03-12-problem` via Open Interfaces's `IVP` interface
 with Sundials CVODE solver and via direct binding to this solver from
 `scikit.odes` version 2.7.0 package.
 
