@@ -22,4 +22,3 @@ To build the software, use command
 ```
 which invokes underlying CMake build and builds software inside
 the `build` directory.
-
