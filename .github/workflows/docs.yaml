@@ -22,7 +22,7 @@ jobs:
               uses: actions/checkout@v4
             - name: install-doc-deps
               run: |
-                  sudo apt install -y doxygen &&
+                  sudo apt install -y doxygen ghostscript &&
                   pip install -r docs/requirements-docs.txt
             - name: make-html
               run: make docs
