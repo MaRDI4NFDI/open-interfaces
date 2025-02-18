@@ -15,6 +15,9 @@ jobs:
     build-docs:
         runs-on: ubuntu-22.04
         steps:
+            - name: Patch ImageMagick policy to allow PDF -> PNG conversion
+              run: |
+                  sudo sed -i 's/^.*policy.*rights.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
             - name: Check out repository code
               uses: actions/checkout@v4
             - name: install-doc-deps
