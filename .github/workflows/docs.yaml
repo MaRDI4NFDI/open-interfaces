@@ -1,0 +1,51 @@
+---
+name: Docs
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+
+concurrency:
+    group: ${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    build-docs:
+        runs-on: ubuntu-22.04
+        env:
+            ACTIONS_STEP_DEBUG: true
+        steps:
+            - name: Patch ImageMagick policy to allow PDF -> PNG conversion
+              run: |
+                  sudo sed -i 's/^.*policy.*rights.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
+            - name: Check out repository code
+              uses: actions/checkout@v4
+              with:
+                  lfs: true
+            - name: install-doc-deps
+              run: |
+                  sudo apt-get update
+                  sudo apt install -y doxygen ghostscript
+                  pip install -r docs/requirements-docs.txt
+            - name: make-html
+              run: make docs
+            - name: upload
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: docs/build/html/
+    deploy-docs:
+        if: ${{ github.ref == 'refs/heads/main' }}
+        runs-on: ubuntu-22.04
+        needs: [build-docs]
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        permissions:
+            pages: write    # to deploy to Pages
+            id-token: write # to verify the deployment originates from an appropriate source
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
