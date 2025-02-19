@@ -14,6 +14,8 @@ concurrency:
 jobs:
     build-docs:
         runs-on: ubuntu-22.04
+        env:
+            ACTIONS_STEP_DEBUG: true
         steps:
             - name: Patch ImageMagick policy to allow PDF -> PNG conversion
               run: |
