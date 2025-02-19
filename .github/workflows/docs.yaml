@@ -22,6 +22,8 @@ jobs:
                   sudo sed -i 's/^.*policy.*rights.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
             - name: Check out repository code
               uses: actions/checkout@v4
+              with:
+                  lfs: true
             - name: install-doc-deps
               run: |
                   sudo apt-get update
