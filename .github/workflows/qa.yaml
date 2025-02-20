@@ -30,10 +30,10 @@ jobs:
                   environment-file: environment-linux.yaml
             - name: Get Date
               id: get-date
-              run: echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+              run: echo "name=date::$(/bin/date -u "+%Y%m%d")" >> "$GITHUB_OUTPUT"
 
             - name: Cache Conda env
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               env:
                   # Increase this value to reset cache
                   # if etc/example-environment.yml has not changed.
@@ -60,10 +60,12 @@ jobs:
             - name: Set up environment variables
               run: |
                   source env.sh
-                  echo "OIF_IMPL_ROOT_DIR=$OIF_IMPL_ROOT_DIR" >> $GITHUB_ENV
-                  echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> $GITHUB_ENV
-                  echo "PYTHONPATH=$PYTHONPATH" >> $GITHUB_ENV
-                  echo "JULIA_PROJECT=$JULIA_PROJECT" >> $GITHUB_ENV
+                  {
+                    echo "OIF_IMPL_ROOT_DIR=$OIF_IMPL_ROOT_DIR"
+                    echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+                    echo "PYTHONPATH=$PYTHONPATH"
+                    echo "JULIA_PROJECT=$JULIA_PROJECT"
+                  } >> "$GITHUB_ENV"
             - name: Show info
               run: |
                   conda info
