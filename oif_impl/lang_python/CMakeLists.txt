@@ -2,7 +2,8 @@ find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFI REQUIRED IMPORTED_TARGET libffi)
-message(STATUS "PkgConfig found FFI: '${FFI_INCLUDE_DIRS}' and '${FFI_LIBRARIES}'")
+message(
+  STATUS "PkgConfig found FFI: '${FFI_INCLUDE_DIRS}' and '${FFI_LIBRARIES}'")
 
 add_library(oif_dispatch_python SHARED dispatch_python.c)
 target_include_directories(oif_dispatch_python
@@ -12,9 +13,10 @@ target_link_libraries(oif_dispatch_python PUBLIC Python::NumPy)
 target_link_libraries(oif_dispatch_python PRIVATE oif_c)
 
 add_library(oif_dispatch_python_callback MODULE _callback.c)
-target_include_directories(oif_dispatch_python_callback
-                           PRIVATE ${CMAKE_SOURCE_DIR}/oif/include
-                           PRIVATE ${FFI_INCLUDE_DIRS})
+target_include_directories(
+  oif_dispatch_python_callback
+  PRIVATE ${CMAKE_SOURCE_DIR}/oif/include
+  PRIVATE ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_dispatch_python_callback PRIVATE Python::Python)
 target_link_libraries(oif_dispatch_python_callback PRIVATE Python::NumPy)
 target_link_libraries(oif_dispatch_python_callback PRIVATE ffi)
