@@ -67,8 +67,13 @@ To build the software, use command
 ```shell
     make release
 ```
-which invokes underlying CMake build and builds software inside
+which invokes underlying CMake build and builds Open Interfaces inside
 the `build` directory.
+
+To test that the build processes has succeeded, use command
+```shell
+    make test
+```
 
 
 [1]: https://conda.io/projects/conda/en/latest/user-guide/getting-started.html

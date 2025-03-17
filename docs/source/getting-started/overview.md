@@ -13,7 +13,7 @@ algorithm implementations from another language.
 For example, a user can be mostly comfortable with Python, but desires
 to use an implementation of a solver for partial differential equations
 written in C.
-If the solver does not provide Python bindings, the user needs to write
+If the solver doesn't offer Python bindings, the user needs to write
 them with tools like `ctypes`, Python C API, Cython, etc.
 
 With the help of open interfaces, this responsibility can be taken from the
