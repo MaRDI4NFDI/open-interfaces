@@ -2,12 +2,11 @@ find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(FFI REQUIRED IMPORTED_TARGET libffi)
-message(
-  STATUS "PkgConfig found FFI: '${FFI_INCLUDE_DIRS}' and '${FFI_LIBRARIES}'")
 
 add_library(oif_dispatch_python SHARED dispatch_python.c)
 target_include_directories(oif_dispatch_python
                            PRIVATE ${CMAKE_SOURCE_DIR}/oif/include)
+target_include_directories(oif_dispatch_python PRIVATE ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_dispatch_python PUBLIC Python::Python)
 target_link_libraries(oif_dispatch_python PUBLIC Python::NumPy)
 target_link_libraries(oif_dispatch_python PRIVATE oif_c)
@@ -19,7 +18,7 @@ target_include_directories(
   PRIVATE ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_dispatch_python_callback PRIVATE Python::Python)
 target_link_libraries(oif_dispatch_python_callback PRIVATE Python::NumPy)
-target_link_libraries(oif_dispatch_python_callback PRIVATE ffi)
+target_link_libraries(oif_dispatch_python_callback PRIVATE PkgConfig::FFI)
 
 # Parameter `SUFFIX` adds extension suffix, for example,
 # `.cpython-312-x86_64-linux-gnu.so` that matches the suffix used by Python's

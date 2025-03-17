@@ -1,11 +1,14 @@
 find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
 
 add_library(oif_python_conversion MODULE _conversion.c)
-target_include_directories(oif_python_conversion
-                           PRIVATE ${CMAKE_SOURCE_DIR}/oif/include)
+target_include_directories(
+   oif_python_conversion
+   PRIVATE ${CMAKE_SOURCE_DIR}/oif/include
+   PRIVATE ${FFI_INCLUDE_DIRS}
+)
 target_link_libraries(oif_python_conversion PRIVATE Python::Python)
 target_link_libraries(oif_python_conversion PRIVATE Python::NumPy)
-target_link_libraries(oif_python_conversion PRIVATE ffi)
+target_link_libraries(oif_python_conversion PRIVATE PkgConfig::FFI)
 
 # Parameter `SUFFIX` adds extension suffix, for example,
 # `.cpython-312-x86_64-linux-gnu.so` that matches the suffix used by Python's
