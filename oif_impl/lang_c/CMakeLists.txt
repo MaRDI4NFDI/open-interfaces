@@ -9,4 +9,4 @@ target_include_directories(
 
 target_link_libraries(oif_dispatch_c PRIVATE oif_c_data_structures)
 target_link_libraries(oif_dispatch_c PRIVATE oif_c_util)
-target_link_libraries(oif_dispatch_c PRIVATE ${FFI_LIBRARIES})
+target_link_libraries(oif_dispatch_c PRIVATE PkgConfig::FFI)
