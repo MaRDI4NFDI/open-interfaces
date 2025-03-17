@@ -1,5 +1,8 @@
 find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FFI REQUIRED IMPORTED_TARGET libffi)
+
 add_library(oif_python_conversion MODULE _conversion.c)
 target_include_directories(
    oif_python_conversion
