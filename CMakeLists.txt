@@ -33,7 +33,9 @@ add_subdirectory(vendor)
 add_subdirectory(oif)
 add_subdirectory(oif_impl)
 
-add_subdirectory(examples)
+if(EXISTS examples/CMakeLists.txt)
+    add_subdirectory(examples)
+endif()
 
 enable_testing()
 add_subdirectory(tests)
