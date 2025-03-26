@@ -21,6 +21,3 @@ target_include_directories(oif_c_data_structures
                            PRIVATE ${cwpack_SOURCE_DIR}/src)
 target_link_libraries(oif_c_data_structures PRIVATE oif_c_util)
 target_link_libraries(oif_c_data_structures PRIVATE HashMap::HashMap)
-
-add_library(oif_c_util SHARED oif_util.c)
-target_include_directories(oif_c_util PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
