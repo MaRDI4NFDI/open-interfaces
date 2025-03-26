@@ -1,3 +1,6 @@
+add_library(oif_c_util SHARED util.c)
+target_include_directories(oif_c_util PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
+
 add_library(oif_dispatch SHARED dispatch.c)
 target_include_directories(oif_dispatch PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(oif_dispatch PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
