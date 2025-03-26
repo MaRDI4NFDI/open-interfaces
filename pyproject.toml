@@ -1,3 +1,7 @@
+[build-system]
+requires = ["scikit-build-core>=0.11", "numpy"]
+build-backend = "scikit_build_core.build"
+
 [project]
 name = "mardi-open-interfaces"
 version = "0.5.0"
@@ -36,9 +40,72 @@ documentation = "https://mardi4nfdi.github.io/open-interfaces/"
 issues = "https://github.com/MaRDI4NFDI/open-interfaces/issues"
 source = "https://github.com/MaRDI4NFDI/open-interfaces"
 
-[build-system]
-requires = ["scikit-build-core", "numpy"]
-build-backend = "scikit_build_core.build"
+[tool.scikit-build]
+sdist.include = [
+    "!bin/*",
+    "!cmake/",
+    "!examples/*.c",
+    "examples/*.py",
+    "CMakeLists.txt",
+    "!exp/",
+    "!oif/interfaces/c",
+    "oif/interfaces/python",
+    "oif/include/",
+    "oif/dispatch.c",
+    "oif/util.c",
+    "!oif/lang_c/*",
+    "!oif/lang_julia/*",
+    "oif/lang_python/",
+    "!oif_impl/impl/ivp/**",
+    "!oif_impl/impl/linsolve/**",
+    "!oif_impl/impl/qeq/**",
+    "oif_impl/impl/ivp/scipy_ode/*",
+    "oif_impl/impl/linsolve/numpy/*",
+    "oif_impl/impl/qeq/py_qeq_solver/*",
+    "!oif_impl/lang_c/**/*",
+    "!oif_impl/lang_julia/**/*",
+    "oif_impl/lang_python/",
+    "tests/lang_python",
+    "!build*/**/CMakeLists.txt",
+    "!dist/**/CMakeLists.txt",
+    "!oif/lang_c/CMakeLists.txt",
+    "!examples/CMakeLists.txt",
+    "!dist/**/*",
+    "LICENSE",
+    "pyproject.toml",
+    "README.md",
+    "!build*/**/README.md",
+    "!build*/**/LICENSE",
+    "!build*/**/pyproject.toml",
+    "!__pycache__/",
+    "!*.so",
+]
+
+sdist.exclude = [
+    "*",
+#     "dist/**",
+#     "*.pyc",
+#     "*.so",
+#     "bin/",
+#     "build/",
+#     "build.debug/",
+#     "build.release/",
+#     "cmake/",
+#     "dist/",
+#     "examples/",
+#     "exp/",
+#     "oif/lang_c/",
+#     "_output/",
+#     "env.sh",
+#     "environment-linux.yaml",
+#     "environment-macos.yaml",
+#     "helpers.py",
+#     "Makefile",
+#     "Manifest.toml",
+#     "matplotlibrc",
+#     "pixi.toml",
+#     "Project.toml",
+]
 
 [tool.mypy]
 ignore_missing_imports = true
