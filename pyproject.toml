@@ -107,6 +107,8 @@ sdist.exclude = [
 #     "Project.toml",
 ]
 
+wheel.packages = ["oif/lang_python/oif"]
+
 [tool.mypy]
 ignore_missing_imports = true
 
