@@ -24,7 +24,7 @@ ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor);
 
 int
-unload_impl(ImplInfo *impl_info);
+call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args);
 
 int
-call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args);
+unload_impl(ImplInfo *impl_info);
