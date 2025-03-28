@@ -1,4 +1,6 @@
 import ctypes
+import os
+import site
 from io import BytesIO
 from typing import Callable, NewType, Union
 
@@ -28,7 +30,16 @@ OIF_LANG_R = 5
 OIF_LANG_COUNT = 6
 
 
-_lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
+# We need to check if the library is in the site-packages directory
+# because this is the only place I could install this library
+# using `scikit-build-core` as a Python packaging build system.
+_site_packages = site.getsitepackages()[-1]
+if os.path.isfile(os.path.join(_site_packages, "lib", "liboif_dispatch.so")):
+    _lib_dispatch = ctypes.PyDLL(
+        os.path.join(_site_packages, "lib", "liboif_dispatch.so")
+    )
+else:
+    _lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
 
 elapsed = 0.0
 
