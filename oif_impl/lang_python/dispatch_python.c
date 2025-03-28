@@ -4,13 +4,11 @@
 #include <numpy/arrayobject.h>
 
 #include <dlfcn.h>
-#include <ffi.h>
 #include <stdbool.h>
 
 #include <stdlib.h>
 
 #include <oif/api.h>
-#include <oif/c_bindings.h>
 #include <oif/dispatch_api.h>
 
 typedef struct {
@@ -78,6 +76,7 @@ get_deserialization_function(void)
     return pFunc;
 }
 
+static
 PyObject *
 convert_oif_callback(OIFCallback *p)
 {
