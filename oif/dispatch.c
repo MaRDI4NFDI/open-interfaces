@@ -24,7 +24,7 @@ static char OIF_DISPATCH_C_SO[] = "liboif_dispatch_c.so";
 static char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
 static char OIF_DISPATCH_JULIA_SO[] = "liboif_dispatch_julia.so";
 
-static const char *OIF_IMPL_ROOT_DIR;
+static const char *OIF_IMPL_PATH;
 
 static char *OIF_LANG_FROM_LANG_ID[] = {
     [OIF_LANG_C] = "C",         [OIF_LANG_CXX] = "C++", [OIF_LANG_PYTHON] = "Python",
@@ -63,10 +63,10 @@ compare_fn(const ImplHandle *key1, const ImplHandle *key2)
 static int
 init_module_(void)
 {
-    OIF_IMPL_ROOT_DIR = getenv("OIF_IMPL_ROOT_DIR");
-    if (OIF_IMPL_ROOT_DIR == NULL) {
+    OIF_IMPL_PATH = getenv("OIF_IMPL_PATH");
+    if (OIF_IMPL_PATH == NULL) {
         fprintf(stderr,
-                "[dispatch] Environment variable 'OIF_IMPL_ROOT_DIR' must be "
+                "[dispatch] Environment variable 'OIF_IMPL_PATH' must be "
                 "set so that implementations can be found. Cannot proceed\n");
         return -1;
     }
@@ -95,8 +95,8 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     ImplHandle retval = OIF_IMPL_INIT_ERROR;
 
     char conf_filename[1024] = "";
-    strcat(conf_filename, OIF_IMPL_ROOT_DIR);
-    strcat(conf_filename, "/oif_impl/impl/");
+    strcat(conf_filename, OIF_IMPL_PATH);
+    strcat(conf_filename, "/");
     strcat(conf_filename, interface);
     strcat(conf_filename, "/");
     strcat(conf_filename, impl);
