@@ -1,5 +1,5 @@
 import numpy as np
-from oif.impl.ivp import IVPInterface
+from oif._impl.interfaces.ivp import IVPInterface
 from scipy import integrate
 
 _prefix = "scipy_ode"
