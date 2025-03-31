@@ -41,6 +41,14 @@ if os.path.isfile(os.path.join(_site_packages, "lib", "liboif_dispatch.so")):
 else:
     _lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
 
+# Add path to Python implementations to the environment variable.
+if "OIF_IMPL_PATH" not in os.environ:
+    os.environ["OIF_IMPL_PATH"] = os.path.join(_site_packages, "oif", "_impl")
+else:
+    os.environ["OIF_IMPL_PATH"] += os.pathsep + os.path.join(
+        _site_packages, "oif", "_impl"
+    )
+
 elapsed = 0.0
 
 elapsed_call = 0.0
