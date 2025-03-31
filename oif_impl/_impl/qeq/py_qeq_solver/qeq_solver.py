@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-from oif.impl.qeq import QeqInterface
+from oif._impl.interfaces.qeq import QeqInterface
 
 
 class QeqSolver(QeqInterface):
