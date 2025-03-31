@@ -108,7 +108,11 @@ sdist.exclude = [
 #     "Project.toml",
 ]
 
-wheel.packages = ["oif/lang_python/oif"]
+[tool.scikit-build.wheel.packages]
+"oif" = "oif/lang_python/oif"
+"oif/interfaces" = "oif/interfaces/python/oif/interfaces"
+"oif/_impl" = "oif_impl/_impl"
+"oif/_impl/interfaces" = "oif_impl/lang_python/oif/_impl/interfaces"
 
 [tool.mypy]
 ignore_missing_imports = true
