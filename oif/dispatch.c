@@ -89,24 +89,38 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     DispatchHandle dh;
     const char *dispatch_lang_so;
     void *lib_handle = NULL;
-    FILE *conf_file;
+    FILE *conf_file = NULL;
     char *buffer;
     /* One must be a pessimist, while programming in C. */
     ImplHandle retval = OIF_IMPL_INIT_ERROR;
 
-    char conf_filename[1024] = "";
-    strcat(conf_filename, OIF_IMPL_PATH);
-    strcat(conf_filename, "/");
-    strcat(conf_filename, interface);
-    strcat(conf_filename, "/");
-    strcat(conf_filename, impl);
-    strcat(conf_filename, "/");
-    strcat(conf_filename, impl);
-    strcat(conf_filename, ".conf");
+    char conf_filename_fixed_part[512] = {'\0'};
+    strcat(conf_filename_fixed_part, interface);
+    strcat(conf_filename_fixed_part, "/");
+    strcat(conf_filename_fixed_part, impl);
+    strcat(conf_filename_fixed_part, "/");
+    strcat(conf_filename_fixed_part, impl);
+    strcat(conf_filename_fixed_part, ".conf");
 
-    conf_file = fopen(conf_filename, "re");
+    char *path = strtok((char *)OIF_IMPL_PATH, ":");
+    char conf_filename[1024] = "";
+    char *conf_filename_p = conf_filename;
+    while (path) {
+        strcat(conf_filename_p, path);
+        strcat(conf_filename_p, "/");
+        strcat(conf_filename_p, conf_filename_fixed_part);
+
+        conf_file = fopen(conf_filename, "re");
+        if (conf_file != NULL) {
+            break;
+        }
+        path = strtok(NULL, ":");
+        conf_filename_p = conf_filename;
+    }
+
     if (conf_file == NULL) {
-        fprintf(stderr, "[dispatch] Cannot open conf file '%s'\n", conf_filename);
+        fprintf(stderr, "[dispatch] Cannot open conf file '%s'\n", conf_filename_fixed_part);
+        fprintf(stderr, "[dispatch] Search was done in the following paths: %s\n", OIF_IMPL_PATH);
         perror("Error message is: ");
         return -1;
     }
