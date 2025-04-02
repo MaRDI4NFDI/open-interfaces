@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-rm -rf dist/mardi_open_interfaces-0.5.0/
+rm -rf dist/oif-0.5.0/
 
 
 if ! python -m build --sdist ; then
@@ -7,5 +7,5 @@ if ! python -m build --sdist ; then
     exit 1
 fi
 
-tar xzf dist/mardi_open_interfaces-0.5.0.tar.gz -C dist/
-open dist/mardi_open_interfaces-0.5.0/
+tar xzf dist/oif-0.5.0.tar.gz -C dist/
+open dist/oif-0.5.0/
