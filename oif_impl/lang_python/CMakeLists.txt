@@ -9,6 +9,7 @@ target_include_directories(oif_dispatch_python
 target_include_directories(oif_dispatch_python PRIVATE ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_dispatch_python PUBLIC Python::Python)
 target_link_libraries(oif_dispatch_python PUBLIC Python::NumPy)
+target_link_libraries(oif_dispatch_python PRIVATE oif_c_data_structures)
 install(TARGETS oif_dispatch_python DESTINATION lib)
 
 add_library(oif_dispatch_python_callback MODULE _callback.c)
@@ -19,6 +20,7 @@ target_include_directories(
 target_link_libraries(oif_dispatch_python_callback PRIVATE Python::Python)
 target_link_libraries(oif_dispatch_python_callback PRIVATE Python::NumPy)
 target_link_libraries(oif_dispatch_python_callback PRIVATE PkgConfig::FFI)
+install(TARGETS oif_dispatch_python_callback DESTINATION lib)
 
 # Parameter `SUFFIX` adds extension suffix, for example,
 # `.cpython-312-x86_64-linux-gnu.so` that matches the suffix used by Python's
