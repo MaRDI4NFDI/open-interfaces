@@ -12,7 +12,7 @@ else
 fi
 
 # Set path to implementations
-export OIF_IMPL_ROOT_DIR="${PRJ_ROOT_DIR}"
+export OIF_IMPL_PATH="${PRJ_ROOT_DIR}/oif_impl/_impl"
 
 # Add compiled libraries to the path for the linker.
 if [ -n "$LD_LIBRARY_PATH" ]; then
