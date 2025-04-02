@@ -42,12 +42,11 @@ else:
     _lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
 
 # Add path to Python implementations to the environment variable.
+path = os.path.join(_site_packages, "oif", "data")
 if "OIF_IMPL_PATH" not in os.environ:
-    os.environ["OIF_IMPL_PATH"] = os.path.join(_site_packages, "oif", "_impl")
+    os.environ["OIF_IMPL_PATH"] = path
 else:
-    os.environ["OIF_IMPL_PATH"] += os.pathsep + os.path.join(
-        _site_packages, "oif", "_impl"
-    )
+    os.environ["OIF_IMPL_PATH"] += os.pathsep + path
 
 elapsed = 0.0
 
