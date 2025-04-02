@@ -21,3 +21,4 @@ target_include_directories(oif_c_data_structures
                            PRIVATE ${cwpack_SOURCE_DIR}/src)
 target_link_libraries(oif_c_data_structures PRIVATE oif_c_util)
 target_link_libraries(oif_c_data_structures PRIVATE HashMap::HashMap)
+install(TARGETS oif_c_data_structures DESTINATION lib)
