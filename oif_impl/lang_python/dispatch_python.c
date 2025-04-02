@@ -76,8 +76,7 @@ get_deserialization_function(void)
     return pFunc;
 }
 
-static
-PyObject *
+static PyObject *
 convert_oif_callback(OIFCallback *p)
 {
     const char *id = "123";
