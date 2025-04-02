@@ -120,7 +120,8 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
 
     if (conf_file == NULL) {
         fprintf(stderr, "[dispatch] Cannot open conf file '%s'\n", conf_filename_fixed_part);
-        fprintf(stderr, "[dispatch] Search was done in the following paths: %s\n", OIF_IMPL_PATH);
+        fprintf(stderr, "[dispatch] Search was done in the following paths: %s\n",
+                OIF_IMPL_PATH);
         perror("Error message is: ");
         return -1;
     }
