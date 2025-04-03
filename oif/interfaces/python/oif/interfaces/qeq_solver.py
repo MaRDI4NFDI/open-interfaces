@@ -59,6 +59,9 @@ class QeqSolver:
 
     def solve(self, a: float, b: float, c: float):
         """Solve the quadratic equation :math:`a x^2 + b x + c = 0`."""
+        a = float(a)
+        b = float(b)
+        c = float(c)
         result = np.array([11.0, 22.0])
         self._binding.call("solve_qeq", (a, b, c), (result,))
         return result
