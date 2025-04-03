@@ -29,17 +29,7 @@ OIF_LANG_JULIA = 4
 OIF_LANG_R = 5
 OIF_LANG_COUNT = 6
 
-
-# We need to check if the library is in the site-packages directory
-# because this is the only place I could install this library
-# using `scikit-build-core` as a Python packaging build system.
 _site_packages = site.getsitepackages()[-1]
-if os.path.isfile(os.path.join(_site_packages, "lib", "liboif_dispatch.so")):
-    _lib_dispatch = ctypes.PyDLL(
-        os.path.join(_site_packages, "lib", "liboif_dispatch.so")
-    )
-else:
-    _lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
 
 # Add path to Python implementations to the environment variable.
 path = os.path.join(_site_packages, "oif", "data")
@@ -47,6 +37,17 @@ if "OIF_IMPL_PATH" not in os.environ:
     os.environ["OIF_IMPL_PATH"] = path
 else:
     os.environ["OIF_IMPL_PATH"] += os.pathsep + path
+print("[oif/core.py] OIF_IMPL_PATH = ", os.environ["OIF_IMPL_PATH"])
+
+# We need to check if the library is in the site-packages directory
+# because this is the only place I could install this library
+# using `scikit-build-core` as a Python packaging build system.
+if os.path.isfile(os.path.join(_site_packages, "lib", "liboif_dispatch.so")):
+    _lib_dispatch = ctypes.PyDLL(
+        os.path.join(_site_packages, "lib", "liboif_dispatch.so")
+    )
+else:
+    _lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
 
 elapsed = 0.0
 
