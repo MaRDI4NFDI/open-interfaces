@@ -16,9 +16,10 @@
 #include <hashmap.h>
 
 #include "oif/api.h"
-#include "oif/dispatch.h"
-#include "oif/dispatch_api.h"
 #include <oif/util.h>
+
+#include "oif/internal/bridge_api.h"
+#include "oif/internal/dispatch.h"
 
 static char OIF_DISPATCH_C_SO[] = "liboif_dispatch_c.so";
 static char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";

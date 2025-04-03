@@ -1,9 +1,8 @@
-#include <stdio.h>
 #include <stdlib.h>
 
 #include <oif/api.h>
-#include <oif/dispatch.h>
 #include <oif/interfaces/ivp.h>
+#include <oif/internal/dispatch.h>
 
 int
 oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs)

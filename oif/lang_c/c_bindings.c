@@ -1,12 +1,11 @@
-#include "oif/dispatch_api.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <oif/api.h>
-#include <oif/dispatch.h>
-
 #include <oif/c_bindings.h>
+
+#include <oif/internal/dispatch.h>
 
 ImplHandle
 oif_load_impl(const char *interface, const char *impl, int version_major, int version_minor)

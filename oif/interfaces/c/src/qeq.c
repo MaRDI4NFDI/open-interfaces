@@ -1,8 +1,6 @@
-#include <stdlib.h>
-
 #include <oif/api.h>
-#include <oif/dispatch.h>
 #include <oif/interfaces/qeq.h>
+#include <oif/internal/dispatch.h>
 
 int
 oif_solve_qeq(ImplHandle implh, double a, double b, double c, OIFArrayF64 *roots)
