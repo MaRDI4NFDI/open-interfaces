@@ -51,9 +51,9 @@ sdist.include = [
     "!exp/",
     "!oif/interfaces/c",
     "oif/interfaces/python",
+    "oif/common",
+    "oif/dispatch/",
     "oif/include/",
-    "oif/dispatch.c",
-    "oif/util.c",
     "!oif/lang_c/*",
     "!oif/lang_julia/*",
     "oif/lang_python/",
@@ -110,8 +110,9 @@ sdist.exclude = [
 
 [tool.scikit-build.wheel.packages]
 "oif" = "oif/lang_python/oif"
+"oif/examples" = "examples"
 "oif/interfaces" = "oif/interfaces/python/oif/interfaces"
-"oif/_impl" = "oif_impl/_impl"
+"oif/_impl" = "oif_impl/oif/_impl"
 "oif/_impl/interfaces" = "oif_impl/lang_python/oif/_impl/interfaces"
 
 [tool.mypy]
