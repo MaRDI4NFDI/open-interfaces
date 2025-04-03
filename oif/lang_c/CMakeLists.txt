@@ -13,7 +13,7 @@ target_link_libraries(oif_c PUBLIC oif_c_data_structures)
 target_link_libraries(oif_c PRIVATE oif_c_util)
 target_link_libraries(oif_c PRIVATE oif_dispatch)
 
-add_library(oif_c_data_structures SHARED oif_config_dict.c allocation_tracker.c
+add_library(oif_c_data_structures SHARED oif_config_dict.c
                                          ${cwpack_SOURCE_DIR}/src/cwpack.c)
 target_include_directories(oif_c_data_structures
                            PUBLIC ${CMAKE_SOURCE_DIR}/oif/include)
