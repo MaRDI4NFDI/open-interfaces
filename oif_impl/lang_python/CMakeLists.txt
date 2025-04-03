@@ -9,7 +9,7 @@ target_include_directories(oif_dispatch_python
 target_include_directories(oif_dispatch_python PRIVATE ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_dispatch_python PUBLIC Python::Python)
 target_link_libraries(oif_dispatch_python PUBLIC Python::NumPy)
-target_link_libraries(oif_dispatch_python PRIVATE oif_c_data_structures)
+target_link_libraries(oif_dispatch_python PRIVATE oif_common_data_structures)
 install(TARGETS oif_dispatch_python DESTINATION lib)
 
 add_library(oif_dispatch_python_callback MODULE _callback.c)
