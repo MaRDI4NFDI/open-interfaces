@@ -8,7 +8,7 @@
 #include <julia.h>
 
 #include <oif/api.h>
-#include <oif/dispatch_api.h>
+#include <oif/internal/bridge_api.h>
 #include <oif/_platform.h>
 
 static char *prefix_ = "dispatch_julia";

@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #include <oif/api.h>
-#include <oif/dispatch_api.h>
+#include <oif/internal/bridge_api.h>
 
 typedef struct {
     ImplInfo base;
