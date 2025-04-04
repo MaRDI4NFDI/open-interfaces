@@ -61,7 +61,7 @@ jobs:
               run: |
                   source env.sh
                   {
-                    echo "OIF_IMPL_ROOT_DIR=$OIF_IMPL_ROOT_DIR"
+                    echo "OIF_IMPL_PATH=$OIF_IMPL_PATH"
                     echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
                     echo "PYTHONPATH=$PYTHONPATH"
                     echo "JULIA_PROJECT=$JULIA_PROJECT"
