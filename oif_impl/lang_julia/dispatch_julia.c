@@ -142,7 +142,8 @@ make_wrapper_over_c_callback(OIFCallback *p)
     if (CALLBACK_MODULE_ == NULL) {
         /* char include_statement[512]; */
         /* int nchars_written = */
-        /*     snprintf(include_statement, 512, "include(\"%s/oif_impl/lang_julia/callback.jl\")", */
+        /*     snprintf(include_statement, 512,
+         * "include(\"%s/oif_impl/lang_julia/callback.jl\")", */
         /*              OIF_IMPL_ROOT_DIR); */
         /* if (nchars_written >= 512 - 1) { */
         /*     fprintf(stderr, */
@@ -186,7 +187,8 @@ deserialize_config_dict(OIFConfigDict *dict)
     if (SERIALIZATION_MODULE_ == NULL) {
         /* char include_statement[512]; */
         /* int nchars_written = snprintf(include_statement, 512, */
-        /*                               "include(\"%s/oif_impl/lang_julia/serialization.jl\")", */
+        /*                               "include(\"%s/oif_impl/lang_julia/serialization.jl\")",
+         */
         /*                               OIF_IMPL_ROOT_DIR); */
         /* if (nchars_written >= 512 - 1) { */
         /*     fprintf(stderr, */
@@ -280,8 +282,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix_, module_name);
 
     char include_statement[1024];
-    sprintf(include_statement, "include(\"%s/%s\")", OIF_IMPL_PATH,
-            module_filename);
+    sprintf(include_statement, "include(\"%s/%s\")", OIF_IMPL_PATH, module_filename);
     char import_statement[1024];
     sprintf(import_statement, "import .%s", module_name);
 
