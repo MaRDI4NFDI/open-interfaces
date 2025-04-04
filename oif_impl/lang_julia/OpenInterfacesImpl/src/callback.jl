@@ -1,5 +1,5 @@
 module CallbackWrapper
-export make_wrapper_for_c_callback
+export make_wrapper_over_c_callback
 
 import SciMLBase
 
