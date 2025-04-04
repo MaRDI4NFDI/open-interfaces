@@ -6,10 +6,12 @@
 #include <string.h>
 
 #include <oif/api.h>
-#include <oif/dispatch_api.h>
-#include <oif/allocation_tracker.h>
 #include <oif/config_dict.h>
 #include <oif/util.h>
+
+#include <oif/internal/bridge_api.h>
+
+#include "allocation_tracker.h"
 
 typedef struct {
     ImplInfo base;

@@ -1,8 +1,8 @@
 #include <stdlib.h>
 
 #include <oif/api.h>
-#include <oif/dispatch.h>
 #include <oif/interfaces/linsolve.h>
+#include <oif/internal/dispatch.h>
 
 int
 oif_solve_linear_system(ImplHandle implh, OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)

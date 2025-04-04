@@ -2,7 +2,7 @@
 
 julia_version = "1.11.4"
 manifest_format = "2.0"
-project_hash = "258145a324ad6b39edab940bfac27fbe44108a9d"
+project_hash = "aefe9cb724782c9143457acd9c582574aeca13ac"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e2478490447631aedba0823d4d7a80b2cc8cdb32"
@@ -870,14 +870,8 @@ uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 version = "0.3.27+1"
 
 [[deps.OpenInterfaces]]
-path = "oif/lang_julia/OpenInterfaces"
+path = "../../../oif/lang_julia/OpenInterfaces"
 uuid = "07cfd324-e924-40a7-85fa-5e46307e7ad7"
-version = "0.1.0"
-
-[[deps.OpenInterfacesImpl]]
-deps = ["MsgPack", "OpenInterfaces", "OrdinaryDiffEq", "SciMLBase"]
-path = "oif_impl/lang_julia/OpenInterfacesImpl"
-uuid = "daff4927-7858-4806-96da-915047fb441c"
 version = "0.1.0"
 
 [[deps.OpenLibm_jll]]

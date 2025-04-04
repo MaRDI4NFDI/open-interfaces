@@ -63,7 +63,7 @@ The user interacts with `liboif`, the library that provides
 - language-specific interfaces that the user can invoke with given
   implementation
 - data marshalling to pass data between different languages
-- invokation of the requested implementation
+- invocation of the requested implementation
 
 The structure is the following:
 
@@ -71,8 +71,8 @@ The structure is the following:
 oif/
     include/
         oif/
-            # interface that dispatch_LANG.c must implement)
-            dispatch_api.h
+            # interface that bridge_LANG.c must implement
+            bridge_api.h
             # definition of constants and types
             api.h
             # definition of supporting C functions for users
@@ -155,8 +155,8 @@ oif_impl/
 
 Here there are three principal layers:
 
-- Language-specific dispatch libraries that implement interface from
-  `dispatch_api.h` and marshall data to the types of the concrete language
+- Language-specific bridge libraries that implement interface from
+  `bridge_api.h` and marshall data to the types of the concrete language
 - Interfaces for the computational problems: abstract classes in Python
   and header files in C, etc.
 - Configuration files and actual implementations. Configuration files

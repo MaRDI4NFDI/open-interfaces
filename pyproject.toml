@@ -1,3 +1,120 @@
+[build-system]
+requires = ["scikit-build-core>=0.11", "numpy"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "oif"
+version = "0.5.0"
+authors = [
+    { name = "Dmitry I. Kabanov", email = "dmitry.kabanov@uni-muenster.de" },
+    { name = "Stephan Rave", email = "stephan.rave@uni-muenster.de" },
+    { name = "Mario Ohlberger", email = "mario.ohlberger@uni-muenster.de" },
+]
+description = "Open Interfaces for improving Interoperability in Scientific Computing"
+license-files = ["LICENSE"]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Operating System :: Unix",
+    "Programming Language :: C",
+    "Programming Language :: Other",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "msgpack",
+]
+
+[project.urls]
+homepage = "https://github.com/MaRDI4NFDI/open-interfaces"
+documentation = "https://mardi4nfdi.github.io/open-interfaces/"
+issues = "https://github.com/MaRDI4NFDI/open-interfaces/issues"
+source = "https://github.com/MaRDI4NFDI/open-interfaces"
+
+[tool.scikit-build]
+sdist.include = [
+    "!bin/*",
+    "!cmake/",
+    "!examples/*.c",
+    "examples/*.py",
+    "CMakeLists.txt",
+    "!exp/",
+    "!oif/interfaces/c",
+    "oif/interfaces/python",
+    "oif/common",
+    "oif/dispatch/",
+    "oif/include/",
+    "!oif/lang_c/*",
+    "!oif/lang_julia/*",
+    "oif/lang_python/",
+    "!oif_impl/_impl/ivp/**",
+    "!oif_impl/_impl/linsolve/**",
+    "!oif_impl/_impl/qeq/**",
+    "oif_impl/_impl/ivp/scipy_ode/*",
+    "oif_impl/_impl/linsolve/numpy/*",
+    "oif_impl/_impl/qeq/py_qeq_solver/*",
+    "!oif_impl/lang_c/**/*",
+    "!oif_impl/lang_julia/**/*",
+    "oif_impl/lang_python/",
+    "tests/lang_python",
+    "!build*/**/CMakeLists.txt",
+    "!dist/**/CMakeLists.txt",
+    "!oif/lang_c/CMakeLists.txt",
+    "!examples/CMakeLists.txt",
+    "!dist/**/*",
+    "LICENSE",
+    "pyproject.toml",
+    "README.md",
+    "!build*/**/README.md",
+    "!build*/**/LICENSE",
+    "!build*/**/pyproject.toml",
+    "!__pycache__/",
+    "!*.so",
+]
+
+sdist.exclude = [
+    "*",
+#     "dist/**",
+#     "*.pyc",
+#     "*.so",
+#     "bin/",
+#     "build/",
+#     "build.debug/",
+#     "build.release/",
+#     "cmake/",
+#     "dist/",
+#     "examples/",
+#     "exp/",
+#     "oif/lang_c/",
+#     "_output/",
+#     "env.sh",
+#     "environment-linux.yaml",
+#     "environment-macos.yaml",
+#     "helpers.py",
+#     "Makefile",
+#     "Manifest.toml",
+#     "matplotlibrc",
+#     "pixi.toml",
+#     "Project.toml",
+]
+
+[tool.scikit-build.wheel.packages]
+"oif" = "oif/lang_python/oif"
+"oif/examples" = "examples"
+"oif/interfaces" = "oif/interfaces/python/oif/interfaces"
+"oif/_impl" = "oif_impl/oif/_impl"
+"oif/_impl/interfaces" = "oif_impl/lang_python/oif/_impl/interfaces"
+
 [tool.mypy]
 ignore_missing_imports = true
 

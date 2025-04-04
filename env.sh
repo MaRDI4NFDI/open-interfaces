@@ -12,7 +12,7 @@ else
 fi
 
 # Set path to implementations
-export OIF_IMPL_ROOT_DIR="${PRJ_ROOT_DIR}"
+export OIF_IMPL_PATH="${PRJ_ROOT_DIR}/oif_impl/oif/_impl"
 
 # Add compiled libraries to the path for the linker.
 if [ -n "$LD_LIBRARY_PATH" ]; then
@@ -29,7 +29,7 @@ fi
 oifpath=${PRJ_ROOT_DIR}/oif/interfaces/python
 oifpath="$oifpath":${PRJ_ROOT_DIR}/oif/lang_python
 oifpath="$oifpath":${PRJ_ROOT_DIR}/oif_impl/lang_python
-oifpath="$oifpath":${PRJ_ROOT_DIR}/oif_impl/impl
+oifpath="$oifpath":${PRJ_ROOT_DIR}/oif_impl
 oifpath="$oifpath":${PRJ_ROOT_DIR}/build
 export PYTHONPATH="$oifpath":"$PYTHONPATH"
 

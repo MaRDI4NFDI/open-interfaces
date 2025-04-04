@@ -25,6 +25,13 @@ endif()
 # find and load them.
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+# when building, don't use the install RPATH already (but later on when
+# installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+# Make sure that libraries can be found by the linker.
+set(CMAKE_INSTALL_RPATH "$ORIGIN")
+
 # Add additional cmake module to find packages.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -33,7 +40,9 @@ add_subdirectory(vendor)
 add_subdirectory(oif)
 add_subdirectory(oif_impl)
 
-add_subdirectory(examples)
+if(EXISTS examples/CMakeLists.txt)
+  add_subdirectory(examples)
+endif()
 
 enable_testing()
 add_subdirectory(tests)

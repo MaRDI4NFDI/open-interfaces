@@ -4,14 +4,12 @@
 #include <numpy/arrayobject.h>
 
 #include <dlfcn.h>
-#include <ffi.h>
 #include <stdbool.h>
 
 #include <stdlib.h>
 
 #include <oif/api.h>
-#include <oif/c_bindings.h>
-#include <oif/dispatch_api.h>
+#include <oif/internal/bridge_api.h>
 
 typedef struct {
     ImplInfo base;
@@ -78,7 +76,7 @@ get_deserialization_function(void)
     return pFunc;
 }
 
-PyObject *
+static PyObject *
 convert_oif_callback(OIFCallback *p)
 {
     const char *id = "123";

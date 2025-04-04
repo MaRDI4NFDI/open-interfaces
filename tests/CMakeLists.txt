@@ -1,4 +1,6 @@
-find_package(GTest CONFIG REQUIRED)
-include(GoogleTest)
+if(IS_DIRECTORY lang_c)
+  find_package(GTest CONFIG REQUIRED)
+  include(GoogleTest)
 
-add_subdirectory(lang_c)
+  add_subdirectory(lang_c)
+endif()
