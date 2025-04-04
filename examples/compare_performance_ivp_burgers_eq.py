@@ -197,7 +197,6 @@ def analyze(tts_list):
 
 
 def _run_once(impl, N=1001, plot_solution=True) -> float:
-    global memory_monitor
     print("================================================================")
     print(f"Solving Burgers' equation with time integration {impl}, N = {N}")
     begin_time = time.time()
