@@ -9,7 +9,6 @@
 
 #include <oif/api.h>
 #include <oif/internal/bridge_api.h>
-#include <oif/_platform.h>
 
 static char *prefix_ = "dispatch_julia";
 
@@ -18,7 +17,7 @@ enum {
     JULIA_MAX_MODULE_NAME_,
 };
 
-static const char *OIF_IMPL_ROOT_DIR = NULL;
+static const char *OIF_IMPL_PATH = NULL;
 
 static bool INITIALIZED_ = false;
 
@@ -50,10 +49,10 @@ handle_exception_(void)
 static int
 init_module_(void)
 {
-    OIF_IMPL_ROOT_DIR = getenv("OIF_IMPL_ROOT_DIR");
-    if (OIF_IMPL_ROOT_DIR == NULL) {
+    OIF_IMPL_PATH = getenv("OIF_IMPL_PATH");
+    if (OIF_IMPL_PATH == NULL) {
         fprintf(stderr,
-                "[dispatch] Environment variable 'OIF_IMPL_ROOT_DIR' must be "
+                "[dispatch] Environment variable 'OIF_IMPL_PATH' must be "
                 "set so that implementations can be found. Cannot proceed\n");
         return -1;
     }
@@ -141,23 +140,23 @@ make_wrapper_over_c_callback(OIFCallback *p)
 {
     jl_value_t *wrapper = NULL;
     if (CALLBACK_MODULE_ == NULL) {
-        char include_statement[512];
-        int nchars_written =
-            snprintf(include_statement, 512, "include(\"%s/oif_impl/lang_julia/callback.jl\")",
-                     OIF_IMPL_ROOT_DIR);
-        if (nchars_written >= 512 - 1) {
-            fprintf(stderr,
-                    "[%s] Could not execute include statement for `callback.jl` "
-                    "while the provided buffer is only 512 characters, and %d "
-                    "characters are supposed to be written\n",
-                    prefix_, nchars_written + 1);
-        }
-        jl_eval_string(include_statement);
-        if (jl_exception_occurred()) {
-            handle_exception_();
-            goto cleanup;
-        }
-        jl_eval_string("import .CallbackWrapper");
+        /* char include_statement[512]; */
+        /* int nchars_written = */
+        /*     snprintf(include_statement, 512, "include(\"%s/oif_impl/lang_julia/callback.jl\")", */
+        /*              OIF_IMPL_ROOT_DIR); */
+        /* if (nchars_written >= 512 - 1) { */
+        /*     fprintf(stderr, */
+        /*             "[%s] Could not execute include statement for `callback.jl` " */
+        /*             "while the provided buffer is only 512 characters, and %d " */
+        /*             "characters are supposed to be written\n", */
+        /*             prefix_, nchars_written + 1); */
+        /* } */
+        /* jl_eval_string(include_statement); */
+        /* if (jl_exception_occurred()) { */
+        /*     handle_exception_(); */
+        /*     goto cleanup; */
+        /* } */
+        jl_eval_string("using OpenInterfacesImpl.CallbackWrapper");
         if (jl_exception_occurred()) {
             handle_exception_();
             goto cleanup;
@@ -185,23 +184,23 @@ deserialize_config_dict(OIFConfigDict *dict)
 {
     jl_value_t *julia_dict = NULL;
     if (SERIALIZATION_MODULE_ == NULL) {
-        char include_statement[512];
-        int nchars_written = snprintf(include_statement, 512,
-                                      "include(\"%s/oif_impl/lang_julia/serialization.jl\")",
-                                      OIF_IMPL_ROOT_DIR);
-        if (nchars_written >= 512 - 1) {
-            fprintf(stderr,
-                    "[%s] Could not execute include statement for `serialization.jl` "
-                    "while the provided buffer is only 512 characters, and %d "
-                    "characters are supposed to be written\n",
-                    prefix_, nchars_written + 1);
-        }
-        jl_eval_string(include_statement);
-        if (jl_exception_occurred()) {
-            handle_exception_();
-            goto cleanup;
-        }
-        jl_eval_string("import .OIFSerialization");
+        /* char include_statement[512]; */
+        /* int nchars_written = snprintf(include_statement, 512, */
+        /*                               "include(\"%s/oif_impl/lang_julia/serialization.jl\")", */
+        /*                               OIF_IMPL_ROOT_DIR); */
+        /* if (nchars_written >= 512 - 1) { */
+        /*     fprintf(stderr, */
+        /*             "[%s] Could not execute include statement for `serialization.jl` " */
+        /*             "while the provided buffer is only 512 characters, and %d " */
+        /*             "characters are supposed to be written\n", */
+        /*             prefix_, nchars_written + 1); */
+        /* } */
+        /* jl_eval_string(include_statement); */
+        /* if (jl_exception_occurred()) { */
+        /*     handle_exception_(); */
+        /*     goto cleanup; */
+        /* } */
+        jl_eval_string("using OpenInterfacesImpl.OIFSerialization");
         if (jl_exception_occurred()) {
             handle_exception_();
             goto cleanup;
@@ -281,7 +280,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix_, module_name);
 
     char include_statement[1024];
-    sprintf(include_statement, "include(\"%s/oif_impl/impl/%s\")", OIF_IMPL_ROOT_DIR,
+    sprintf(include_statement, "include(\"%s/%s\")", OIF_IMPL_PATH,
             module_filename);
     char import_statement[1024];
     sprintf(import_statement, "import .%s", module_name);
