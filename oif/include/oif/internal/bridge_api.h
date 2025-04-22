@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Interface that language-specific dispatches must implement.
  */
@@ -28,3 +33,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
 
 int
 unload_impl(ImplInfo *impl_info);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,6 +1,9 @@
 #pragma once
-#ifndef OIF_DISPATCH_H
-#define OIF_DISPATCH_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -40,4 +43,7 @@ unload_interface_impl(ImplHandle implh);
  */
 int
 call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args);
+
+#ifdef __cplusplus
+}
 #endif
