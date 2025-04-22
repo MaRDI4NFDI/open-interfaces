@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -31,3 +36,7 @@ oif_util_str_duplicate(const char *src);
  */
 int
 oif_strcmp_nocase(const char s1[static 1], const char s2[static 1]);
+
+#ifdef __cplusplus
+}
+#endif
