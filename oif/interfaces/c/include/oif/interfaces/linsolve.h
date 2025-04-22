@@ -9,6 +9,7 @@
  * \f]
  * where \f$A\f$ is a square matrix and \f$b\f$ is a vector.
  */
+// clang-format Language: C
 #pragma once
 
 #ifdef __cplusplus

@@ -1,3 +1,4 @@
+// clang-format Language: C
 #pragma once
 
 typedef void(cleanup_fn)(void *p);
