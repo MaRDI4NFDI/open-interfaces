@@ -1,3 +1,4 @@
+// clang-format Language: C
 #ifndef OIF_IMPL_QEQ_H_
 #define OIF_IMPL_QEQ_H_
 

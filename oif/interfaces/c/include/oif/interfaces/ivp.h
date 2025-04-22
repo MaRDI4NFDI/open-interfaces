@@ -11,6 +11,7 @@
  * where \f$y\f$ is the state vector, \f$t\f$ is the time,
  * \f$f\f$ is the right-hand side (RHS) function.
  */
+// clang-format Language: C
 #pragma once
 
 #ifdef __cplusplus

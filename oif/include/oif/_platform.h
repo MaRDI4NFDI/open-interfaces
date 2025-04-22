@@ -1,3 +1,4 @@
+// clang-format Language: C
 #pragma once
 
 #ifdef __cplusplus

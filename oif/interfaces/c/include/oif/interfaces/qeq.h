@@ -16,6 +16,7 @@
  * It is used as a simple text case as well.
  *
  */
+// clang-format Language: C
 #pragma once
 
 #ifdef __cplusplus
