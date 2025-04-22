@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Kabanov
+    given-names: Dmitry
+    orcid: https://orcid.org/0000-0003-2521-4921
+  - family-names: Rave
+    given-names: Stephan
+    orcid: https://orcid.org/0000-0003-0439-7212
+  - family-names: Ohlberger
+    given-names: Mario
+    orcid: https://orcid.org/0000-0002-6260-3574
+title: "MaRDI Open Interfaces"
+version: 0.5.0
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.13753666
+date-released: 2025-04-04
