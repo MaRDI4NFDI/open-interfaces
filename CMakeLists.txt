@@ -37,6 +37,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 add_subdirectory(vendor)
 
+add_subdirectory(common)
+add_subdirectory(dispatch)
+
+add_subdirectory(lang_python)
+
 add_subdirectory(oif)
 add_subdirectory(oif_impl)
 
