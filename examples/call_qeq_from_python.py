@@ -1,7 +1,7 @@
 import argparse
 import dataclasses
 
-from oif.interfaces.qeq_solver import QeqSolver
+from oif.interfaces.qeq import QEQ
 
 
 @dataclasses.dataclass
@@ -26,7 +26,7 @@ def main():
     impl = args.impl
     print("Calling from Python an open interface for quadratic solver")
     print(f"Implementation: {impl}")
-    s = QeqSolver(impl)
+    s = QEQ(impl)
     a, b, c = 1.0, 5.0, 4.0
     x = s.solve(a, b, c)
 
