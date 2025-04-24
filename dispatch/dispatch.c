@@ -117,6 +117,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         }
         path = strtok(NULL, ":");
         conf_filename_p = conf_filename;
+        conf_filename_p[0] = '\0';
     }
 
     if (conf_file == NULL) {
