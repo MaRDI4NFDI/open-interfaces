@@ -103,7 +103,6 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     strcat(conf_filename_fixed_part, impl);
     strcat(conf_filename_fixed_part, ".conf");
 
-    printf("OIF_IMPL_PATH = '%s'\n", OIF_IMPL_PATH);
     // We cannot tokenize OIF_IMPL_PATH because `strtok`
     // modifies the original string during tokenization
     // by replacing tokens with nul-terminators.
