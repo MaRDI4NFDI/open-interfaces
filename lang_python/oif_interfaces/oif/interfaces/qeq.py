@@ -20,7 +20,7 @@ import numpy as np
 from oif.core import OIFPyBinding, load_impl, unload_impl
 
 
-class QeqSolver:
+class QEQ:
     """Interface for solving quadratic equations.
 
     This class serves as a gateway to the implementations of the
@@ -36,7 +36,7 @@ class QeqSolver:
 
     First, import the necessary modules:
 
-    >>> from oif.interfaces.qeq_solver import QeqSolver
+    >>> from oif.interfaces.qeq import QEQ
 
     Define the coefficients of the equation:
 
@@ -44,7 +44,7 @@ class QeqSolver:
 
     Create an instance of the solver:
 
-    >>> s = QeqSolver("py_qeq_solver")
+    >>> s = QEQ("py_qeq_solver")
 
     Solve the equation:
 

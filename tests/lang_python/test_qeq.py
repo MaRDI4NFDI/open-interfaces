@@ -1,13 +1,13 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from oif.interfaces.qeq_solver import QeqSolver
+from oif.interfaces.qeq import QEQ
 
 
-class TestQeqSolver:
+class TestQEQ:
     @pytest.fixture(params=["py_qeq_solver", "c_qeq_solver", "jl_qeq_solver"])
     def s(self, request):
-        return QeqSolver(request.param)
+        return QEQ(request.param)
 
     def test_1(self, s):
         a, b, c = 1.0, 5.0, 4.0
