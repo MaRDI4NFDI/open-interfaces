@@ -103,7 +103,14 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     strcat(conf_filename_fixed_part, impl);
     strcat(conf_filename_fixed_part, ".conf");
 
-    char *path = strtok((char *)OIF_IMPL_PATH, ":");
+    printf("OIF_IMPL_PATH = '%s'\n", OIF_IMPL_PATH);
+    // We cannot tokenize OIF_IMPL_PATH because `strtok`
+    // modifies the original string during tokenization
+    // by replacing tokens with nul-terminators.
+    // Then, when loading new implementations,
+    // OIF_IMPL_PATH will not have the original value.
+    char *oif_impl_path_dup = oif_util_str_duplicate(OIF_IMPL_PATH);
+    char *path = strtok((char *)oif_impl_path_dup, ":");
     char conf_filename[1024] = "";
     char *conf_filename_p = conf_filename;
     while (path) {
@@ -123,13 +130,15 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     if (conf_file == NULL) {
         fprintf(stderr, "[dispatch] Cannot open conf file '%s'\n", conf_filename_fixed_part);
         fprintf(stderr, "[dispatch] Search was done in the following paths: %s\n",
-                OIF_IMPL_PATH);
+                oif_impl_path_dup);
+        free(oif_impl_path_dup);
         perror("Error message is: ");
         return -1;
     }
     else {
         fprintf(stderr, "[dispatch] Configuration file: %s\n", conf_filename);
     }
+    free(oif_impl_path_dup);
 
     // Temporary buffer to read lines from file.
     const int buffer_size = 512;
