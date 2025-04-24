@@ -27,9 +27,9 @@ if [ -n "$PYTHONPATH" ]; then
 fi
 
 oifpath=${PRJ_ROOT_DIR}/oif/interfaces/python
-oifpath="$oifpath":${PRJ_ROOT_DIR}/oif/lang_python
-oifpath="$oifpath":${PRJ_ROOT_DIR}/oif_impl/lang_python
-oifpath="$oifpath":${PRJ_ROOT_DIR}/oif_impl
+oifpath="$oifpath":${PRJ_ROOT_DIR}/lang_python/oif
+oifpath="$oifpath":${PRJ_ROOT_DIR}/lang_python/oif_interfaces
+oifpath="$oifpath":${PRJ_ROOT_DIR}/lang_python/oif_impl
 oifpath="$oifpath":${PRJ_ROOT_DIR}/build
 export PYTHONPATH="$oifpath":"$PYTHONPATH"
 
