@@ -1,13 +1,16 @@
+#include <alloca.h>
 #include <assert.h>
-#include <dlfcn.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <julia.h>
 
 #include <oif/api.h>
+#include <oif/config_dict.h>
+#include <oif/util.h>
 #include <oif/internal/bridge_api.h>
 
 static char *prefix_ = "dispatch_julia";
@@ -281,8 +284,44 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     fprintf(stderr, "[%s] Provided module filename: '%s'\n", prefix_, module_filename);
     fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix_, module_name);
 
+    // We cannot tokenize OIF_IMPL_PATH because `strtok`
+    // modifies the original string during tokenization
+    // by replacing tokens with nul-terminators.
+    // Then, when loading new implementations,
+    // OIF_IMPL_PATH will not have the original value.
+    char *oif_impl_path_dup = oif_util_str_duplicate(OIF_IMPL_PATH);
+    if (oif_impl_path_dup == NULL) {
+        fprintf(stderr, "[%s] Could not duplicate OIF_IMPL_PATH\n", prefix_);
+        return NULL;
+    }
+    char *path = strtok(oif_impl_path_dup, ":");
     char include_statement[1024];
-    sprintf(include_statement, "include(\"%s/%s\")", OIF_IMPL_PATH, module_filename);
+    char module_filename_full[512] = {'\0'};
+    char *module_filename_full_p = module_filename_full;
+    FILE *module_file = NULL;
+    while (path) {
+        strcat(module_filename_full_p, path);
+        strcat(module_filename_full_p, "/");
+        strcat(module_filename_full_p, module_filename);
+
+        module_file = fopen(module_filename_full, "re");
+        if (module_file != NULL) {
+            fclose(module_file);
+            fprintf(stderr, "[%s] Found module file '%s'\n", prefix_, module_filename_full);
+            break;
+        }
+        path = strtok(NULL, ":");
+        module_filename_full_p = module_filename_full;
+        module_filename_full_p[0] = '\0';
+    }
+    free(oif_impl_path_dup);
+
+    if (module_file == NULL) {
+        fprintf(stderr, "[%s] Could not find an appropriate module file\n", prefix_);
+        return NULL;
+    }
+
+    sprintf(include_statement, "include(\"%s\")", module_filename_full);
     char import_statement[1024];
     sprintf(import_statement, "import .%s", module_name);
 
