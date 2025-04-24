@@ -37,7 +37,6 @@ if "OIF_IMPL_PATH" not in os.environ:
     os.environ["OIF_IMPL_PATH"] = path
 else:
     os.environ["OIF_IMPL_PATH"] += os.pathsep + path
-print("[oif/core.py] OIF_IMPL_PATH = ", os.environ["OIF_IMPL_PATH"])
 
 # We need to check if the library is in the site-packages directory
 # because this is the only place I could install this library
