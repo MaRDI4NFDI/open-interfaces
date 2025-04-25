@@ -3,6 +3,7 @@ requires = ["scikit-build-core>=0.11", "numpy"]
 build-backend = "scikit_build_core.build"
 
 [project]
+name = "openinterfaces"
 version = "0.5.1"
 authors = [
     { name = "Dmitry I. Kabanov", email = "dmitry.kabanov@uni-muenster.de" },
@@ -47,24 +48,12 @@ sdist.include = [
     "!examples/*.c",
     "examples/*.py",
     "CMakeLists.txt",
-    "!exp/",
-    "!oif/interfaces/c",
-    "oif/interfaces/python",
-    "oif/common",
-    "oif/dispatch/",
+    "lang_python/",
+    "/common/",
+    "!build/common/",
+    "!build.debug/common/",
+    "/dispatch/",
     "oif/include/",
-    "!oif/lang_c/*",
-    "!oif/lang_julia/*",
-    "oif/lang_python/",
-    "!oif_impl/_impl/ivp/**",
-    "!oif_impl/_impl/linsolve/**",
-    "!oif_impl/_impl/qeq/**",
-    "oif_impl/_impl/ivp/scipy_ode/*",
-    "oif_impl/_impl/linsolve/numpy/*",
-    "oif_impl/_impl/qeq/py_qeq_solver/*",
-    "!oif_impl/lang_c/**/*",
-    "!oif_impl/lang_julia/**/*",
-    "oif_impl/lang_python/",
     "tests/lang_python",
     "!build*/**/CMakeLists.txt",
     "!dist/**/CMakeLists.txt",
@@ -74,45 +63,24 @@ sdist.include = [
     "LICENSE",
     "pyproject.toml",
     "README.md",
+    "!*.so",
+    "!build*/**",
     "!build*/**/README.md",
     "!build*/**/LICENSE",
     "!build*/**/pyproject.toml",
-    "!__pycache__/",
-    "!*.so",
 ]
 
 sdist.exclude = [
     "*",
-#     "dist/**",
-#     "*.pyc",
-#     "*.so",
-#     "bin/",
-#     "build/",
-#     "build.debug/",
-#     "build.release/",
-#     "cmake/",
-#     "dist/",
-#     "examples/",
-#     "exp/",
-#     "oif/lang_c/",
-#     "_output/",
-#     "env.sh",
-#     "environment-linux.yaml",
-#     "environment-macos.yaml",
-#     "helpers.py",
-#     "Makefile",
-#     "Manifest.toml",
-#     "matplotlibrc",
-#     "pixi.toml",
-#     "Project.toml",
+    "build/**",
+    "build.debug/**",
 ]
 
 [tool.scikit-build.wheel.packages]
-"oif" = "oif/lang_python/oif"
-"oif/examples" = "examples"
-"oif/interfaces" = "oif/interfaces/python/oif/interfaces"
-"oif/_impl" = "oif_impl/oif/_impl"
-"oif/_impl/interfaces" = "oif_impl/lang_python/oif/_impl/interfaces"
+"openinterfaces" = "lang_python/oif/openinterfaces"
+"openinterfaces/examples" = "examples"
+"openinterfaces/interfaces" = "lang_python/oif_interfaces/openinterfaces/interfaces"
+"openinterfaces/_impl" = "lang_python/oif_impl/openinterfaces/_impl"
 
 [tool.mypy]
 ignore_missing_imports = true
