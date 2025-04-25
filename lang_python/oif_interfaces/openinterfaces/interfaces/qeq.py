@@ -17,7 +17,7 @@ It is used as a simple text case as well.
 """
 
 import numpy as np
-from oif.core import OIFPyBinding, load_impl, unload_impl
+from openinterfaces.core import OIFPyBinding, load_impl, unload_impl
 
 
 class QEQ:

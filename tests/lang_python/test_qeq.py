@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from oif.interfaces.qeq import QEQ
+from openinterfaces.interfaces.qeq import QEQ
 
 
 class TestQEQ:

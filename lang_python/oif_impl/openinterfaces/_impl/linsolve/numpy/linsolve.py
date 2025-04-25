@@ -1,5 +1,5 @@
 import numpy as np
-from oif._impl.interfaces.linsolve import LinsolveInterface
+from openinterfaces._impl.interfaces.linsolve import LinsolveInterface
 
 
 class NumPyLinsolve(LinsolveInterface):

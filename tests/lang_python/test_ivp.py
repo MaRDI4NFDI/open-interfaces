@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import numpy.testing as npt
 import pytest
-from oif.interfaces.ivp import IVP
+from openinterfaces.interfaces.ivp import IVP
 from scipy import optimize
 
 

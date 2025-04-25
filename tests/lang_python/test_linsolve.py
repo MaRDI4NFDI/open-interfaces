@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from oif.interfaces.linear_solver import LinearSolver
+from openinterfaces.interfaces.linear_solver import LinearSolver
 
 
 class TestLinearSolver:
