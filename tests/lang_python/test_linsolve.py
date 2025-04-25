@@ -1,13 +1,13 @@
 import numpy as np
 import numpy.testing as npt
 import pytest
-from openinterfaces.interfaces.linear_solver import LinearSolver
+from openinterfaces.interfaces.linsolve import Linsolve
 
 
 class TestLinearSolver:
     @pytest.fixture(params=["c_lapack", "numpy"])
     def s(self, request):
-        return LinearSolver(request.param)
+        return Linsolve(request.param)
 
     def test_1(self, s):
         A = np.array(

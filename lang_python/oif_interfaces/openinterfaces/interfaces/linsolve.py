@@ -12,7 +12,7 @@ import numpy as np
 from openinterfaces.core import OIFPyBinding, load_impl, unload_impl
 
 
-class LinearSolver:
+class Linsolve:
     """Interface for solving linear systems of equations.
 
     This class serves as a gateway to the implementations of the
