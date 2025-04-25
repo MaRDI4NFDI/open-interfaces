@@ -10,7 +10,7 @@ from collections.abc import Callable
 from typing import TypeAlias
 
 import numpy as np
-from oif.core import (
+from openinterfaces.core import (
     OIF_ARRAY_F64,
     OIF_FLOAT64,
     OIF_INT,

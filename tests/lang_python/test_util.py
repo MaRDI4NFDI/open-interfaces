@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_allclose
-from oif.util import Laplacian2DApproximator
+from openinterfaces.util import Laplacian2DApproximator
 from scipy import sparse as sp
 
 
