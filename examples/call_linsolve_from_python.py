@@ -2,7 +2,7 @@ import argparse
 import dataclasses
 
 import numpy as np
-from oif.interfaces.linear_solver import LinearSolver
+from openinterfaces.interfaces.linsolve import Linsolve
 
 
 @dataclasses.dataclass
@@ -31,7 +31,7 @@ def main():
         ]
     )
     b = np.array([6.0, 2.0])
-    s = LinearSolver(impl)
+    s = Linsolve(impl)
     x = s.solve(A, b)
 
     print("Solving system of linear equations:")
