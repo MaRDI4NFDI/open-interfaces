@@ -1,3 +1,5 @@
+package := openinterfaces
+
 .PHONY : all
 all :
 	cmake -S . -B build.debug \
@@ -45,3 +47,20 @@ docs-from-scratch: | mk-docs-build-dir
 .PHONY : mk-docs-build-dir
 mk-docs-build-dir:
 	mkdir -p docs/build
+
+# Build the Python sdist package, unpack it, and open the directory.
+.PHONY : build-package-python
+build-package-python :
+	@{ \
+	version=$$(grep 'version =' pyproject.toml | sed 's/version = "//' | sed 's/"//'); \
+	echo "\033[01;32mBuilding package: $(package) version $${version}\033[0m"; \
+	rm -r "dist/$(package)-$${version}/" && echo "deleted old dist/$(package)-$${version}/"; \
+	\
+	if ! python -m build --sdist ; then \
+	    echo -e "\033[01;31mERROR: build failed\033[0m"; \
+	    exit 1; \
+	fi; \
+	tar xzf "dist/$(package)-$${version}.tar.gz" -C dist/; \
+	open "dist/$(package)-$${version}/"; \
+	}
+
