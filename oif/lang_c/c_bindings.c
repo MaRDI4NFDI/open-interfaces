@@ -1,5 +1,7 @@
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <oif/api.h>
@@ -69,13 +71,13 @@ oif_print_matrix(OIFArrayF64 *mat)
 {
     assert(mat->nd == 2);
 
-    long m = mat->dimensions[0];
-    long n = mat->dimensions[1];
+    size_t m = mat->dimensions[0];
+    size_t n = mat->dimensions[1];
     double *data = mat->data;
     printf("[ \n");
-    for (size_t i = 0; i < mat->dimensions[0]; ++i) {
+    for (size_t i = 0; i < m; ++i) {
         printf("[ ");
-        for (size_t j = 0; j < mat->dimensions[1]; ++j) {
+        for (size_t j = 0; j < n; ++j) {
             printf("%g, ", data[i * n + j]);
         }
         printf("\b\b ],\n");
