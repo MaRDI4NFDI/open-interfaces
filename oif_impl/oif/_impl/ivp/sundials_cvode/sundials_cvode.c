@@ -21,6 +21,7 @@
 #include <sunnonlinsol/sunnonlinsol_fixedpoint.h>
 
 #include "oif/api.h"
+#include "oif/config_dict.h"
 #include "oif/util.h"
 #include "oif_impl/ivp.h"
 

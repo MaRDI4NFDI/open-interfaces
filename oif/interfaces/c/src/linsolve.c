@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include <oif/api.h>
 #include <oif/interfaces/linsolve.h>
 #include <oif/internal/dispatch.h>

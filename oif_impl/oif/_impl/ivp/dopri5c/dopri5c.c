@@ -11,10 +11,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <tgmath.h>
 
 #include <oif/api.h>
-#include <oif/util.h>
+#include <oif/config_dict.h>
 #include <oif_impl/ivp.h>
 #include <oif/c_bindings.h>
 

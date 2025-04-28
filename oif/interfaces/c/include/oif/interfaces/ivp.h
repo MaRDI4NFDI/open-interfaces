@@ -19,6 +19,7 @@ extern "C" {
 #endif
 
 #include <oif/api.h>
+#include <oif/config_dict.h>
 
 /**
  * User-provided right-hand side function for the system of ODEs.

@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 #include <oif/api.h>
+#include <oif/config_dict.h>
 #include <oif/internal/bridge_api.h>
 
 typedef struct {

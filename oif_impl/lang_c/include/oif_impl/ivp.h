@@ -2,6 +2,7 @@
 #pragma once
 
 #include <oif/api.h>
+#include <oif/config_dict.h>
 
 /**
  * Signature of the right-hand side function f for the system of ODEs.
