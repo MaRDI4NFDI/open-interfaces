@@ -5,7 +5,7 @@ pkg_check_modules(FFI REQUIRED IMPORTED_TARGET libffi)
 
 add_library(oif_dispatch_python SHARED dispatch_python.c)
 target_include_directories(oif_dispatch_python
-                           PRIVATE ${CMAKE_SOURCE_DIR}/oif/include)
+                           PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(oif_dispatch_python PRIVATE ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_dispatch_python PUBLIC Python::Python)
 target_link_libraries(oif_dispatch_python PUBLIC Python::NumPy)
@@ -15,7 +15,7 @@ install(TARGETS oif_dispatch_python DESTINATION lib)
 add_library(oif_dispatch_python_callback MODULE _callback.c)
 target_include_directories(
   oif_dispatch_python_callback
-  PRIVATE ${CMAKE_SOURCE_DIR}/oif/include
+  PRIVATE ${CMAKE_SOURCE_DIR}/include
   PRIVATE ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_dispatch_python_callback PRIVATE Python::Python)
 target_link_libraries(oif_dispatch_python_callback PRIVATE Python::NumPy)
