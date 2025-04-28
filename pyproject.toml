@@ -43,38 +43,36 @@ source = "https://github.com/MaRDI4NFDI/open-interfaces"
 
 [tool.scikit-build]
 sdist.include = [
-    "!bin/*",
-    "!cmake/",
-    "!examples/*.c",
-    "examples/*.py",
-    "CMakeLists.txt",
-    "lang_python/",
     "/common/",
-    "!build/common/",
-    "!build.debug/common/",
     "/dispatch/",
-    "oif/include/",
-    "tests/lang_python",
-    "!build*/**/CMakeLists.txt",
-    "!dist/**/CMakeLists.txt",
-    "!oif/lang_c/CMakeLists.txt",
-    "!examples/CMakeLists.txt",
-    "!dist/**/*",
+    "/examples/*.py",
+    "/include/",
+    "/lang_python/",
+    "/tests/lang_python/",
+    "/vendor/",
+    "CMakeLists.txt",
     "LICENSE",
     "pyproject.toml",
     "README.md",
+    "!build*/**/CMakeLists.txt",
+    "!dist/**/CMakeLists.txt",
+    "!examples/CMakeLists.txt",
+    "!oif/**/CMakeLists.txt",
+    "!oif_impl/**/CMakeLists.txt",
+    "!dist/**/*",
     "!*.so",
     "!build*/**",
     "!build*/**/README.md",
     "!build*/**/LICENSE",
     "!build*/**/pyproject.toml",
+    "!**/__pycache__/",
 ]
 
 sdist.exclude = [
     "*",
-    "build/**",
-    "build.debug/**",
 ]
+
+wheel.exclude = ["**.c", "CMakeLists.txt"]
 
 [tool.scikit-build.wheel.packages]
 "openinterfaces" = "lang_python/oif/openinterfaces"
