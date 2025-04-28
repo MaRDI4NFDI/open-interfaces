@@ -42,8 +42,12 @@ add_subdirectory(dispatch)
 
 add_subdirectory(lang_python)
 
-add_subdirectory(oif)
-add_subdirectory(oif_impl)
+if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/oif")
+    add_subdirectory(oif)
+endif()
+if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/oif_impl")
+    add_subdirectory(oif_impl)
+endif()
 
 if(EXISTS examples/CMakeLists.txt)
   add_subdirectory(examples)
