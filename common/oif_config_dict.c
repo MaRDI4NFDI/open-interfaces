@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 #include <cwpack.h>
+
 #include <hashmap.h>
 
 #include <oif/api.h>
@@ -222,9 +223,9 @@ oif_config_dict_get_double(OIFConfigDict *dict, const char *key)
 }
 
 void
-oif_config_dict_print(const OIFConfigDict *dict)
+oif_config_dict_print(OIFConfigDict *dict)
 {
-    char *key;
+    const char *key;
     OIFConfigEntry *entry;
 
     if (dict->size == 0) {

@@ -41,7 +41,7 @@ oif_config_dict_deserialize(OIFConfigDict *dict);
 int
 oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from);
 void
-oif_config_dict_print(const OIFConfigDict *dict);
+oif_config_dict_print(OIFConfigDict *dict);
 const uint8_t *
 oif_config_dict_get_serialized(OIFConfigDict *dict);
 size_t
