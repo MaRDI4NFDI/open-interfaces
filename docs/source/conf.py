@@ -37,7 +37,7 @@ myst_dmath_double_inline = True
 image_converter_args = ["-density", "600"]
 
 # -- Options for sphinx-autoapi extension -------------------------------------------
-autoapi_dirs = ["../../oif/interfaces/python/oif/interfaces/"]
+autoapi_dirs = ["../../lang_python/oif_interfaces/openinterfaces/interfaces"]
 autoapi_options = ["show-inheritance", "members", "undoc-members"]
 autoapi_add_toctree_entry = False
 autoapi_keep_files = True

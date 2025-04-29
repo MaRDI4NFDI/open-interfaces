@@ -75,6 +75,31 @@ To test that the build processes has succeeded, use command
     make test
 ```
 
+## Quality assurance during development
+
+For quality assurance, we write unit tests that test communication between
+different clients and solvers.
+The full test suite can be run using the command
+```shell
+    make test
+```
+
+Additionally, to ensure code consistency,
+we use [`pre-commit`](https://pre-commit.com/).
+It is configured to run multiple checks for formatting and trailing whitespace
+for all source code in the repository.
+During development, the checks can be run automatically by installing
+a pre-commit Git hook:
+
+    pre-commit install
+
+or by invoking it manually via
+
+    pre-commit run --all-files
+
+We recommend running it automatically so that the code is pushed only after
+formatting checks.
+
 
 [1]: https://conda.io/projects/conda/en/latest/user-guide/getting-started.html
 [2]: https://julialang.org/downloads/

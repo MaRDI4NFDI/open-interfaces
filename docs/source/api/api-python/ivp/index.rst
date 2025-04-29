@@ -20,9 +20,8 @@ ivp
 Module Contents
 ---------------
 
-.. py:data:: RhsFn
-   :type:  TypeAlias
-   :value: Callable[[float, np.ndarray, np.ndarray, object], int]
+.. py:type:: RhsFn
+   :canonical: Callable[[float, np.ndarray, np.ndarray, object], int]
 
 
    Signature of the right-hand side (RHS) function :math:`f(t, y)`.
@@ -141,3 +140,6 @@ Module Contents
    .. py:method:: print_stats()
 
       Print integration statistics.
+
+
+
