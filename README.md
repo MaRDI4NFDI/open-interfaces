@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src="assets/mardi-oif-logo.svg" width="40" style="vertical-align: text-bottom;" />
+<img src="https://raw.githubusercontent.com/MaRDI4NFDI/open-interfaces/refs/heads/main/assets/mardi-oif-logo.svg" width="40" style="vertical-align: text-bottom;" />
 MaRDI Open Interfaces
 </h1>
 
@@ -30,7 +30,7 @@ This project is the part of the [_Mathematical Research Data Initiative
 
 ## Data flow
 
-![Architecture of the MaRDI Open Interfaces](assets/arch.png)
+![Architecture of the MaRDI Open Interfaces](https://media.githubusercontent.com/media/MaRDI4NFDI/open-interfaces/refs/heads/main/assets/arch.png)
 
 This figure shows the software architecture of the _MaRDI Open Interfaces_.
 There are two principal decoupled parts. The left part is user-facing
