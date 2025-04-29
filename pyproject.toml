@@ -13,7 +13,7 @@ authors = [
 description = "Open Interfaces for improving Interoperability in Scientific Computing"
 license-files = ["LICENSE"]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
