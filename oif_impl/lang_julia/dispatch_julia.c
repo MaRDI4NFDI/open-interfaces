@@ -366,7 +366,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     goto finally;
 
-    catch : handle_exception_();
+catch:
+    handle_exception_();
 
     free(result);
     result = NULL;
