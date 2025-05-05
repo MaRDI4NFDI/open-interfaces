@@ -16,14 +16,18 @@
   ```shell
   git checkout main
   ```
-- [ ] Fetch changes from the remote repository:
+- [ ] Fetch changes from the remote repository (from your fork):
   ```shell
-  git fetch upstream
+  git fetch origin
+  ```
+- [ ] Fetch tags from the upstream repository:
+  ```shell
+  git fetch --tags upstream
   ```
 - [ ] Make sure that `main` is on the tagged commit:
-  ```shell
-  git describe HEAD
-  ```
+  `git log` must report that HEAD, `main`, `origin/main`, and `upstream/main`
+  are all the same;
+  besides, it must have the tag from the above
 - [ ] Build the Python package
   ``` shell
   make build-python-package
