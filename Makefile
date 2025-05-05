@@ -37,12 +37,16 @@ clean :
 	$(RM) -r build build.debug build.release
 
 .PHONY : docs
-docs :
+docs : | mk-docs-build-dir
 	cd docs && doxygen && make html
 
 .PHONY : docs-from-scratch
 docs-from-scratch:
 	cd docs && rm -rf build && mkdir build && doxygen && make html
+
+.PHONY : mk-docs-build-dir
+mk-docs-build-dir:
+	mkdir -p docs/build
 
 # Build the Python sdist package, unpack it, and open the directory.
 .PHONY : build-package-python

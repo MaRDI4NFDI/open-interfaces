@@ -57,6 +57,7 @@ jobs:
             - name: Activate Julia environment
               run: |
                   julia --project=. -e "using Pkg; Pkg.instantiate()"
+
             - name: Set up environment variables
               run: |
                   source env.sh
@@ -66,6 +67,7 @@ jobs:
                     echo "PYTHONPATH=$PYTHONPATH"
                     echo "JULIA_PROJECT=$JULIA_PROJECT"
                   } >> "$GITHUB_ENV"
+
             - name: Show info
               run: |
                   conda info
@@ -82,6 +84,7 @@ jobs:
                   echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
                   echo "PYTHONPATH = $PYTHONPATH"
                   echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
+
             - name: Build
               run: |
                   make
