@@ -13,3 +13,5 @@ Technical notes
    2024-02-09-conversion-of-oif-arrays-c-ext.md
    2024-02-23-python-wrapper-for-c-callback.md
    2024-03-12-perf-study-ivp-cvode-gray-scott.md
+   2025-03-31-folder-structure.md
+   2025-05-05-how-to-release.md
