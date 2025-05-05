@@ -37,16 +37,12 @@ clean :
 	$(RM) -r build build.debug build.release
 
 .PHONY : docs
-docs : | mk-docs-build-dir
+docs :
 	cd docs && doxygen && make html
 
 .PHONY : docs-from-scratch
-docs-from-scratch: | mk-docs-build-dir
-	cd docs && rm -rf build && doxygen && make html
-
-.PHONY : mk-docs-build-dir
-mk-docs-build-dir:
-	mkdir -p docs/build
+docs-from-scratch:
+	cd docs && rm -rf build && mkdir build && doxygen && make html
 
 # Build the Python sdist package, unpack it, and open the directory.
 .PHONY : build-package-python
@@ -64,3 +60,13 @@ build-package-python :
 	open "dist/$(package)-$${version}/"; \
 	}
 
+.PHONY : upload-package-python-test
+upload-package-python-test :
+	@{ \
+	version=$$(grep 'version =' pyproject.toml | sed 's/version = "//' | sed 's/"//'); \
+	echo "\033[01;32mUploading package: $(package) version $${version}\033[0m"; \
+	if ! python -m twine upload --repository testpypi dist/$(package)-$${version}.tar.gz ; then \
+	    echo -e "\033[01;31mERROR: upload failed\033[0m"; \
+	    exit 1; \
+	fi; \
+	}
