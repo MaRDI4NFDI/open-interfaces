@@ -64,6 +64,3 @@ Module Contents
    .. py:method:: solve(a: float, b: float, c: float)
 
       Solve the quadratic equation :math:`a x^2 + b x + c = 0`.
-
-
-
