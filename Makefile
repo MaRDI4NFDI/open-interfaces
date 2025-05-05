@@ -74,3 +74,14 @@ upload-package-python-test :
 	    exit 1; \
 	fi; \
 	}
+
+.PHONY : upload-package-python
+upload-package-python :
+	@{ \
+	version=$$(grep 'version =' pyproject.toml | sed 's/version = "//' | sed 's/"//'); \
+	echo "\033[01;32mUploading package: $(package) version $${version}\033[0m"; \
+	if ! python -m twine upload dist/$(package)-$${version}.tar.gz ; then \
+	    echo -e "\033[01;31mERROR: upload failed\033[0m"; \
+	    exit 1; \
+	fi; \
+	}
