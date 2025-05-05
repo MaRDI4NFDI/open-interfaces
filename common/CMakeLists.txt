@@ -4,8 +4,7 @@
 # -----------------------------------------------------------------------------
 # Library oif_common_util
 add_library(oif_common_util SHARED util.c)
-target_include_directories(oif_common_util
-                           PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(oif_common_util PUBLIC ${CMAKE_SOURCE_DIR}/include)
 install(TARGETS oif_common_util DESTINATION lib)
 
 # -----------------------------------------------------------------------------
