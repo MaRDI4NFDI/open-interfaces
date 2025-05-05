@@ -140,6 +140,3 @@ Module Contents
    .. py:method:: print_stats()
 
       Print integration statistics.
-
-
-
