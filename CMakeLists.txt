@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 project(
   oif-toy-example
   LANGUAGES C CXX
-  VERSION 0.5.3)
+  VERSION 0.5.4)
 
 # Enforce using `-std=c11`, without any extensions like `gnu11`.
 set(CMAKE_C_STANDARD 11)
