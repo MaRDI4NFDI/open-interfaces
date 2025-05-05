@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "openinterfaces"
-version = "0.5.2"
+version = "0.5.3"
 authors = [
     { name = "Dmitry I. Kabanov", email = "dmitry.kabanov@uni-muenster.de" },
     { name = "Stephan Rave", email = "stephan.rave@uni-muenster.de" },
