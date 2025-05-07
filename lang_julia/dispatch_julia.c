@@ -143,23 +143,6 @@ make_wrapper_over_c_callback(OIFCallback *p)
 {
     jl_value_t *wrapper = NULL;
     if (CALLBACK_MODULE_ == NULL) {
-        /* char include_statement[512]; */
-        /* int nchars_written = */
-        /*     snprintf(include_statement, 512,
-         * "include(\"%s/oif_impl/lang_julia/callback.jl\")", */
-        /*              OIF_IMPL_ROOT_DIR); */
-        /* if (nchars_written >= 512 - 1) { */
-        /*     fprintf(stderr, */
-        /*             "[%s] Could not execute include statement for `callback.jl` " */
-        /*             "while the provided buffer is only 512 characters, and %d " */
-        /*             "characters are supposed to be written\n", */
-        /*             prefix_, nchars_written + 1); */
-        /* } */
-        /* jl_eval_string(include_statement); */
-        /* if (jl_exception_occurred()) { */
-        /*     handle_exception_(); */
-        /*     goto cleanup; */
-        /* } */
         jl_eval_string("using OpenInterfacesImpl.CallbackWrapper");
         if (jl_exception_occurred()) {
             handle_exception_();

@@ -43,6 +43,7 @@ add_subdirectory(vendor)
 add_subdirectory(common)
 add_subdirectory(dispatch)
 
+add_subdirectory(lang_julia)
 add_subdirectory(lang_python)
 
 if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/oif")
