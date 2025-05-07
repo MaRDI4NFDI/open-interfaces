@@ -1,7 +1,7 @@
 name = "OpenInterfacesImpl"
 uuid = "daff4927-7858-4806-96da-915047fb441c"
-authors = ["Dmitry Kabanov <dmitry.kabanov@uni-muenster.de>"]
-version = "0.1.0"
+authors = ["Dmitry Kabanov <dmitry.kabanov@uni-muenster.de>", "Stephan Rave <stephan.rave@uni-muenster.de", "Mario Ohlberger <mario.ohlberger@uni-muenster.de"]
+version = "0.5.5"
 
 [deps]
 MsgPack = "99f44e22-a591-53d1-9472-aa23ef4bd671"
@@ -11,5 +11,5 @@ SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 
 [compat]
 MsgPack = "1.2.1"
-OrdinaryDiffEq = "6.93.0"
-SciMLBase = "2.60.0"
+OrdinaryDiffEq = "6.95.1"
+SciMLBase = "2.86.2"
