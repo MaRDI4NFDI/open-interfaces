@@ -4,7 +4,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from oif.interfaces.ivp import IVP
+from openinterfaces.interfaces.ivp import IVP
 
 
 @dataclasses.dataclass
