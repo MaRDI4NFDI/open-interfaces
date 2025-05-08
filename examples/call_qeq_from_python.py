@@ -1,7 +1,7 @@
 import argparse
 import dataclasses
 
-from oif.interfaces.qeq import QEQ
+from openinterfaces.interfaces.qeq import QEQ
 
 
 @dataclasses.dataclass

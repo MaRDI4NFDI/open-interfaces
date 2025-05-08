@@ -4,7 +4,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from oif.interfaces.ivp import IVP
+from openinterfaces.interfaces.ivp import IVP
 
 RESULT_DATA_FILENAME_TPL = "ivp_py_vdp_eq_{:s}.txt"
 RESULT_FIG_FILENAME_TPL = "ivp_py_vdp_eq_{:s}.pdf"
