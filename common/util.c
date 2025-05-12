@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -50,6 +51,21 @@ oif_strcmp_nocase(const char s1[static 1], const char s2[static 1])
             return 1;
         }
     }
+
+    return 0;
+}
+
+int
+logerr(const char *prefix, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    fprintf(stderr, "[%s] \033[1m\033[31mERROR:\033[0m ", prefix);
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+
+    va_end(ap);
 
     return 0;
 }

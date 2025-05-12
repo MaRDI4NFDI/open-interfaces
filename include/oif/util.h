@@ -9,6 +9,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 
+
 /**
  * Convert `size_t` input to `uint32_t`.
  *
@@ -37,6 +38,18 @@ oif_util_str_duplicate(const char *src);
  */
 int
 oif_strcmp_nocase(const char s1[static 1], const char s2[static 1]);
+
+/**
+ * Log an error message to stderr.
+ *
+ * The error message starts with "[prefix] ERROR: "
+ * followed by the formatted message.
+ *
+ * @param prefix The prefix to be printed before the message.
+ * @param fmt The format string for the message.
+ * @param ... The arguments for the format string.
+ */
+int logerr(const char *prefix, const char *fmt, ...);
 
 #ifdef __cplusplus
 }

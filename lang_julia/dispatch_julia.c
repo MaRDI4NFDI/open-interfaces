@@ -44,7 +44,7 @@ handle_exception_(void)
 
     jl_value_t *backtrace = jl_call0(catch_backtrace_fn);
     const char *exc_msg = jl_string_ptr(jl_call3(sprint_fn, showerror_fn, exc, backtrace));
-    printf("[%s] ERROR: %s\n", prefix_, exc_msg);
+    logerr(prefix_, "%s", exc_msg);
 
     jl_exception_clear();
 }
