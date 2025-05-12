@@ -1,6 +1,4 @@
 [deps]
-MsgPack = "99f44e22-a591-53d1-9472-aa23ef4bd671"
 OpenInterfaces = "07cfd324-e924-40a7-85fa-5e46307e7ad7"
 OpenInterfacesImpl = "daff4927-7858-4806-96da-915047fb441c"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
