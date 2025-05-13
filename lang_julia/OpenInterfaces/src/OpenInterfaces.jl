@@ -14,6 +14,10 @@ export OIF_ERROR, OIF_IMPL_INIT_ERROR
 # Data structures
 export OIFArgs, OIFArrayF64, OIFCallback, OIFUserData
 
+export load_impl
+
+using Libdl
+
 @enum OIFArgType begin
     OIF_INT = 1
     # OIF_FLOAT32 = 2
@@ -62,6 +66,30 @@ struct OIFUserData
     src::Int32
     c::Ptr{Cvoid}
     py::Ptr{Cvoid}
+end
+
+const _lib_dispatch = Libdl.dlopen("liboif_dispatch.so")
+
+export _lib_dispatch
+
+function __init__()
+    _lib_dispatch = Libdl.dlopen("liboif_dispatch.so")
+end
+
+function load_impl(interface::String, impl::String, major::Int, minor::Int)::Int
+    load_interface_impl_fn = Libdl.dlsym(_lib_dispatch, :load_interface_impl)
+    implh = @ccall $load_interface_impl_fn(
+        interface::String,
+        impl::String,
+        major::UInt,
+        minor::UInt
+    )::Int
+
+    if implh < 0
+        error("Failed to load interface implementation: $impl")
+    end
+
+    return implh
 end
 
 end # module OpenInterfaces
