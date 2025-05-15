@@ -21,9 +21,9 @@
 #include "oif/internal/bridge_api.h"
 #include "oif/internal/dispatch.h"
 
-static char OIF_DISPATCH_C_SO[] = "liboif_dispatch_c.so";
-static char OIF_DISPATCH_PYTHON_SO[] = "liboif_dispatch_python.so";
-static char OIF_DISPATCH_JULIA_SO[] = "liboif_dispatch_julia.so";
+static char OIF_DISPATCH_C_SO[] = "liboif_bridge_c.so";
+static char OIF_DISPATCH_PYTHON_SO[] = "liboif_bridge_python.so";
+static char OIF_DISPATCH_JULIA_SO[] = "liboif_bridge_julia.so";
 
 static const char *OIF_IMPL_PATH;
 
