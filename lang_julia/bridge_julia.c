@@ -13,7 +13,7 @@
 #include <oif/util.h>
 #include <oif/internal/bridge_api.h>
 
-static char *prefix_ = "dispatch_julia";
+static char *prefix_ = "bridge_julia";
 
 enum {
     BUFFER_SIZE_ = 32,
