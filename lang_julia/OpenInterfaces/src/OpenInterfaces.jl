@@ -18,17 +18,18 @@ export load_impl, call_impl, unload_impl
 
 using Libdl
 
-@enum OIFArgType begin
-    OIF_INT = 1
-    # OIF_FLOAT32 = 2
-    OIF_FLOAT64 = 3
-    # OIF_FLOAT32_P = 4
-    OIF_ARRAY_F64 = 5
-    OIF_STR = 6
-    OIF_CALLBACK = 7
-    OIF_USER_DATA = 8
-    OIF_CONFIG_DICT = 9
-end
+
+const OIFArgType = Int32
+
+const OIF_INT::OIFArgType = 1
+# const OIF_FLOAT32::OIFArgType = 2
+const OIF_FLOAT64::OIFArgType = 3
+# const OIF_FLOAT32_P::OIFArgType = 4
+const OIF_ARRAY_F64::OIFArgType = 5
+const OIF_STR::OIFArgType = 6
+const OIF_CALLBACK::OIFArgType = 7
+const OIF_USER_DATA::OIFArgType = 8
+const OIF_CONFIG_DICT::OIFArgType = 9
 
 @enum OIFLang begin
     OIF_LANG_C = 1
