@@ -151,11 +151,11 @@ function call_impl(implh::Int, func_name::String, in_user_args::Tuple{Vararg{Any
             data = pointer(arg)
             arr = OIFArrayF64(nd, dimensions, data)
             arr_p = Base.unsafe_convert(Ptr{Cvoid}, Ref(arr))
-            arr_p_p = Base.unsafe_convert{Ptr{Cvoid}, Ref(arr_p)
+            arr_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, Ref(arr_p))
             println("[OpenInterfaces.jl] arr_p: ", arr_p)
 
             out_arg_types[i] = OIF_ARRAY_F64
-            out_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arr_p_p)
+            out_arg_values[i] = arr_p_p
         else
             error("Cannot convert output argument $(arg) of type $(typeof(arg))")
         end
