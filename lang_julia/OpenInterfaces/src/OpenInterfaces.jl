@@ -102,6 +102,8 @@ function call_impl(implh::Int, func_name::String, in_user_args::Tuple{Vararg{Any
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
 
+    temp_refs = Vector{Any}()
+
     # Allocate memory for the argument types and values
     in_arg_types = Vector{OIFArgType}(undef, in_num_args)
     in_arg_values = Vector{Ptr{Cvoid}}(undef, in_num_args)
@@ -115,6 +117,7 @@ function call_impl(implh::Int, func_name::String, in_user_args::Tuple{Vararg{Any
         elseif typeof(arg) == Float64
             in_arg_types[i] = OIF_FLOAT64
             arg_ref = Ref(arg)
+            push!(temp_refs, arg_ref)
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
         elseif typeof(arg) == OIFArrayF64
             in_arg_types[i] = OIF_ARRAY_F64
@@ -147,11 +150,24 @@ function call_impl(implh::Int, func_name::String, in_user_args::Tuple{Vararg{Any
             out_arg_values[i] = pointer(arg)
         elseif typeof(arg) == Vector{Float64}
             nd = ndims(arg)
-            dimensions = Base.unsafe_convert(Ptr{Clong}, collect(size(arg)))
+            dims_jl = collect(size(arg))
+            push!(temp_refs, dims_jl)
+            dimensions = Base.unsafe_convert(Ptr{Clong}, dims_jl)
+            push!(temp_refs, dimensions)
             data = pointer(arg)
+            push!(temp_refs, data)
+
             arr = OIFArrayF64(nd, dimensions, data)
-            arr_p = Base.unsafe_convert(Ptr{Cvoid}, Ref(arr))
-            arr_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, Ref(arr_p))
+            push!(temp_refs, arr)
+
+            arr_ref = Ref(arr)
+            push!(temp_refs, arr_ref)
+            arr_p = Base.unsafe_convert(Ptr{Cvoid}, arr_ref)
+            push!(temp_refs, arr_p)
+
+            arr_p_ref = Ref(arr_p)
+            push!(temp_refs, arr_p_ref)
+            arr_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, arr_p_ref)
             println("[OpenInterfaces.jl] arr_p: ", arr_p)
 
             out_arg_types[i] = OIF_ARRAY_F64
@@ -165,13 +181,22 @@ function call_impl(implh::Int, func_name::String, in_user_args::Tuple{Vararg{Any
 
     in_args = Ref(OIFArgs(in_num_args, pointer(in_arg_types), pointer(in_arg_values)))
     out_args = Ref(OIFArgs(out_num_args, pointer(out_arg_types), pointer(out_arg_values)))
+    # print("[OpenInterfaces.jl] in_arg_types = ", in_arg_types, "\n")
+    # print("[OpenInterfaces.jl] typeof(in_arg_types) = ", typeof(in_arg_types), "\n")
+    #
+    print("[OpenInterfaces.jl] out_arg_values = ", out_arg_values, "\n")
 
-    result = @ccall $(call_interface_impl_fn[])(
-        implh::Int,
-        func_name::Cstring,
-        in_args::Ptr{OIFArgs},
-        out_args::Ptr{OIFArgs}
-    )::Int
+    in_args = Ref(OIFArgs(in_num_args, pointer(in_arg_types), pointer(in_arg_values), 42))
+    out_args = Ref(OIFArgs(out_num_args, pointer(out_arg_types), pointer(out_arg_values), 42))
+
+    result = GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values begin
+        @ccall $(call_interface_impl_fn[])(
+            implh::Int,
+            func_name::Cstring,
+            in_args::Ptr{OIFArgs},
+            out_args::Ptr{OIFArgs}
+        )::Int
+    end
 
     return result
 end
