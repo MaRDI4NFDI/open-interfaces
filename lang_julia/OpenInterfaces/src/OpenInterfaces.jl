@@ -18,6 +18,7 @@ export load_impl, call_impl, unload_impl
 
 using Libdl
 
+const ImplHandle = Int32
 
 const OIFArgType = Int32
 
@@ -49,6 +50,7 @@ struct OIFArgs
     num_args::Int64
     arg_types::Ptr{OIFArgType}
     arg_values::Ptr{Ptr{Cvoid}}
+    _check::Int32
 end
 
 struct OIFArrayF64
@@ -83,7 +85,7 @@ function __init__()
     unload_interface_impl_fn[] = dlsym(lib_dispatch[], :unload_interface_impl)
 end
 
-function load_impl(interface::String, impl::String, major::Int, minor::Int)::Int
+function load_impl(interface::String, impl::String, major::Int, minor::Int)::ImplHandle
     implh = @ccall $(load_interface_impl_fn[])(
         interface::Cstring,
         impl::Cstring,
@@ -98,7 +100,7 @@ function load_impl(interface::String, impl::String, major::Int, minor::Int)::Int
     return implh
 end
 
-function call_impl(implh::Int, func_name::String, in_user_args::Tuple{Vararg{Any}}, out_user_args::Tuple{Vararg{Any}})::Int
+function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Vararg{Any}}, out_user_args::Tuple{Vararg{Any}})::Int
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
 
@@ -201,7 +203,7 @@ function call_impl(implh::Int, func_name::String, in_user_args::Tuple{Vararg{Any
     return result
 end
 
-function unload_impl(implh)
+function unload_impl(implh::ImplHandle)
     status = @ccall $(unload_interface_impl_fn[])(
         implh::Cint
     )::Int
@@ -210,5 +212,7 @@ function unload_impl(implh)
         error("Failed to unload interface implementation with id '$impl'")
     end
 end
+
+include("interfaces.jl")
 
 end # module OpenInterfaces
