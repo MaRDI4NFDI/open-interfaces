@@ -280,7 +280,16 @@ unload_interface_impl(ImplHandle implh)
         return -1;
     }
     // Free resources added by subtypes of ImplInfo.
-    unload_impl_fn(impl_info);
+    fprintf(stderr, "[dispatch] Unloading implementation with id '%d'\n", implh);
+    int status = unload_impl_fn(impl_info);
+    if (status != 0) {
+        fprintf(stderr,
+                "[dispatch] Error occurred when unloading implementation "
+                "with id '%d'\n",
+                implh);
+        return -1;
+    }
+
     ImplInfo *result = hashmap_remove(&IMPL_MAP, &implh);
     if (result == NULL || result->implh != implh) {
         fprintf(stderr,
@@ -290,7 +299,7 @@ unload_interface_impl(ImplHandle implh)
     free(impl_info->interface);
     free(impl_info);
     impl_info = NULL;
-    printf("[dispatch] Unload implementation with id '%d'\n", implh);
+    printf("[dispatch] Unloaded implementation with id '%d'\n", implh);
 
     return 0;
 }
