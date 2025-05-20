@@ -202,7 +202,13 @@ function call_impl(implh::Int, func_name::String, in_user_args::Tuple{Vararg{Any
 end
 
 function unload_impl(implh)
-    println("Unload implementation with handle '$implh'")
+    status = @ccall $(unload_interface_impl_fn[])(
+        implh::Cint
+    )::Int
+
+    if status != 0
+        error("Failed to unload interface implementation with id '$impl'")
+    end
 end
 
 end # module OpenInterfaces
