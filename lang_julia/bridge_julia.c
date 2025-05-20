@@ -27,6 +27,14 @@ static bool INITIALIZED_ = false;
 static jl_module_t *CALLBACK_MODULE_;
 static jl_module_t *SERIALIZATION_MODULE_;
 
+// Global IdDict() that keeps references to Julia objects
+// between function calls to avoid them being garbage collected.
+static jl_value_t *REFS_;
+// Function Base.setindex! used to store references in `REFS_`.
+static jl_function_t *SETINDEX_FN_;
+// Function Base.delete! used to delete references from `REFS_`.
+static jl_function_t *DELETE_FN_;
+
 typedef struct {
     ImplInfo base;
     char module_name[64];
@@ -345,6 +353,37 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     if (jl_exception_occurred()) {
         goto catch;
     }
+
+    jl_function_t *println_fn = jl_get_function(jl_base_module, "println");
+    if (println_fn == NULL) {
+        fprintf(stderr, "[%s] Could not find function 'println' in Julia\n", prefix_);
+        goto catch;
+    }
+    printf("[%s] Instantiated self:\n", prefix_);
+    jl_call1(println_fn, self);
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+
+    REFS_ = jl_eval_string("refs_ = IdDict()");
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+    SETINDEX_FN_ = jl_get_function(jl_base_module, "setindex!");
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+
+    jl_call3(SETINDEX_FN_, REFS_, self, self);
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+
+    DELETE_FN_ = jl_get_function(jl_base_module, "delete!");
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+
     result->self = self;
 
     goto finally;
@@ -365,8 +404,19 @@ unload_impl(ImplInfo *impl_info_)
     assert(impl_info_->dh == OIF_LANG_JULIA);
     // Here, we need to use `setindex!` and `delete!` functions
     // as explained on the Embedding Julia page.
-    // JuliaImplInfo *impl_info = (JuliaImplInfo *)impl_info_;
+    JuliaImplInfo *impl_info = (JuliaImplInfo *)impl_info_;
 
+    if (impl_info->self != NULL) {
+        assert(DELETE_FN_ != NULL);
+        jl_call2(DELETE_FN_, REFS_, impl_info->self);
+        if (jl_exception_occurred()) {
+            handle_exception_();
+            return -1;
+        }
+    }
+
+    fprintf(stderr, "[%s] Unloading implementation with id '%d'\n", prefix_,
+            impl_info->base.implh);
     // Do not finalize embedded Julia as then it cannot be initialized again.
     // It is the same situation as with embedded Python.
     /* jl_atexit_hook(0); */
