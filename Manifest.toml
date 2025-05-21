@@ -2,7 +2,7 @@
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "f414e99f76d8caa55a96a92d16bfaab3316906fa"
+project_hash = "a6d12c98dfb96c03c2fda3e35e2cf7c4599d0d54"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e2478490447631aedba0823d4d7a80b2cc8cdb32"
@@ -861,6 +861,7 @@ uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 version = "0.3.27+1"
 
 [[deps.OpenInterfaces]]
+deps = ["Libdl"]
 path = "lang_julia/OpenInterfaces"
 uuid = "07cfd324-e924-40a7-85fa-5e46307e7ad7"
 version = "0.5.5"
