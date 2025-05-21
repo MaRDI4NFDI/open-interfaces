@@ -179,15 +179,6 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
         end
     end
 
-    print("typeof(in_arg_types) = ", typeof(in_arg_types), "\n")
-
-    in_args = Ref(OIFArgs(in_num_args, pointer(in_arg_types), pointer(in_arg_values)))
-    out_args = Ref(OIFArgs(out_num_args, pointer(out_arg_types), pointer(out_arg_values)))
-    # print("[OpenInterfaces.jl] in_arg_types = ", in_arg_types, "\n")
-    # print("[OpenInterfaces.jl] typeof(in_arg_types) = ", typeof(in_arg_types), "\n")
-    #
-    print("[OpenInterfaces.jl] out_arg_values = ", out_arg_values, "\n")
-
     in_args = Ref(OIFArgs(in_num_args, pointer(in_arg_types), pointer(in_arg_values), 42))
     out_args = Ref(OIFArgs(out_num_args, pointer(out_arg_types), pointer(out_arg_values), 42))
 
