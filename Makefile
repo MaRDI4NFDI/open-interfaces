@@ -13,7 +13,11 @@ all :
 
 .PHONY : test
 test :
+	@echo "=== C tests ==="
 	cd build && ctest --output-on-failure
+	@echo "=== Julia tests ==="
+	julia test/lang_julia/runtests.jl
+	@echo "=== Python tests ==="
 	pytest tests/lang_python
 
 .PHONY : pytest-valgrind
