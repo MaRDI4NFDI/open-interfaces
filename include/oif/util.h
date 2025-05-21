@@ -9,7 +9,6 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 
-
 /**
  * Convert `size_t` input to `uint32_t`.
  *
@@ -49,7 +48,8 @@ oif_strcmp_nocase(const char s1[static 1], const char s2[static 1]);
  * @param fmt The format string for the message.
  * @param ... The arguments for the format string.
  */
-int logerr(const char *prefix, const char *fmt, ...);
+int
+logerr(const char *prefix, const char *fmt, ...);
 
 #ifdef __cplusplus
 }
