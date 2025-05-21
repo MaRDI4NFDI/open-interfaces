@@ -170,7 +170,6 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             arr_p_ref = Ref(arr_p)
             push!(temp_refs, arr_p_ref)
             arr_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, arr_p_ref)
-            println("[OpenInterfaces.jl] arr_p: ", arr_p)
 
             out_arg_types[i] = OIF_ARRAY_F64
             out_arg_values[i] = arr_p_p
