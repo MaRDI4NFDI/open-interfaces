@@ -125,8 +125,37 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             push!(temp_refs, arg_ref)
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
         elseif typeof(arg) <: AbstractArray{Float64}
+            nd = ndims(arg)
+
+            dims_jl = collect(size(arg))
+            push!(temp_refs, dims_jl)
+            dimensions = Base.unsafe_convert(Ptr{Clong}, dims_jl)
+            push!(temp_refs, dimensions)
+            data = pointer(arg)
+            push!(temp_refs, data)
+
+            if nd == 1
+                # One-dimensional arrays are both C and Fortran-contiguous.
+                flags = OIF_ARRAY_C_CONTIGUOUS | OIF_ARRAY_F_CONTIGUOUS
+            else
+                # Julia arrays are Fortran-contiguous by default.
+                flags = OIF_ARRAY_F_CONTIGUOUS
+            end
+
+            arr = OIFArrayF64(nd, dimensions, data, flags)
+            push!(temp_refs, arr)
+
+            arr_ref = Ref(arr)
+            push!(temp_refs, arr_ref)
+            arr_p = Base.unsafe_convert(Ptr{Cvoid}, arr_ref)
+            push!(temp_refs, arr_p)
+
+            arr_p_ref = Ref(arr_p)
+            push!(temp_refs, arr_p_ref)
+            arr_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, arr_p_ref)
+
             in_arg_types[i] = OIF_ARRAY_F64
-            in_arg_values[i] = pointer(arg)
+            in_arg_values[i] = arr_p_p
         elseif typeof(arg) == String
             in_arg_types[i] = OIF_STR
             in_arg_values[i] = pointer(arg)
