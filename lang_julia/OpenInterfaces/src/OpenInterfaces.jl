@@ -46,6 +46,9 @@ end
     OIF_IMPL_INIT_ERROR = -2
 end
 
+const OIF_ARRAY_C_CONTIGUOUS::Int32 = 0x0001
+const OIF_ARRAY_F_CONTIGUOUS::Int32 = 0x0002
+
 struct OIFArgs
     num_args::Int64
     arg_types::Ptr{OIFArgType}
@@ -56,6 +59,7 @@ struct OIFArrayF64
     nd::Int32
     dimensions::Ptr{Int64}
     data::Ptr{Float64}
+    flags::Int32
 end
 
 struct OIFCallback
@@ -158,7 +162,15 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             data = pointer(arg)
             push!(temp_refs, data)
 
-            arr = OIFArrayF64(nd, dimensions, data)
+            if nd == 1
+                # One-dimensional arrays are both C and Fortran-contiguous.
+                flags = OIF_ARRAY_C_CONTIGUOUS | OIF_ARRAY_F_CONTIGUOUS
+            else
+                # Julia arrays are Fortran-contiguous by default.
+                flags = OIF_ARRAY_F_CONTIGUOUS
+            end
+
+            arr = OIFArrayF64(nd, dimensions, data, flags)
             push!(temp_refs, arr)
 
             arr_ref = Ref(arr)
