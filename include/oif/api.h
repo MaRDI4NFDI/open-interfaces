@@ -32,6 +32,11 @@ enum {
     OIF_LANG_COUNT = 6,
 };
 
+enum {
+    OIF_ARRAY_C_CONTIGUOUS = 0x0001,
+    OIF_ARRAY_F_CONTIGUOUS = 0x0002,
+};
+
 typedef struct {
     size_t num_args;
     OIFArgType *arg_types;
@@ -46,7 +51,15 @@ typedef struct {
     intptr_t *dimensions;
     // Pointer to actual data.
     double *data;
+    // Flags that describe the array: things like row-major order, etc.
+    int flags;
 } OIFArrayF64;
+
+// Check if the array is C-contiguous.
+#define OIF_ARRAY_C_CONTIGUOUS(arr) ((arr)->flags & OIF_ARRAY_C_CONTIGUOUS)
+
+// Check if the array is Fortran-contiguous.
+#define OIF_ARRAY_F_CONTIGUOUS(arr) ((arr)->flags & OIF_ARRAY_F_CONTIGUOUS)
 
 // This structure is used for callback functions.
 typedef struct {
