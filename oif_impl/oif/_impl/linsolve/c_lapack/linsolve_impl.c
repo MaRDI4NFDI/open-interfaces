@@ -8,6 +8,7 @@
 // Use LAPACKE - C-friendly interface to LAPACK.
 #include <lapacke.h>
 
+#include <oif/api.h>
 #include <oif_impl/linsolve.h>
 
 int
@@ -33,8 +34,23 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
     }
 
     lapack_int NRHS = 1;  // Number of right-hand sides.
-    lapack_int LDA = N;   // Leading Dimension of A
-    lapack_int LDB = 1;   // Leading Dimension of b
+    lapack_int LDA = N;   // Leading Dimension of A.
+    lapack_int LDB = 1;   // Leading Dimension of b.
+
+    int matrix_layout;
+
+    if (OIF_ARRAY_C_CONTIGUOUS(A)) {
+        matrix_layout = LAPACK_ROW_MAJOR;
+    }
+    else if (OIF_ARRAY_F_CONTIGUOUS(A)) {
+        matrix_layout = LAPACK_COL_MAJOR;
+        LDB = N;
+    }
+    else {
+        fprintf(stderr,
+                "[c_lapack] Matrix A is not C or Fortran contiguous. Cannot proceed\n");
+        return 1;
+    }
 
     assert(NRHS == b->nd);
     assert(b->nd == x->nd);
@@ -55,7 +71,7 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
 
     int *ipiv = malloc(sizeof *ipiv * N);
 
-    int info = LAPACKE_dgesv(LAPACK_ROW_MAJOR, N, NRHS, Acopy, LDA, ipiv, x->data, LDB);
+    int info = LAPACKE_dgesv(matrix_layout, N, NRHS, Acopy, LDA, ipiv, x->data, LDB);
 
     if (info > 0) {
         fprintf(stderr, "[linsolve] LU factorization of A was not successfull\n");
@@ -63,7 +79,7 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
         goto cleanup;
     }
     else if (info < 0) {
-        fprintf(stderr, "[linsolve] The %i-th argument had an illegal value", info);
+        fprintf(stderr, "[linsolve] The %i-th argument had an illegal value\n", info);
         goto cleanup;
     }
 
