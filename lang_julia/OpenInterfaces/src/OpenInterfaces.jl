@@ -120,7 +120,7 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             arg_ref = Ref(arg)
             push!(temp_refs, arg_ref)
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
-        elseif typeof(arg) == OIFArrayF64
+        elseif typeof(arg) <: AbstractArray{Float64}
             in_arg_types[i] = OIF_ARRAY_F64
             in_arg_values[i] = pointer(arg)
         elseif typeof(arg) == String
@@ -149,7 +149,7 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
         elseif typeof(arg) == Float64
             out_arg_types[i] = OIF_FLOAT64
             out_arg_values[i] = pointer(arg)
-        elseif typeof(arg) == Vector{Float64}
+        elseif typeof(arg) <: AbstractArray{Float64}
             nd = ndims(arg)
             dims_jl = collect(size(arg))
             push!(temp_refs, dims_jl)
