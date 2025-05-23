@@ -288,6 +288,33 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 OIFArrayF64 *arr = *(OIFArrayF64 **)in_args->arg_values[i];
                 pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
                                                    arr->data);
+                if (pValue == NULL) {
+                    fprintf(stderr, "[%s] Could not create NumPy array\n", prefix);
+                    goto cleanup;
+                }
+
+                if (arr->nd == 1) {
+                    PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_F_CONTIGUOUS);
+                }
+                else {
+                    if (OIF_ARRAY_C_CONTIGUOUS(arr)) {
+                        fprintf(stderr, "[%s] Got C-like array\n", prefix);
+                        PyArray_CLEARFLAGS((PyArrayObject *)pValue, NPY_ARRAY_F_CONTIGUOUS);
+                        PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS);
+                    }
+                    else if (OIF_ARRAY_F_CONTIGUOUS(arr)) {
+                        fprintf(stderr, "[%s] Got Fortran-like array\n", prefix);
+                        PyArray_CLEARFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS);
+                        PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_F_CONTIGUOUS);
+                    }
+                    else {
+                        fprintf(stderr, "[%s] Array is not C or Fortran contiguous. Cannot proceed\n", prefix);
+                        goto cleanup;
+                    }
+                }
+
+                fprintf(stderr, "[%s] Got array with %d dimensions\n", prefix, arr->nd);
+                fprintf(stderr, "[%s] Got array with flags: 0x%X\n", prefix, arr->flags);
             }
             else if (in_args->arg_types[i] == OIF_STR) {
                 char *c_str = *((char **)in_args->arg_values[i]);
@@ -396,8 +423,30 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             }
             else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
                 OIFArrayF64 *arr = *(OIFArrayF64 **)out_args->arg_values[i];
-                pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
-                                                   arr->data);
+                pValue = PyArray_SimpleNewFromData(
+                    arr->nd, arr->dimensions, NPY_FLOAT64, arr->data
+                );
+                if (pValue == NULL) {
+                    fprintf(stderr, "[%s] Could not create NumPy array\n", prefix);
+                    goto cleanup;
+                }
+
+                if (arr->nd == 1) {
+                    PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_F_CONTIGUOUS);
+                }
+                else {
+                    if (OIF_ARRAY_C_CONTIGUOUS(arr)) {
+                        PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS);
+                    }
+                    else if (OIF_ARRAY_F_CONTIGUOUS(arr)) {
+                        fprintf(stderr, "[%s] Got Fortran-like array\n", prefix);
+                        PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_F_CONTIGUOUS);
+                    }
+                    else {
+                        fprintf(stderr, "[%s] Array is not C or Fortran contiguous. Cannot proceed\n", prefix);
+                        goto cleanup;
+                    }
+                }
             }
             else {
                 pValue = NULL;
