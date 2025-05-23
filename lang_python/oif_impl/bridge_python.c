@@ -6,6 +6,7 @@
 #include <dlfcn.h>
 #include <stdbool.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include <oif/api.h>
@@ -262,6 +263,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 int
 call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
 {
+    int result = 1;
     if (impl_info->dh != OIF_LANG_PYTHON) {
         fprintf(stderr, "[%s] Provided implementation is not in Python\n", prefix);
         return -1;
@@ -271,12 +273,12 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     PyObject *pFunc;
     PyObject *pValue;
 
+    size_t num_args = in_args->num_args + out_args->num_args;
+    PyObject *pArgs = PyTuple_New(num_args);
+
     pFunc = PyObject_GetAttrString(impl->pInstance, method);
 
     if (pFunc && PyCallable_Check(pFunc)) {
-        size_t num_args = in_args->num_args + out_args->num_args;
-        PyObject *pArgs = PyTuple_New(num_args);
-
         // Convert input arguments.
         for (size_t i = 0; i < in_args->num_args; ++i) {
             if (in_args->arg_types[i] == OIF_FLOAT64) {
@@ -332,6 +334,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                             "has type OIF_CALLBACK "
                             "but it is actually is not callable\n",
                             prefix, i);
+                    goto cleanup;
                 }
             }
             else if (in_args->arg_types[i] == OIF_USER_DATA) {
@@ -371,14 +374,13 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             else {
                 pValue = NULL;
             }
+
             if (!pValue) {
-                Py_DECREF(pArgs);
-                Py_DECREF(pFunc);
                 fprintf(stderr,
                         "[%s] Cannot convert input argument #%zu with "
                         "provided type id %d\n",
                         prefix, i, in_args->arg_types[i]);
-                return 1;
+                goto cleanup;
             }
             PyTuple_SetItem(pArgs, i, pValue);
         }
@@ -401,11 +403,9 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 pValue = NULL;
             }
             if (!pValue) {
-                Py_DECREF(pArgs);
-                Py_DECREF(pFunc);
                 fprintf(stderr, "[%s] Cannot convert out_arg %zu of type %d\n", prefix, i,
                         out_args->arg_types[i]);
-                return 1;
+                goto cleanup;
             }
             PyTuple_SetItem(pArgs, i + in_args->num_args, pValue);
         }
@@ -434,7 +434,15 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     }
     Py_DECREF(pFunc);
 
-    return 0;
+    // Woo-hoo! We got a successful function call without errors.
+    result = 0;
+
+cleanup:
+    Py_XDECREF(pValue);
+    Py_XDECREF(pArgs);
+    Py_XDECREF(pFunc);
+
+    return result;
 }
 
 int
