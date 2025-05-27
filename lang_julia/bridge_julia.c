@@ -453,7 +453,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         }
         else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
             OIFArrayF64 *oif_array = *(OIFArrayF64 **)in_args->arg_values[i];
-            jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
+            jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, oif_array->nd);
             jl_value_t *dims =
                 build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
             bool own_buffer = false;
@@ -517,7 +517,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         }
         else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
             OIFArrayF64 *oif_array = *(OIFArrayF64 **)out_args->arg_values[i];
-            jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, 1);
+            jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, oif_array->nd);
             jl_value_t *dims =
                 build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
             bool own_buffer = false;
