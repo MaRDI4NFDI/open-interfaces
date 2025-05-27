@@ -4,7 +4,6 @@ using OpenInterfaces
 using OpenInterfaces.Interfaces.Linsolve
 
 IMPLEMENTATIONS = ["c_lapack", "numpy"]
-IMPLEMENTATIONS = ["c_lapack"]
 
 @testset "Testing Linsolve interface from Julia" begin
 
