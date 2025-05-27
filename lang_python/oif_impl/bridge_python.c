@@ -294,7 +294,8 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 }
 
                 if (arr->nd == 1) {
-                    PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_F_CONTIGUOUS);
+                    PyArray_ENABLEFLAGS((PyArrayObject *)pValue,
+                                        NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_F_CONTIGUOUS);
                 }
                 else {
                     if (OIF_ARRAY_C_CONTIGUOUS(arr)) {
@@ -306,9 +307,29 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                         fprintf(stderr, "[%s] Got Fortran-like array\n", prefix);
                         PyArray_CLEARFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS);
                         PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_F_CONTIGUOUS);
+
+                        // I am not quite sure why there is a duplication
+                        // of information in the PyArray_Object structure:
+                        // we not only preserve flags as NPY_ARRAY_F_CONTIGUOUS,
+                        // but also need to specify strides,
+                        // although the strides are completely deducable
+                        // from the dimensions, data type, and the order of the array.
+                        //
+                        // However, as we wrapped the existing array,
+                        // NumPy assumed that it is in the C style
+                        // and set the strides accordingly,
+                        // so we need to reverse them for the Fortran style.
+                        npy_intp *strides = PyArray_STRIDES((PyArrayObject *)pValue);
+                        for (int j = 0; j < arr->nd / 2; ++j) {
+                            npy_int tmp = strides[j];
+                            strides[j] = strides[arr->nd - j - 1];
+                            strides[arr->nd - j - 1] = tmp;
+                        }
                     }
                     else {
-                        fprintf(stderr, "[%s] Array is not C or Fortran contiguous. Cannot proceed\n", prefix);
+                        fprintf(stderr,
+                                "[%s] Array is not C or Fortran contiguous. Cannot proceed\n",
+                                prefix);
                         goto cleanup;
                     }
                 }
@@ -423,16 +444,16 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             }
             else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
                 OIFArrayF64 *arr = *(OIFArrayF64 **)out_args->arg_values[i];
-                pValue = PyArray_SimpleNewFromData(
-                    arr->nd, arr->dimensions, NPY_FLOAT64, arr->data
-                );
+                pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
+                                                   arr->data);
                 if (pValue == NULL) {
                     fprintf(stderr, "[%s] Could not create NumPy array\n", prefix);
                     goto cleanup;
                 }
 
                 if (arr->nd == 1) {
-                    PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_F_CONTIGUOUS);
+                    PyArray_ENABLEFLAGS((PyArrayObject *)pValue,
+                                        NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_F_CONTIGUOUS);
                 }
                 else {
                     if (OIF_ARRAY_C_CONTIGUOUS(arr)) {
@@ -441,9 +462,29 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     else if (OIF_ARRAY_F_CONTIGUOUS(arr)) {
                         fprintf(stderr, "[%s] Got Fortran-like array\n", prefix);
                         PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_F_CONTIGUOUS);
+
+                        // I am not quite sure why there is a duplication
+                        // of information in the PyArray_Object structure:
+                        // we not only preserve flags as NPY_ARRAY_F_CONTIGUOUS,
+                        // but also need to specify strides,
+                        // although the strides are completely deducable
+                        // from the dimensions, data type, and the order of the array.
+                        //
+                        // However, as we wrapped the existing array,
+                        // NumPy assumed that it is in the C style
+                        // and set the strides accordingly,
+                        // so we need to reverse them for the Fortran style.
+                        npy_intp *strides = PyArray_STRIDES((PyArrayObject *)pValue);
+                        for (int j = 0; j < arr->nd; ++j) {
+                            npy_int tmp = strides[j];
+                            strides[j] = strides[arr->nd - j - 1];
+                            strides[arr->nd - j - 1] = tmp;
+                        }
                     }
                     else {
-                        fprintf(stderr, "[%s] Array is not C or Fortran contiguous. Cannot proceed\n", prefix);
+                        fprintf(stderr,
+                                "[%s] Array is not C or Fortran contiguous. Cannot proceed\n",
+                                prefix);
                         goto cleanup;
                     }
                 }
