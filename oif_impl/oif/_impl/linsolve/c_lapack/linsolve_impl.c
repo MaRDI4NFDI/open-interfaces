@@ -18,7 +18,7 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
 
     if (sizeof(N) < sizeof A->dimensions[1]) {
         fprintf(stderr,
-                "[c_lapack::solve_lin] WARN Type `lapack_int` is smaller "
+                "[linsolve::c_lapack] WARN Type `lapack_int` is smaller "
                 "than the one used to describe dimensions of 'OIFArrayF64' "
                 "variables\n");
     }
@@ -28,7 +28,7 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
     }
     else {
         fprintf(stderr,
-                "[c_lapack::solve_lin] Dimensions of matrix are larger than "
+                "[linsolve::c_lapack] Dimensions of matrix are larger than "
                 "this LAPACK implementation can handle\n");
         return 1;
     }
@@ -48,7 +48,7 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
     }
     else {
         fprintf(stderr,
-                "[c_lapack] Matrix A is not C or Fortran contiguous. Cannot proceed\n");
+                "[linsolve::c_lapack] Matrix A is not C or Fortran contiguous. Cannot proceed\n");
         return 1;
     }
 
@@ -58,15 +58,15 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
 
     double *Acopy = malloc(sizeof(double) * N * N);
     if (Acopy == NULL) {
-        fprintf(stderr, "[c_lapack:solve_lin] Could not allocate memory for matrix copy\n");
+        fprintf(stderr, "[linsolve::c_lapack] Could not allocate memory for matrix copy\n");
         return 2;
     }
     memcpy(Acopy, A->data, sizeof(double) * N * N);
     memcpy(x->data, b->data, sizeof(double) * N);
 
-    fprintf(stderr, "[linsolve] A dimensions = %ld x %ld\n", A->dimensions[0],
+    fprintf(stderr, "[linsolve::c_lapack] A dimensions = %ld x %ld\n", A->dimensions[0],
             A->dimensions[1]);
-    fprintf(stderr, "[linsolve] b dimensions: nd = %d, dim[0] = %ld\n", b->nd,
+    fprintf(stderr, "[linsolve::c_lapack] b dimensions: nd = %d, dim[0] = %ld\n", b->nd,
             b->dimensions[0]);
 
     int *ipiv = malloc(sizeof *ipiv * N);
@@ -74,12 +74,12 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
     int info = LAPACKE_dgesv(matrix_layout, N, NRHS, Acopy, LDA, ipiv, x->data, LDB);
 
     if (info > 0) {
-        fprintf(stderr, "[linsolve] LU factorization of A was not successfull\n");
-        fprintf(stderr, "[linsolve] U(%i, %i) are zero, hence A is singular\n", info, info);
+        fprintf(stderr, "[linsolve::c_lapack] LU factorization of A was not successfull\n");
+        fprintf(stderr, "[linsolve::c_lapack] U(%i, %i) are zero, hence A is singular\n", info, info);
         goto cleanup;
     }
     else if (info < 0) {
-        fprintf(stderr, "[linsolve] The %i-th argument had an illegal value\n", info);
+        fprintf(stderr, "[linsolve::c_lapack] The %i-th argument had an illegal value\n", info);
         goto cleanup;
     }
 
