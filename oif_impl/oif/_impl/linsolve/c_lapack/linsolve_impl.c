@@ -47,8 +47,9 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
         LDB = N;
     }
     else {
-        fprintf(stderr,
-                "[linsolve::c_lapack] Matrix A is not C or Fortran contiguous. Cannot proceed\n");
+        fprintf(
+            stderr,
+            "[linsolve::c_lapack] Matrix A is not C or Fortran contiguous. Cannot proceed\n");
         return 1;
     }
 
@@ -75,11 +76,13 @@ solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
 
     if (info > 0) {
         fprintf(stderr, "[linsolve::c_lapack] LU factorization of A was not successfull\n");
-        fprintf(stderr, "[linsolve::c_lapack] U(%i, %i) are zero, hence A is singular\n", info, info);
+        fprintf(stderr, "[linsolve::c_lapack] U(%i, %i) are zero, hence A is singular\n", info,
+                info);
         goto cleanup;
     }
     else if (info < 0) {
-        fprintf(stderr, "[linsolve::c_lapack] The %i-th argument had an illegal value\n", info);
+        fprintf(stderr, "[linsolve::c_lapack] The %i-th argument had an illegal value\n",
+                info);
         goto cleanup;
     }
 
