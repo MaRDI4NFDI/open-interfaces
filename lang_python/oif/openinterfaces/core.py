@@ -29,6 +29,10 @@ OIF_LANG_JULIA = 4
 OIF_LANG_R = 5
 OIF_LANG_COUNT = 6
 
+# Bit mask that sets flags in OIFArrayF64 structure.
+OIF_ARRAY_C_CONTIGUOUS = 0x0001
+OIF_ARRAY_F_CONTIGUOUS = 0x0002
+
 _site_packages = site.getsitepackages()[-1]
 
 # Add path to Python implementations to the environment variable.
@@ -70,6 +74,7 @@ class OIFArrayF64(ctypes.Structure):
         ("nd", ctypes.c_int),
         ("dimensions", ctypes.POINTER(ctypes.c_long)),
         ("data", ctypes.POINTER(ctypes.c_double)),
+        ("flags", ctypes.c_int),
     ]
 
 
@@ -259,7 +264,17 @@ class OIFPyBinding:
                 dimensions = (ctypes.c_long * len(arg.shape))(*arg.shape)
                 data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-                oif_array = OIFArrayF64(nd, dimensions, data)
+                flags = 0
+                if arg.flags.c_contiguous:
+                    flags += OIF_ARRAY_C_CONTIGUOUS
+                if arg.flags.f_contiguous:
+                    flags += OIF_ARRAY_F_CONTIGUOUS
+
+                if not flags:
+                    raise ValueError("Array must be either C or Fortran contiguous")
+
+                oif_array = OIFArrayF64(nd, dimensions, data, flags)
+
                 oif_array_p = ctypes.cast(ctypes.pointer(oif_array), ctypes.c_void_p)
                 oif_array_p_p = ctypes.cast(
                     ctypes.pointer(oif_array_p), ctypes.c_void_p
@@ -319,7 +334,17 @@ class OIFPyBinding:
                 dimensions = (ctypes.c_long * len(arg.shape))(*arg.shape)
                 data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-                oif_array = OIFArrayF64(nd, dimensions, data)
+                flags = 0
+                if arg.flags.c_contiguous:
+                    flags += OIF_ARRAY_C_CONTIGUOUS
+                if arg.flags.f_contiguous:
+                    flags += OIF_ARRAY_F_CONTIGUOUS
+
+                if not flags:
+                    raise ValueError("Array must be either C or Fortran contiguous")
+
+                oif_array = OIFArrayF64(nd, dimensions, data, flags)
+
                 oif_array_p = ctypes.cast(ctypes.pointer(oif_array), ctypes.c_void_p)
                 oif_array_p_p = ctypes.cast(
                     ctypes.pointer(oif_array_p), ctypes.c_void_p
