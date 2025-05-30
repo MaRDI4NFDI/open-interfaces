@@ -36,4 +36,4 @@ TEST_P(LinearSolverFixture, TestCase1)
 }
 
 INSTANTIATE_TEST_SUITE_P(LinearSolverTestSuite, LinearSolverFixture,
-                         ::testing::Values("c_lapack", "numpy"));
+                         ::testing::Values("c_lapack", "numpy", "jl_backslash"));
