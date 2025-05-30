@@ -27,6 +27,11 @@ oif_create_array_f64(int nd, intptr_t *dimensions)
     OIFArrayF64 *x = malloc(sizeof(OIFArrayF64));
     x->nd = nd;
     x->dimensions = dimensions;
+    x->flags = OIF_ARRAY_C_CONTIGUOUS;
+
+    if (nd == 1) {
+        x->flags = OIF_ARRAY_C_CONTIGUOUS | OIF_ARRAY_F_CONTIGUOUS;
+    }
 
     int size = 1;
     for (size_t i = 0; i < nd; ++i) {
