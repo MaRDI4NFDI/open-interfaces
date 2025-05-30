@@ -182,8 +182,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         }
         else {
             fflush(stdout);
-            fprintf(stderr, "[%s] Unknown input arg type: %d\n",
-                    prefix_, in_args->arg_types[i]);
+            fprintf(stderr, "[%s] Unknown input arg type: %d\n", prefix_,
+                    in_args->arg_types[i]);
             goto cleanup;
         }
     }
@@ -196,8 +196,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             arg_types[i] = &ffi_type_pointer;
         }
         else {
-            fprintf(stderr, "[%s] Unknown output arg type: %d\n",
-                    prefix_, out_args->arg_types[i - num_in_args]);
+            fprintf(stderr, "[%s] Unknown output arg type: %d\n", prefix_,
+                    out_args->arg_types[i - num_in_args]);
             goto cleanup;
         }
     }
