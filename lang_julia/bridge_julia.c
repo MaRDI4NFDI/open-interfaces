@@ -460,6 +460,11 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             bool own_buffer = false;
             cur_julia_arg = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
                                                           (jl_value_t *)dims, own_buffer);
+
+            if (OIF_ARRAY_C_CONTIGUOUS(oif_array) && !OIF_ARRAY_F_CONTIGUOUS(oif_array)) {
+                jl_function_t *transpose_fn = jl_get_function(jl_base_module, "transpose");
+                cur_julia_arg = jl_call1(transpose_fn, cur_julia_arg);
+            }
         }
         else if (in_args->arg_types[i] == OIF_STR) {
             cur_julia_arg = jl_cstr_to_string(*((char **)in_args->arg_values[i]));
@@ -525,6 +530,11 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             bool own_buffer = false;
             cur_julia_arg = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
                                                           (jl_value_t *)dims, own_buffer);
+
+            if (OIF_ARRAY_C_CONTIGUOUS(oif_array) && !OIF_ARRAY_F_CONTIGUOUS(oif_array)) {
+                jl_function_t *transpose_fn = jl_get_function(jl_base_module, "transpose");
+                cur_julia_arg = jl_call1(transpose_fn, cur_julia_arg);
+            }
         }
         else {
             fprintf(stderr,
