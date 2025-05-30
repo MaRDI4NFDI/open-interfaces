@@ -236,6 +236,32 @@ cleanup:
     return julia_dict;
 }
 
+
+// Wrap an `OIFArrayF64` in a Julia array.
+// The function additionally transposes the array if it is C-contiguous
+// so that linear-algebra functions could work with it correctly.
+static inline jl_value_t *
+get_julia_array_from_oif_arrayf64(OIFArrayF64 **value)
+{
+    jl_value_t *julia_array;
+
+    OIFArrayF64 *oif_array = *value;
+    jl_value_t *arr_type =
+        jl_apply_array_type((jl_value_t *)jl_float64_type, oif_array->nd);
+    jl_value_t *dims =
+        build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
+    bool own_buffer = false;
+    julia_array = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
+                                                  (jl_value_t *)dims, own_buffer);
+
+    if (OIF_ARRAY_C_CONTIGUOUS(oif_array) && !OIF_ARRAY_F_CONTIGUOUS(oif_array)) {
+        jl_function_t *transpose_fn = jl_get_function(jl_base_module, "transpose");
+        julia_array = jl_call1(transpose_fn, julia_array);
+    }
+
+    return julia_array;
+}
+
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
@@ -452,19 +478,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             cur_julia_arg = jl_box_float64(*(double *)in_args->arg_values[i]);
         }
         else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
-            OIFArrayF64 *oif_array = *(OIFArrayF64 **)in_args->arg_values[i];
-            jl_value_t *arr_type =
-                jl_apply_array_type((jl_value_t *)jl_float64_type, oif_array->nd);
-            jl_value_t *dims =
-                build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
-            bool own_buffer = false;
-            cur_julia_arg = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
-                                                          (jl_value_t *)dims, own_buffer);
-
-            if (OIF_ARRAY_C_CONTIGUOUS(oif_array) && !OIF_ARRAY_F_CONTIGUOUS(oif_array)) {
-                jl_function_t *transpose_fn = jl_get_function(jl_base_module, "transpose");
-                cur_julia_arg = jl_call1(transpose_fn, cur_julia_arg);
-            }
+            cur_julia_arg = get_julia_array_from_oif_arrayf64(in_args->arg_values[i]);
         }
         else if (in_args->arg_types[i] == OIF_STR) {
             cur_julia_arg = jl_cstr_to_string(*((char **)in_args->arg_values[i]));
@@ -522,19 +536,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             cur_julia_arg = jl_box_float64(*(float *)out_args->arg_values[i]);
         }
         else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
-            OIFArrayF64 *oif_array = *(OIFArrayF64 **)out_args->arg_values[i];
-            jl_value_t *arr_type =
-                jl_apply_array_type((jl_value_t *)jl_float64_type, oif_array->nd);
-            jl_value_t *dims =
-                build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
-            bool own_buffer = false;
-            cur_julia_arg = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
-                                                          (jl_value_t *)dims, own_buffer);
-
-            if (OIF_ARRAY_C_CONTIGUOUS(oif_array) && !OIF_ARRAY_F_CONTIGUOUS(oif_array)) {
-                jl_function_t *transpose_fn = jl_get_function(jl_base_module, "transpose");
-                cur_julia_arg = jl_call1(transpose_fn, cur_julia_arg);
-            }
+            cur_julia_arg = get_julia_array_from_oif_arrayf64(out_args->arg_values[i]);
         }
         else {
             fprintf(stderr,
