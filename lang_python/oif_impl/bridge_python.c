@@ -23,7 +23,7 @@ static int IMPL_COUNTER = 0;
 
 static bool is_python_initialized_by_us = false;
 
-static char prefix[] = "dispatch_python";
+static char prefix_[] = "bridge_python";
 
 PyObject *
 instantiate_callback_class(void)
@@ -37,7 +37,7 @@ instantiate_callback_class(void)
 
     if (pModule == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[%s] Failed to load callback module\n", prefix);
+        fprintf(stderr, "[%s] Failed to load callback module\n", prefix_);
         exit(1);
     }
 
@@ -47,7 +47,7 @@ instantiate_callback_class(void)
         fprintf(stderr,
                 "[%s] Cannot proceed as callback class %s could "
                 "not be instantiated\n",
-                prefix, class_name);
+                prefix_, class_name);
     }
     Py_INCREF(CALLBACK_CLASS_P);
     Py_DECREF(pModule);
@@ -65,14 +65,14 @@ get_deserialization_function(void)
 
     if (pModule == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[%s] Failed to load `serialization` module\n", prefix);
+        fprintf(stderr, "[%s] Failed to load `serialization` module\n", prefix_);
         exit(1);
     }
 
     PyObject *pFunc = PyObject_GetAttrString(pModule, "deserialize");
     if (pFunc == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[%s] Could not find function `deserialize`\n", prefix);
+        fprintf(stderr, "[%s] Could not find function `deserialize`\n", prefix_);
     }
 
     return pFunc;
@@ -84,13 +84,13 @@ convert_oif_callback(OIFCallback *p)
     const char *id = "123";
     PyObject *fn_p = PyCapsule_New(p->fn_p_c, id, NULL);
     if (fn_p == NULL) {
-        fprintf(stderr, "[%s] Could not create PyCapsule\n", prefix);
+        fprintf(stderr, "[%s] Could not create PyCapsule\n", prefix_);
     }
-    fprintf(stderr, "[%s] HARDCODE!!!!!!\n", prefix);
+    fprintf(stderr, "[%s] HARDCODE!!!!!!\n", prefix_);
     unsigned int nargs = 4;
     PyObject *obj = Py_BuildValue("(N, I)", fn_p, nargs);
     if (obj == NULL) {
-        fprintf(stderr, "[%s] Could not build arguments\n", prefix);
+        fprintf(stderr, "[%s] Could not build arguments\n", prefix_);
     }
     return obj;
 }
@@ -109,7 +109,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     (void)version_major;
     (void)version_minor;
     if (Py_IsInitialized()) {
-        fprintf(stderr, "[%s] Backend is already initialized\n", prefix);
+        fprintf(stderr, "[%s] Backend is already initialized\n", prefix_);
     }
     else {
         Py_Initialize();
@@ -125,19 +125,19 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     char libpython_name[1024];
     pFileName = PyUnicode_DecodeFSDefault("sysconfig");
     if (pFileName == NULL) {
-        fprintf(stderr, "[%s] Could not find `sysconfig` module file\n", prefix);
+        fprintf(stderr, "[%s] Could not find `sysconfig` module file\n", prefix_);
         return NULL;
     }
     pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
 
     if (pModule == NULL) {
-        fprintf(stderr, "[%s] Could not import `sysconfig` module\n", prefix);
+        fprintf(stderr, "[%s] Could not import `sysconfig` module\n", prefix_);
         return NULL;
     }
     pFunc = PyObject_GetAttrString(pModule, "get_config_var");
     if (pFunc == NULL || !PyCallable_Check(pFunc)) {
-        fprintf(stderr, "[%s] Could not find function `sysconfig.get_config_var`\n", prefix);
+        fprintf(stderr, "[%s] Could not find function `sysconfig.get_config_var`\n", prefix_);
         return NULL;
     }
     pArgs = PyTuple_New(1);
@@ -146,28 +146,28 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     if (status != 0) {
         fprintf(stderr,
                 "[%s] Could not build arguments for executing `sysconfig.get_config_var`\n",
-                prefix);
+                prefix_);
         return NULL;
     }
     pValue = PyObject_CallObject(pFunc, pArgs);
     Py_DECREF(pArgs);
     if (pValue == NULL) {
-        fprintf(stderr, "[%s] Could not execute `sysconfig.get_config_var`\n", prefix);
+        fprintf(stderr, "[%s] Could not execute `sysconfig.get_config_var`\n", prefix_);
         return NULL;
     }
     const char *libpython_path = PyUnicode_AsUTF8(pValue);
     Py_DECREF(pValue);
     if (libpython_path == NULL) {
-        fprintf(stderr, "[%s] Could not convert path to `libpython`\n", prefix);
+        fprintf(stderr, "[%s] Could not convert path to `libpython`\n", prefix_);
         return NULL;
     }
 
-    fprintf(stderr, "[%s] libpython path: %s\n", prefix, libpython_path);
+    fprintf(stderr, "[%s] libpython path: %s\n", prefix_, libpython_path);
     sprintf(libpython_name, "libpython%d.%d.so", PY_MAJOR_VERSION, PY_MINOR_VERSION);
-    fprintf(stderr, "[%s] Loading %s\n", prefix, libpython_name);
+    fprintf(stderr, "[%s] Loading %s\n", prefix_, libpython_name);
     void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
     if (libpython == NULL) {
-        fprintf(stderr, "[%s] Cannot open python library\n", prefix);
+        fprintf(stderr, "[%s] Cannot open python library\n", prefix_);
         exit(EXIT_FAILURE);
     }
 
@@ -176,7 +176,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         "print('[dispatch_python]', sys.executable); "
         "print('[dispatch_python]', sys.version)");
     if (status < 0) {
-        fprintf(stderr, "[%s] An error occurred when initializating Python\n", prefix);
+        fprintf(stderr, "[%s] An error occurred when initializating Python\n", prefix_);
         return NULL;
     }
 
@@ -186,7 +186,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         "import numpy; "
         "print('[dispatch_python] NumPy version: ', numpy.__version__)");
     if (status < 0) {
-        fprintf(stderr, "[%s] An error occurred when initializating Python\n", prefix);
+        fprintf(stderr, "[%s] An error occurred when initializating Python\n", prefix_);
         return NULL;
     }
 
@@ -212,14 +212,14 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         }
     }
 
-    fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix, moduleName);
-    fprintf(stderr, "[%s] Provided class name: '%s'\n", prefix, className);
+    fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix_, moduleName);
+    fprintf(stderr, "[%s] Provided class name: '%s'\n", prefix_, className);
     pFileName = PyUnicode_FromString(moduleName);
     if (pFileName == NULL) {
         fprintf(stderr,
                 "[%s::load_impl] Provided moduleName '%s' "
                 "could not be resolved to file name\n",
-                prefix, moduleName);
+                prefix_, moduleName);
         return NULL;
     }
     pModule = PyImport_Import(pFileName);
@@ -227,7 +227,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     if (pModule == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[%s] Failed to load module \"%s\"\n", prefix, moduleName);
+        fprintf(stderr, "[%s] Failed to load module \"%s\"\n", prefix_, moduleName);
         return NULL;
     }
 
@@ -236,7 +236,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     pInstance = PyObject_CallObject(pClass, pInitArgs);
     if (pInstance == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[%s] Failed to instantiate class %s\n", prefix, className);
+        fprintf(stderr, "[%s] Failed to instantiate class %s\n", prefix_, className);
         Py_DECREF(pClass);
         return NULL;
     }
@@ -249,7 +249,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         fprintf(stderr,
                 "[%s] Could not allocate memory for Python "
                 "implementation information\n",
-                prefix);
+                prefix_);
         return NULL;
     }
     impl_info->pInstance = pInstance;
@@ -265,7 +265,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
 {
     int result = 1;
     if (impl_info->dh != OIF_LANG_PYTHON) {
-        fprintf(stderr, "[%s] Provided implementation is not in Python\n", prefix);
+        fprintf(stderr, "[%s] Provided implementation is not in Python\n", prefix_);
         return -1;
     }
     PythonImplInfo *impl = (PythonImplInfo *)impl_info;
@@ -289,7 +289,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
                                                    arr->data);
                 if (pValue == NULL) {
-                    fprintf(stderr, "[%s] Could not create NumPy array\n", prefix);
+                    fprintf(stderr, "[%s] Could not create NumPy array\n", prefix_);
                     goto cleanup;
                 }
 
@@ -299,12 +299,12 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 }
                 else {
                     if (OIF_ARRAY_C_CONTIGUOUS(arr)) {
-                        fprintf(stderr, "[%s] Got C-like array\n", prefix);
+                        fprintf(stderr, "[%s] Got C-like array\n", prefix_);
                         PyArray_CLEARFLAGS((PyArrayObject *)pValue, NPY_ARRAY_F_CONTIGUOUS);
                         PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS);
                     }
                     else if (OIF_ARRAY_F_CONTIGUOUS(arr)) {
-                        fprintf(stderr, "[%s] Got Fortran-like array\n", prefix);
+                        fprintf(stderr, "[%s] Got Fortran-like array\n", prefix_);
                         PyArray_CLEARFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS);
                         PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_F_CONTIGUOUS);
 
@@ -329,13 +329,13 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     else {
                         fprintf(stderr,
                                 "[%s] Array is not C or Fortran contiguous. Cannot proceed\n",
-                                prefix);
+                                prefix_);
                         goto cleanup;
                     }
                 }
 
-                fprintf(stderr, "[%s] Got array with %d dimensions\n", prefix, arr->nd);
-                fprintf(stderr, "[%s] Got array with flags: 0x%X\n", prefix, arr->flags);
+                fprintf(stderr, "[%s] Got array with %d dimensions\n", prefix_, arr->nd);
+                fprintf(stderr, "[%s] Got array with flags: 0x%X\n", prefix_, arr->flags);
             }
             else if (in_args->arg_types[i] == OIF_STR) {
                 char *c_str = *((char **)in_args->arg_values[i]);
@@ -359,7 +359,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     fprintf(stderr,
                             "[%s] Check what callback to "
                             "wrap via src field\n",
-                            prefix);
+                            prefix_);
                     if (impl->pCallbackClass == NULL) {
                         impl->pCallbackClass = instantiate_callback_class();
                     }
@@ -369,11 +369,11 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                         fprintf(stderr,
                                 "[%s] Could not instantiate "
                                 "Callback class for wrapping C functions\n",
-                                prefix);
+                                prefix_);
                     }
                 }
                 else {
-                    fprintf(stderr, "[%s] Cannot determine callback source\n", prefix);
+                    fprintf(stderr, "[%s] Cannot determine callback source\n", prefix_);
                     pValue = NULL;
                 }
                 if (!PyCallable_Check(pValue)) {
@@ -381,7 +381,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                             "[%s] Input argument #%zu "
                             "has type OIF_CALLBACK "
                             "but it is actually is not callable\n",
-                            prefix, i);
+                            prefix_, i);
                     goto cleanup;
                 }
             }
@@ -395,7 +395,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     pValue = user_data->py;
                 }
                 else {
-                    fprintf(stderr, "[%s] Cannot handle user data with src %d\n", prefix,
+                    fprintf(stderr, "[%s] Cannot handle user data with src %d\n", prefix_,
                             user_data->src);
                     pValue = NULL;
                 }
@@ -415,7 +415,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 else {
                     pValue = PyDict_New();
                     if (pValue == NULL) {
-                        fprintf(stderr, "[%s] Could not create a dictionary\n", prefix);
+                        fprintf(stderr, "[%s] Could not create a dictionary\n", prefix_);
                     }
                 }
             }
@@ -427,7 +427,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 fprintf(stderr,
                         "[%s] Cannot convert input argument #%zu with "
                         "provided type id %d\n",
-                        prefix, i, in_args->arg_types[i]);
+                        prefix_, i, in_args->arg_types[i]);
                 goto cleanup;
             }
             PyTuple_SetItem(pArgs, i, pValue);
@@ -436,7 +436,6 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         for (size_t i = 0; i < out_args->num_args; ++i) {
             if (out_args->arg_types[i] == OIF_INT) {
                 int *tmp = *(int **)out_args->arg_values[i];
-                printf("tmp =====  %d\n", *tmp);
                 pValue = PyArray_SimpleNewFromData(1, (intptr_t[1]){1}, NPY_INT32, tmp);
             }
             else if (out_args->arg_types[i] == OIF_FLOAT64) {
@@ -447,7 +446,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
                                                    arr->data);
                 if (pValue == NULL) {
-                    fprintf(stderr, "[%s] Could not create NumPy array\n", prefix);
+                    fprintf(stderr, "[%s] Could not create NumPy array\n", prefix_);
                     goto cleanup;
                 }
 
@@ -460,7 +459,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                         PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_C_CONTIGUOUS);
                     }
                     else if (OIF_ARRAY_F_CONTIGUOUS(arr)) {
-                        fprintf(stderr, "[%s] Got Fortran-like array\n", prefix);
+                        fprintf(stderr, "[%s] Got Fortran-like array\n", prefix_);
                         PyArray_ENABLEFLAGS((PyArrayObject *)pValue, NPY_ARRAY_F_CONTIGUOUS);
 
                         // I am not quite sure why there is a duplication
@@ -484,7 +483,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     else {
                         fprintf(stderr,
                                 "[%s] Array is not C or Fortran contiguous. Cannot proceed\n",
-                                prefix);
+                                prefix_);
                         goto cleanup;
                     }
                 }
@@ -493,7 +492,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 pValue = NULL;
             }
             if (!pValue) {
-                fprintf(stderr, "[%s] Cannot convert out_arg %zu of type %d\n", prefix, i,
+                fprintf(stderr, "[%s] Cannot convert out_arg %zu of type %d\n", prefix_, i,
                         out_args->arg_types[i]);
                 goto cleanup;
             }
@@ -509,16 +508,16 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         else {
             Py_DECREF(pFunc);
             PyErr_Print();
-            fprintf(stderr, "[%s] Call failed\n", prefix);
+            fprintf(stderr, "[%s] Call failed\n", prefix_);
             return 2;
         }
     }
     else {
         if (PyErr_Occurred()) {
-            fprintf(stderr, "[%s] An error occurred during the call\n", prefix);
+            fprintf(stderr, "[%s] An error occurred during the call\n", prefix_);
             PyErr_Print();
         }
-        fprintf(stderr, "[%s] Cannot find function \"%s\"\n", prefix, method);
+        fprintf(stderr, "[%s] Cannot find function \"%s\"\n", prefix_, method);
         Py_XDECREF(pFunc);
         return -1;
     }
@@ -542,7 +541,7 @@ unload_impl(ImplInfo *impl_info_)
         fprintf(stderr,
                 "[%s] unload_impl received non-Python "
                 "implementation argument\n",
-                prefix);
+                prefix_);
         return -1;
     }
     PythonImplInfo *impl_info = (PythonImplInfo *)impl_info_;

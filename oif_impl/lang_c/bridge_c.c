@@ -21,6 +21,8 @@ typedef struct {
 
 static int IMPL_COUNTER = 0;
 
+static char *prefix_ = "bridge_c";
+
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
@@ -31,15 +33,15 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     void *impl_lib = dlopen(impl_details, RTLD_LOCAL | RTLD_LAZY);
     if (impl_lib == NULL) {
         fprintf(stderr,
-                "[dispatch_c] Could not load implementation library '%s', "
+                "[%s] Could not load implementation library '%s', "
                 "error: %s\n",
-                impl_details, dlerror());
+                prefix_, impl_details, dlerror());
         return NULL;
     }
 
     CImplInfo *impl_info = malloc(sizeof(CImplInfo));
     if (impl_info == NULL) {
-        fprintf(stderr, "[dispatch_c] Could not create an implementation structure\n");
+        fprintf(stderr, "[%s] Could not create an implementation structure\n", prefix_);
         return NULL;
     }
     impl_info->impl_lib = impl_lib;
@@ -56,8 +58,9 @@ unload_impl(ImplInfo *impl_info_)
 {
     if (impl_info_->dh != OIF_LANG_C) {
         fprintf(stderr,
-                "[dispatch_python] unload_impl received non-C implementation "
-                "argument\n");
+                "[%s] unload_impl received non-C implementation "
+                "argument\n",
+                prefix_);
         return -1;
     }
     CImplInfo *impl_info = (CImplInfo *)impl_info_;
@@ -65,9 +68,9 @@ unload_impl(ImplInfo *impl_info_)
     int status = dlclose(impl_info->impl_lib);
     if (status != 0) {
         fprintf(stderr,
-                "[dispatch_c] While closing implementation '%s' an error occurred. "
+                "[%] While closing implementation '%s' an error occurred. "
                 "Error message: %s",
-                impl_info->impl_details, dlerror());
+                prefix_, impl_info->impl_details, dlerror());
     }
     IMPL_COUNTER--;
 
@@ -85,7 +88,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     AllocationTracker *tracker = NULL;
 
     if (impl_info_->dh != OIF_LANG_C) {
-        fprintf(stderr, "[dispatch_c] Provided implementation is not implemented in C\n");
+        fprintf(stderr, "[%s] Provided implementation is not implemented in C\n", prefix_);
         return -1;
     }
 
@@ -93,8 +96,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     void *service_lib = impl_info->impl_lib;
     void *func = dlsym(service_lib, method);
     if (func == NULL) {
-        fprintf(stderr, "[dispatch_c] Cannot load interface '%s'\n", method);
-        fprintf(stderr, "[dispatch_c] dlerror() = %s\n", dlerror());
+        fprintf(stderr, "[%s] Cannot load interface '%s'\n", prefix_, method);
+        fprintf(stderr, "[%s] dlerror() = %s\n", prefix_, dlerror());
         goto cleanup;
     }
 
@@ -104,12 +107,12 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     arg_types = malloc(num_total_args * sizeof(ffi_type *));
     if (arg_types == NULL) {
-        fprintf(stderr, "[dispatch_c] Could not allocate memory for FFI types\n");
+        fprintf(stderr, "[%s] Could not allocate memory for FFI types\n", prefix_);
         goto cleanup;
     }
     arg_values = malloc(num_total_args * sizeof(void *));
     if (arg_values == NULL) {
-        fprintf(stderr, "[dispatch_c] Could not allocate memory for FFI values\n");
+        fprintf(stderr, "[%s] Could not allocate memory for FFI values\n", prefix_);
         goto cleanup;
     }
 
@@ -140,8 +143,9 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             }
             else {
                 fprintf(stderr,
-                        "[dispatch_c] Cannot handle OIFUserData because of the unsupported "
-                        "language.\n");
+                        "[%s] Cannot handle OIFUserData because of the unsupported "
+                        "language.\n",
+                        prefix_);
                 goto cleanup;
             }
         }
@@ -160,7 +164,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                 // We need to obtain a pointer as it is required by `libffi`.
                 OIFConfigDict **new_dict_p = malloc(sizeof(void *));
                 if (new_dict_p == NULL) {
-                    fprintf(stderr, "Could not allocate memory\n");
+                    fprintf(stderr, "[%s] Could not allocate memory\n", prefix_);
                     exit(1);
                 }
                 *new_dict_p = new_dict;
@@ -178,8 +182,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         }
         else {
             fflush(stdout);
-            fprintf(stderr, "[dispatch_c] Unknown input arg type: %d\n",
-                    in_args->arg_types[i]);
+            fprintf(stderr, "[%s] Unknown input arg type: %d\n",
+                    prefix_, in_args->arg_types[i]);
             goto cleanup;
         }
     }
@@ -192,8 +196,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             arg_types[i] = &ffi_type_pointer;
         }
         else {
-            fprintf(stderr, "[dispatch_c] Unknown output arg type: %d\n",
-                    out_args->arg_types[i - num_in_args]);
+            fprintf(stderr, "[%s] Unknown output arg type: %d\n",
+                    prefix_, out_args->arg_types[i - num_in_args]);
             goto cleanup;
         }
     }
@@ -202,7 +206,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         ffi_prep_cif(&cif, FFI_DEFAULT_ABI, num_total_args, &ffi_type_sint, arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
-        fprintf(stderr, "[dispatch_c] ffi_prep_cif was not OK");
+        fprintf(stderr, "[%s] ffi_prep_cif was not OK", prefix_);
         goto cleanup;
     }
 
