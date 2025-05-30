@@ -236,7 +236,6 @@ cleanup:
     return julia_dict;
 }
 
-
 // Wrap an `OIFArrayF64` in a Julia array.
 // The function additionally transposes the array if it is C-contiguous
 // so that linear-algebra functions could work with it correctly.
@@ -246,13 +245,12 @@ get_julia_array_from_oif_arrayf64(OIFArrayF64 **value)
     jl_value_t *julia_array;
 
     OIFArrayF64 *oif_array = *value;
-    jl_value_t *arr_type =
-        jl_apply_array_type((jl_value_t *)jl_float64_type, oif_array->nd);
+    jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, oif_array->nd);
     jl_value_t *dims =
         build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
     bool own_buffer = false;
-    julia_array = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data,
-                                                  (jl_value_t *)dims, own_buffer);
+    julia_array = (jl_value_t *)jl_ptr_to_array(arr_type, oif_array->data, (jl_value_t *)dims,
+                                                own_buffer);
 
     if (OIF_ARRAY_C_CONTIGUOUS(oif_array) && !OIF_ARRAY_F_CONTIGUOUS(oif_array)) {
         jl_function_t *transpose_fn = jl_get_function(jl_base_module, "transpose");
