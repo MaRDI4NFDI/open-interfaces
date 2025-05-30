@@ -101,8 +101,7 @@ get_numpy_array_from_oif_array_f64(OIFArrayF64 **value)
     PyObject *pValue = NULL;
 
     OIFArrayF64 *arr = *value;
-    pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,
-                                       arr->data);
+    pValue = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64, arr->data);
     if (pValue == NULL) {
         fprintf(stderr, "[%s] Could not create NumPy array\n", prefix_);
         return NULL;
@@ -141,8 +140,7 @@ get_numpy_array_from_oif_array_f64(OIFArrayF64 **value)
             }
         }
         else {
-            fprintf(stderr,
-                    "[%s] Array is not C or Fortran contiguous. Cannot proceed\n",
+            fprintf(stderr, "[%s] Array is not C or Fortran contiguous. Cannot proceed\n",
                     prefix_);
             return NULL;
         }
