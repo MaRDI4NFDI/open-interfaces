@@ -5,7 +5,7 @@ from openinterfaces.interfaces.linsolve import Linsolve
 
 
 class TestLinearSolver:
-    @pytest.fixture(params=["c_lapack", "numpy"])
+    @pytest.fixture(params=["c_lapack", "numpy", "jl_backslash"])
     def s(self, request):
         return Linsolve(request.param)
 
