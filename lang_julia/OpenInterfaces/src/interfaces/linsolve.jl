@@ -13,7 +13,8 @@ export solve
 
 using OpenInterfaces: ImplHandle, call_impl
 
-function solve(implh:: ImplHandle, A:: Matrix{Float64}, b:: Vector{Float64}):: Vector{Float64}
+
+function solve(implh::ImplHandle, A::AbstractMatrix{Float64}, b::AbstractVector{Float64})::AbstractVector{Float64}
     """Solve the linear system of equations :math:`A x = b`.
 
     Parameters
