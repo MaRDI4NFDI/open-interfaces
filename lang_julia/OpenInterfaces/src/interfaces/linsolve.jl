@@ -14,23 +14,18 @@ export solve
 using OpenInterfaces: ImplHandle, call_impl
 
 
+"""
+    solve(implh, A, b) -> AbstractVector{Float64}
+
+
+Solve the linear system of equations ``A x = b`` and return ``x``.
+
+# Arguments
+- `A::AbstractMatrix{Float64}`: Coefficient square matrix
+- `b::AbstractVector{Float64}`: Right-hand side vector
+
+"""
 function solve(implh::ImplHandle, A::AbstractMatrix{Float64}, b::AbstractVector{Float64})::AbstractVector{Float64}
-    """Solve the linear system of equations :math:`A x = b`.
-
-    Parameters
-    ----------
-    A : np.ndarray of shape (n, n)
-        Coefficient matrix.
-    b : np.ndarray of shape (n,)
-        Right-hand side vector.
-
-    Returns
-    -------
-    np.ndarray
-        Result of the linear system solution after the invocation
-        of the `solve` method.
-
-    """
     m, n = size(A)
     result = Vector{Float64}(undef, n)
 

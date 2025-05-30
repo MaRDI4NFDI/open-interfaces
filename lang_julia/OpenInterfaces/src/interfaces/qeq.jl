@@ -21,6 +21,14 @@ using OpenInterfaces: ImplHandle, call_impl
 
 export solve_qeq
 
+"""
+    solve_qeq(implh, a, b, c) -> Vector{Float64}
+
+Solve the quadratic equation :math:`a x^2 + b x + c = 0` and return the roots.
+
+Note that repeated roots are also returned as two identical values,
+so that the length of the roots vector is always 2.
+"""
 function solve_qeq(implh::ImplHandle, a::Float64, b::Float64, c::Float64)::Vector{Float64}
     result = [11.0, 22.0]
     call_impl(implh, "solve_qeq", (a, b, c), (result,))
