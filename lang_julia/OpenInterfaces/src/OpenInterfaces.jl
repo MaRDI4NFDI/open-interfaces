@@ -64,8 +64,9 @@ end
 
 struct OIFCallback
     src::Int32
-    fn_p_py::Ptr{Cvoid}
     fn_p_c::Ptr{Cvoid}
+    fn_p_jl::Ptr{Cvoid}
+    fn_p_py::Ptr{Cvoid}
 end
 
 struct OIFUserData
@@ -240,6 +241,78 @@ function unload_impl(implh::ImplHandle)
 
     if status != 0
         error("Failed to unload interface implementation with id '$impl'")
+    end
+end
+
+function make_oif_callback(fn, argtypes::Tuple{OIFArgType}, restype::Int)::OIFCallback
+    c_argtypes::Tuple{OIFArgType} = ()
+
+    for argtype in argtypes
+        if argtype == OIF_INT
+            push!(c_argtypes, Cint)
+        elseif argtype == OIF_FLOAT64
+            push!(c_argtypes, Cdouble)
+        elseif argtype == OIF_ARRAY_F64
+            push!(c_argtypes, Ptr{OIFArrayF64})
+        elseif argtype == OIF_USER_DATA
+            push!(c_argtypes, Ptr{Cvoid})
+        else
+            error("Unsupported argument type: $argtype")
+        end
+    end
+
+    fn_wrapper = _make_c_func_wrapper_over_jl_fn(fn, argtypes, restype)
+
+    # Build the function wrapper in C.
+    fn_p_c = @cfunction(fn_wrapper, Cint, c_argtypes)
+    # Convert the Julia function to a pointer.
+    fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, fn)
+    # Python pointer should be null.
+    fn_p_py = C_NULL
+
+    return OIFCallback(OIF_LANG_JULIA, fn_p_c, fn_p_jl, fn_p_py)
+end
+
+
+function _make_c_func_wrapper_over_jl_fn(fn, argtypes::Tuple{OIFArgType}, restype::Int)
+    # This function creates a C function wrapper that calls the Julia function.
+    # The actual implementation will depend on how you want to handle the arguments and return value.
+    #
+    oif_argtypes = argtypes
+    function wrapper(oif_args...)
+        jl_args = ()
+
+        for (i, arg) in enumerate(oif_args)
+            if oif_argtypes[i] == OIF_INT
+                push!(jl_args, Int(arg))
+            elseif oif_argtypes[i] == OIF_FLOAT64
+                push!(jl_args, Float64(arg))
+            elseif oif_argtypes[i] == OIF_ARRAY_F64
+                # Convert the pointer to an array.
+                oif_arr = unsafe_load(arg)
+                nd = oif_arr[].nd
+                dimensions = unsafe_load(oif_arr[].dimensions, 1:nd)
+                data_ptr = unsafe_load(oif_arr[].data)
+                arr = unsafe_wrap(Array{Float64, nd}, data_ptr, dimensions)
+
+                push!(jl_args, arr)
+            elseif oif_argtypes[i] == OIF_USER_DATA
+                # Convert the pointer to a user data structure.
+                user_data = unsafe_load(arg)
+                push!(jl_args, user_data)
+            else
+                error("Unsupported argument type: $(oif_argtypes[i])")
+            end
+        end
+
+        # Call the Julia function with the converted arguments.
+        result = fn(jl_args...)
+
+        if result == nothing
+            return 0
+        end
+
+        return result
     end
 end
 
