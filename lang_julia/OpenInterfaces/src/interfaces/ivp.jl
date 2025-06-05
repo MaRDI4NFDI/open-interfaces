@@ -1,6 +1,6 @@
 module IVP
 
-using OpenInterfaces: ImplHandle, load_impl, call_impl
+using OpenInterfaces: ImplHandle, load_impl, call_impl, make_oif_callback, OIF_FLOAT64, OIF_ARRAY_F64, OIF_INT, OIF_USER_DATA
 
 export Self,
        set_initial_value,
@@ -32,7 +32,12 @@ end
 
 function set_rhs_fn(self::Self, rhs_fn::Function)
     """Specify right-hand side function f."""
-    println("Setting right-hand side function.")
+    rhs_fn_wrapper = make_oif_callback(
+        rhs_fn,
+        (OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64, OIF_USER_DATA),
+        OIF_INT,
+    )
+    call_impl(self.implh, "set_rhs_fn", (rhs_fn_wrapper,), ())
 end
 
 function set_tolerances(self::Self, rtol::Float64, atol::Float64)
