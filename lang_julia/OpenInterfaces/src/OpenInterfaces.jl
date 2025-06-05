@@ -12,7 +12,7 @@ export OIF_LANG_C, OIF_LANG_CXX, OIF_LANG_PYTHON, OIF_LANG_JULIA, OIF_LANG_R
 export OIF_ERROR, OIF_IMPL_INIT_ERROR
 
 # Data structures
-export OIFArgs, OIFArrayF64, OIFCallback, OIFUserData
+export OIFArgType, OIFArgs, OIFArrayF64, OIFCallback, OIFUserData
 
 export load_impl, call_impl, unload_impl
 
