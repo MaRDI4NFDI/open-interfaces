@@ -32,14 +32,12 @@ const OIF_CALLBACK::OIFArgType = 7
 const OIF_USER_DATA::OIFArgType = 8
 const OIF_CONFIG_DICT::OIFArgType = 9
 
-@enum OIFLang begin
-    OIF_LANG_C = 1
-    OIF_LANG_CXX = 2
-    OIF_LANG_PYTHON = 3
-    OIF_LANG_JULIA = 4
-    OIF_LANG_R = 5
-    OIF_LANG_COUNT = 6
-end
+const OIF_LANG_C::Int32 = 1
+const OIF_LANG_CXX::Int32 = 2
+const OIF_LANG_PYTHON::Int32 = 3
+const OIF_LANG_JULIA::Int32 = 4
+const OIF_LANG_R::Int32 = 5
+const OIF_LANG_COUNT::Int32 = 6
 
 @enum OIFError begin
     OIF_ERROR = -1
