@@ -159,8 +159,10 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             in_arg_types[i] = OIF_STR
             in_arg_values[i] = pointer(arg)
         elseif typeof(arg) == OIFCallback
+            arg_ref = Ref(arg)
+            push!(temp_refs, arg_ref)
             in_arg_types[i] = OIF_CALLBACK
-            in_arg_values[i] = pointer(arg)
+            in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
         elseif typeof(arg) == OIFUserData
             in_arg_types[i] = OIF_USER_DATA
             in_arg_values[i] = pointer(arg)
@@ -242,8 +244,10 @@ function unload_impl(implh::ImplHandle)
     end
 end
 
-function make_oif_callback(fn, argtypes::Tuple{OIFArgType}, restype::Int)::OIFCallback
-    c_argtypes::Tuple{OIFArgType} = ()
+function make_oif_callback(fn, argtypes::NTuple{N, OIFArgType}, restype::OIFArgType)::OIFCallback where {N}
+    @assert restype == OIF_INT "Only OIF_INT is supported as a return type for callbacks because 
+        it is used to indicate success or failure in a C-compatible way."
+    c_argtypes::Array{Any, 1} = []
 
     for argtype in argtypes
         if argtype == OIF_INT
@@ -262,7 +266,16 @@ function make_oif_callback(fn, argtypes::Tuple{OIFArgType}, restype::Int)::OIFCa
     fn_wrapper = _make_c_func_wrapper_over_jl_fn(fn, argtypes, restype)
 
     # Build the function wrapper in C.
-    fn_p_c = @cfunction(fn_wrapper, Cint, c_argtypes)
+    # I have to use `@cfunction` to create a C function pointer that can be called from C code
+    # However, the variable `c_argtypes` can be known only at runtime,
+    # not at compile time.
+    # Therefore, I get a compilation error,
+    # that `c_argtypes` must be literal tuple.
+    # All this black magic with eval is here to overcome this limitation.
+    c_argtypes_expr = Expr(:tuple, (map(t->QuoteNode(t), c_argtypes))...)
+    cfunction_expr = :(@cfunction($fn_wrapper, Cint, $c_argtypes_expr))
+
+    fn_p_c = eval(cfunction_expr)
     # Convert the Julia function to a pointer.
     fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, fn)
     # Python pointer should be null.
@@ -272,7 +285,7 @@ function make_oif_callback(fn, argtypes::Tuple{OIFArgType}, restype::Int)::OIFCa
 end
 
 
-function _make_c_func_wrapper_over_jl_fn(fn, argtypes::Tuple{OIFArgType}, restype::Int)
+function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, restype::Int32) where {N}
     # This function creates a C function wrapper that calls the Julia function.
     # The actual implementation will depend on how you want to handle the arguments and return value.
     #
