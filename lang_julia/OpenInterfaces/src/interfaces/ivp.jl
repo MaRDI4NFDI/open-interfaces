@@ -57,7 +57,7 @@ end
 
 function integrate(self::Self, t::Float64)
     """Integrate to time `t` and write solution to `y`."""
-    println("Integrating to time:", t)
+    call_impl(self.implh, "integrate", (t,), (self.y,))
 end
 
 function print_stats(self::Self)
