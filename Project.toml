@@ -1,4 +1,6 @@
 [deps]
+Debugger = "31a5f54b-26ea-5ae9-a837-f05ce5417438"
+LanguageServer = "2b0e0bc5-e4fd-59b4-8912-456d1b03d8d7"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 OpenInterfaces = "07cfd324-e924-40a7-85fa-5e46307e7ad7"
 OpenInterfacesImpl = "daff4927-7858-4806-96da-915047fb441c"
