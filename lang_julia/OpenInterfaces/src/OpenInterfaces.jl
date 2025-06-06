@@ -288,10 +288,9 @@ end
 function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, restype::Int32) where {N}
     # This function creates a C function wrapper that calls the Julia function.
     # The actual implementation will depend on how you want to handle the arguments and return value.
-    #
     oif_argtypes = argtypes
     function wrapper(oif_args...)
-        jl_args = ()
+        jl_args = Array{Any}(undef, 0)
 
         for (i, arg) in enumerate(oif_args)
             if oif_argtypes[i] == OIF_INT
@@ -301,10 +300,8 @@ function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, re
             elseif oif_argtypes[i] == OIF_ARRAY_F64
                 # Convert the pointer to an array.
                 oif_arr = unsafe_load(arg)
-                nd = oif_arr[].nd
-                dimensions = unsafe_load(oif_arr[].dimensions, 1:nd)
-                data_ptr = unsafe_load(oif_arr[].data)
-                arr = unsafe_wrap(Array{Float64, nd}, data_ptr, dimensions)
+                dimensions = unsafe_load(oif_arr.dimensions)
+                arr = unsafe_wrap(Array{Float64}, oif_arr.data, dimensions, own=false)
 
                 push!(jl_args, arr)
             elseif oif_argtypes[i] == OIF_USER_DATA
