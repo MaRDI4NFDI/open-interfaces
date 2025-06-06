@@ -64,8 +64,9 @@ typedef struct {
 // This structure is used for callback functions.
 typedef struct {
     int src;        // Language of the function (one of OIF_LANG_* constants)
-    void *fn_p_py;  // Function pointer in Python
     void *fn_p_c;   // Function pointer in C
+    void *fn_p_jl;  // Function pointer in Julia
+    void *fn_p_py;  // Function pointer in Python
 } OIFCallback;
 
 /**
