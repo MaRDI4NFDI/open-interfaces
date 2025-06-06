@@ -322,6 +322,8 @@ function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, re
 
         return result
     end
+
+    return wrapper
 end
 
 include("interfaces.jl")
