@@ -7,29 +7,88 @@ using OpenInterfaces.Interfaces.IVP
 IMPLEMENTATIONS = ["sundials_cvode"]
 
 
-mutable struct ScalarExpDecayProblem
-    t0::Float64 = 0.0
+struct IVPProblem
+    t0::Float64
     y0::Vector{Float64}
     rhs::Function
     exact::Function
-    ScalarExpDecayProblem()
-        t0 = 0.0
-        y0 = [1.0]
-        function rhs(t, y, ydot, user_data)
-            ydot[1] = -y[1]
-            return 0
-        end
-        exact = (t) -> y0[1] * exp(-t)
+end
 
-        new(t0, y0, rhs, exact)
+
+function ScalarExpDecayProblem()
+    t0 = 0.0
+    y0 = [1.0]
+    function rhs(t, y, ydot, user_data)
+        ydot[1] = -y[1]
+        return 0
     end
+    exact = (t) -> y0 * exp(-t)
+
+    IVPProblem(t0, y0, rhs, exact)
+end
+
+function LinearOscillatorProblem()
+    t0 = 0.0
+    y0 = [1.0, 0.5]
+    omega = π
+
+    function rhs(_, y, ydot, __)
+        ydot[1] = y[2]
+        ydot[2] = -(omega^2) * y[1]
+        return 0
+    end
+
+    function exact(t)
+        [
+            y0[1] * cos(omega * t) +
+            + y0[2] * sin(omega * t) / omega,
+            -y0[1] * omega * sin(omega * t) +
+            + y0[2] * cos(omega * t)
+        ]
+    end
+
+    IVPProblem(t0, y0, rhs, exact)
 end
 
 
-function rhs_fn(t, y, ydot, user_data)::Int32
-    ydot[1], ydot[2] = -y[1], -y[2]  # Example RHS function
-    return 0
+function OrbitEquationsProblem()
+    p_eps = 0.9
+    t0 = 0.0
+    y0 = [1 - p_eps, 0.0, 0.0, sqrt((1 + p_eps) / (1 - p_eps))]
+
+    function rhs(self, _, y, ydot, __)
+        r = sqrt(y[1]^2 + y[2]^2)
+        ydot[1] = y[3]
+        ydot[2] = y[4]
+        ydot[3] = -y[1] / r^3
+        ydot[4] = -y[2] / r^3
+        return 0
+    end
+
+    function exact(t)
+        function f(u, p)
+            p_eps, = p
+            return u - p_eps * sin.(u) .- t
+        end
+
+        nonlin_prob = NonlinearProblem(f, [1.0], (p_eps,))
+        sol = solve(nonlin_prob)
+        @assert sol.retcode == ReturnCode.Success
+        u = u[1]  # Extract the scalar value from the array.
+
+        return [
+            cos(u) - p_eps,
+            sqrt(1 - p_eps^2) * sin(u),
+            -sin(u) / (1 - p_eps * cos(u)),
+            (sqrt(1 - p_eps^2) * cos(u)) / (1 - p_eps * cos(u)),
+        ]
+    end
+
+    IVPProblem(t0, y0, rhs, exact)
 end
+
+
+PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem()]
 
 @testset "Testing IVP interface from Julia" begin
 
@@ -39,7 +98,6 @@ end
                 println("Testing impl $impl")
                 println("Test problem $p")
                 impl_self = IVP.Self(impl)
-                println("Testing implementation implh =", impl_self.implh)
                 testCore(impl_self, p)
             end
         end
@@ -57,7 +115,7 @@ end
                 IVP.integrate(impl_self, t)
             end
 
-            @test impl_self.y[end] ≈ p.exact(t1) rtol=2e-4
+            @test impl_self.y ≈ p.exact(t1) rtol=2e-4
         end
     end
 
