@@ -70,6 +70,7 @@ end
 struct OIFUserData
     src::Int32
     c::Ptr{Cvoid}
+    jl::Ptr{Cvoid}
     py::Ptr{Cvoid}
 end
 
@@ -164,8 +165,10 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             in_arg_types[i] = OIF_CALLBACK
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
         elseif typeof(arg) == OIFUserData
+            arg_ref = Ref(arg)
+            push!(temp_refs, arg_ref)
             in_arg_types[i] = OIF_USER_DATA
-            in_arg_values[i] = pointer(arg)
+            in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
         elseif typeof(arg) == Dict
             in_arg_types[i] = OIF_CONFIG_DICT
             # Convert the dictionary to a pointer
@@ -277,7 +280,8 @@ function make_oif_callback(fn, argtypes::NTuple{N, OIFArgType}, restype::OIFArgT
 
     fn_p_c = eval(cfunction_expr)
     # Convert the Julia function to a pointer.
-    fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, fn)
+    # fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, fn)
+    fn_p_jl = C_NULL
     # Python pointer should be null.
     fn_p_py = C_NULL
 
@@ -307,6 +311,7 @@ function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, re
             elseif oif_argtypes[i] == OIF_USER_DATA
                 # Convert the pointer to a user data structure.
                 user_data = unsafe_load(arg)
+                println("user_data = ", user_data)
                 push!(jl_args, user_data)
             else
                 error("Unsupported argument type: $(oif_argtypes[i])")
@@ -324,6 +329,16 @@ function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, re
     end
 
     return wrapper
+end
+
+
+# It is extremely important that the caller of this function
+# takes care of keeping the reference `data` alive,
+# otherwise, the will be crashes or something like that
+# as Julia's garbage collector is pretty fast to remove reference
+# that it thinks are unused.
+function make_oif_user_data(data::Ref{Any})::OIFUserData
+    OIFUserData(OIF_LANG_JULIA, C_NULL, Base.unsafe_convert(Ptr{Cvoid}, data), C_NULL)
 end
 
 include("interfaces.jl")
