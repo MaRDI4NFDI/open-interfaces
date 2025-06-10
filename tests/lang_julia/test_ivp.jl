@@ -1,3 +1,5 @@
+using LinearAlgebra
+using NonlinearSolve
 using Test
 
 using OpenInterfaces
@@ -95,15 +97,13 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem()]
     function test(testCore)
         for impl in IMPLEMENTATIONS
             for p in PROBLEMS
-                println("Testing impl $impl")
-                println("Test problem $p")
                 impl_self = IVP.Self(impl)
                 testCore(impl_self, p)
             end
         end
     end
 
-    @testset "test_1" begin
+    @testset "test_1__basic__should_work" begin
         test() do impl_self, p
             @test IVP.set_initial_value(impl_self, p.y0, p.t0) == 0
             @test impl_self.N == length(p.y0)
@@ -119,4 +119,31 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem()]
         end
     end
 
+    @testset "test_3__lower_tolerances__should_give_smaller_errors" begin
+        test() do impl_self, p
+            IVP.set_initial_value(impl_self, p.y0, p.t0)
+            IVP.set_rhs_fn(impl_self, p.rhs)
+
+            t1 = p.t0 + 1.0
+            times = collect(range(p.t0, t1, 11))
+
+            errors = []
+            for tol in [1e-3, 1e-4, 1e-6, 1e-8]
+                IVP.set_initial_value(impl_self, p.y0, p.t0)
+                IVP.set_tolerances(impl_self, tol, tol)
+                for t in times[2:end]
+                    IVP.integrate(impl_self, t)
+                end
+            end
+
+            final_value = impl_self.y
+            true_value = p.exact(t1)
+            error = norm(final_value - true_value)
+            push!(errors, error)
+
+            for k in range(2, length(errors))
+                @test errors[k-1] >= errors[k]
+            end
+        end
+    end
 end
