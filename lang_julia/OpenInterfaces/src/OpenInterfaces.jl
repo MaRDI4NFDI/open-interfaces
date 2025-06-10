@@ -314,10 +314,10 @@ function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, re
         end
 
         # Call the Julia function with the converted arguments.
-        result = fn(jl_args...)
+        result::Int32 = fn(jl_args...)
 
         if result == nothing
-            return 0
+            return Int32(0)
         end
 
         return result
