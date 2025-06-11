@@ -1,6 +1,7 @@
 module IVP
+using Infiltrator
 
-using OpenInterfaces: ImplHandle, load_impl, call_impl, make_oif_callback, make_oif_user_data, OIF_FLOAT64, OIF_ARRAY_F64, OIF_INT, OIF_USER_DATA
+using OpenInterfaces: ImplHandle, load_impl, call_impl, make_oif_callback, make_oif_user_data, OIF_FLOAT64, OIF_ARRAY_F64, OIF_INT, OIF_USER_DATA, OIFUserData
 
 export Self,
        set_initial_value,
@@ -16,9 +17,10 @@ mutable struct Self
     N::Int32
     y::Vector{Float64}
     user_data_ref::Ref{Any}
+    oif_user_data
     function Self(impl::String)
         implh = load_impl("ivp", impl, 1, 0)
-        self = new(ImplHandle(implh), 0, Float64[], Nothing)
+        self = new(ImplHandle(implh), 0, Float64[], Nothing, Nothing)
         f(t) = ccall(:jl_safe_printf, Cvoid, (Cstring, Cint), "Finalizing %d.\n", self.implh)
         finalizer(f, self)
     end
@@ -48,9 +50,9 @@ end
 
 function set_user_data(self::Self, user_data::Any)
     """Specify additional data that will be used for right-hand side function."""
-    self.user_data_ref = Ref(user_data)
-    oif_user_data = make_oif_user_data(self.user_data_ref)
-    call_impl(self.implh, "set_user_data", (oif_user_data,), ())
+    self.user_data_ref = user_data
+    self.oif_user_data = make_oif_user_data(self.user_data_ref)
+    call_impl(self.implh, "set_user_data", (self.oif_user_data,), ())
 end
 
 function set_integrator(self::Self, integrator_name::String, integrator_params::Dict)
