@@ -76,9 +76,10 @@ typedef struct {
  * to the constant of the language of the data origin.
  */
 typedef struct {
-    int src;   // Language of the data origin (one of `OIF_LANG_*` constants)
-    void *c;   // Pointer to data in C
-    void *py;  // Pointer to `PyObject` that holds the data in Python
+    int src;    // Language of the data origin (one of `OIF_LANG_*` constants)
+    void *c;    // Pointer to data in C
+    void *jl;   // Pointer to data in Julia
+    void *py;   // Pointer to `PyObject` that holds the data in Python
 } OIFUserData;
 
 enum {
