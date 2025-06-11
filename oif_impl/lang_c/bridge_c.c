@@ -141,6 +141,9 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
             else if (user_data->src == OIF_LANG_PYTHON) {
                 in_args->arg_values[i] = &user_data->py;
             }
+            else if (user_data->src == OIF_LANG_JULIA) {
+                in_args->arg_values[i] = &user_data->jl;
+            }
             else {
                 fprintf(stderr,
                         "[%s] Cannot handle OIFUserData because of the unsupported "
