@@ -90,8 +90,30 @@ function OrbitEquationsProblem()
 end
 
 
+function IVPProblemWithUserData()
+    t0 = 0.0
+    y0 = [0.0, 1.0]
+
+    function rhs(_, y, ydot, (a, b)::Tuple{Int, Float64})
+        ydot[1] = y[1] + a
+        ydot[2] = b * y[2]
+        return 0
+    end
+
+    function exact(t, (a, b)::Tuple{Int, Float64})
+        return [
+            a * (exp(t) - 1),
+            exp(b * t),
+        ]
+    end
+
+    IVPProblem(t0, y0, rhs, exact)
+end
+
+
 PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem()]
 
+# The enumeration of tests corresponds to the one from `test_ivp.py`.
 @testset "Testing IVP interface from Julia" begin
 
     function test(testCore)
@@ -100,6 +122,13 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem()]
                 impl_self = IVP.Self(impl)
                 testCore(impl_self, p)
             end
+        end
+    end
+
+    function test_one_problem(testCore)
+        for impl in IMPLEMENTATIONS
+            impl_self = IVP.Self(impl)
+            testCore(impl_self)
         end
     end
 
@@ -144,6 +173,26 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem()]
             for k in range(2, length(errors))
                 @test errors[k-1] >= errors[k]
             end
+        end
+    end
+
+    @testset "test_4__set_user_data__should_work" begin
+        test_one_problem() do impl_self
+            params = (12, 2.7)
+            p = IVPProblemWithUserData()
+            IVP.set_initial_value(impl_self, p.y0, p.t0)
+            IVP.set_user_data(impl_self, params)
+            IVP.set_rhs_fn(impl_self, p.rhs)
+            IVP.set_tolerances(impl_self, 1e-6, 1e-8)
+
+            t1 = p.t0 + 1
+            times = collect(range(p.t0, t1, 11))
+
+            for t in times[2:end]
+                IVP.integrate(impl_self, t)
+            end
+
+            @test impl_self.y ≈ p.exact(t1, params) rtol=1e-5 atol=1e-6
         end
     end
 end
