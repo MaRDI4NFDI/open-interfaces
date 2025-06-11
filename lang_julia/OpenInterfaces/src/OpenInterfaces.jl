@@ -310,8 +310,14 @@ function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, re
                 push!(jl_args, arr)
             elseif oif_argtypes[i] == OIF_USER_DATA
                 # Convert the pointer to a user data structure.
-                user_data = unsafe_load(arg)
-                println("user_data = ", user_data)
+                # If users do not set user data,
+                # then the pointer will be null.
+                # In this case, we return `nothing`.
+                if arg == C_NULL
+                    user_data = nothing
+                else
+                    user_data = unsafe_pointer_to_objref(arg)
+                end
                 push!(jl_args, user_data)
             else
                 error("Unsupported argument type: $(oif_argtypes[i])")
@@ -338,7 +344,8 @@ end
 # as Julia's garbage collector is pretty fast to remove reference
 # that it thinks are unused.
 function make_oif_user_data(data::Ref{Any})::OIFUserData
-    OIFUserData(OIF_LANG_JULIA, C_NULL, Base.unsafe_convert(Ptr{Cvoid}, data), C_NULL)
+    data_ptr = Base.unsafe_convert(Ptr{Cvoid}, data)
+    OIFUserData(OIF_LANG_JULIA, C_NULL, data_ptr, C_NULL)
 end
 
 include("interfaces.jl")
