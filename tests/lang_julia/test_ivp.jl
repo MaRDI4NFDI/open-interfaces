@@ -58,7 +58,7 @@ function OrbitEquationsProblem()
     t0 = 0.0
     y0 = [1 - p_eps, 0.0, 0.0, sqrt((1 + p_eps) / (1 - p_eps))]
 
-    function rhs(self, _, y, ydot, __)
+    function rhs(_, y, ydot, __)
         r = sqrt(y[1]^2 + y[2]^2)
         ydot[1] = y[3]
         ydot[2] = y[4]
@@ -76,7 +76,7 @@ function OrbitEquationsProblem()
         nonlin_prob = NonlinearProblem(f, [1.0], (p_eps,))
         sol = solve(nonlin_prob)
         @assert sol.retcode == ReturnCode.Success
-        u = u[1]  # Extract the scalar value from the array.
+        u = sol.u[1]  # Extract the scalar value from the array.
 
         return [
             cos(u) - p_eps,
@@ -111,7 +111,7 @@ function IVPProblemWithUserData()
 end
 
 
-PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem()]
+PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsProblem()]
 
 # The enumeration of tests corresponds to the one from `test_ivp.py`.
 @testset "Testing IVP interface from Julia" begin
