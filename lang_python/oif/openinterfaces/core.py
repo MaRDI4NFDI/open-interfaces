@@ -194,7 +194,7 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
 
 
 def make_oif_user_data(data: object) -> OIFUserData:
-    return OIFUserData(OIF_LANG_PYTHON, None, ctypes.c_void_p(id(data)))
+    return OIFUserData(OIF_LANG_PYTHON, None, None, ctypes.c_void_p(id(data)))
 
 
 def make_oif_config_dict(arg: dict) -> OIFConfigDict:
