@@ -284,8 +284,7 @@ function make_oif_callback(fn, argtypes::NTuple{N, OIFArgType}, restype::OIFArgT
 
     fn_p_c = eval(cfunction_expr)
     # Convert the Julia function to a pointer.
-    # fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, fn)
-    fn_p_jl = C_NULL
+    fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, Ref(fn))
     # Python pointer should be null.
     fn_p_py = C_NULL
 

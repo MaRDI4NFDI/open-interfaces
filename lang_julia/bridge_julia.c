@@ -484,7 +484,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         else if (in_args->arg_types[i] == OIF_CALLBACK) {
             OIFCallback *p = in_args->arg_values[i];
             if (p->src == OIF_LANG_JULIA) {
-                cur_julia_arg = (jl_function_t *)p->fn_p_jl;
+                jl_value_t *tmp = jl_get_nth_field(p->fn_p_jl, 0);
+                cur_julia_arg = (jl_function_t *)tmp;
             }
             else {
                 jl_value_t *wrapper = make_wrapper_over_c_callback(p);
