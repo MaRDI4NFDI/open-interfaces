@@ -234,6 +234,10 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
         )::Int
     end
 
+    if result != 0
+        error("Error occurred while invoking function '$func_name' from implementation with id '$implh'")
+        end
+
     return result
 end
 
