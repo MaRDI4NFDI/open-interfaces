@@ -90,6 +90,7 @@ class OIFUserData(ctypes.Structure):
     _fields_ = [
         ("src", ctypes.c_int),
         ("c", ctypes.c_void_p),
+        ("jl", ctypes.c_void_p),
         ("py", ctypes.c_void_p),
     ]
 
