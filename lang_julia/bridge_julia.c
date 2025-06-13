@@ -484,8 +484,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         else if (in_args->arg_types[i] == OIF_CALLBACK) {
             OIFCallback *p = in_args->arg_values[i];
             if (p->src == OIF_LANG_JULIA) {
-                fprintf(stderr, "[%s] This code path is not implemented yet\n", prefix_);
-                exit(1);
+                cur_julia_arg = (jl_function_t *)p->fn_p_jl;
             }
             else {
                 jl_value_t *wrapper = make_wrapper_over_c_callback(p);
