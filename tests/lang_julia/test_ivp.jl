@@ -20,7 +20,7 @@ end
 function ScalarExpDecayProblem()
     t0 = 0.0
     y0 = [1.0]
-    function rhs(t, y, ydot, user_data)
+    function rhs(__, y, ydot, __)
         ydot[1] = -y[1]
         return 0
     end
@@ -34,7 +34,7 @@ function LinearOscillatorProblem()
     y0 = [1.0, 0.5]
     omega = π
 
-    function rhs(_, y, ydot, __)
+    function rhs(__, y, ydot, __)
         ydot[1] = y[2]
         ydot[2] = -(omega^2) * y[1]
         return 0
