@@ -245,7 +245,17 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         }
         else if (arg_type_ids[i] == OIF_USER_DATA) {
             void **p_user_data = arg_values[i];
-            *p_user_data = PyCapsule_GetPointer(arg, NULL);
+
+            if (arg == Py_None) {
+                *p_user_data = NULL;
+            }
+            else if (PyCapsule_CheckExact(arg)) {
+                *p_user_data = PyCapsule_GetPointer(arg, NULL);
+            }
+            else {
+                fprintf(stderr, "[_callback] Python object corresponding to 'OIF_USER_DATA' argument must be either None or PyCapsule\n");
+                return NULL;
+            }
         }
         else {
             fprintf(stderr, "[_callback] Unknown input arg type: %d\n", arg_type_ids[i]);
