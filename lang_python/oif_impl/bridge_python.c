@@ -83,9 +83,12 @@ convert_oif_callback(OIFCallback *p)
 {
     const char *id = "123";
     PyObject *fn_p = PyCapsule_New(p->fn_p_c, id, NULL);
+
     if (fn_p == NULL) {
         fprintf(stderr, "[%s] Could not create PyCapsule\n", prefix_);
+        return NULL;
     }
+
     fprintf(stderr, "[%s] HARDCODE!!!!!!\n", prefix_);
     unsigned int nargs = 4;
     PyObject *obj = Py_BuildValue("(N, I)", fn_p, nargs);
