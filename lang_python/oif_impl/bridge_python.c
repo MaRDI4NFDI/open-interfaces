@@ -362,7 +362,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                      */
                     Py_INCREF(pValue);
                 }
-                else if (p->src == OIF_LANG_C) {
+                else if (p->src == OIF_LANG_C || p->src == OIF_LANG_JULIA) {
                     fprintf(stderr,
                             "[%s] Check what callback to "
                             "wrap via src field\n",
@@ -371,6 +371,15 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                         impl->pCallbackClass = instantiate_callback_class();
                     }
                     PyObject *callback_args = convert_oif_callback(p);
+                    if (callback_args == NULL) {
+                        fprintf(stderr,
+                                "[%s] Could not convert OIFCallback to Python "
+                                "callable object because function 'convert_oif_callback' "
+                                "returned error\n",
+                                prefix_);
+                        pValue = NULL;
+                        goto cleanup;
+                    }
                     pValue = PyObject_CallObject(impl->pCallbackClass, callback_args);
                     if (pValue == NULL) {
                         fprintf(stderr,
