@@ -410,6 +410,10 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 else if (user_data->src == OIF_LANG_PYTHON) {
                     pValue = user_data->py;
                 }
+                else if (user_data->src == OIF_LANG_JULIA) {
+                    /* Treat the argument as a raw pointer. */
+                    pValue = PyCapsule_New(user_data->jl, NULL, NULL);
+                }
                 else {
                     fprintf(stderr, "[%s] Cannot handle user data with src %d\n", prefix_,
                             user_data->src);
