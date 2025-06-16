@@ -252,7 +252,7 @@ function unload_impl(implh::ImplHandle)
 end
 
 function make_oif_callback(fn, argtypes::NTuple{N, OIFArgType}, restype::OIFArgType)::OIFCallback where {N}
-    @assert restype == OIF_INT "Only OIF_INT is supported as a return type for callbacks because 
+    @assert restype == OIF_INT "Only OIF_INT is supported as a return type for callbacks because
         it is used to indicate success or failure in a C-compatible way."
     c_argtypes::Array{Any, 1} = []
 

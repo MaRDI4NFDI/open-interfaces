@@ -253,7 +253,9 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
                 *p_user_data = PyCapsule_GetPointer(arg, NULL);
             }
             else {
-                fprintf(stderr, "[_callback] Python object corresponding to 'OIF_USER_DATA' argument must be either None or PyCapsule\n");
+                fprintf(stderr,
+                        "[_callback] Python object corresponding to 'OIF_USER_DATA' argument "
+                        "must be either None or PyCapsule\n");
                 return NULL;
             }
         }
