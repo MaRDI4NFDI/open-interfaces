@@ -72,8 +72,8 @@ function OrbitEquationsProblem()
             return u - p_eps * sin.(u) .- t
         end
 
-        nonlin_prob = NonlinearProblem(f, [1.0], (p_eps,))
-        sol = solve(nonlin_prob)
+        nonlin_prob = NonlinearSolve.NonlinearProblem(f, [1.0], (p_eps,))
+        sol = NonlinearSolve.solve(nonlin_prob)
         @assert sol.retcode == ReturnCode.Success
         u = sol.u[1]  # Extract the scalar value from the array.
 
