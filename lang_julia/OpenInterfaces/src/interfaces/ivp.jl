@@ -1,5 +1,4 @@
 module IVP
-using Infiltrator
 
 using OpenInterfaces: ImplHandle, load_impl, call_impl, make_oif_callback, make_oif_user_data, OIF_FLOAT64, OIF_ARRAY_F64, OIF_INT, OIF_USER_DATA, OIFUserData
 
