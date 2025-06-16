@@ -5,8 +5,7 @@ using Test
 using OpenInterfaces
 using OpenInterfaces.Interfaces.IVP
 
-# IMPLEMENTATIONS = ["c_lapack", "numpy", "jl_backslash"]
-IMPLEMENTATIONS = ["sundials_cvode"]
+IMPLEMENTATIONS = ["sundials_cvode", "jl_diffeq", "scipy_ode"]
 
 
 struct IVPProblem
