@@ -60,7 +60,7 @@ end
 
 function set_integrator(self::Self, integrator_name::String, integrator_params::Dict)
     """Set integrator, if the name is recognizable."""
-    println("Setting integrator: $integrator_name with parameters: $integrator_params")
+    call_impl(self.implh, "set_integrator", (integrator_name, integrator_params), ())
 end
 
 function integrate(self::Self, t::Float64)
