@@ -7,6 +7,12 @@ using OpenInterfaces.Interfaces.IVP
 
 IMPLEMENTATIONS = ["sundials_cvode", "jl_diffeq", "scipy_ode"]
 
+INTEGRATORS = Dict(
+    "sundials_cvode" => ["adams", "bdf"],
+    "jl_diffeq" => ["DP5", "Tsit5"],
+    "scipy_ode" => ["vode", "lsoda", "dopri5", "dop853"],
+)
+
 
 struct IVPProblem
     t0::Float64
@@ -131,6 +137,14 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
         end
     end
 
+    function test_impl_integrator_problem(testCore)
+        for impl in IMPLEMENTATIONS
+            integrators_list = INTEGRATORS[impl]
+            p = OrbitEquationsProblem()
+            testCore(impl, integrators_list, p)
+        end
+    end
+
     @testset "test_1__basic__should_work" begin
         test() do impl_self, p
             @test IVP.set_initial_value(impl_self, p.y0, p.t0) == 0
@@ -192,6 +206,34 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             end
 
             @test impl_self.y ≈ p.exact(t1, params) rtol=1e-5 atol=1e-6
+        end
+    end
+
+    @testset "test_5__check_that_we_can_set_integrator" begin
+        test_impl_integrator_problem() do impl, integrators_list, p
+            dt = 0.125
+
+            s = IVP.Self(impl)
+            p = OrbitEquationsProblem()
+
+            IVP.set_initial_value(s, p.y0, p.t0)
+            IVP.set_rhs_fn(s, p.rhs)
+            IVP.set_tolerances(s, 1e-2, 1e-2)
+
+            IVP.integrate(s, p.t0 + dt)
+            value_1 = s.y
+
+            println("Integrators list: ", integrators_list)
+            for integrator_name in integrators_list
+                println("Solver: ", impl)
+                println("Integrator: ", integrator_name)
+                IVP.set_integrator(s, integrator_name, Dict())
+                IVP.set_initial_value(s, p.y0, p.t0)
+                IVP.integrate(s, p.t0 + dt)
+                value_2 = s.y
+
+                @test value_1 ≈ value_2 rtol=1e-1 atol=1e-1
+            end
         end
     end
 end
