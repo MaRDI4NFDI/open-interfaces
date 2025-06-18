@@ -169,11 +169,18 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             push!(temp_refs, arg_ref)
             in_arg_types[i] = OIF_USER_DATA
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
-        elseif typeof(arg) == Dict
+        elseif typeof(arg) <: Dict
+            dict_ref = Ref(arg)
+            dict_p = Base.unsafe_convert(Ptr{Cvoid}, dict_ref)
+            push!(temp_refs, dict_ref)
+            push!(temp_refs, dict_p)
+
+            dict_p_ref = Ref(dict_p)
+            dict_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, dict_p_ref)
+            push!(temp_refs, dict_p_ref)
+
             in_arg_types[i] = OIF_CONFIG_DICT
-            # Convert the dictionary to a pointer
-            dict_ptr = pointer(arg)
-            in_arg_values[i] = dict_ptr
+            in_arg_values[i] = dict_p_p
         else
             error("Cannot convert input argument $(arg) of type $(typeof(arg))")
         end
