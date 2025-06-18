@@ -327,8 +327,8 @@ set_integrator(Self *self, const char *integrator_name, OIFConfigDict *config_)
         self->integrator = CV_ADAMS;
     }
     else {
-        fprintf(stderr, "[%s] Supported values for integrator name are `bdf` and `adams`\n",
-                prefix);
+        fprintf(stderr, "[%s] ERROR: Supported values for integrator name are `bdf` and `adams`, got instead '%s'\n",
+                prefix, integrator_name);
         return 1;
     }
 
