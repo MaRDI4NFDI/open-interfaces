@@ -157,8 +157,16 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             in_arg_types[i] = OIF_ARRAY_F64
             in_arg_values[i] = arr_p_p
         elseif typeof(arg) == String
+            arg_ref = Ref(arg)
+            push!(temp_refs, arg_ref)
+            arg_p = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
+            push!(temp_refs, arg_p)
+            arg_p_ref = Ref(arg_p)
+            push!(temp_refs, arg_p_ref)
+            arg_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, arg_p_ref)
+
             in_arg_types[i] = OIF_STR
-            in_arg_values[i] = pointer(arg)
+            in_arg_values[i] = arg_p_p
         elseif typeof(arg) == OIFCallback
             arg_ref = Ref(arg)
             push!(temp_refs, arg_ref)
