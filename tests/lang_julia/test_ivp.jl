@@ -5,14 +5,6 @@ using Test
 using OpenInterfaces
 using OpenInterfaces.Interfaces.IVP
 
-IMPLEMENTATIONS = ["sundials_cvode", "jl_diffeq", "scipy_ode"]
-
-INTEGRATORS = Dict(
-    "sundials_cvode" => ["adams", "bdf"],
-    "jl_diffeq" => ["DP5", "Tsit5"],
-    "scipy_ode" => ["vode", "lsoda", "dopri5", "dop853"],
-)
-
 
 struct IVPProblem
     t0::Float64
@@ -115,6 +107,15 @@ function IVPProblemWithUserData()
     IVPProblem(t0, y0, rhs, exact)
 end
 
+
+
+IMPLEMENTATIONS = ["sundials_cvode", "jl_diffeq", "scipy_ode"]
+
+INTEGRATORS = Dict(
+    "sundials_cvode" => ["adams", "bdf"],
+    "jl_diffeq" => ["DP5", "Tsit5"],
+    "scipy_ode" => ["vode", "lsoda", "dopri5", "dop853"],
+)
 
 PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsProblem()]
 
