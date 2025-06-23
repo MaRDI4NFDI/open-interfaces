@@ -237,4 +237,20 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             end
         end
     end
+
+    # test_ivp.py has this test but I am not sure that it is a good idea
+    # to throw an exception when the user calls `set_integrator`
+    # before setting the right-hand side function.
+    # @testset "test_6__check_that_set_integrator_works_only_after_setting_rhs" begin
+    # end
+
+    @testset "test_7__unknown_integrator_name__should_throw_exception" begin
+        test_one_problem() do impl_self
+            p = ScalarExpDecayProblem()
+            IVP.set_initial_value(impl_self, p.y0, p.t0)
+            IVP.set_rhs_fn(impl_self, p.rhs)
+
+            @test_throws ErrorException IVP.set_integrator(impl_self, "i-am-not-known-integrator", Dict())
+        end
+    end
 end
