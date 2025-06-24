@@ -1,7 +1,16 @@
 using Test
+using SafeTestsets
 
 @testset "Julia tests for Open Interfaces" begin
-    include("test_qeq.jl")
-    include("test_linsolve.jl")
-    include("test_ivp.jl")
+    @safetestset "Julia tests for QEQ Open Interface" begin
+        include("test_qeq.jl")
+    end
+
+    @safetestset "Julia tests for Linsolve Open Interface" begin
+        include("test_linsolve.jl")
+    end
+
+    @safetestset "Julia tests for IVP Open Interface" begin
+        include("test_ivp.jl")
+    end
 end
