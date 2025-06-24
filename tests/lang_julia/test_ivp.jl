@@ -122,65 +122,65 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
 # The enumeration of tests corresponds to the one from `test_ivp.py`.
 @testset "Testing IVP interface from Julia" begin
 
-    function test(testCore)
+    function fixture_self_prob(test_func)
         for impl in IMPLEMENTATIONS
-            for p in PROBLEMS
-                impl_self = IVP.Self(impl)
-                testCore(impl_self, p)
+            for prob in PROBLEMS
+                self = IVP.Self(impl)
+                test_func(self, prob)
             end
         end
     end
 
-    function test_one_problem(testCore)
+    function fixture_self(test_func)
         for impl in IMPLEMENTATIONS
-            impl_self = IVP.Self(impl)
-            testCore(impl_self)
+            self = IVP.Self(impl)
+            test_func(self)
         end
     end
 
-    function test_impl_integrator_problem(testCore)
+    function fixture_impl_integrators_prob(test_func)
         for impl in IMPLEMENTATIONS
-            integrators_list = INTEGRATORS[impl]
-            p = OrbitEquationsProblem()
-            testCore(impl, integrators_list, p)
+            integrators = INTEGRATORS[impl]
+            prob = OrbitEquationsProblem()
+            test_func(impl, integrators, prob)
         end
     end
 
     @testset "test_1__basic__should_work" begin
-        test() do impl_self, p
-            @test IVP.set_initial_value(impl_self, p.y0, p.t0) == 0
-            @test impl_self.N == length(p.y0)
-            @test IVP.set_rhs_fn(impl_self, p.rhs) == 0
+        fixture_self_prob() do self, prob
+            @test IVP.set_initial_value(self, prob.y0, prob.t0) == 0
+            @test self.N == length(prob.y0)
+            @test IVP.set_rhs_fn(self, prob.rhs) == 0
 
-            t1 = p.t0 + 1
-            times = collect(range(p.t0, t1, 11))
+            t1 = prob.t0 + 1
+            times = collect(range(prob.t0, t1, 11))
             for t in times[2:end]
-                IVP.integrate(impl_self, t)
+                IVP.integrate(self, t)
             end
 
-            @test impl_self.y ≈ p.exact(t1) rtol=2e-4
+            @test self.y ≈ prob.exact(t1) rtol=2e-4
         end
     end
 
     @testset "test_3__lower_tolerances__should_give_smaller_errors" begin
-        test() do impl_self, p
-            IVP.set_initial_value(impl_self, p.y0, p.t0)
-            IVP.set_rhs_fn(impl_self, p.rhs)
+        fixture_self_prob() do self, prob
+            IVP.set_initial_value(self, prob.y0, prob.t0)
+            IVP.set_rhs_fn(self, prob.rhs)
 
-            t1 = p.t0 + 1.0
-            times = collect(range(p.t0, t1, 11))
+            t1 = prob.t0 + 1.0
+            times = collect(range(prob.t0, t1, 11))
 
             errors = []
             for tol in [1e-3, 1e-4, 1e-6, 1e-8]
-                IVP.set_initial_value(impl_self, p.y0, p.t0)
-                IVP.set_tolerances(impl_self, tol, tol)
+                IVP.set_initial_value(self, prob.y0, prob.t0)
+                IVP.set_tolerances(self, tol, tol)
                 for t in times[2:end]
-                    IVP.integrate(impl_self, t)
+                    IVP.integrate(self, t)
                 end
             end
 
-            final_value = impl_self.y
-            true_value = p.exact(t1)
+            final_value = self.y
+            true_value = prob.exact(t1)
             error = norm(final_value - true_value)
             push!(errors, error)
 
@@ -191,7 +191,7 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
     end
 
     @testset "test_4__set_user_data__should_work" begin
-        test_one_problem() do impl_self
+        fixture_self() do impl_self
             params = (12, 2.7)
             p = IVPProblemWithUserData()
             IVP.set_initial_value(impl_self, p.y0, p.t0)
@@ -211,26 +211,26 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
     end
 
     @testset "test_5__check_that_we_can_set_integrator" begin
-        test_impl_integrator_problem() do impl, integrators_list, p
+        fixture_impl_integrators_prob() do impl, integrators, prob
             dt = 0.125
 
             s = IVP.Self(impl)
-            p = OrbitEquationsProblem()
+            prob = OrbitEquationsProblem()
 
-            IVP.set_initial_value(s, p.y0, p.t0)
-            IVP.set_rhs_fn(s, p.rhs)
+            IVP.set_initial_value(s, prob.y0, prob.t0)
+            IVP.set_rhs_fn(s, prob.rhs)
             IVP.set_tolerances(s, 1e-2, 1e-2)
 
-            IVP.integrate(s, p.t0 + dt)
+            IVP.integrate(s, prob.t0 + dt)
             value_1 = s.y
 
-            println("Integrators list: ", integrators_list)
-            for integrator_name in integrators_list
+            println("Integrators list: ", integrators)
+            for integrator_name in integrators
                 println("Solver: ", impl)
                 println("Integrator: ", integrator_name)
                 IVP.set_integrator(s, integrator_name, Dict())
-                IVP.set_initial_value(s, p.y0, p.t0)
-                IVP.integrate(s, p.t0 + dt)
+                IVP.set_initial_value(s, prob.y0, prob.t0)
+                IVP.integrate(s, prob.t0 + dt)
                 value_2 = s.y
 
                 @test value_1 ≈ value_2 rtol=1e-1 atol=1e-1
@@ -245,12 +245,12 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
     # end
 
     @testset "test_7__unknown_integrator_name__should_throw_exception" begin
-        test_one_problem() do impl_self
+        fixture_self() do self
             p = ScalarExpDecayProblem()
-            IVP.set_initial_value(impl_self, p.y0, p.t0)
-            IVP.set_rhs_fn(impl_self, p.rhs)
+            IVP.set_initial_value(self, p.y0, p.t0)
+            IVP.set_rhs_fn(self, p.rhs)
 
-            @test_throws ErrorException IVP.set_integrator(impl_self, "i-am-not-known-integrator", Dict())
+            @test_throws ErrorException IVP.set_integrator(self, "i-am-not-known-integrator", Dict())
         end
     end
 end
