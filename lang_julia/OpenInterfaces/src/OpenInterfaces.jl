@@ -17,6 +17,7 @@ export OIFArgType, OIFArgs, OIFArrayF64, OIFCallback, OIFUserData
 export load_impl, call_impl, unload_impl
 
 using Libdl
+using MsgPack
 
 const ImplHandle = Int32
 
@@ -72,6 +73,16 @@ struct OIFUserData
     c::Ptr{Cvoid}
     jl::Ptr{Cvoid}
     py::Ptr{Cvoid}
+end
+
+
+struct OIFConfigDict
+    type::Cint
+    src::Cint
+    size::Csize_t
+    buffer::Ptr{Cchar}
+    buffer_length::Csize_t
+    py_object::Ptr{Cvoid}
 end
 
 const lib_dispatch = Ref{Ptr{Cvoid}}(0)
@@ -176,17 +187,14 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             in_arg_types[i] = OIF_USER_DATA
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
         elseif typeof(arg) <: Dict
+            oif_dict = make_oif_config_dict(arg)
             dict_ref = Ref(arg)
             dict_p = Base.unsafe_convert(Ptr{Cvoid}, dict_ref)
             push!(temp_refs, dict_ref)
             push!(temp_refs, dict_p)
 
-            dict_p_ref = Ref(dict_p)
-            dict_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, dict_p_ref)
-            push!(temp_refs, dict_p_ref)
-
             in_arg_types[i] = OIF_CONFIG_DICT
-            in_arg_values[i] = dict_p_p
+            in_arg_values[i] = dict_p
         else
             error("Cannot convert input argument $(arg) of type $(typeof(arg))")
         end
@@ -362,6 +370,47 @@ end
 function make_oif_user_data(data::Ref{Any})::OIFUserData
     data_ptr = Base.unsafe_convert(Ptr{Cvoid}, data)
     OIFUserData(OIF_LANG_JULIA, C_NULL, data_ptr, C_NULL)
+end
+
+
+function make_oif_config_dict(dict)::OIFConfigDict
+    # buffer = BytesIO()
+    # # buffer.write(msgpack.packb(len(arg.keys()), use_bin_type=True))
+    # for k in arg.keys():
+    #     v1 = k
+    #     v2 = arg[k]
+    #     if isinstance(v2, int) or isinstance(v2, float) or isinstance(v2, str):
+    #         pass
+    #     else:
+    #         raise TypeError("Supported types for dictionaries are: int, float, str")
+
+    #     buffer.write(msgpack.packb(v1, use_bin_type=True))
+    #     buffer.write(msgpack.packb(v2, use_bin_type=True))
+    # buffer.seek(0)
+
+
+    # obj = OIFConfigDict(
+    #     OIF_CONFIG_DICT,
+    #     OIF_LANG_JULIA,
+    #     0,
+    #     buffer.getvalue(),
+    #     len(buffer.getvalue()),
+    #     id(arg),
+    # )
+
+    # return obj
+    bytes = MsgPack.pack(dict)
+
+    oif_config_dict_obj = OIFConfigDict(
+        OIF_CONFIG_DICT,
+        OIF_LANG_JULIA,
+        0,
+        pointer(bytes),
+        length(bytes),
+        C_NULL,
+    )
+
+    return oif_config_dict_obj
 end
 
 include("interfaces.jl")
