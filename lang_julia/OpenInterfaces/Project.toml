@@ -6,7 +6,9 @@ version = "0.5.5"
 [deps]
 Debugger = "31a5f54b-26ea-5ae9-a837-f05ce5417438"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+MsgPack = "99f44e22-a591-53d1-9472-aa23ef4bd671"
 
 [compat]
 Debugger = "0.7.13"
 Libdl = "1.11.0"
+MsgPack = "1.2.1"
