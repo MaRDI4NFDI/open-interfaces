@@ -188,13 +188,17 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
         elseif typeof(arg) <: Dict
             oif_dict = make_oif_config_dict(arg)
-            dict_ref = Ref(arg)
+            dict_ref = Ref(oif_dict)
             dict_p = Base.unsafe_convert(Ptr{Cvoid}, dict_ref)
             push!(temp_refs, dict_ref)
             push!(temp_refs, dict_p)
 
+            dict_p_ref = Ref(dict_p)
+            push!(temp_refs, dict_p_ref)
+            dict_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, dict_p_ref)
+
             in_arg_types[i] = OIF_CONFIG_DICT
-            in_arg_values[i] = dict_p
+            in_arg_values[i] = dict_p_p
         else
             error("Cannot convert input argument $(arg) of type $(typeof(arg))")
         end
