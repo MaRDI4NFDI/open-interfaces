@@ -2,7 +2,7 @@
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "4589bbf707d541eed84e2969d24abe908e0ab2fe"
+project_hash = "48f98758793499891455b08a150c9047c56d84ca"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e2478490447631aedba0823d4d7a80b2cc8cdb32"
@@ -930,7 +930,7 @@ uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
 version = "0.3.27+1"
 
 [[deps.OpenInterfaces]]
-deps = ["Debugger", "Libdl"]
+deps = ["Debugger", "Libdl", "MsgPack"]
 path = "lang_julia/OpenInterfaces"
 uuid = "07cfd324-e924-40a7-85fa-5e46307e7ad7"
 version = "0.5.5"
