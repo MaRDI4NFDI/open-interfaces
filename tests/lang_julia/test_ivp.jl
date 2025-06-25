@@ -108,6 +108,23 @@ function IVPProblemWithUserData()
 end
 
 
+function MildlyStiffODESystem()
+    t0 = 0.0
+    y0 = [1.0, 0.0]
+
+    function rhs(t, y, ydot, __)
+        ydot[1] = -16 * y[1] + 12 * y[2] + 16 * cos(t) - 13 * sin(t)
+        ydot[2] = 12 * y[1] - 9 * y[2] - 11 * cos(t) + 9 * sin(t)
+        return 0
+    end
+
+    function exact(t)
+        return [cos(t), sin(t)]
+    end
+
+    IVPProblem(t0, y0, rhs, exact)
+end
+
 
 IMPLEMENTATIONS = ["sundials_cvode", "jl_diffeq", "scipy_ode"]
 
@@ -272,6 +289,20 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             IVP.set_rhs_fn(s, p.rhs)
             params = Dict("method" => "bdf", "wrong-param-name" => 1)
             @test_throws ErrorException IVP.set_integrator(s, "vode", params)
+        end
+
+        @testset "test_4__config_dict_scipy_ode__should_fail_with_not_enough_nsteps" begin
+            s = IVP.Self("scipy_ode")
+            p = MildlyStiffODESystem()
+            IVP.set_initial_value(s, p.y0, p.t0)
+            IVP.set_rhs_fn(s, p.rhs)
+
+            t1 = p.t0 + 1
+
+            # We need to filter integration errors to avoid spurious output.
+            # Set very small number of steps, so that integrator fails.
+            IVP.set_integrator(s, "dopri5", Dict("nsteps" => 1))
+            @test_throws ErrorException IVP.integrate(s, t1)
         end
     end
 end
