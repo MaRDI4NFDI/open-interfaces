@@ -282,7 +282,19 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             @test IVP.set_integrator(s, "vode", params) == 0
         end
 
-        @testset "test_2__malformed_config_dict_scipy_ode__should_throw" begin
+        @testset "test_2__config_dict_with_bad_types__should_throw" begin
+            s = IVP.Self("jl_diffeq")
+            p = ScalarExpDecayProblem()
+            IVP.set_initial_value(s, p.y0, p.t0)
+            IVP.set_rhs_fn(s, p.rhs)
+
+            # Value 10^10 is too large to be represented as Int32
+            # and the code should throw an exception.
+            params = Dict("method" => 10^10, "order" => 1)
+            @test_throws ErrorException IVP.set_integrator(s, "vode", params)
+        end
+
+        @testset "test_3__malformed_config_dict_scipy_ode__should_throw" begin
             s = IVP.Self("scipy_ode")
             p = ScalarExpDecayProblem()
             IVP.set_initial_value(s, p.y0, p.t0)
@@ -299,8 +311,7 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
 
             t1 = p.t0 + 1
 
-            # We need to filter integration errors to avoid spurious output.
-            # Set very small number of steps, so that integrator fails.
+            # Set a very small number of steps, so that integrator fails.
             IVP.set_integrator(s, "dopri5", Dict("nsteps" => 1))
             @test_throws ErrorException IVP.integrate(s, t1)
         end
