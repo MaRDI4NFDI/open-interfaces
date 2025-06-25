@@ -378,39 +378,25 @@ end
 
 
 function make_oif_config_dict(dict)::OIFConfigDict
-    # buffer = BytesIO()
-    # # buffer.write(msgpack.packb(len(arg.keys()), use_bin_type=True))
-    # for k in arg.keys():
-    #     v1 = k
-    #     v2 = arg[k]
-    #     if isinstance(v2, int) or isinstance(v2, float) or isinstance(v2, str):
-    #         pass
-    #     else:
-    #         raise TypeError("Supported types for dictionaries are: int, float, str")
+    io = IOBuffer()
+    for k in keys(dict)
+        pack(io, k)
+        pack(io, dict[k])
 
-    #     buffer.write(msgpack.packb(v1, use_bin_type=True))
-    #     buffer.write(msgpack.packb(v2, use_bin_type=True))
-    # buffer.seek(0)
-
-
-    # obj = OIFConfigDict(
-    #     OIF_CONFIG_DICT,
-    #     OIF_LANG_JULIA,
-    #     0,
-    #     buffer.getvalue(),
-    #     len(buffer.getvalue()),
-    #     id(arg),
-    # )
-
-    # return obj
-    bytes = MsgPack.pack(dict)
+        if typeof(dict[k]) == Int32 || typeof(dict[k]) == Float64 || typeof(dict[k]) == String
+            continue
+        else
+            error("Supported types for dictionaries are: Int32, Float64, String")
+        end
+    end
+    seekstart(io)
 
     oif_config_dict_obj = OIFConfigDict(
         OIF_CONFIG_DICT,
         OIF_LANG_JULIA,
         0,
-        pointer(bytes),
-        length(bytes),
+        pointer(io.data),
+        io.size,
         C_NULL,
     )
 
