@@ -377,13 +377,20 @@ function make_oif_user_data(data::Ref{Any})::OIFUserData
 end
 
 
-function make_oif_config_dict(dict)::OIFConfigDict
+function make_oif_config_dict(dict::Dict)::OIFConfigDict
     io = IOBuffer()
-    for k in keys(dict)
+    for (k, v) in dict
         pack(io, k)
-        pack(io, dict[k])
+        pack(io, v)
 
-        if typeof(dict[k]) == Int32 || typeof(dict[k]) == Float64 || typeof(dict[k]) == String
+        if typeof(v) <: Integer || typeof(v) == Float64 || typeof(v) == String
+            if typeof(v) <: Integer
+                try
+                    Int32(v)
+                catch
+                    error("Supported integers must be representable as Int32")
+                end
+            end
             continue
         else
             error("Supported types for dictionaries are: Int32, Float64, String")
