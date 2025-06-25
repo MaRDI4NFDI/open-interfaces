@@ -253,4 +253,25 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             @test_throws ErrorException IVP.set_integrator(self, "i-am-not-known-integrator", Dict())
         end
     end
+
+    @testset "IVP, OIF_CONFIG_DICT tests" begin
+        @testset "test_1__config_dict_scipy_ode__should_accept_alright" begin
+            s = IVP.Self("scipy_ode")
+            p = ScalarExpDecayProblem()
+            IVP.set_initial_value(s, p.y0, p.t0)
+            IVP.set_rhs_fn(s, p.rhs)
+
+            params = Dict("method" => "bdf", "order" => 1)
+            @test IVP.set_integrator(s, "vode", params) == 0
+        end
+
+        @testset "test_2__malformed_config_dict_scipy_ode__should_throw" begin
+            s = IVP.Self("scipy_ode")
+            p = ScalarExpDecayProblem()
+            IVP.set_initial_value(s, p.y0, p.t0)
+            IVP.set_rhs_fn(s, p.rhs)
+            params = Dict("method" => "bdf", "wrong-param-name" => 1)
+            @test_throws ErrorException IVP.set_integrator(s, "vode", params)
+        end
+    end
 end
