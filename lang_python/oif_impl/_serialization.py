@@ -1,3 +1,4 @@
+import sys
 from io import BytesIO
 
 import msgpack
@@ -14,7 +15,12 @@ def deserialize(sd: bytes) -> dict:
     for datum in unpacker:
         data.append(datum)
 
-    assert len(data) % 2 == 0, "Malformed serialized config dict"
+    if len(data) % 2 != 0:
+        print(
+            f"Malformed serialized config dict: "
+            f"expected a sequence of key-value pairs, unstead got '{data}'",
+            file=sys.stderr,
+        )
 
     resultant_dict = {}
     i = 0
