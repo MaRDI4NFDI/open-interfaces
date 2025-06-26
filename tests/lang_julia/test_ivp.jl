@@ -303,7 +303,7 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             @test_throws ErrorException IVP.set_integrator(s, "vode", params)
         end
 
-        @testset "test_4__config_dict_scipy_ode__should_fail_with_not_enough_nsteps" begin
+        @testset "test_4__config_dict_scipy_ode__should_succeed_with_enough_nsteps" begin
             s = IVP.Self("scipy_ode")
             p = MildlyStiffODESystem()
             IVP.set_initial_value(s, p.y0, p.t0)
@@ -314,6 +314,10 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             # Set a very small number of steps, so that integrator fails.
             IVP.set_integrator(s, "dopri5", Dict("nsteps" => 1))
             @test_throws ErrorException IVP.integrate(s, t1)
+
+            # Set large number of steps, so that integrator succeeds.
+            IVP.set_integrator(s, "dopri5", Dict("nsteps" => 10_000))
+            @test IVP.integrate(s, t1) == 0
         end
     end
 end
