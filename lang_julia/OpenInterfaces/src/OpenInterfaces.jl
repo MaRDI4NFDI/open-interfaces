@@ -90,7 +90,6 @@ const load_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 const call_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 const unload_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 
-export _lib_dispatch
 
 function __init__()
     lib_dispatch[] = Libdl.dlopen("liboif_dispatch.so")
