@@ -55,7 +55,6 @@ function set_user_data(self::Self, user_data)
 end
 
 function set_integrator(self::Self, integrator_name::String, params::Dict)
-    println("Requested integrator is '$integrator_name'")
     integrator_symbol = Symbol(integrator_name)
     if !isdefined(OrdinaryDiffEq, integrator_symbol)
         error("[jl_diffeq] Could not find integrator '$integrator_name'")
@@ -72,6 +71,12 @@ function print_stats(self::Self)
 end
 
 function _rhs_wrapper(rhs)
+    # From the documentation:
+    # with `ODEProblem`s the function signature is always
+    # `f(du,u,p,t)` for the in-place form
+    # or `f(u,p,t)` for the out-of-place form.
+    # Note that the `p` argument will always be in the function signature
+    # regardless of if the problem is defined with parameters!
     function wrapper(du, u, p, t)
         return rhs(t, u, du, p)
     end
@@ -88,6 +93,9 @@ function _init(self::Self)
             _rhs_wrapper(self.rhs), self.y0, (self.t0, Inf), self.user_data
         )
     end
-    self.solver = init(problem, self.integrator; reltol = self.reltol, abstol = self.abstol, save_everystep = false)
+    self.solver = init(
+        problem, self.integrator;
+        reltol=self.reltol, abstol=self.abstol, save_everystep=false
+    )
 end
 end

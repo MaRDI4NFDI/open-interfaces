@@ -40,9 +40,9 @@ function LinearOscillatorProblem()
     function exact(t)
         [
             y0[1] * cos(omega * t) +
-            + y0[2] * sin(omega * t) / omega,
+            +y0[2] * sin(omega * t) / omega,
             -y0[1] * omega * sin(omega * t) +
-            + y0[2] * cos(omega * t)
+            +y0[2] * cos(omega * t)
         ]
     end
 
@@ -91,13 +91,13 @@ function IVPProblemWithUserData()
     t0 = 0.0
     y0 = [0.0, 1.0]
 
-    function rhs(_, y, ydot, (a, b)::Tuple{Int, Float64})
+    function rhs(_, y, ydot, (a, b)::Tuple{Int,Float64})
         ydot[1] = y[1] + a
         ydot[2] = b * y[2]
         return 0
     end
 
-    function exact(t, (a, b)::Tuple{Int, Float64})
+    function exact(t, (a, b)::Tuple{Int,Float64})
         return [
             a * (exp(t) - 1),
             exp(b * t),
@@ -318,6 +318,49 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             # Set large number of steps, so that integrator succeeds.
             IVP.set_integrator(s, "dopri5", Dict("nsteps" => 10_000))
             @test IVP.integrate(s, t1) == 0
+        end
+
+        @testset "test_5__config_dict_cvode__fails_when_max_num_steps_too_small" begin
+            s = IVP.Self("sundials_cvode")
+            p = MildlyStiffODESystem()
+            IVP.set_initial_value(s, p.y0, p.t0)
+            IVP.set_rhs_fn(s, p.rhs)
+
+            IVP.set_integrator(s, "bdf", Dict("max_num_steps" => 50))
+
+            t1 = p.t0 + 1
+
+            @test_throws ErrorException s.integrate(t1)
+        end
+
+        @testset "test_6__config_dict_sundials_cvode__fails_with_false_options" begin
+            s = IVP.Self("sundials_cvode")
+            p = MildlyStiffODESystem()
+            IVP.set_initial_value(s, p.y0, p.t0)
+            IVP.set_rhs_fn(s, p.rhs)
+
+            # Should error on the unknown option.
+            @test_throws ErrorException s.set_integrator("bdf", Dict("max_num_steps_typo" => 50))
+        end
+
+        @testset "test_7__config_dict_jl_diffeq__works" begin
+            s = IVP.Self("jl_diffeq")
+            p = MildlyStiffODESystem()
+            IVP.set_initial_value(s, p.y0, p.t0)
+            IVP.set_rhs_fn(s, p.rhs)
+
+            params = Dict("chunk_size" => 10, "autodiff" => false)
+            @test IVP.set_integrator(s, "Rosenbrock23", params) == 0
+        end
+
+        @testset "test_8__config_dict_jl_diffeq__fails_when_unknown_options" begin
+            s = IVP.Self("jl_diffeq")
+            p = MildlyStiffODESystem()
+            IVP.set_initial_value(s, p.y0, p.t0)
+            IVP.set_rhs_fn(s, p.rhs)
+
+            bad_params = Dict("unknown_option" => 10_000)
+            @test_throws ErrorException s.set_integrator("DP5", bad_params)
         end
     end
 end
