@@ -12,12 +12,22 @@ function deserialize(sd::Ptr)::Dict
     i = 1
     while !eof(io)
         elem = MsgPack.unpack(io)
+        # Because MsgPack specification says that values _should_ be represented
+        # in smallest number of bytes, Julia quite often unpacks
+        # small integers in UInt8 values:
+        # for example, original value `10` (of type `Int64`)
+        # becomes `0x0a` (of type `UInt8`).
+        # Because it breaks other things, we have to convert such values
+        # deliberately to wider integer type.
+        if typeof(elem) == UInt8
+            elem = Int64(elem)
+        end
         if i % 2 == 1
             push!(data, Symbol(elem))
         else
             push!(data, elem)
         end
-        i += 2
+        i += 1
     end
 
     @assert length(data) % 2 == 0
