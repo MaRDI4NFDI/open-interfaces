@@ -103,8 +103,7 @@ class OIFConfigDict(ctypes.Structure):
         ("size", ctypes.c_size_t),  # Current number of elements in the map
         ("buffer", ctypes.c_char_p),  # Buffer that is used by the pc
         ("buffer_length", ctypes.c_size_t),  # Buffer length, unsurprisingly
-        ("py_object", ctypes.c_void_p),  # Python dictionary
-    ]
+        ("native_object", ctypes.c_void_p),  # Native dictionary in its source language
 
 
 def make_oif_callback(
