@@ -40,10 +40,8 @@ const OIF_LANG_JULIA::Int32 = 4
 const OIF_LANG_R::Int32 = 5
 const OIF_LANG_COUNT::Int32 = 6
 
-@enum OIFError begin
-    OIF_ERROR = -1
-    OIF_IMPL_INIT_ERROR = -2
-end
+OIF_ERROR = -1
+OIF_IMPL_INIT_ERROR = -2
 
 const OIF_ARRAY_C_CONTIGUOUS::Int32 = 0x0001
 const OIF_ARRAY_F_CONTIGUOUS::Int32 = 0x0002
