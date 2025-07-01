@@ -74,6 +74,7 @@ struct OIFUserData
 end
 
 
+# See oif_config_dict.c
 struct OIFConfigDict
     type::Cint
     src::Cint
@@ -401,7 +402,7 @@ function make_oif_config_dict(dict::Dict)::OIFConfigDict
         0,
         pointer(io.data),
         io.size,
-        C_NULL,
+        Base.unsafe_convert(Ptr{Cvoid}, Ref(dict)),
     )
 
     return oif_config_dict_obj
