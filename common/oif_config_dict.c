@@ -21,8 +21,8 @@ struct oif_config_dict_t {
     int src;               // Source of the dictionary (one of OIF_LANG_* constants).
     size_t size;           // Current number of elements in the map.
     uint8_t *buffer;       // Buffer that is used by the pc.
-    size_t buffer_length;  // Buffer length, unsurprisingly.
-    void *py_object;       // Should be used by Python to pass dictionary directly.
+    size_t buffer_length;  // Buffer length, surprisingly.
+    void *native_object;   // Can be be used by Julia or Python to pass dictionary directly.
     HASHMAP(char, OIFConfigEntry) map;
     cw_pack_context *pc;  // Data structure that holds serialized map.
 };
