@@ -80,7 +80,7 @@ struct OIFConfigDict
     size::Csize_t
     buffer::Ptr{Cchar}
     buffer_length::Csize_t
-    py_object::Ptr{Cvoid}
+    native_object::Ptr{Cvoid}
 end
 
 const lib_dispatch = Ref{Ptr{Cvoid}}(0)
