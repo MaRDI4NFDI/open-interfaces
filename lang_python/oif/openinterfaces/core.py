@@ -104,6 +104,7 @@ class OIFConfigDict(ctypes.Structure):
         ("buffer", ctypes.c_char_p),  # Buffer that is used by the pc
         ("buffer_length", ctypes.c_size_t),  # Buffer length, unsurprisingly
         ("native_object", ctypes.c_void_p),  # Native dictionary in its source language
+    ]
 
 
 def make_oif_callback(
