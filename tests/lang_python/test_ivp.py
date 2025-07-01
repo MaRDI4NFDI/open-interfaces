@@ -333,7 +333,7 @@ class TestIVPConfigDict:
         s.set_rhs_fn(p.rhs)
 
         params = {"chunk_size": 10, "autodiff": False}
-        assert s.set_integrator("Rosenbrock23", params) == 0
+        assert s.set_integrator("Rosenbrock23", params) is None
 
     def test_8__config_dict_jl_diffeq__fails_when_unknown_options(self):
         s = IVP("jl_diffeq")
