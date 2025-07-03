@@ -368,6 +368,7 @@ def p(request):
     params=[
         ("scipy_ode", ["vode", "lsoda", "dopri5", "dop853"]),
         ("sundials_cvode", ["bdf", "adams"]),
+        ("jl_diffeq", ["DP5", "Tsit5", "Vern7"]),
     ]
 )
 def solver_integrator(request):
