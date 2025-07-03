@@ -209,7 +209,7 @@ class TestIVP:
         true_value = p.exact(t1)
         npt.assert_allclose(final_value, true_value, 1e-5, 1e-6)
 
-    def test_5__check_that_we_can_set_integrator(self, solver_integrator, p):
+    def test_5__check_that_we_can_set_integrator(self, solver_integrator):
         dt = 0.125
 
         s = IVP(solver_integrator[0])
@@ -218,7 +218,6 @@ class TestIVP:
 
         s.set_initial_value(p.y0, p.t0)
         s.set_rhs_fn(p.rhs)
-        s.set_tolerances(1e-2, 1e-2)
 
         s.integrate(p.t0 + dt)
         value_1 = s.y
