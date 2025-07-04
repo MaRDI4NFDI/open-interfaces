@@ -34,6 +34,7 @@ class ODEProblem {
     ODEProblem(const ODEProblem &other)
     {
         N = other.N;
+        delete[] y0;  // Free old memory.
         y0 = new double[N];
         memcpy(y0, other.y0, sizeof(*y0) * N);
     }
@@ -46,7 +47,10 @@ class ODEProblem {
         }
 
         this->N = other.N;
-        delete[] y0;
+
+        if (this->y0) {
+            delete[] this->y0;  // Free old memory.
+        }
         this->y0 = new double[N];
         memcpy(y0, other.y0, sizeof(*y0) * this->N);
 
