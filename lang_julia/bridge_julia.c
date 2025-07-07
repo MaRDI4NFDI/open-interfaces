@@ -46,11 +46,30 @@ static void
 handle_exception_(void)
 {
     jl_value_t *exc = jl_exception_occurred();
+    if (exc == NULL) {
+        fprintf(stderr, "[%s] No exception occurred\n", prefix_);
+        exit(1);
+    }
     jl_value_t *sprint_fn = jl_get_function(jl_base_module, "sprint");
+    if (sprint_fn == NULL) {
+        fprintf(stderr, "[%s] Could not find `sprint` function in the Base module\n", prefix_);
+    }
     jl_value_t *showerror_fn = jl_get_function(jl_base_module, "showerror");
+    if (showerror_fn == NULL) {
+        fprintf(stderr, "[%s] Could not find `showerror` function in the Base module\n",
+                prefix_);
+    }
     jl_value_t *catch_backtrace_fn = jl_get_function(jl_base_module, "catch_backtrace");
+    if (catch_backtrace_fn == NULL) {
+        fprintf(stderr, "[%s] Could not find `catch_backtrace` function in the Base module\n",
+                prefix_);
+    }
 
     jl_value_t *backtrace = jl_call0(catch_backtrace_fn);
+    if (backtrace == NULL) {
+        fprintf(stderr, "[%s] Could not get backtrace\n", prefix_);
+        exit(1);
+    }
     const char *exc_msg = jl_string_ptr(jl_call3(sprint_fn, showerror_fn, exc, backtrace));
     logerr(prefix_, "%s", exc_msg);
 
