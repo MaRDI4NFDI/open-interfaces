@@ -15,11 +15,13 @@ mutable struct Self
     implh::ImplHandle
     N::Int32
     y::Vector{Float64}
+    rhs_fn_wrapper
     user_data_ref::Ref{Any}
     oif_user_data
+    rhs_fn_c
     function Self(impl::String)
         implh = load_impl("ivp", impl, 1, 0)
-        self = new(ImplHandle(implh), 0, Float64[], Nothing, Nothing)
+        self = new(ImplHandle(implh), 0, Float64[], Nothing, Nothing, Nothing, Nothing)
         finalizer(finalizing, self)
     end
 
@@ -38,12 +40,12 @@ end
 
 function set_rhs_fn(self::Self, rhs_fn::Function)
     """Specify right-hand side function f."""
-    rhs_fn_wrapper = make_oif_callback(
+    self.rhs_fn_wrapper = make_oif_callback(
         rhs_fn,
         (OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64, OIF_USER_DATA),
         OIF_INT,
     )
-    call_impl(self.implh, "set_rhs_fn", (rhs_fn_wrapper,), ())
+    call_impl(self.implh, "set_rhs_fn", (self.rhs_fn_wrapper,), ())
 end
 
 function set_tolerances(self::Self, rtol::Float64, atol::Float64)
