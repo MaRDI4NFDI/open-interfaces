@@ -177,8 +177,10 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
         elseif typeof(arg) == OIFCallback
             arg_ref = Ref(arg)
             push!(temp_refs, arg_ref)
+            arg_p = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
+            push!(temp_refs, arg_p)
             in_arg_types[i] = OIF_CALLBACK
-            in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
+            in_arg_values[i] = arg_p
         elseif typeof(arg) == OIFUserData
             arg_ref = Ref(arg)
             push!(temp_refs, arg_ref)
@@ -194,6 +196,7 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             dict_p_ref = Ref(dict_p)
             push!(temp_refs, dict_p_ref)
             dict_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, dict_p_ref)
+            push!(temp_refs, dict_p_p)
 
             in_arg_types[i] = OIF_CONFIG_DICT
             in_arg_values[i] = dict_p_p
@@ -248,7 +251,7 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
     in_args = Ref(OIFArgs(in_num_args, pointer(in_arg_types), pointer(in_arg_values)))
     out_args = Ref(OIFArgs(out_num_args, pointer(out_arg_types), pointer(out_arg_values)))
 
-    result = GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values begin
+    result = GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values temp_refs begin
         @ccall $(call_interface_impl_fn[])(
             implh::Int,
             func_name::Cstring,
@@ -259,7 +262,7 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
 
     if result != 0
         error("Error occurred while invoking function '$func_name' from implementation with id '$implh'")
-        end
+    end
 
     return result
 end
