@@ -86,9 +86,18 @@ oif_config_dict_free(void *_dict)
     assert(dict->type == OIF_CONFIG_DICT);
     const char *key;
     OIFConfigEntry *entry;
-    hashmap_foreach(key, entry, &dict->map) { free(entry->value); }
+    hashmap_foreach(key, entry, &dict->map)
+    {
+        free(entry->value);
+        free(entry);
+    }
     hashmap_cleanup(&dict->map);
-    free(dict->buffer);
+    if (dict->buffer) {
+        free(dict->buffer);
+    }
+    if (dict->pc) {
+        free(dict->pc);
+    }
     free(dict);
 }
 
