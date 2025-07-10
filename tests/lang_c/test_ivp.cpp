@@ -189,6 +189,7 @@ class SundialsCVODEConfigDictTest : public testing::Test {
     {
         oif_free_array_f64(y0);
         oif_free_array_f64(y);
+        oif_unload_impl(implh);
         delete problem;
     }
 
@@ -228,6 +229,7 @@ class ScipyODEConfigDictTest : public testing::Test {
         oif_free_array_f64(y0);
         oif_free_array_f64(y);
         delete problem;
+        oif_unload_impl(implh);
     }
 
     ImplHandle implh;
