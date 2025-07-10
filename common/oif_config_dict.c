@@ -34,7 +34,7 @@ static size_t SIZE_ = 65;
 static char *
 copy_key_(const char *key)
 {
-    char *key_copy = malloc((strlen(key) + 1) * sizeof(char));
+    char *key_copy = oif_util_malloc((strlen(key) + 1) * sizeof(char));
     if (key_copy == NULL) {
         fprintf(stderr, "Could not allocate memory for a key copy\n");
         exit(1);
@@ -46,7 +46,7 @@ copy_key_(const char *key)
 static void
 free_key_(char *key)
 {
-    free(key);
+    oif_util_free(key);
 }
 
 inline static uint8_t *
@@ -64,7 +64,7 @@ reallocate_buffer_(uint8_t *buffer, size_t new_buffer_size)
 OIFConfigDict *
 oif_config_dict_init(void)
 {
-    OIFConfigDict *dict = malloc(sizeof(OIFConfigDict));
+    OIFConfigDict *dict = oif_util_malloc(sizeof(OIFConfigDict));
     assert(dict != NULL);
 
     dict->type = OIF_CONFIG_DICT;
@@ -88,29 +88,29 @@ oif_config_dict_free(void *_dict)
     OIFConfigEntry *entry;
     hashmap_foreach(key, entry, &dict->map)
     {
-        free(entry->value);
-        free(entry);
+        oif_util_free(entry->value);
+        oif_util_free(entry);
     }
     hashmap_cleanup(&dict->map);
     if (dict->buffer) {
-        free(dict->buffer);
+        oif_util_free(dict->buffer);
     }
     if (dict->pc) {
-        free(dict->pc);
+        oif_util_free(dict->pc);
     }
-    free(dict);
+    oif_util_free(dict);
 }
 
 void
 oif_config_dict_add_int(OIFConfigDict *dict, const char *key, int value)
 {
-    OIFConfigEntry *entry = malloc(sizeof(OIFConfigEntry));
+    OIFConfigEntry *entry = oif_util_malloc(sizeof(OIFConfigEntry));
     if (entry == NULL) {
         fprintf(stderr, "Could not add an entry to the config dictionary\n");
         exit(1);
     }
     entry->type = OIF_INT;
-    entry->value = malloc(sizeof(int));
+    entry->value = oif_util_malloc(sizeof(int));
     if (entry->value == NULL) {
         fprintf(stderr, "Could not allocate memory for adding an int entry\n");
         exit(1);
@@ -126,13 +126,13 @@ oif_config_dict_add_int(OIFConfigDict *dict, const char *key, int value)
 void
 oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double value)
 {
-    OIFConfigEntry *entry = malloc(sizeof(OIFConfigEntry));
+    OIFConfigEntry *entry = oif_util_malloc(sizeof(OIFConfigEntry));
     if (entry == NULL) {
         fprintf(stderr, "Could not add an entry to the config dictionary\n");
         exit(1);
     }
     entry->type = OIF_FLOAT64;
-    entry->value = malloc(sizeof(double));
+    entry->value = oif_util_malloc(sizeof(double));
     if (entry->value == NULL) {
         fprintf(stderr, "Could not allocate memory for adding a double entry\n");
         exit(1);
@@ -148,7 +148,7 @@ oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double value)
 void
 oif_config_dict_add_str(OIFConfigDict *dict, const char *key, const char *value)
 {
-    OIFConfigEntry *entry = malloc(sizeof(OIFConfigEntry));
+    OIFConfigEntry *entry = oif_util_malloc(sizeof(OIFConfigEntry));
     if (entry == NULL) {
         fprintf(stderr, "Could not add an entry to the config dictionary\n");
         exit(1);
@@ -169,7 +169,7 @@ oif_config_dict_add_str(OIFConfigDict *dict, const char *key, const char *value)
 const char **
 oif_config_dict_get_keys(OIFConfigDict *dict)
 {
-    const char **keys = malloc(dict->size * sizeof(char *));
+    const char **keys = oif_util_malloc(dict->size * sizeof(char *));
     if (keys == NULL) {
         fprintf(stderr, "Could not allocate memory for keys\n");
         exit(1);
@@ -276,7 +276,7 @@ oif_config_dict_print(OIFConfigDict *dict)
 void
 oif_config_dict_serialize(OIFConfigDict *dict)
 {
-    cw_pack_context *pc = malloc(sizeof(*pc));
+    cw_pack_context *pc = oif_util_malloc(sizeof(*pc));
     if (pc == NULL) {
         fprintf(stderr,
                 "Could not allocate memory required for serializing a config dictionary\n");
@@ -284,7 +284,7 @@ oif_config_dict_serialize(OIFConfigDict *dict)
     }
 
     size_t buffer_size = BUF_SIZE_;
-    uint8_t *buffer = malloc(buffer_size * sizeof(uint8_t));
+    uint8_t *buffer = oif_util_malloc(buffer_size * sizeof(uint8_t));
     if (buffer == NULL) {
         fprintf(stderr, "Could not allocate memory\n");
         exit(1);
@@ -460,7 +460,7 @@ oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from)
                 "at the destination was already initialized\n");
         return 1;
     }
-    to->buffer = malloc(from->buffer_length * sizeof(*from->buffer));
+    to->buffer = oif_util_malloc(from->buffer_length * sizeof(*from->buffer));
     if (to->buffer == NULL) {
         fprintf(stderr, "Memory error\n");
         exit(1);
