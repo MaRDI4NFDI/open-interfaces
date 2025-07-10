@@ -5,6 +5,7 @@ BasedOnStyle: Google
 AlwaysBreakAfterReturnType: All
 AllowShortIfStatementsOnASingleLine: false
 AlignAfterOpenBracket: Align
+AlignEscapedNewlines: LeftWithLastLine
 BreakBeforeBraces: Stroustrup
 ColumnLimit: 95
 DerivePointerAlignment: false
