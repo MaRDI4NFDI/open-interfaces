@@ -180,9 +180,13 @@ logerr(const char *prefix, const char *fmt, ...)
 #if !defined(__OPTIMIZE__)
 void __attribute((destructor))
 oif_util_dtor_(void) {
-    fprintf(stderr, "[oif_util] Final statistics on memory allocs via malloc/free:\n");
-    fprintf(stderr, "[oif_util] Number of not-freed allocations: %zu\n", NALLOCS_);
+    fprintf(stderr, "\033[31m[oif_util]\033[0m Final statistics on memory allocs via malloc/free:\n");
+    fprintf(stderr, "\033[31m[oif_util]\033[0m Number of not-freed allocations: %zu\n", NALLOCS_);
     // fprintf(stderr, "[oif_util] Number of not-freed bytes: %zu\n", NBYTES_);
+    if (NALLOCS_ > 0) {
+        fprintf(stderr, "\033[31m[oif_util]\033[0m Memory leaks detected!\n");
+        exit(1);
+    }
 }
 #endif
 #endif
