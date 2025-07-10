@@ -59,7 +59,7 @@ oif_util_str_duplicate(const char *src);
  * @return The same values as `string.h::strcmp`
  */
 int
-oif_strcmp_nocase(const char s1[static 1], const char s2[static 1]);
+oif_strcmp_nocase(const char *s1, const char *s2);
 
 /**
  * Log an error message to stderr.
