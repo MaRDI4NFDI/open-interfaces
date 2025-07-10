@@ -130,14 +130,14 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         fprintf(stderr, "[dispatch] Cannot open conf file '%s'\n", conf_filename_fixed_part);
         fprintf(stderr, "[dispatch] Search was done in the following paths: %s\n",
                 oif_impl_path_dup);
-        free(oif_impl_path_dup);
+        oif_util_free(oif_impl_path_dup);
         perror("Error message is: ");
         return -1;
     }
     else {
         fprintf(stderr, "[dispatch] Configuration file: %s\n", conf_filename);
     }
-    free(oif_impl_path_dup);
+    oif_util_free(oif_impl_path_dup);
 
     // Temporary buffer to read lines from file.
     const int buffer_size = 512;
@@ -296,7 +296,7 @@ unload_interface_impl(ImplHandle implh)
                 "[dispatch] Error occured when unloading implementation "
                 "from the implementations table.");
     }
-    free(impl_info->interface);
+    oif_util_free(impl_info->interface);
     free(impl_info);
     impl_info = NULL;
     printf("[dispatch] Unloaded implementation with id '%d'\n", implh);
