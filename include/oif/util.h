@@ -9,6 +9,29 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 
+void *oif_util_malloc_(size_t nbytes);
+void oif_util_free_(void *ptr);
+
+void *oif_util_malloc_verbose(size_t nbytes, const char *file, const char *func, int line);
+void oif_util_free_verbose(void *ptr, const char *file, const char *func, int line);
+
+/**
+ * Wrap `malloc` to collect debugging information about allocated memory.
+ *
+ * The function also does a check and **exits if the `malloc` fails**.
+ * The reason for exiting is that if we cannot allocate memory,
+ * then something is really wrong with the system,
+ * and there is no point to continue.
+ *
+ * @param nbytes Number of bytes to allocate.
+ * @return Pointer to the allocated memory.
+ */
+#define oif_util_malloc(nbytes) \
+        oif_util_malloc_verbose((nbytes), __FILE__, __func__, __LINE__)
+
+#define oif_util_free(ptr) \
+        oif_util_free_verbose((ptr), __FILE__, __func__, __LINE__)
+
 /**
  * Convert `size_t` input to `uint32_t`.
  *
