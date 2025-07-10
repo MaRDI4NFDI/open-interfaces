@@ -32,9 +32,12 @@ INSTANTIATE_TEST_SUITE_P(
     QeqGatewayParameterizedTestSuite,
     QeqGatewayFixture,
     ::testing::Values(
-        "c_qeq_solver",
+        "c_qeq_solver"
+#if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
+        ,
         "jl_qeq_solver",
         "py_qeq_solver"
+#endif
     )
 );
 
