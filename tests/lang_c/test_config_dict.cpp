@@ -2,6 +2,7 @@
 
 #include <oif/api.h>
 #include <oif/config_dict.h>
+#include <oif/util.h>
 
 TEST(OIFConfigDictTest, SimpleCase)
 {
@@ -104,4 +105,20 @@ TEST(OIFConfigDictTest, SerializeDeserializeVeryLongStringCase)
 
     oif_config_dict_free(dict);
     oif_config_dict_free(new_dict);
+}
+
+TEST(OIFConfigDictTest, GetCopyOfKeys)
+{
+    OIFConfigDict *dict = oif_config_dict_init();
+
+    oif_config_dict_add_int(dict, "int_option", 42);
+    oif_config_dict_add_double(dict, "double_option", 2.718);
+
+    const char **keys = oif_config_dict_get_keys(dict);
+    ASSERT_EQ(keys[0], "int_option");
+    ASSERT_EQ(keys[1], "double_option");
+    ASSERT_EQ(keys[2], nullptr);
+
+    oif_util_free(keys);
+    oif_config_dict_free(dict);
 }
