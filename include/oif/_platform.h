@@ -1,16 +1,12 @@
 // clang-format Language: C
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #if !defined(static_assert)
 #define static_assert _Static_assert
 #endif
+#endif
 
-#ifdef __cplusplus
-}
 #if defined(__SANITIZE_ADDRESS__)
     #define OIF_SANITIZE_ADDRESS_ENABLED 1
 #endif
