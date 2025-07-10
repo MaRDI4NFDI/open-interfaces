@@ -329,7 +329,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         module_filename_full_p = module_filename_full;
         module_filename_full_p[0] = '\0';
     }
-    free(oif_impl_path_dup);
+    oif_util_free(oif_impl_path_dup);
 
     if (module_file == NULL) {
         fprintf(stderr, "[%s] Could not find an appropriate module file\n", prefix_);
@@ -383,11 +383,11 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         fprintf(stderr, "[%s] Could not find function 'println' in Julia\n", prefix_);
         goto catch;
     }
-    printf("[%s] Instantiated self:\n", prefix_);
-    jl_call1(println_fn, self);
-    if (jl_exception_occurred()) {
-        goto catch;
-    }
+    // printf("[%s] Instantiated self:\n", prefix_);
+    // jl_call1(println_fn, self);
+    // if (jl_exception_occurred()) {
+    //     goto catch;
+    // }
 
     REFS_ = jl_eval_string("refs_ = IdDict()");
     if (jl_exception_occurred()) {
