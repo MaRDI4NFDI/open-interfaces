@@ -169,7 +169,7 @@ oif_config_dict_add_str(OIFConfigDict *dict, const char *key, const char *value)
 const char **
 oif_config_dict_get_keys(OIFConfigDict *dict)
 {
-    const char **keys = oif_util_malloc(dict->size * sizeof(char *));
+    const char **keys = oif_util_malloc((dict->size + 1) * sizeof(char *));
     if (keys == NULL) {
         fprintf(stderr, "Could not allocate memory for keys\n");
         exit(1);
