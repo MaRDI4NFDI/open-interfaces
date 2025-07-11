@@ -297,7 +297,7 @@ unload_interface_impl(ImplHandle implh)
                 "from the implementations table.");
     }
     oif_util_free(impl_info->interface);
-    free(impl_info);
+    oif_util_free(impl_info);
     impl_info = NULL;
     printf("[dispatch] Unloaded implementation with id '%d'\n", implh);
 

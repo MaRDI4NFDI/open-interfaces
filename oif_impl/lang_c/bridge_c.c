@@ -39,9 +39,10 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         return NULL;
     }
 
-    CImplInfo *impl_info = malloc(sizeof(CImplInfo));
+    CImplInfo *impl_info = oif_util_malloc(sizeof(CImplInfo));
     if (impl_info == NULL) {
         fprintf(stderr, "[%s] Could not create an implementation structure\n", prefix_);
+        dlclose(impl_lib);
         return NULL;
     }
     impl_info->impl_lib = impl_lib;
