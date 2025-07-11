@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -60,6 +61,16 @@ oif_util_str_duplicate(const char *src);
  */
 int
 oif_strcmp_nocase(const char *s1, const char *s2);
+
+/**
+ * Check if a string is contained in a null-trerminated array of strings.
+ *
+ * @param arr The null-terminated array of strings to search in.
+ * @param s The string to search for.
+ * @return true if the key is found, false otherwise.
+ */
+bool
+oif_util_str_contains(const char **arr, const char *s);
 
 /**
  * Log an error message to stderr.

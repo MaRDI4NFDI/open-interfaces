@@ -160,6 +160,17 @@ oif_strcmp_nocase(const char s1[static 1], const char s2[static 1])
     return 0;
 }
 
+bool
+oif_util_str_contains(const char **arr, const char *s)
+{
+    for (size_t i = 0; arr[i] != NULL; ++i) {
+        if (strcmp(arr[i], s) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 int
 logerr(const char *prefix, const char *fmt, ...)
 {

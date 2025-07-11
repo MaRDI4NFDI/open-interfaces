@@ -115,8 +115,8 @@ TEST(OIFConfigDictTest, GetCopyOfKeys)
     oif_config_dict_add_double(dict, "double_option", 2.718);
 
     const char **keys = oif_config_dict_get_keys(dict);
-    ASSERT_EQ(keys[0], "int_option");
-    ASSERT_EQ(keys[1], "double_option");
+    ASSERT_EQ(oif_util_str_contains(keys, "int_option"), true);
+    ASSERT_EQ(oif_util_str_contains(keys, "double_option"), true);
     ASSERT_EQ(keys[2], nullptr);
 
     oif_util_free(keys);
