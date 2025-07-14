@@ -102,6 +102,7 @@ oif_config_dict_free(void *_dict)
         oif_util_free(dict->pc);
     }
     oif_util_free(dict);
+    dict = NULL;
 }
 
 void
