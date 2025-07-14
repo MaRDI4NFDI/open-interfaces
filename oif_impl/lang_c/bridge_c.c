@@ -70,7 +70,7 @@ unload_impl(ImplInfo *impl_info_)
     int status = dlclose(impl_info->impl_lib);
     if (status != 0) {
         fprintf(stderr,
-                "[%] While closing implementation '%s' an error occurred. "
+                "[%s] While closing implementation '%s' an error occurred. "
                 "Error message: %s",
                 prefix_, impl_info->impl_details, dlerror());
     }
