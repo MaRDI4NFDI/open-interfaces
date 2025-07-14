@@ -82,6 +82,9 @@ oif_config_dict_init(void)
 void
 oif_config_dict_free(void *_dict)
 {
+    if (_dict == NULL) {
+        return;
+    }
     OIFConfigDict *dict = _dict;
     assert(dict->type == OIF_CONFIG_DICT);
     const char *key;
@@ -460,13 +463,14 @@ oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from)
                 "at the destination was already initialized\n");
         return 1;
     }
-    to->buffer = oif_util_malloc(from->buffer_length * sizeof(*from->buffer));
+    to->buffer = oif_util_malloc((from->buffer_length + 1) * sizeof(*from->buffer));
     if (to->buffer == NULL) {
         fprintf(stderr, "Memory error\n");
         exit(1);
     }
     memcpy(to->buffer, from->buffer, from->buffer_length);
     to->buffer_length = from->buffer_length;
+    to->buffer[to->buffer_length] = '\0';  // Ensure null-termination.
     return 0;
 }
 
