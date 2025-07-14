@@ -293,7 +293,7 @@ unload_interface_impl(ImplHandle implh)
     ImplInfo *result = hashmap_remove(&IMPL_MAP, &implh);
     if (result == NULL || result->implh != implh) {
         fprintf(stderr,
-                "[dispatch] Error occured when unloading implementation "
+                "[dispatch] Error occurred when unloading implementation "
                 "from the implementations table.");
     }
     oif_util_free(impl_info->interface);
