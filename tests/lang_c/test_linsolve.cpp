@@ -3,7 +3,19 @@
 #include "oif/c_bindings.h"
 #include "oif/interfaces/linsolve.h"
 
+#include <oif/_platform.h>
+
 class LinearSolverFixture : public ::testing::TestWithParam<const char *> {};
+
+INSTANTIATE_TEST_SUITE_P(
+        LinearSolverTestSuite, LinearSolverFixture,
+        ::testing::Values(
+            "c_lapack"
+#if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
+            , "numpy", "jl_backslash"
+#endif
+    )
+);
 
 TEST_P(LinearSolverFixture, TestCase1)
 {
@@ -35,5 +47,3 @@ TEST_P(LinearSolverFixture, TestCase1)
     oif_unload_impl(implh);
 }
 
-INSTANTIATE_TEST_SUITE_P(LinearSolverTestSuite, LinearSolverFixture,
-                         ::testing::Values("c_lapack", "numpy", "jl_backslash"));
