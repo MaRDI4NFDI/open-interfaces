@@ -38,6 +38,7 @@ class ODEProblem {
         }
 
         this->N = other.N;
+        delete [] y0;
         this->y0 = new double[N];
         memcpy(y0, other.y0, sizeof(*y0) * this->N);
 
@@ -151,7 +152,7 @@ class OrbitEquationsProblem : public ODEProblem {
 // BEGIN fixtures
 
 struct IvpImplementationsTimesODEProblemsFixture
-    : public testing::TestWithParam<std::tuple<const char *, ODEProblem *>> {};
+    : public testing::TestWithParam<std::tuple<const char *, std::shared_ptr<ODEProblem>>> {};
 
 struct SolverIntegratorsCombination {
     const char *impl;
@@ -163,7 +164,7 @@ struct ImplTimesIntegratorsFixture
 
 class SundialsCVODEConfigDictTest : public testing::Test {
    protected:
-    SundialsCVODEConfigDictTest()
+    void SetUp() override
     {
         const char *impl = "sundials_cvode";
         problem = new ScalarExpDecayProblem();
@@ -185,7 +186,7 @@ class SundialsCVODEConfigDictTest : public testing::Test {
         EXPECT_EQ(status, 0);
     }
 
-    ~SundialsCVODEConfigDictTest()
+    void TearDown() override
     {
         oif_free_array_f64(y0);
         oif_free_array_f64(y);
@@ -256,10 +257,10 @@ INSTANTIATE_TEST_SUITE_P(
 // END fixtures
 // ----------------------------------------------------------------------------
 
-TEST_P(IvpImplementationsTimesODEProblemsFixture, ScalarExpDecayTestCase)
+TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
 {
     const char *impl = std::get<0>(GetParam());
-    ODEProblem *problem = std::get<1>(GetParam());
+    ODEProblem *problem = std::get<1>(GetParam()).get();
     double t0 = 0.0;
     intptr_t dims[] = {
         problem->N,
@@ -319,6 +320,9 @@ TEST_P(ImplTimesIntegratorsFixture, Test1)
         oif_ivp_integrate(implh, t1, y);
     }
 
+    oif_unload_impl(implh);
+    oif_free_array_f64(y);
+    oif_free_array_f64(y0);
     delete problem;
 }
 
@@ -330,6 +334,7 @@ TEST_F(SundialsCVODEConfigDictTest, Test01)
     ASSERT_EQ(status, 0);
 
     oif_ivp_integrate(implh, t1, y);
+    oif_config_dict_free(dict);
 }
 
 TEST_F(SundialsCVODEConfigDictTest, Test02)
@@ -340,6 +345,7 @@ TEST_F(SundialsCVODEConfigDictTest, Test02)
     ASSERT_EQ(status, 0);
 
     oif_ivp_integrate(implh, t1, y);
+    oif_config_dict_free(dict);
 }
 
 TEST_F(SundialsCVODEConfigDictTest, Test03)
@@ -351,6 +357,7 @@ TEST_F(SundialsCVODEConfigDictTest, Test03)
     ASSERT_NE(status, 0);
 
     oif_ivp_integrate(implh, t1, y);
+    oif_config_dict_free(dict);
 }
 
 TEST_F(ScipyODEConfigDictTest, ShouldAcceptIntegratorParamsForDopri5)
@@ -361,6 +368,7 @@ TEST_F(ScipyODEConfigDictTest, ShouldAcceptIntegratorParamsForDopri5)
     ASSERT_EQ(status, 0);
 
     oif_ivp_integrate(implh, t1, y);
+    oif_config_dict_free(dict);
 }
 
 TEST_F(ScipyODEConfigDictTest, ShouldAcceptIntegratorParamsForVODE)
@@ -374,6 +382,7 @@ TEST_F(ScipyODEConfigDictTest, ShouldAcceptIntegratorParamsForVODE)
     ASSERT_EQ(status, 0);
 
     oif_ivp_integrate(implh, t1, y);
+    oif_config_dict_free(dict);
 }
 
 TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
@@ -382,4 +391,6 @@ TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
     oif_config_dict_add_int(dict, "max_num_steps_wrong_key", 1000);
     int status = oif_ivp_set_integrator(implh, (char *)"vode", dict);
     ASSERT_NE(status, 0);
+
+    oif_config_dict_free(dict);
 }
