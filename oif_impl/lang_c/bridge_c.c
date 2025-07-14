@@ -106,12 +106,12 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     size_t num_out_args = out_args->num_args;
     unsigned int num_total_args = (unsigned int)(num_in_args + num_out_args);
 
-    arg_types = malloc(num_total_args * sizeof(ffi_type *));
+    arg_types = oif_util_malloc(num_total_args * sizeof(ffi_type *));
     if (arg_types == NULL) {
         fprintf(stderr, "[%s] Could not allocate memory for FFI types\n", prefix_);
         goto cleanup;
     }
-    arg_values = malloc(num_total_args * sizeof(void *));
+    arg_values = oif_util_malloc(num_total_args * sizeof(void *));
     if (arg_values == NULL) {
         fprintf(stderr, "[%s] Could not allocate memory for FFI values\n", prefix_);
         goto cleanup;
@@ -226,10 +226,10 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
 cleanup:
     if (arg_values != NULL) {
-        free(arg_values);
+        oif_util_free(arg_values);
     }
     if (arg_types != NULL) {
-        free(arg_types);
+        oif_util_free(arg_types);
     }
 
     if (tracker != NULL) {
