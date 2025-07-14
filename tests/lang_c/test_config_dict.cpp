@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include <gtest/gtest.h>
 
 #include <oif/api.h>
