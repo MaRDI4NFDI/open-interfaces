@@ -143,7 +143,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     const int buffer_size = 512;
     size_t len;
     char *fgets_status;
-    buffer = malloc(sizeof(char) * buffer_size);
+    buffer = oif_util_malloc(sizeof(char) * buffer_size);
     if (buffer == NULL) {
         fprintf(stderr,
                 "[dispatch] Could not allocate buffer for parsing "
@@ -247,7 +247,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
 
 cleanup:
     if (buffer != NULL) {
-        free(buffer);
+        oif_util_free(buffer);
     }
     if (conf_file != NULL) {
         fclose(conf_file);
