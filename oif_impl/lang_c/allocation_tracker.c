@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "oif/util.h"
+
 #include "allocation_tracker.h"
 
 #define ALLOCATION_TRACKER_TYPE 120
@@ -19,17 +21,17 @@ struct allocation_tracker_t {
 AllocationTracker *
 allocation_tracker_init(void)
 {
-    AllocationTracker *tracker = malloc(sizeof(AllocationTracker));
+    AllocationTracker *tracker = oif_util_malloc(sizeof(AllocationTracker));
     if (tracker == NULL) {
         goto report_error_and_exit;
     }
 
     tracker->type = ALLOCATION_TRACKER_TYPE;
-    tracker->pointers = malloc(sizeof(*tracker->pointers) * INITIAL_CAPACITY_);
+    tracker->pointers = oif_util_malloc(sizeof(*tracker->pointers) * INITIAL_CAPACITY_);
     if (tracker->pointers == NULL) {
         goto report_error_and_exit;
     }
-    tracker->cleanup_fns = malloc(sizeof(*tracker->cleanup_fns) * INITIAL_CAPACITY_);
+    tracker->cleanup_fns = oif_util_malloc(sizeof(*tracker->cleanup_fns) * INITIAL_CAPACITY_);
     tracker->size = 0;
     tracker->capacity = INITIAL_CAPACITY_;
 
@@ -72,7 +74,8 @@ allocation_tracker_free(void *tracker_)
         tracker->cleanup_fns[i](tracker->pointers[i]);
     }
 
-    free(tracker->pointers);
-    free(tracker->cleanup_fns);
-    free(tracker);
+    oif_util_free(tracker->pointers);
+    oif_util_free(tracker->cleanup_fns);
+    oif_util_free(tracker);
+    tracker = NULL;
 }
