@@ -19,7 +19,7 @@ typedef struct {
     char *impl_details;
 } CImplInfo;
 
-static int IMPL_COUNTER = 0;
+static int IMPL_COUNTER_ = 0;
 
 static char *prefix_ = "bridge_c";
 
@@ -51,6 +51,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     fprintf(stderr, "[dispatch_c] load_impl impl_info->impl_details = %s\n",
             impl_info->impl_details);
 
+    IMPL_COUNTER_++;
     return (ImplInfo *)impl_info;
 }
 
@@ -73,7 +74,7 @@ unload_impl(ImplInfo *impl_info_)
                 "Error message: %s",
                 prefix_, impl_info->impl_details, dlerror());
     }
-    IMPL_COUNTER--;
+    IMPL_COUNTER_--;
 
     oif_util_free(impl_info->impl_details);
     return 0;
