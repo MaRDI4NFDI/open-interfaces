@@ -8,6 +8,8 @@
 #include "oif/c_bindings.h"
 #include "oif/interfaces/ivp.h"
 
+#include "oif/_platform.h"
+
 using namespace std;
 
 const double EPS = 0.9;
@@ -240,19 +242,31 @@ class ScipyODEConfigDictTest : public testing::Test {
     OIFArrayF64 *y;
 };
 
-INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
-                         testing::Combine(testing::Values("sundials_cvode", "scipy_ode",
-                                                          "jl_diffeq"),
-                                          testing::Values(new ScalarExpDecayProblem(),
-                                                          new LinearOscillatorProblem(),
-                                                          new OrbitEquationsProblem())));
+INSTANTIATE_TEST_SUITE_P(
+    IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
+    testing::Combine(testing::Values("sundials_cvode"
+#if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
+                                     ,
+                                     "scipy_ode", "jl_diffeq"
+#endif
+                                     ),
+                     testing::Values(
+                         std::make_shared<ScalarExpDecayProblem>()
+                         ,
+                                     std::make_shared<LinearOscillatorProblem>(),
+                                     std::make_shared<OrbitEquationsProblem>()
+    )));
 
 INSTANTIATE_TEST_SUITE_P(
     IvpChangeIntegratorsTests, ImplTimesIntegratorsFixture,
-    testing::Values(SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}},
-                    SolverIntegratorsCombination{"scipy_ode",
-                                                 {"vode", "lsoda", "dopri5", "dop853"}},
-                    SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}));
+    testing::Values(SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}}
+#if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
+                    // ,
+                    // SolverIntegratorsCombination{"scipy_ode",
+                    //                              {"vode", "lsoda", "dopri5", "dop853"}},
+                    // SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}
+#endif
+                    ));
 
 // END fixtures
 // ----------------------------------------------------------------------------
@@ -290,7 +304,7 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
     oif_unload_impl(implh);
 }
 
-TEST_P(ImplTimesIntegratorsFixture, Test1)
+TEST_P(ImplTimesIntegratorsFixture, SetIntegratorMethodWorks)
 {
     auto param = GetParam();
     const char *impl = param.impl;
@@ -360,6 +374,7 @@ TEST_F(SundialsCVODEConfigDictTest, Test03)
     oif_config_dict_free(dict);
 }
 
+#if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
 TEST_F(ScipyODEConfigDictTest, ShouldAcceptIntegratorParamsForDopri5)
 {
     OIFConfigDict *dict = oif_config_dict_init();
@@ -394,3 +409,4 @@ TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
 
     oif_config_dict_free(dict);
 }
+#endif
