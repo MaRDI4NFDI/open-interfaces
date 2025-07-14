@@ -67,7 +67,12 @@ unload_impl(ImplInfo *impl_info_)
     }
     CImplInfo *impl_info = (CImplInfo *)impl_info_;
 
-    int status = dlclose(impl_info->impl_lib);
+    int status;
+#if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
+    status = dlclose(impl_info->impl_lib);
+#else
+    status = 0;
+#endif
     if (status != 0) {
         fprintf(stderr,
                 "[%s] While closing implementation '%s' an error occurred. "
