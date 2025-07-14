@@ -37,6 +37,8 @@ static SUNContext sunctx;
 // CVode memory block.
 void *cvode_mem = NULL;
 
+SUNNonlinearSolver NLS = NULL;
+
 /** Number of equations */
 sunindextype N;
 
@@ -72,27 +74,38 @@ static int
 init_(void)
 {
     int status;
-    // 5. Create CVODE object.
+    
+    // Clean up existing resources before reinitializing
     if (cvode_mem != NULL) {
         CVodeFree(&cvode_mem);
+        cvode_mem = NULL;
     }
 
+    // 5. Create CVODE object.
     cvode_mem = CVodeCreate(integrator, sunctx);
+    if (cvode_mem == NULL) {
+        fprintf(stderr, "%s CVodeCreate failed\n", prefix);
+        return 1;
+    }
+
     // 6. Initialize CVODE solver.
     status = CVodeInit(cvode_mem, cvode_rhs, self_t0, self_y0);
     if (status) {
-        fprintf(stderr, "%s CVodeInit call failed", prefix);
+        fprintf(stderr, "%s CVodeInit call failed\n", prefix);
         return 1;
     }
 
     // 7. Specify integration tolerances.
-    CVodeSStolerances(cvode_mem, self_rtol, self_atol);
+    status = CVodeSStolerances(cvode_mem, self_rtol, self_atol);
+    if (status) {
+        fprintf(stderr, "%s CVodeSStolerances failed\n", prefix);
+        return 1;
+    }
 
     // 8. Create matrix object
     /* A = SUNDenseMatrix(N, N, sunctx); */
     /* if (A == NULL) { */
-    /*     fprintf(stderr, "[sundials_cvode] Could not create matrix for dense
-     * linear solver\n"); */
+    /*     fprintf(stderr, "[sundials_cvode] Could not create matrix for dense linear solver\n"); */
     /*     return 2; */
     /* } */
 
@@ -119,8 +132,7 @@ init_(void)
     /* } else if (status == CVLS_ILL_INPUT) { */
     /*     fprintf( */
     /*         stderr, */
-    /*         "[sundials_cvode] Setting linear solver failed due to ill
-     * input\n" */
+    /*         "[sundials_cvode] Setting linear solver failed due to ill input\n" */
     /*     ); */
     /*     return 5; */
     /* } else if (status != CVLS_SUCCESS) { */
@@ -151,11 +163,16 @@ init_(void)
     }
 
     // 13. Create nonlinear solver object (optional)
-    SUNNonlinearSolver NLS = SUNNonlinSol_FixedPoint(self_y0, 0, sunctx);
+    if (NLS != NULL) {
+        SUNNonlinSolFree(NLS);
+        NLS = NULL;
+    }
+    NLS = SUNNonlinSol_FixedPoint(self_y0, 0, sunctx);
     if (NLS == NULL) {
         fprintf(stderr, "%s Could not create Fixed Point Nonlinear solver\n", prefix);
         return 7;
     }
+    
     // 14. Attach nonlinear solver module (optional)
     status = CVodeSetNonlinearSolver(cvode_mem, NLS);
     if (status != CV_SUCCESS) {
@@ -181,9 +198,12 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     // No, it is not appropriate here as we work with serial code :-)
 
     // 2. Create the Sundials context object.
+    if (sunctx != NULL) {
+        SUNContext_Free(&sunctx);
+    }
     status = SUNContext_Create(SUN_COMM_NULL, &sunctx);
     if (status) {
-        fprintf(stderr, "%s An error occurred when creating SUNContext", prefix);
+        fprintf(stderr, "%s An error occurred when creating SUNContext\n", prefix);
         return 1;
     }
 
@@ -207,14 +227,27 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     }
 
     // 4. Set vector of initial values.
+    // If `self_y0` already exists, then we free it first.
+    if (self_y0 != NULL) {
+        N_VDestroy(self_y0);
+    }
+    
     self_y0 = N_VMake_Serial(N, y0_in->data, sunctx);  // Problem vector.
+    if (self_y0 == NULL) {
+        fprintf(stderr, "%s Could not create initial value vector\n", prefix);
+        return 3;
+    }
+    
     // Sanity check that `sunrealtype` is actually the same as OIF_FLOAT64.
     assert(NV_Ith_S(self_y0, 0) == y0_in->data[0]);
 
-    sunrealtype self_t0 = t0_in;
+    self_t0 = t0_in;
     assert(self_t0 == t0_in);
 
-    init_();
+    status = init_();
+    if (status) {
+        return status;
+    }
 
     return 0;
 }
@@ -270,6 +303,11 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
         return 1;
     }
 
+    // Clean up existing config if it exists
+    if (config != NULL) {
+        oif_config_dict_free(config);
+    }
+    
     config = config_;
     if (config != NULL) {
         const char **keys = oif_config_dict_get_keys(config);
@@ -285,13 +323,18 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
                 fprintf(stderr,
                         "[%s] Passed option '%s' is not one of the available options\n",
                         prefix, keys[i]);
+                oif_util_free(keys);
                 return 1;
             }
         }
+        oif_util_free(keys);
     }
 
     if (self_y0 != NULL) {
-        init_();
+        int status = init_();
+        if (status) {
+            return status;
+        }
     }
 
     return 0;
@@ -300,6 +343,10 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
 int
 print_stats(void)
 {
+    if (cvode_mem == NULL) {
+        fprintf(stderr, "%s CVODE not initialized\n", prefix);
+        return 1;
+    }
     return CVodePrintAllStats(cvode_mem, stdout, SUN_OUTPUTFORMAT_TABLE);
 }
 
@@ -330,7 +377,7 @@ integrate(double t, OIFArrayF64 *y)
         case CV_SUCCESS:
             return 0;
         default:
-            fprintf(stderr, "%s During call to `CVode`, an error occurred\n", prefix);
+            fprintf(stderr, "%s During call to `CVode`, an error occurred (code: %d)\n", prefix, ier);
             return 1;
     }
 }
@@ -355,4 +402,36 @@ cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data)
     int result = OIF_RHS_FN(t, &oif_y, &oif_ydot, user_data);
 
     return result;
+}
+
+void
+oif_ivp_free(void *self)
+{
+    fprintf(stderr, "%s Freeing resources\n", prefix);
+    (void)self;  // Fixed: cast to void to suppress unused parameter warning
+    
+    if (self_y0 != NULL) {
+        N_VDestroy(self_y0);
+        self_y0 = NULL;
+    }
+
+    if (cvode_mem != NULL) {
+        CVodeFree(&cvode_mem);
+        cvode_mem = NULL;
+    }
+
+    if (NLS != NULL) {
+        SUNNonlinSolFree(NLS);
+        NLS = NULL;
+    }
+
+    if (sunctx != NULL) {
+        SUNContext_Free(&sunctx);
+        sunctx = NULL;
+    }
+
+    if (config != NULL) {
+        oif_config_dict_free(config);
+        config = NULL;
+    }
 }
