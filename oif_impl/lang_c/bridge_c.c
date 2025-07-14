@@ -97,7 +97,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     void *service_lib = impl_info->impl_lib;
     void *func = dlsym(service_lib, method);
     if (func == NULL) {
-        fprintf(stderr, "[%s] Cannot load interface '%s'\n", prefix_, method);
+        fprintf(stderr, "[%s] Cannot load method '%s'\n", prefix_, method);
         fprintf(stderr, "[%s] dlerror() = %s\n", prefix_, dlerror());
         goto cleanup;
     }
