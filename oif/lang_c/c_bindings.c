@@ -7,6 +7,8 @@
 #include <oif/api.h>
 #include <oif/c_bindings.h>
 
+#include <oif/util.h>
+
 #include <oif/internal/dispatch.h>
 
 ImplHandle
@@ -24,7 +26,7 @@ oif_unload_impl(ImplHandle implh)
 OIFArrayF64 *
 oif_create_array_f64(int nd, intptr_t *dimensions)
 {
-    OIFArrayF64 *x = malloc(sizeof(OIFArrayF64));
+    OIFArrayF64 *x = oif_util_malloc(sizeof(OIFArrayF64));
     x->nd = nd;
     x->dimensions = dimensions;
     x->flags = OIF_ARRAY_C_CONTIGUOUS;
@@ -37,7 +39,7 @@ oif_create_array_f64(int nd, intptr_t *dimensions)
     for (size_t i = 0; i < nd; ++i) {
         size *= dimensions[i];
     }
-    x->data = (double *)malloc(size * sizeof(double));
+    x->data = (double *) oif_util_malloc(size * sizeof(double));
 
     return x;
 }
@@ -67,8 +69,9 @@ oif_free_array_f64(OIFArrayF64 *x)
         return;
     }
 
-    free(x->data);
-    free(x);
+    oif_util_free(x->data);
+    oif_util_free(x);
+    x = NULL;
 }
 
 void
