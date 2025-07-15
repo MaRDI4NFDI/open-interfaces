@@ -81,6 +81,10 @@ void oif_util_free_(void *ptr) {
     // fprintf(stderr, "     Size in it: %zu bytes\n", nbytes);
     free(p_oif);
     p_oif = NULL;
+    if (NALLOCS_ == 0) {
+        fprintf(stderr, "\033[31m[oif_util_free] ERROR:\033[0m For some reason, number of non-freed allocations is already zero. Exiting...\n");
+        exit(1);
+    }
     NALLOCS_--;
     // NBYTES_ -= nbytes;
 }
