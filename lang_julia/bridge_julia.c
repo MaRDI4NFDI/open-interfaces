@@ -355,7 +355,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         goto catch;
     }
 
-    result = malloc(sizeof *result);
+    result = oif_util_malloc(sizeof *result);
     if (result == NULL) {
         fprintf(stderr,
                 "[%s] Could not allocate memory for Julia implementation information\n",
