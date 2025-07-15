@@ -73,6 +73,19 @@ bool
 oif_util_str_contains(const char **arr, const char *s);
 
 /**
+ * Log a warning message to stderr.
+ *
+ * The error message starts with "[prefix] WARNING: "
+ * followed by the formatted message.
+ *
+ * @param prefix The prefix to be printed before the message.
+ * @param fmt The format string for the message.
+ * @param ... The arguments for the format string.
+ */
+int
+logwarn(const char *prefix, const char *fmt, ...);
+
+/**
  * Log an error message to stderr.
  *
  * The error message starts with "[prefix] ERROR: "
