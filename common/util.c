@@ -176,6 +176,21 @@ oif_util_str_contains(const char **arr, const char *s)
 }
 
 int
+logwarn(const char *prefix, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    fprintf(stderr, "[%s] \033[1m\033[33mWARNING:\033[0m ", prefix);
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+
+    va_end(ap);
+
+    return 0;
+}
+
+int
 logerr(const char *prefix, const char *fmt, ...)
 {
     va_list ap;
