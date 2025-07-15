@@ -1,6 +1,6 @@
 module IVP
 
-using OpenInterfaces: ImplHandle, load_impl, call_impl, make_oif_callback, make_oif_user_data, OIF_FLOAT64, OIF_ARRAY_F64, OIF_INT, OIF_USER_DATA, OIFUserData
+using OpenInterfaces: ImplHandle, load_impl, call_impl, unload_impl, make_oif_callback, make_oif_user_data, OIF_FLOAT64, OIF_ARRAY_F64, OIF_INT, OIF_USER_DATA, OIFUserData
 
 export Self,
        set_initial_value,
@@ -20,8 +20,12 @@ mutable struct Self
     function Self(impl::String)
         implh = load_impl("ivp", impl, 1, 0)
         self = new(ImplHandle(implh), 0, Float64[], Nothing, Nothing)
-        f(t) = ccall(:jl_safe_printf, Cvoid, (Cstring, Cint), "Finalizing %d.\n", self.implh)
-        finalizer(f, self)
+        finalizer(finalizing, self)
+    end
+
+    function finalizing(self::Self)
+        """Finalization function to clean up resources."""
+        unload_impl(self.implh)
     end
 end
 
