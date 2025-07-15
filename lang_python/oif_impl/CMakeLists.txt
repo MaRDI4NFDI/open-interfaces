@@ -10,6 +10,7 @@ target_include_directories(oif_bridge_python PRIVATE ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_bridge_python PUBLIC Python::Python)
 target_link_libraries(oif_bridge_python PUBLIC Python::NumPy)
 target_link_libraries(oif_bridge_python PRIVATE oif_common_data_structures)
+target_link_libraries(oif_bridge_python PRIVATE oif_common_util)
 install(TARGETS oif_bridge_python DESTINATION lib)
 
 add_library(oif_bridge_python_callback MODULE _callback.c)
