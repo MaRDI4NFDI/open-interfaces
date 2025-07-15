@@ -118,23 +118,8 @@ oif_util_u32_from_size_t(size_t val)
 }
 
 char *
-oif_util_str_duplicate(const char *src)
+oif_util_str_duplicate_(const char *src)
 {
-    void *addr = __builtin_return_address(0);
-    Dl_info info;
-    if (dladdr(addr, &info) && info.dli_fname) {
-        fprintf(
-            stderr,
-            "\033[31m[oif_util_str_duplicate]\033[0m\n"
-            "        File: %s\n"
-            "    Function: %s\n"
-            "        Line: %d\n",
-            info.dli_fname,
-            info.dli_sname,
-            __LINE__);
-    } else {
-        fprintf(stderr, "[str_duplicate] Could not retrieve caller information\n");
-    }
     size_t len = strlen(src);
     char *dest = oif_util_malloc_((len + 1) * sizeof(*dest));
     if (dest == NULL) {
@@ -143,6 +128,23 @@ oif_util_str_duplicate(const char *src)
     }
     strcpy(dest, src);
     return dest;
+}
+
+char *
+oif_util_str_duplicate_verbose(const char *src, const char *file, const char *func, int line)
+{
+    fprintf(
+        stderr,
+        "\033[31m"
+        "[oif_util_str_duplicate]"
+        "\033[0m"
+        " Duplicate string '%s'\n"
+        "                  File: %s\n"
+        "              Function: %s\n"
+        "                  Line: %d\n",
+        src, file, func, line
+    );
+    return oif_util_str_duplicate_(src);
 }
 
 int

@@ -52,7 +52,13 @@ oif_util_u32_from_size_t(size_t val);
  * of an error.
  */
 char *
-oif_util_str_duplicate(const char *src);
+oif_util_str_duplicate_(const char *src);
+
+char *
+oif_util_str_duplicate_verbose(const char *src, const char *file, const char *func, int line);
+
+#define oif_util_str_duplicate(src) \
+        oif_util_str_duplicate_verbose((src), __FILE__, __func__, __LINE__)
 
 /**
  * Compare two C strings case-insensitively.
