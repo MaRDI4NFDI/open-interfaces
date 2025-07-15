@@ -164,84 +164,6 @@ struct SolverIntegratorsCombination {
 struct ImplTimesIntegratorsFixture
     : public testing::TestWithParam<SolverIntegratorsCombination> {};
 
-class SundialsCVODEConfigDictTest : public testing::Test {
-   protected:
-    void SetUp() override
-    {
-        const char *impl = "sundials_cvode";
-        problem = new ScalarExpDecayProblem();
-        double t0 = 0.0;
-        intptr_t dims[] = {
-            problem->N,
-        };
-        y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
-        y = oif_create_array_f64(1, dims);
-        implh = oif_load_impl("ivp", impl, 1, 0);
-        EXPECT_GT(implh, 0);
-
-        int status;
-        status = oif_ivp_set_initial_value(implh, y0, t0);
-        EXPECT_EQ(status, 0);
-        status = oif_ivp_set_user_data(implh, problem);
-        EXPECT_EQ(status, 0);
-        status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
-        EXPECT_EQ(status, 0);
-    }
-
-    void TearDown() override
-    {
-        oif_free_array_f64(y0);
-        oif_free_array_f64(y);
-        oif_unload_impl(implh);
-        delete problem;
-    }
-
-    ImplHandle implh;
-    ODEProblem *problem;
-    double t1 = 0.1;
-    OIFArrayF64 *y0;
-    OIFArrayF64 *y;
-};
-
-class ScipyODEConfigDictTest : public testing::Test {
-   protected:
-    ScipyODEConfigDictTest()
-    {
-        const char *impl = "scipy_ode";
-        problem = new ScalarExpDecayProblem();
-        double t0 = 0.0;
-        intptr_t dims[] = {
-            problem->N,
-        };
-        y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
-        y = oif_create_array_f64(1, dims);
-        implh = oif_load_impl("ivp", impl, 1, 0);
-        EXPECT_GT(implh, 0);
-
-        int status;
-        status = oif_ivp_set_initial_value(implh, y0, t0);
-        EXPECT_EQ(status, 0);
-        status = oif_ivp_set_user_data(implh, problem);
-        EXPECT_EQ(status, 0);
-        status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
-        EXPECT_EQ(status, 0);
-    }
-
-    ~ScipyODEConfigDictTest()
-    {
-        oif_free_array_f64(y0);
-        oif_free_array_f64(y);
-        delete problem;
-        oif_unload_impl(implh);
-    }
-
-    ImplHandle implh;
-    ODEProblem *problem;
-    double t1 = 0.1;
-    OIFArrayF64 *y0;
-    OIFArrayF64 *y;
-};
-
 INSTANTIATE_TEST_SUITE_P(
     IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
     testing::Combine(testing::Values("sundials_cvode"
@@ -340,6 +262,46 @@ TEST_P(ImplTimesIntegratorsFixture, SetIntegratorMethodWorks)
     delete problem;
 }
 
+// ----------------------------------------------------------------------------
+class SundialsCVODEConfigDictTest : public testing::Test {
+   protected:
+    void SetUp() override
+    {
+        const char *impl = "sundials_cvode";
+        problem = new ScalarExpDecayProblem();
+        double t0 = 0.0;
+        intptr_t dims[] = {
+            problem->N,
+        };
+        y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
+        y = oif_create_array_f64(1, dims);
+        implh = oif_load_impl("ivp", impl, 1, 0);
+        EXPECT_GT(implh, 0);
+
+        int status;
+        status = oif_ivp_set_initial_value(implh, y0, t0);
+        EXPECT_EQ(status, 0);
+        status = oif_ivp_set_user_data(implh, problem);
+        EXPECT_EQ(status, 0);
+        status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
+        EXPECT_EQ(status, 0);
+    }
+
+    void TearDown() override
+    {
+        oif_free_array_f64(y0);
+        oif_free_array_f64(y);
+        oif_unload_impl(implh);
+        delete problem;
+    }
+
+    ImplHandle implh;
+    ODEProblem *problem;
+    double t1 = 0.1;
+    OIFArrayF64 *y0;
+    OIFArrayF64 *y;
+};
+
 TEST_F(SundialsCVODEConfigDictTest, Test01)
 {
     OIFConfigDict *dict = oif_config_dict_init();
@@ -374,7 +336,48 @@ TEST_F(SundialsCVODEConfigDictTest, Test03)
     oif_config_dict_free(dict);
 }
 
+// ----------------------------------------------------------------------------
+
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
+class ScipyODEConfigDictTest : public testing::Test {
+   protected:
+    ScipyODEConfigDictTest()
+    {
+        const char *impl = "scipy_ode";
+        problem = new ScalarExpDecayProblem();
+        double t0 = 0.0;
+        intptr_t dims[] = {
+            problem->N,
+        };
+        y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
+        y = oif_create_array_f64(1, dims);
+        implh = oif_load_impl("ivp", impl, 1, 0);
+        EXPECT_GT(implh, 0);
+
+        int status;
+        status = oif_ivp_set_initial_value(implh, y0, t0);
+        EXPECT_EQ(status, 0);
+        status = oif_ivp_set_user_data(implh, problem);
+        EXPECT_EQ(status, 0);
+        status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
+        EXPECT_EQ(status, 0);
+    }
+
+    ~ScipyODEConfigDictTest()
+    {
+        oif_free_array_f64(y0);
+        oif_free_array_f64(y);
+        delete problem;
+        oif_unload_impl(implh);
+    }
+
+    ImplHandle implh;
+    ODEProblem *problem;
+    double t1 = 0.1;
+    OIFArrayF64 *y0;
+    OIFArrayF64 *y;
+};
+
 TEST_F(ScipyODEConfigDictTest, ShouldAcceptIntegratorParamsForDopri5)
 {
     OIFConfigDict *dict = oif_config_dict_init();
