@@ -11,6 +11,7 @@
 
 #include <oif/api.h>
 #include <oif/config_dict.h>
+#include <oif/util.h>
 #include <oif/internal/bridge_api.h>
 
 typedef struct {
@@ -301,7 +302,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     Py_DECREF(pInitArgs);
     Py_DECREF(pClass);
 
-    PythonImplInfo *impl_info = malloc(sizeof(*impl_info));
+    PythonImplInfo *impl_info = oif_util_malloc(sizeof(*impl_info));
     if (impl_info == NULL) {
         fprintf(stderr,
                 "[%s] Could not allocate memory for Python "
