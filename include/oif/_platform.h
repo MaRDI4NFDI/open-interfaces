@@ -8,13 +8,13 @@
 #endif
 
 #if defined(__SANITIZE_ADDRESS__)
-    #define OIF_SANITIZE_ADDRESS_ENABLED 1
+#define OIF_SANITIZE_ADDRESS_ENABLED 1
 #endif
 
-#if defined(__clang__) || defined (__GNUC__)
-# define OIF_ATTRIBUTE_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
+#if defined(__clang__) || defined(__GNUC__)
+#define OIF_ATTRIBUTE_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
 #else
-# define OIF_ATTRIBUTE_NO_SANITIZE_ADDRESS
+#define OIF_ATTRIBUTE_NO_SANITIZE_ADDRESS
 #endif
 // Usage example:
 // OIF_ATTRIBUTE_NO_SANITIZE_ADDRESS

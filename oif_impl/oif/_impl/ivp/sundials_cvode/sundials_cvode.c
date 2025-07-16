@@ -74,7 +74,7 @@ static int
 init_(void)
 {
     int status;
-    
+
     // Clean up existing resources before reinitializing
     if (cvode_mem != NULL) {
         CVodeFree(&cvode_mem);
@@ -105,7 +105,8 @@ init_(void)
     // 8. Create matrix object
     /* A = SUNDenseMatrix(N, N, sunctx); */
     /* if (A == NULL) { */
-    /*     fprintf(stderr, "[sundials_cvode] Could not create matrix for dense linear solver\n"); */
+    /*     fprintf(stderr, "[sundials_cvode] Could not create matrix for dense linear
+     * solver\n"); */
     /*     return 2; */
     /* } */
 
@@ -172,7 +173,7 @@ init_(void)
         fprintf(stderr, "%s Could not create Fixed Point Nonlinear solver\n", prefix);
         return 7;
     }
-    
+
     // 14. Attach nonlinear solver module (optional)
     status = CVodeSetNonlinearSolver(cvode_mem, NLS);
     if (status != CV_SUCCESS) {
@@ -231,13 +232,13 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     if (self_y0 != NULL) {
         N_VDestroy(self_y0);
     }
-    
+
     self_y0 = N_VMake_Serial(N, y0_in->data, sunctx);  // Problem vector.
     if (self_y0 == NULL) {
         fprintf(stderr, "%s Could not create initial value vector\n", prefix);
         return 3;
     }
-    
+
     // Sanity check that `sunrealtype` is actually the same as OIF_FLOAT64.
     assert(NV_Ith_S(self_y0, 0) == y0_in->data[0]);
 
@@ -307,7 +308,7 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
     if (config != NULL) {
         oif_config_dict_free(config);
     }
-    
+
     config = config_;
     if (config != NULL) {
         const char **keys = oif_config_dict_get_keys(config);
@@ -377,7 +378,8 @@ integrate(double t, OIFArrayF64 *y)
         case CV_SUCCESS:
             return 0;
         default:
-            fprintf(stderr, "%s During call to `CVode`, an error occurred (code: %d)\n", prefix, ier);
+            fprintf(stderr, "%s During call to `CVode`, an error occurred (code: %d)\n",
+                    prefix, ier);
             return 1;
     }
 }
@@ -409,7 +411,7 @@ oif_ivp_free(void *self)
 {
     fprintf(stderr, "%s Freeing resources\n", prefix);
     (void)self;  // Fixed: cast to void to suppress unused parameter warning
-    
+
     if (self_y0 != NULL) {
         N_VDestroy(self_y0);
         self_y0 = NULL;
@@ -434,4 +436,6 @@ oif_ivp_free(void *self)
         oif_config_dict_free(config);
         config = NULL;
     }
+
+    return 0;
 }

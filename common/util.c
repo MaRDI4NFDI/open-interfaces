@@ -13,7 +13,9 @@
 static size_t NALLOCS_ = 0;
 static size_t NBYTES_ = 0;
 
-void *oif_util_malloc_(size_t nbytes) {
+void *
+oif_util_malloc_(size_t nbytes)
+{
     // void *p_raw = malloc(nbytes + sizeof(size_t));
     // if (p_raw == NULL) {
     //     fprintf(stderr, "Could not allocate memory\n");
@@ -35,19 +37,19 @@ void *oif_util_malloc_(size_t nbytes) {
     return p_oif;
 }
 
-void *oif_util_malloc_verbose(size_t nbytes, const char *file, const char *func, int line) {
+void *
+oif_util_malloc_verbose(size_t nbytes, const char *file, const char *func, int line)
+{
 #if defined(OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO)
-    fprintf(
-        stderr,
-        "\033[31m"
-        "[oif_util_malloc]"
-        "\033[0m"
-        " Allocating %zu bytes of memory\n"
-        "                  File: %s\n"
-        "              Function: %s\n"
-        "                  Line: %d\n",
-        nbytes, file, func, line
-    );
+    fprintf(stderr,
+            "\033[31m"
+            "[oif_util_malloc]"
+            "\033[0m"
+            " Allocating %zu bytes of memory\n"
+            "                  File: %s\n"
+            "              Function: %s\n"
+            "                  Line: %d\n",
+            nbytes, file, func, line);
 #else
     (void)file;  // Suppress unused parameter warning
     (void)func;  // Suppress unused parameter warning
@@ -56,7 +58,9 @@ void *oif_util_malloc_verbose(size_t nbytes, const char *file, const char *func,
     return oif_util_malloc_(nbytes);
 }
 
-void oif_util_free_(void *ptr) {
+void
+oif_util_free_(void *ptr)
+{
     if (ptr == NULL) {
         fprintf(stderr, "Cannot free a NULL pointer\n");
         exit(1);
@@ -71,23 +75,25 @@ void oif_util_free_(void *ptr) {
     free(p_oif);
     p_oif = NULL;
     if (NALLOCS_ == 0) {
-        fprintf(stderr, "\033[31m[oif_util_free] ERROR:\033[0m For some reason, number of non-freed allocations is already zero. Exiting...\n");
+        fprintf(stderr,
+                "\033[31m[oif_util_free] ERROR:\033[0m For some reason, number of non-freed "
+                "allocations is already zero. Exiting...\n");
         exit(1);
     }
     NALLOCS_--;
     // NBYTES_ -= nbytes;
 }
 
-void oif_util_free_verbose(void *ptr, const char *file, const char *func, int line) {
+void
+oif_util_free_verbose(void *ptr, const char *file, const char *func, int line)
+{
 #if defined(OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO)
-    fprintf(
-        stderr,
-        "\033[31m[oif_util_free]\033[0m Freeing memory\n"
-        "                  File: %s\n"
-        "              Function: %s\n"
-        "                  Line: %d\n",
-        file, func, line
-    );
+    fprintf(stderr,
+            "\033[31m[oif_util_free]\033[0m Freeing memory\n"
+            "                  File: %s\n"
+            "              Function: %s\n"
+            "                  Line: %d\n",
+            file, func, line);
 #else
     (void)file;  // Suppress unused parameter warning
     (void)func;  // Suppress unused parameter warning
@@ -129,17 +135,15 @@ char *
 oif_util_str_duplicate_verbose(const char *src, const char *file, const char *func, int line)
 {
 #if defined(OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO)
-    fprintf(
-        stderr,
-        "\033[31m"
-        "[oif_util_str_duplicate]"
-        "\033[0m"
-        " Duplicate string '%s'\n"
-        "                  File: %s\n"
-        "              Function: %s\n"
-        "                  Line: %d\n",
-        src, file, func, line
-    );
+    fprintf(stderr,
+            "\033[31m"
+            "[oif_util_str_duplicate]"
+            "\033[0m"
+            " Duplicate string '%s'\n"
+            "                  File: %s\n"
+            "              Function: %s\n"
+            "                  Line: %d\n",
+            src, file, func, line);
 #else
     (void)file;  // Suppress unused parameter warning
     (void)func;  // Suppress unused parameter warning
@@ -208,13 +212,15 @@ logerr(const char *prefix, const char *fmt, ...)
     return 0;
 }
 
-
 #if defined(__GNUC__)
 #if !defined(__OPTIMIZE__)
 void __attribute((destructor))
-oif_util_dtor_(void) {
-    fprintf(stderr, "\033[31m[oif_util]\033[0m Final statistics on memory allocs via malloc/free:\n");
-    fprintf(stderr, "\033[31m[oif_util]\033[0m Number of not-freed allocations: %zu\n", NALLOCS_);
+oif_util_dtor_(void)
+{
+    fprintf(stderr,
+            "\033[31m[oif_util]\033[0m Final statistics on memory allocs via malloc/free:\n");
+    fprintf(stderr, "\033[31m[oif_util]\033[0m Number of not-freed allocations: %zu\n",
+            NALLOCS_);
     // fprintf(stderr, "[oif_util] Number of not-freed bytes: %zu\n", NBYTES_);
     if (NALLOCS_ > 0) {
         fprintf(stderr, "\033[31m[oif_util]\033[0m Memory leaks detected!\n");

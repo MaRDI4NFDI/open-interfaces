@@ -40,7 +40,7 @@ class ODEProblem {
         }
 
         this->N = other.N;
-        delete [] y0;
+        delete[] y0;
         this->y0 = new double[N];
         memcpy(y0, other.y0, sizeof(*y0) * this->N);
 
@@ -172,23 +172,20 @@ INSTANTIATE_TEST_SUITE_P(
                                      "scipy_ode", "jl_diffeq"
 #endif
                                      ),
-                     testing::Values(
-                         std::make_shared<ScalarExpDecayProblem>()
-                         ,
+                     testing::Values(std::make_shared<ScalarExpDecayProblem>(),
                                      std::make_shared<LinearOscillatorProblem>(),
-                                     std::make_shared<OrbitEquationsProblem>()
-    )));
+                                     std::make_shared<OrbitEquationsProblem>())));
 
-INSTANTIATE_TEST_SUITE_P(
-    IvpChangeIntegratorsTests, ImplTimesIntegratorsFixture,
-    testing::Values(SolverIntegratorsCombination{"sundials_cvode", {"bdf", "adams"}}
+INSTANTIATE_TEST_SUITE_P(IvpChangeIntegratorsTests, ImplTimesIntegratorsFixture,
+                         testing::Values(SolverIntegratorsCombination{"sundials_cvode",
+                                                                      {"bdf", "adams"}}
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
-                    // ,
-                    // SolverIntegratorsCombination{"scipy_ode",
-                    //                              {"vode", "lsoda", "dopri5", "dop853"}},
-                    // SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}
+// ,
+// SolverIntegratorsCombination{"scipy_ode",
+//                              {"vode", "lsoda", "dopri5", "dop853"}},
+// SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}
 #endif
-                    ));
+                                         ));
 
 // END fixtures
 // ----------------------------------------------------------------------------
@@ -265,7 +262,8 @@ TEST_P(ImplTimesIntegratorsFixture, SetIntegratorMethodWorks)
 // ----------------------------------------------------------------------------
 class SundialsCVODEConfigDictTest : public testing::Test {
    protected:
-    void SetUp() override
+    void
+    SetUp() override
     {
         const char *impl = "sundials_cvode";
         problem = new ScalarExpDecayProblem();
@@ -287,7 +285,8 @@ class SundialsCVODEConfigDictTest : public testing::Test {
         EXPECT_EQ(status, 0);
     }
 
-    void TearDown() override
+    void
+    TearDown() override
     {
         oif_free_array_f64(y0);
         oif_free_array_f64(y);
