@@ -22,3 +22,7 @@
 //     ...Function implementation...
 // }
 
+#if defined(__GNUC__) && !defined(__OPTIMIZE__)
+#define OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO
+#else
+#endif
