@@ -39,7 +39,7 @@ oif_create_array_f64(int nd, intptr_t *dimensions)
     for (size_t i = 0; i < nd; ++i) {
         size *= dimensions[i];
     }
-    x->data = (double *) oif_util_malloc(size * sizeof(double));
+    x->data = (double *)oif_util_malloc(size * sizeof(double));
 
     return x;
 }

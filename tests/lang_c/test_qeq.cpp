@@ -5,13 +5,14 @@
 
 #include <oif/_platform.h>
 
-
 class QeqGatewayFixture : public ::testing::TestWithParam<const char *> {
-protected:
+   protected:
     OIFArrayF64 *roots;
     ImplHandle implh;
 
-    void SetUp() override {
+    void
+    SetUp() override
+    {
         intptr_t dimensions[] = {
             2,
         };
@@ -22,26 +23,24 @@ protected:
         ASSERT_GT(implh, 0);
     }
 
-    void TearDown() override {
+    void
+    TearDown() override
+    {
         oif_free_array_f64(roots);
         oif_unload_impl(implh);
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    QeqGatewayParameterizedTestSuite,
-    QeqGatewayFixture,
-    ::testing::Values(
-        "c_qeq_solver"
+INSTANTIATE_TEST_SUITE_P(QeqGatewayParameterizedTestSuite, QeqGatewayFixture,
+                         ::testing::Values("c_qeq_solver"
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
-        ,
-        "jl_qeq_solver",
-        "py_qeq_solver"
+                                           ,
+                                           "jl_qeq_solver", "py_qeq_solver"
 #endif
-    )
-);
+                                           ));
 
-TEST_P(QeqGatewayFixture, LinearCase) {
+TEST_P(QeqGatewayFixture, LinearCase)
+{
     int status = oif_solve_qeq(implh, 0.0, 2.0, -1.0, roots);
     ASSERT_EQ(status, 0);
 

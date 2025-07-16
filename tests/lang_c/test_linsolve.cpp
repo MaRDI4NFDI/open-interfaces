@@ -7,15 +7,13 @@
 
 class LinearSolverFixture : public ::testing::TestWithParam<const char *> {};
 
-INSTANTIATE_TEST_SUITE_P(
-        LinearSolverTestSuite, LinearSolverFixture,
-        ::testing::Values(
-            "c_lapack"
+INSTANTIATE_TEST_SUITE_P(LinearSolverTestSuite, LinearSolverFixture,
+                         ::testing::Values("c_lapack"
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
-            , "numpy", "jl_backslash"
+                                           ,
+                                           "numpy", "jl_backslash"
 #endif
-    )
-);
+                                           ));
 
 TEST_P(LinearSolverFixture, TestCase1)
 {
@@ -46,4 +44,3 @@ TEST_P(LinearSolverFixture, TestCase1)
     oif_free_array_f64(roots);
     oif_unload_impl(implh);
 }
-
