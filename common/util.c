@@ -13,24 +13,6 @@ static size_t NALLOCS_ = 0;
 static size_t NBYTES_ = 0;
 
 void *oif_util_malloc_(size_t nbytes) {
-    // void *addr = __builtin_return_address(0);
-    // Dl_info info;
-    // if (dladdr(addr, &info) && info.dli_fname) {
-    //     fprintf(
-    //         stderr,
-    //         "\033[31m"
-    //         "[oif_util_malloc]"
-    //         "\033[0m"
-    //         " Allocating %zu bytes of memory (total allocs: %zu)\n"
-    //         "                  File: %s\n"
-    //         "              Function: %s\n"
-    //         "                  Line: %d\n",
-    //         nbytes, NALLOCS_ + 1, info.dli_fname, info.dli_sname, __LINE__
-    //     );
-    // } else {
-    //     fprintf(stderr, "[oif_util_malloc] Could not retrieve caller information\n");
-    // }
-
     // void *p_raw = malloc(nbytes + sizeof(size_t));
     // if (p_raw == NULL) {
     //     fprintf(stderr, "Could not allocate memory\n");
