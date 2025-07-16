@@ -79,8 +79,27 @@ init_module_(void)
     jl_init();
     static_assert(sizeof(int) == 4, "The code is written in assumption that C int is 32-bit");
 
+    REFS_ = jl_eval_string("refs_ = IdDict()");
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+    SETINDEX_FN_ = jl_get_function(jl_base_module, "setindex!");
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+
+    DELETE_FN_ = jl_get_function(jl_base_module, "delete!");
+    if (jl_exception_occurred()) {
+        goto catch;
+    }
+
     INITIALIZED_ = true;
     return 0;
+
+catch:
+    handle_exception_();
+    jl_atexit_hook(0);
+    return 1;
 }
 
 /**
@@ -397,21 +416,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     //     goto catch;
     // }
 
-    REFS_ = jl_eval_string("refs_ = IdDict()");
-    if (jl_exception_occurred()) {
-        goto catch;
-    }
-    SETINDEX_FN_ = jl_get_function(jl_base_module, "setindex!");
-    if (jl_exception_occurred()) {
-        goto catch;
-    }
-
     jl_call3(SETINDEX_FN_, REFS_, self, self);
-    if (jl_exception_occurred()) {
-        goto catch;
-    }
-
-    DELETE_FN_ = jl_get_function(jl_base_module, "delete!");
     if (jl_exception_occurred()) {
         goto catch;
     }
