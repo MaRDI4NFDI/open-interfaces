@@ -57,6 +57,14 @@ handle_exception_(void)
     jl_exception_clear();
 }
 
+static void
+log_julia_variable_to_stderr(const char *varname, jl_value_t *var)
+{
+    fprintf(stderr, "%s = ", varname);
+    jl_static_show(JL_STDERR, var);
+    fprintf(stderr, "\n");
+}
+
 static int
 init_module_(void)
 {
