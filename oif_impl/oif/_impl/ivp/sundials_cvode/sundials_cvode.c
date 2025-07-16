@@ -404,7 +404,7 @@ cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data)
     return result;
 }
 
-void
+int
 oif_ivp_free(void *self)
 {
     fprintf(stderr, "%s Freeing resources\n", prefix);
