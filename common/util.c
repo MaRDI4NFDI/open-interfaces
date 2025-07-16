@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include <oif/util.h>
+#include <oif/_platform.h>
 
 static size_t NALLOCS_ = 0;
 static size_t NBYTES_ = 0;
@@ -35,6 +36,7 @@ void *oif_util_malloc_(size_t nbytes) {
 }
 
 void *oif_util_malloc_verbose(size_t nbytes, const char *file, const char *func, int line) {
+#if defined(OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO)
     fprintf(
         stderr,
         "\033[31m"
@@ -46,6 +48,11 @@ void *oif_util_malloc_verbose(size_t nbytes, const char *file, const char *func,
         "                  Line: %d\n",
         nbytes, file, func, line
     );
+#else
+    (void)file;  // Suppress unused parameter warning
+    (void)func;  // Suppress unused parameter warning
+    (void)line;  // Suppress unused parameter warning
+#endif
     return oif_util_malloc_(nbytes);
 }
 
@@ -72,6 +79,7 @@ void oif_util_free_(void *ptr) {
 }
 
 void oif_util_free_verbose(void *ptr, const char *file, const char *func, int line) {
+#if defined(OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO)
     fprintf(
         stderr,
         "\033[31m[oif_util_free]\033[0m Freeing memory\n"
@@ -80,6 +88,11 @@ void oif_util_free_verbose(void *ptr, const char *file, const char *func, int li
         "                  Line: %d\n",
         file, func, line
     );
+#else
+    (void)file;  // Suppress unused parameter warning
+    (void)func;  // Suppress unused parameter warning
+    (void)line;  // Suppress unused parameter warning
+#endif
     oif_util_free_(ptr);
 }
 
@@ -115,6 +128,7 @@ oif_util_str_duplicate_(const char *src)
 char *
 oif_util_str_duplicate_verbose(const char *src, const char *file, const char *func, int line)
 {
+#if defined(OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO)
     fprintf(
         stderr,
         "\033[31m"
@@ -126,6 +140,11 @@ oif_util_str_duplicate_verbose(const char *src, const char *file, const char *fu
         "                  Line: %d\n",
         src, file, func, line
     );
+#else
+    (void)file;  // Suppress unused parameter warning
+    (void)func;  // Suppress unused parameter warning
+    (void)line;  // Suppress unused parameter warning
+#endif
     return oif_util_str_duplicate_(src);
 }
 
