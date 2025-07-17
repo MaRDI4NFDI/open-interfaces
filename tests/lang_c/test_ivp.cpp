@@ -12,8 +12,6 @@
 
 using namespace std;
 
-const double EPS = 0.9;
-
 // ----------------------------------------------------------------------------
 // BEGIN ODEProblem and its derived classes.
 
@@ -303,11 +301,13 @@ class SundialsCVODEConfigDictTest : public testing::Test {
         delete problem;
     }
 
+    // NOLINTBEGIN
     ImplHandle implh;
     ODEProblem *problem;
     double t1 = 0.1;
     OIFArrayF64 *y0;
     OIFArrayF64 *y;
+    // NOLINTEND
 };
 
 TEST_F(SundialsCVODEConfigDictTest, Test01)
@@ -382,11 +382,13 @@ class ScipyODEConfigDictTest : public testing::Test {
         oif_unload_impl(implh);
     }
 
+    // NOLINTBEGIN
     ImplHandle implh;
     ODEProblem *problem;
     double t1 = 0.1;
     OIFArrayF64 *y0;
     OIFArrayF64 *y;
+    // NOLINTEND
 };
 
 TEST_F(ScipyODEConfigDictTest, ShouldAcceptIntegratorParamsForDopri5)
