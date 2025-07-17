@@ -3,7 +3,7 @@ package := openinterfaces
 .PHONY : all
 all :
 	cmake -S . -B build.debug \
-		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
+		-G Ninja \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		&& \
@@ -28,6 +28,7 @@ pytest-valgrind :
 .PHONY : release
 release :
 	cmake -S . -B build.release \
+		-G Ninja \
 		-DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
