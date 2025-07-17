@@ -17,6 +17,7 @@ export OIFArgType, OIFArgs, OIFArrayF64, OIFCallback, OIFUserData
 export load_impl, call_impl, unload_impl
 
 using Libdl
+using MsgPack
 
 const ImplHandle = Int32
 
@@ -39,10 +40,8 @@ const OIF_LANG_JULIA::Int32 = 4
 const OIF_LANG_R::Int32 = 5
 const OIF_LANG_COUNT::Int32 = 6
 
-@enum OIFError begin
-    OIF_ERROR = -1
-    OIF_IMPL_INIT_ERROR = -2
-end
+OIF_ERROR = -1
+OIF_IMPL_INIT_ERROR = -2
 
 const OIF_ARRAY_C_CONTIGUOUS::Int32 = 0x0001
 const OIF_ARRAY_F_CONTIGUOUS::Int32 = 0x0002
@@ -74,12 +73,22 @@ struct OIFUserData
     py::Ptr{Cvoid}
 end
 
+
+# See oif_config_dict.c
+struct OIFConfigDict
+    type::Cint
+    src::Cint
+    size::Csize_t
+    buffer::Ptr{Cchar}
+    buffer_length::Csize_t
+    native_object::Ptr{Cvoid}
+end
+
 const lib_dispatch = Ref{Ptr{Cvoid}}(0)
 const load_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 const call_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 const unload_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 
-export _lib_dispatch
 
 function __init__()
     lib_dispatch[] = Libdl.dlopen("liboif_dispatch.so")
@@ -157,8 +166,14 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             in_arg_types[i] = OIF_ARRAY_F64
             in_arg_values[i] = arr_p_p
         elseif typeof(arg) == String
+            arg_p = pointer(arg)
+            arg_p_ref = Ref{Ptr{Cvoid}}(arg_p)
+            push!(temp_refs, arg_p_ref)
+            arg_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, arg_p_ref)
+            push!(temp_refs, arg_p_p)
+
             in_arg_types[i] = OIF_STR
-            in_arg_values[i] = pointer(arg)
+            in_arg_values[i] = arg_p_p
         elseif typeof(arg) == OIFCallback
             arg_ref = Ref(arg)
             push!(temp_refs, arg_ref)
@@ -169,11 +184,19 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
             push!(temp_refs, arg_ref)
             in_arg_types[i] = OIF_USER_DATA
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
-        elseif typeof(arg) == Dict
+        elseif typeof(arg) <: Dict
+            oif_dict = make_oif_config_dict(arg)
+            dict_ref = Ref(oif_dict)
+            dict_p = Base.unsafe_convert(Ptr{Cvoid}, dict_ref)
+            push!(temp_refs, dict_ref)
+            push!(temp_refs, dict_p)
+
+            dict_p_ref = Ref(dict_p)
+            push!(temp_refs, dict_p_ref)
+            dict_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, dict_p_ref)
+
             in_arg_types[i] = OIF_CONFIG_DICT
-            # Convert the dictionary to a pointer
-            dict_ptr = pointer(arg)
-            in_arg_values[i] = dict_ptr
+            in_arg_values[i] = dict_p_p
         else
             error("Cannot convert input argument $(arg) of type $(typeof(arg))")
         end
@@ -349,6 +372,40 @@ end
 function make_oif_user_data(data::Ref{Any})::OIFUserData
     data_ptr = Base.unsafe_convert(Ptr{Cvoid}, data)
     OIFUserData(OIF_LANG_JULIA, C_NULL, data_ptr, C_NULL)
+end
+
+
+function make_oif_config_dict(dict::Dict)::OIFConfigDict
+    io = IOBuffer()
+    for (k, v) in dict
+        pack(io, k)
+        pack(io, v)
+
+        if typeof(v) <: Integer || typeof(v) == Float64 || typeof(v) == String
+            if typeof(v) <: Integer
+                try
+                    Int32(v)
+                catch
+                    error("Supported integers must be representable as Int32")
+                end
+            end
+            continue
+        else
+            error("Supported types for dictionaries are: Int32, Float64, String")
+        end
+    end
+    seekstart(io)
+
+    oif_config_dict_obj = OIFConfigDict(
+        OIF_CONFIG_DICT,
+        OIF_LANG_JULIA,
+        0,
+        pointer(io.data),
+        io.size,
+        Base.unsafe_convert(Ptr{Cvoid}, Ref(dict)),
+    )
+
+    return oif_config_dict_obj
 end
 
 include("interfaces.jl")
