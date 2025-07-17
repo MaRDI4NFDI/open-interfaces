@@ -40,7 +40,7 @@ oif_util_malloc_(size_t nbytes)
 void *
 oif_util_malloc_verbose(size_t nbytes, const char *file, const char *func, int line)
 {
-#if defined(OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO)
+#if defined(OIF_OPTION_VERBOSE_DEBUG_INFO)
     fprintf(stderr,
             "\033[31m"
             "[oif_util_malloc]"
@@ -87,7 +87,7 @@ oif_util_free_(void *ptr)
 void
 oif_util_free_verbose(void *ptr, const char *file, const char *func, int line)
 {
-#if defined(OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO)
+#if defined(OIF_OPTION_VERBOSE_DEBUG_INFO)
     fprintf(stderr,
             "\033[31m[oif_util_free]\033[0m Freeing memory\n"
             "                  File: %s\n"
@@ -134,7 +134,7 @@ oif_util_str_duplicate_(const char *src)
 char *
 oif_util_str_duplicate_verbose(const char *src, const char *file, const char *func, int line)
 {
-#if defined(OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO)
+#if defined(OIF_OPTION_VERBOSE_DEBUG_INFO)
     fprintf(stderr,
             "\033[31m"
             "[oif_util_str_duplicate]"
