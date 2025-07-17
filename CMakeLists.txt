@@ -8,8 +8,7 @@ project(
 option(OIF_OPTION_VERBOSE_DEBUG_INFO
        "Enable verbose debug info in Debug builds" OFF)
 
-option(OIF_OPTION_SANITIZE
-    "Enable sanitizers in Debug builds" OFF)
+option(OIF_OPTION_SANITIZE "Enable sanitizers in Debug builds" OFF)
 
 # Enforce using `-std=c11`, without any extensions like `gnu11`.
 set(CMAKE_C_STANDARD 11)
