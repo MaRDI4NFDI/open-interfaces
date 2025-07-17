@@ -25,6 +25,22 @@ pytest-valgrind :
 	PYTHONMALLOC=malloc valgrind --show-leak-kinds=definite --log-file=/tmp/valgrind-output \
 	python -m pytest -s -vv --valgrind --valgrind-log=/tmp/valgrind-output
 
+# Build C code with verbose debug information
+# and enable `-fanitize=address` to detect memory errors.
+.PHONY : debug-verbose-info-and-sanitize
+debug-verbose-info-and-sanitize :
+	cmake -S . -B build.debug_verbose_info_and_sanitize \
+		-G Ninja \
+		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+        -DOIF_OPTION_VERBOSE_DEBUG_INFO=ON \
+        -DOIF_OPTION_SANITIZE=ON \
+		&& \
+	cmake --build build.debug_verbose_info_and_sanitize && \
+	rm -f build && \
+	ln -sv build.debug_verbose_info_and_sanitize build
+
 .PHONY : release
 release :
 	cmake -S . -B build.release \
@@ -39,7 +55,7 @@ release :
 
 .PHONY : clean
 clean :
-	$(RM) -r build build.debug build.release
+	$(RM) -r build build.debug build.debug_verbose_info_and_sanitize build.release
 
 .PHONY : docs
 docs : | mk-docs-build-dir
