@@ -153,7 +153,6 @@ class OrbitEquationsProblem : public ODEProblem {
 
 // END ODEProblem and its derived classes.
 
-
 // ----------------------------------------------------------------------------
 // BEGIN Tests that use combinations of implementations and ODE problems.
 
@@ -204,7 +203,6 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
     oif_free_array_f64(y);
     oif_unload_impl(implh);
 }
-
 
 // ----------------------------------------------------------------------------
 // BEGIN Tests that implementations-integrators.
@@ -263,7 +261,6 @@ TEST_P(ImplTimesIntegratorsFixture, SetIntegratorMethodWorks)
     delete problem;
 }
 // END Tests that use combinations of implementations and ODE problems.
-
 
 // ----------------------------------------------------------------------------
 // BEGIN Tests for integrator parameters via config dicts for `sundials_cvode`.
@@ -344,7 +341,6 @@ TEST_F(SundialsCVODEConfigDictTest, Test03)
     oif_config_dict_free(dict);
 }
 // END Tests for integrator parameters via config dicts for `sundials_cvode`.
-
 
 // ----------------------------------------------------------------------------
 // BEGIN Tests for integrator parameters via config dicts for `scipy_ode`.
