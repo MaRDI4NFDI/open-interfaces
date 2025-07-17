@@ -14,6 +14,9 @@ using namespace std;
 
 const double EPS = 0.9;
 
+// ----------------------------------------------------------------------------
+// BEGIN ODEProblem and its derived classes.
+
 class ODEProblem {
    public:
     // Thank you, clang-tidy, but I can handle public data alright.
@@ -150,19 +153,14 @@ class OrbitEquationsProblem : public ODEProblem {
     double eps = 0.9L;
 };
 
+// END ODEProblem and its derived classes.
+
+
 // ----------------------------------------------------------------------------
-// BEGIN fixtures
+// BEGIN Tests that use combinations of implementations and ODE problems.
 
 struct IvpImplementationsTimesODEProblemsFixture
     : public testing::TestWithParam<std::tuple<const char *, std::shared_ptr<ODEProblem>>> {};
-
-struct SolverIntegratorsCombination {
-    const char *impl;
-    std::vector<const char *> integrators;
-};
-
-struct ImplTimesIntegratorsFixture
-    : public testing::TestWithParam<SolverIntegratorsCombination> {};
 
 INSTANTIATE_TEST_SUITE_P(
     IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
@@ -175,20 +173,6 @@ INSTANTIATE_TEST_SUITE_P(
                      testing::Values(std::make_shared<ScalarExpDecayProblem>(),
                                      std::make_shared<LinearOscillatorProblem>(),
                                      std::make_shared<OrbitEquationsProblem>())));
-
-INSTANTIATE_TEST_SUITE_P(IvpChangeIntegratorsTests, ImplTimesIntegratorsFixture,
-                         testing::Values(SolverIntegratorsCombination{"sundials_cvode",
-                                                                      {"bdf", "adams"}}
-#if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
-// ,
-// SolverIntegratorsCombination{"scipy_ode",
-//                              {"vode", "lsoda", "dopri5", "dop853"}},
-// SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}
-#endif
-                                         ));
-
-// END fixtures
-// ----------------------------------------------------------------------------
 
 TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
 {
@@ -222,6 +206,28 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
     oif_free_array_f64(y);
     oif_unload_impl(implh);
 }
+
+
+// ----------------------------------------------------------------------------
+// BEGIN Tests that implementations-integrators.
+struct SolverIntegratorsCombination {
+    const char *impl;
+    std::vector<const char *> integrators;
+};
+
+struct ImplTimesIntegratorsFixture
+    : public testing::TestWithParam<SolverIntegratorsCombination> {};
+
+INSTANTIATE_TEST_SUITE_P(IvpChangeIntegratorsTests, ImplTimesIntegratorsFixture,
+                         testing::Values(SolverIntegratorsCombination{"sundials_cvode",
+                                                                      {"bdf", "adams"}}
+#if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
+// ,
+// SolverIntegratorsCombination{"scipy_ode",
+//                              {"vode", "lsoda", "dopri5", "dop853"}},
+// SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}
+#endif
+                                         ));
 
 TEST_P(ImplTimesIntegratorsFixture, SetIntegratorMethodWorks)
 {
@@ -258,8 +264,11 @@ TEST_P(ImplTimesIntegratorsFixture, SetIntegratorMethodWorks)
     oif_free_array_f64(y0);
     delete problem;
 }
+// END Tests that use combinations of implementations and ODE problems.
+
 
 // ----------------------------------------------------------------------------
+// BEGIN Tests for integrator parameters via config dicts for `sundials_cvode`.
 class SundialsCVODEConfigDictTest : public testing::Test {
    protected:
     void
@@ -334,8 +343,11 @@ TEST_F(SundialsCVODEConfigDictTest, Test03)
     oif_ivp_integrate(implh, t1, y);
     oif_config_dict_free(dict);
 }
+// END Tests for integrator parameters via config dicts for `sundials_cvode`.
+
 
 // ----------------------------------------------------------------------------
+// BEGIN Tests for integrator parameters via config dicts for `scipy_ode`.
 
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
 class ScipyODEConfigDictTest : public testing::Test {
@@ -412,3 +424,4 @@ TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
     oif_config_dict_free(dict);
 }
 #endif
+// END Tests for integrator parameters via config dicts for `scipy_ode`.
