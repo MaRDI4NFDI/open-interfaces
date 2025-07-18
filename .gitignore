@@ -140,4 +140,6 @@ memory*
 # Now it is a symlink, not a directory
 build
 build.debug/
+build.debug_verbose_info/
+build.debug_verbose_info_and_sanitize/
 build.release/
