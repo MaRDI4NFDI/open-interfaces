@@ -18,10 +18,9 @@ mutable struct Self
     rhs_fn_wrapper
     user_data_ref::Ref{Any}
     oif_user_data
-    rhs_fn_c
     function Self(impl::String)
         implh = load_impl("ivp", impl, 1, 0)
-        self = new(ImplHandle(implh), 0, Float64[], Nothing, Nothing, Nothing, Nothing)
+        self = new(ImplHandle(implh), 0, Float64[], Nothing, Nothing, Nothing)
         finalizer(finalizing, self)
     end
 
