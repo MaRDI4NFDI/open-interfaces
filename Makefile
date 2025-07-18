@@ -41,6 +41,20 @@ debug-verbose-info-and-sanitize :
 	rm -f build && \
 	ln -sv build.debug_verbose_info_and_sanitize build
 
+# Build C code with verbose debug information
+.PHONY : debug-verbose-info
+debug-verbose-info :
+	cmake -S . -B build.debug_verbose_info \
+		-G Ninja \
+		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+        -DOIF_OPTION_VERBOSE_DEBUG_INFO=ON \
+		&& \
+	cmake --build build.debug_verbose_info && \
+	rm -f build && \
+	ln -sv build.debug_verbose_info build
+
 .PHONY : release
 release :
 	cmake -S . -B build.release \
