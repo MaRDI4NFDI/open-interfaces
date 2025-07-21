@@ -25,7 +25,7 @@ static int IMPL_COUNTER_ = 0;
 static char *prefix_ = "bridge_c";
 
 ImplInfo *
-load_impl(const char *impl_details, size_t version_major, size_t version_minor)
+load_impl(const char *interface, const char *impl_details, size_t version_major, size_t version_minor)
 {
     (void)version_major;
     (void)version_minor;

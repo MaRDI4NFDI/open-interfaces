@@ -221,7 +221,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         lib_handle = OIF_DISPATCH_HANDLES[dh];
     }
 
-    ImplInfo *(*load_impl_fn)(const char *, size_t, size_t);
+    ImplInfo *(*load_impl_fn)(const char *, const char *, size_t, size_t);
     load_impl_fn = dlsym(lib_handle, "load_impl");
 
     if (load_impl_fn == NULL) {
@@ -229,7 +229,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         goto cleanup;
     }
 
-    ImplInfo *impl_info = load_impl_fn(impl_details, version_major, version_minor);
+    ImplInfo *impl_info = load_impl_fn(interface, impl_details, version_major, version_minor);
     if (impl_info == NULL) {
         fprintf(stderr, "[dispatch] Could not load implementation\n");
         goto cleanup;
