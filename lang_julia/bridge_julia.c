@@ -288,8 +288,9 @@ get_julia_array_from_oif_arrayf64(OIFArrayF64 **value)
 }
 
 ImplInfo *
-load_impl(const char *impl_details, size_t version_major, size_t version_minor)
+load_impl(const char *interface, const char *impl_details, size_t version_major, size_t version_minor)
 {
+    (void)interface;
     int status = 0;
     if (!INITIALIZED_) {
         status = init_module_();
