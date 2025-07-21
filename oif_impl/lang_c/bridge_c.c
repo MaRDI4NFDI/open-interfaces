@@ -16,6 +16,7 @@
 
 typedef struct {
     ImplInfo base;
+    void *self;
     void *impl_lib;
     char *impl_details;
 } CImplInfo;
@@ -46,6 +47,32 @@ load_impl(const char *interface, const char *impl_details, size_t version_major,
         dlclose(impl_lib);
         return NULL;
     }
+
+    size_t create_fn_name_len =
+        strlen("oif_") + strlen(interface) + strlen("_create") + 1;
+    char *create_fn_name = malloc(create_fn_name_len);
+    sprintf(create_fn_name, "%s%s%s", "oif_", interface, "_create");
+    void *(*create_fn)() = dlsym(impl_lib, create_fn_name);
+
+    if (create_fn != NULL) {
+        impl_info->self = create_fn();
+        if (impl_info->self == NULL) {
+            fprintf(stderr,
+                    "[%s] Implementation '%s' returned NULL from method '%s'\n",
+                    prefix_, impl_details, create_fn_name);
+            free(create_fn_name);
+            dlclose(impl_lib);
+            oif_util_free(impl_info);
+            return NULL;
+        }
+    }
+    else {
+        fprintf(stderr,
+                "[%s] Implementation '%s' does not implement method '%s'\n",
+                prefix_, impl_details, create_fn_name);
+        impl_info->self = NULL;
+    }
+
     impl_info->impl_lib = impl_lib;
     impl_info->impl_details = oif_util_str_duplicate(impl_details);
     assert(impl_info->impl_details != NULL);
