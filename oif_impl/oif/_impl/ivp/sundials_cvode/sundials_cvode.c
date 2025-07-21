@@ -10,6 +10,7 @@
  */
 #include <assert.h>
 #include <limits.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <cvode/cvode.h>
@@ -31,20 +32,6 @@ const char *prefix = "[ivp::sundials_cvode]";
 static int
 cvode_rhs(sunrealtype t, N_Vector u, N_Vector u_dot, void *user_data);
 
-// Global state of the module.
-// Sundials context
-static SUNContext sunctx;
-// CVode memory block.
-void *cvode_mem = NULL;
-
-SUNNonlinearSolver NLS = NULL;
-
-/** Number of equations */
-sunindextype N;
-
-int
-set_user_data(void *user_data);
-
 /*
  * In Sundials 7.0, `SUNContext_Create` accepts `SUNComm` instead of `void *`
  * as the first argument.
@@ -54,49 +41,86 @@ set_user_data(void *user_data);
 #define SUN_COMM_NULL NULL
 #endif
 
-N_Vector self_y0 = NULL;
-sunrealtype self_t0;
-sunrealtype self_rtol = 1e-6;   // relative tolerance
-sunrealtype self_atol = 1e-12;  // absolute tolerance
-int integrator = CV_ADAMS;
-OIFConfigDict *config = NULL;
-void *self_user_data = NULL;
-// Signature for the right-hand side that is provided by the `IVP` interface
-// of the Open Interfaces.
-static oif_ivp_rhs_fn_t OIF_RHS_FN = NULL;
 
 static const char *AVAILABLE_OPTIONS_[] = {
     "max_num_steps",
     NULL,
 };
 
+typedef struct oiv_ivp_self {
+    /** Number of equations */
+    sunindextype N;
+    sunrealtype t0;
+    N_Vector y0;
+    sunrealtype rtol;  // relative tolerance
+    sunrealtype atol;  // absolute tolerance
+    int integrator;
+    // Signature for the right-hand side that is provided by the `IVP` interface
+    // of the Open Interfaces.
+    oif_ivp_rhs_fn_t OIF_RHS_FN;
+    OIFConfigDict *config;
+    void *user_data;
+    // Global state of the module.
+    // Sundials context
+    SUNContext sunctx;
+    // CVode memory block.
+    void *cvode_mem;
+    SUNNonlinearSolver NLS;
+} Self;
+
+Self *oif_ivp_create(void)
+{
+    Self *self = (Self *)malloc(sizeof(Self));
+    if (self == NULL) {
+        fprintf(stderr, "%s Could not allocate memory for Self object\n", prefix);
+        return NULL;
+    }
+    self->N = 0;
+    self->t0 = 0.0;
+    self->y0 = NULL;
+    self->rtol = 1e-6;
+    self->atol = 1e-12;
+    self->integrator = CV_ADAMS;
+    self->OIF_RHS_FN = NULL;
+    self->config = NULL;
+    self->user_data = NULL;
+    self->sunctx = NULL;
+    self->cvode_mem = NULL;
+    self->NLS = NULL;
+
+    return self;
+}
+
+int
+set_user_data(Self *self, void *user_data);
+
 static int
-init_(void)
+init_(Self *self)
 {
     int status;
 
     // Clean up existing resources before reinitializing
-    if (cvode_mem != NULL) {
-        CVodeFree(&cvode_mem);
-        cvode_mem = NULL;
+    if (self->cvode_mem != NULL) {
+        CVodeFree(&self->cvode_mem);
+        self->cvode_mem = NULL;
     }
 
     // 5. Create CVODE object.
-    cvode_mem = CVodeCreate(integrator, sunctx);
-    if (cvode_mem == NULL) {
+    self->cvode_mem = CVodeCreate(self->integrator, self->sunctx);
+    if (self->cvode_mem == NULL) {
         fprintf(stderr, "%s CVodeCreate failed\n", prefix);
         return 1;
     }
 
     // 6. Initialize CVODE solver.
-    status = CVodeInit(cvode_mem, cvode_rhs, self_t0, self_y0);
+    status = CVodeInit(self->cvode_mem, cvode_rhs, self->t0, self->y0);
     if (status) {
         fprintf(stderr, "%s CVodeInit call failed\n", prefix);
         return 1;
     }
 
     // 7. Specify integration tolerances.
-    status = CVodeSStolerances(cvode_mem, self_rtol, self_atol);
+    status = CVodeSStolerances(self->cvode_mem, self->rtol, self->atol);
     if (status) {
         fprintf(stderr, "%s CVodeSStolerances failed\n", prefix);
         return 1;
@@ -145,10 +169,10 @@ init_(void)
     /* } */
 
     // 12. Set optional inputs
-    if (config != NULL) {
-        if (oif_config_dict_key_exists(config, "max_num_steps")) {
-            int max_num_steps = oif_config_dict_get_int(config, "max_num_steps");
-            status = CVodeSetMaxNumSteps(cvode_mem, max_num_steps);
+    if (self->config != NULL) {
+        if (oif_config_dict_key_exists(self->config, "max_num_steps")) {
+            int max_num_steps = oif_config_dict_get_int(self->config, "max_num_steps");
+            status = CVodeSetMaxNumSteps(self->cvode_mem, max_num_steps);
             if (status) {
                 fprintf(stderr, "%s Could not set max number of steps\n", prefix);
                 return 1;
@@ -156,26 +180,26 @@ init_(void)
         }
     }
 
-    if (self_user_data != NULL) {
-        status = set_user_data(self_user_data);
+    if (self->user_data != NULL) {
+        status = set_user_data(self, self->user_data);
         if (status) {
             return 1;
         }
     }
 
     // 13. Create nonlinear solver object (optional)
-    if (NLS != NULL) {
-        SUNNonlinSolFree(NLS);
-        NLS = NULL;
+    if (self->NLS != NULL) {
+        SUNNonlinSolFree(self->NLS);
+        self->NLS = NULL;
     }
-    NLS = SUNNonlinSol_FixedPoint(self_y0, 0, sunctx);
-    if (NLS == NULL) {
+    self->NLS = SUNNonlinSol_FixedPoint(self->y0, 0, self->sunctx);
+    if (self->NLS == NULL) {
         fprintf(stderr, "%s Could not create Fixed Point Nonlinear solver\n", prefix);
         return 7;
     }
 
     // 14. Attach nonlinear solver module (optional)
-    status = CVodeSetNonlinearSolver(cvode_mem, NLS);
+    status = CVodeSetNonlinearSolver(self->cvode_mem, self->NLS);
     if (status != CV_SUCCESS) {
         fprintf(stderr, "%s CVodeSetNonlinearSolver failed with code %d\n", prefix, status);
         return 8;
@@ -187,7 +211,7 @@ init_(void)
 }
 
 int
-set_initial_value(OIFArrayF64 *y0_in, double t0_in)
+set_initial_value(Self *self, OIFArrayF64 *y0_in, double t0_in)
 {
     if ((y0_in == NULL) || (y0_in->data == NULL)) {
         fprintf(stderr, "`set_initial_value` received NULL argument\n");
@@ -199,10 +223,10 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     // No, it is not appropriate here as we work with serial code :-)
 
     // 2. Create the Sundials context object.
-    if (sunctx != NULL) {
-        SUNContext_Free(&sunctx);
+    if (self->sunctx != NULL) {
+        SUNContext_Free(&self->sunctx);
     }
-    status = SUNContext_Create(SUN_COMM_NULL, &sunctx);
+    status = SUNContext_Create(SUN_COMM_NULL, &self->sunctx);
     if (status) {
         fprintf(stderr, "%s An error occurred when creating SUNContext\n", prefix);
         return 1;
@@ -217,7 +241,7 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
             return 1;
         }
         else {
-            N = (sunindextype)y0_in->dimensions[0];
+            self->N = (sunindextype)y0_in->dimensions[0];
         }
     }
     else {
@@ -228,24 +252,23 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
     }
 
     // 4. Set vector of initial values.
-    // If `self_y0` already exists, then we free it first.
-    if (self_y0 != NULL) {
-        N_VDestroy(self_y0);
+    if (self->y0 != NULL) {
+        N_VDestroy(self->y0);
     }
 
-    self_y0 = N_VMake_Serial(N, y0_in->data, sunctx);  // Problem vector.
-    if (self_y0 == NULL) {
+    self->y0 = N_VMake_Serial(self->N, y0_in->data, self->sunctx);  // Problem vector.
+    if (self->y0 == NULL) {
         fprintf(stderr, "%s Could not create initial value vector\n", prefix);
         return 3;
     }
 
     // Sanity check that `sunrealtype` is actually the same as OIF_FLOAT64.
-    assert(NV_Ith_S(self_y0, 0) == y0_in->data[0]);
+    assert(NV_Ith_S(self->y0, 0) == y0_in->data[0]);
 
-    self_t0 = t0_in;
-    assert(self_t0 == t0_in);
+    self->t0 = t0_in;
+    assert(self->t0 == t0_in);
 
-    status = init_();
+    status = init_(self);
     if (status) {
         return status;
     }
@@ -254,10 +277,10 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
 }
 
 int
-set_user_data(void *user_data)
+set_user_data(Self *self, void *user_data)
 {
-    self_user_data = user_data;
-    int status = CVodeSetUserData(cvode_mem, user_data);
+    self->user_data = user_data;
+    int status = CVodeSetUserData(self->cvode_mem, self);
     if (status == CV_MEM_NULL) {
         fprintf(stderr,
                 "%s Could not set user data as "
@@ -270,33 +293,33 @@ set_user_data(void *user_data)
 }
 
 int
-set_rhs_fn(oif_ivp_rhs_fn_t rhs)
+set_rhs_fn(Self *self, oif_ivp_rhs_fn_t rhs)
 {
     if (rhs == NULL) {
         fprintf(stderr, "`set_rhs_fn` accepts non-null function pointer only\n");
         return 1;
     }
-    OIF_RHS_FN = rhs;
+    self->OIF_RHS_FN = rhs;
     return 0;
 }
 
 int
-set_tolerances(double rtol, double atol)
+set_tolerances(Self *self, double rtol, double atol)
 {
-    self_rtol = rtol;
-    self_atol = atol;
-    CVodeSStolerances(cvode_mem, rtol, atol);
+    self->rtol = rtol;
+    self->atol = atol;
+    CVodeSStolerances(self->cvode_mem, self->rtol, self->atol);
     return 0;
 }
 
 int
-set_integrator(const char *integrator_name, OIFConfigDict *config_)
+set_integrator(Self *self, const char *integrator_name, OIFConfigDict *config_)
 {
     if (oif_strcmp_nocase(integrator_name, "bdf") == 0) {
-        integrator = CV_BDF;
+        self->integrator = CV_BDF;
     }
     else if (oif_strcmp_nocase(integrator_name, "adams") == 0) {
-        integrator = CV_ADAMS;
+        self->integrator = CV_ADAMS;
     }
     else {
         fprintf(stderr, "[%s] Supported values for integrator name are `bdf` and `adams`\n",
@@ -304,14 +327,8 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
         return 1;
     }
 
-    // Clean up existing config if it exists
-    if (config != NULL) {
-        oif_config_dict_free(config);
-    }
-
-    config = config_;
-    if (config != NULL) {
-        const char **keys = oif_config_dict_get_keys(config);
+    if (config_ != NULL) {
+        const char **keys = oif_config_dict_get_keys(config_);
         for (int i = 0; keys[i] != NULL; i++) {
             bool found = false;
             for (int j = 0; AVAILABLE_OPTIONS_[j] != NULL; j++) {
@@ -331,8 +348,14 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
         oif_util_free(keys);
     }
 
-    if (self_y0 != NULL) {
-        int status = init_();
+    // Clean up existing config if it exists
+    if (self->config != NULL) {
+        oif_config_dict_free(self->config);
+    }
+    self->config = config_;
+
+    if (self->y0 != NULL) {
+        int status = init_(self);
         if (status) {
             return status;
         }
@@ -342,17 +365,17 @@ set_integrator(const char *integrator_name, OIFConfigDict *config_)
 }
 
 int
-print_stats(void)
+print_stats(Self *self)
 {
-    if (cvode_mem == NULL) {
+    if (self->cvode_mem == NULL) {
         fprintf(stderr, "%s CVODE not initialized\n", prefix);
         return 1;
     }
-    return CVodePrintAllStats(cvode_mem, stdout, SUN_OUTPUTFORMAT_TABLE);
+    return CVodePrintAllStats(self->cvode_mem, stdout, SUN_OUTPUTFORMAT_TABLE);
 }
 
 int
-integrate(double t, OIFArrayF64 *y)
+integrate(Self *self, double t, OIFArrayF64 *y)
 {
     /* if ((y == NULL) || (y->data == NULL)) { */
     /*     fprintf(stderr, "`integrate` received NULL argument\n"); */
@@ -360,7 +383,7 @@ integrate(double t, OIFArrayF64 *y)
     /* } */
     int ier;  // Error checking.
 
-    N_Vector yout = N_VMake_Serial(N, y->data, sunctx);
+    N_Vector yout = N_VMake_Serial(self->N, y->data, self->sunctx);
     sunrealtype tout = t;
 
     // Time that will be reached by solver during integration.
@@ -371,7 +394,7 @@ integrate(double t, OIFArrayF64 *y)
     sunrealtype tret;
 
     // 17. Advance solution in time.
-    ier = CVode(cvode_mem, tout, yout, &tret, CV_NORMAL);
+    ier = CVode(self->cvode_mem, tout, yout, &tret, CV_NORMAL);
     N_VDestroy(yout);
     // TODO: Handle all cases: write good error messages for all `ier`.
     switch (ier) {
@@ -386,8 +409,17 @@ integrate(double t, OIFArrayF64 *y)
 
 // Function that computes the right-hand side of the ODE system.
 static int
-cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data)
+cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *context)
 {
+    // Because we use object-oriented approach,
+    // we need to abuse a little bit Sundials' assumptions
+    // about what `user_data` mean (the last argument).
+    // We actually pass a pointer to our `Self` object
+    // as user data, and the `Self` object contains
+    // pointers to the user-provided right-hand side function
+    // and its user data.
+    Self *self = (Self *)context;
+
     // While Sundials CVode works with `N_Vector` data structure
     // for one-dimensional arrays, the user provides right-hand side
     // function that works with `OIFArrayF64` data structure,
@@ -401,40 +433,41 @@ cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *user_data)
                             .dimensions = (intptr_t[]){N_VGetLength(ydot)},
                             .data = N_VGetArrayPointer(ydot)};
 
-    int result = OIF_RHS_FN(t, &oif_y, &oif_ydot, user_data);
+    int result = self->OIF_RHS_FN(t, &oif_y, &oif_ydot, self->user_data);
 
     return result;
 }
 
 int
-oif_ivp_free(void *self)
+oif_ivp_free(void *self_)
 {
     fprintf(stderr, "%s Freeing resources\n", prefix);
-    (void)self;  // Fixed: cast to void to suppress unused parameter warning
+    Self *self = (Self *) self_;  // Fixed: cast to void to suppress unused parameter warning
+    assert(self != NULL);
 
-    if (self_y0 != NULL) {
-        N_VDestroy(self_y0);
-        self_y0 = NULL;
+    if (self->y0 != NULL) {
+        N_VDestroy(self->y0);
+        self->y0 = NULL;
     }
 
-    if (cvode_mem != NULL) {
-        CVodeFree(&cvode_mem);
-        cvode_mem = NULL;
+    if (self->cvode_mem != NULL) {
+        CVodeFree(&self->cvode_mem);
+        self->cvode_mem = NULL;
     }
 
-    if (NLS != NULL) {
-        SUNNonlinSolFree(NLS);
-        NLS = NULL;
+    if (self->NLS != NULL) {
+        SUNNonlinSolFree(self->NLS);
+        self->NLS = NULL;
     }
 
-    if (sunctx != NULL) {
-        SUNContext_Free(&sunctx);
-        sunctx = NULL;
+    if (self->sunctx != NULL) {
+        SUNContext_Free(&self->sunctx);
+        self->sunctx = NULL;
     }
 
-    if (config != NULL) {
-        oif_config_dict_free(config);
-        config = NULL;
+    if (self->config != NULL) {
+        oif_config_dict_free(self->config);
+        self->config = NULL;
     }
 
     return 0;
