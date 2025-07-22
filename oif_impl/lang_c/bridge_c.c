@@ -50,7 +50,7 @@ load_impl(const char *interface, const char *impl_details, size_t version_major,
 
     size_t create_fn_name_len =
         strlen("oif_") + strlen(interface) + strlen("_create") + 1;
-    char *create_fn_name = malloc(create_fn_name_len);
+    char *create_fn_name = oif_util_malloc(create_fn_name_len);
     sprintf(create_fn_name, "%s%s%s", "oif_", interface, "_create");
     void *(*create_fn)() = dlsym(impl_lib, create_fn_name);
 
@@ -72,6 +72,7 @@ load_impl(const char *interface, const char *impl_details, size_t version_major,
                 prefix_, impl_details, create_fn_name);
         impl_info->self = NULL;
     }
+    oif_util_free(create_fn_name);
 
     impl_info->impl_lib = impl_lib;
     impl_info->impl_details = oif_util_str_duplicate(impl_details);
