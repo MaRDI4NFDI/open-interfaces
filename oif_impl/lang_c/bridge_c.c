@@ -176,7 +176,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     size_t num_in_args = in_args->num_args;
     size_t num_out_args = out_args->num_args;
-    unsigned int num_total_args = (unsigned int)(num_in_args + num_out_args);
+    // We need to add one more argument for the `Self *self` argument.
+    unsigned int num_total_args = (unsigned int)(1 + num_in_args + num_out_args);
 
     arg_types = oif_util_malloc(num_total_args * sizeof(ffi_type *));
     if (arg_types == NULL) {
@@ -189,24 +190,29 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         goto cleanup;
     }
 
+    arg_types[0] = &ffi_type_pointer;  // Self *self
+    arg_values[0] = &impl_info->self;   // Pass the `Self *self` argument
+                                        // which for libffi
+                                        // must be passed as `Self **self`.
+
     tracker = allocation_tracker_init();
 
     // Merge input and output argument types together in `arg_types` array.
     for (unsigned int i = 0; i < num_in_args; ++i) {
         if (in_args->arg_types[i] == OIF_FLOAT64) {
-            arg_types[i] = &ffi_type_double;
+            arg_types[i + 1] = &ffi_type_double;
         }
         else if (in_args->arg_types[i] == OIF_ARRAY_F64 || in_args->arg_types[i] == OIF_STR) {
-            arg_types[i] = &ffi_type_pointer;
+            arg_types[i + 1] = &ffi_type_pointer;
         }
         else if (in_args->arg_types[i] == OIF_CALLBACK) {
-            arg_types[i] = &ffi_type_pointer;
+            arg_types[i + 1] = &ffi_type_pointer;
             // We need to take a pointer to a pointer according to the FFI
             // convention, hence the & operator.
             in_args->arg_values[i] = &((OIFCallback *)in_args->arg_values[i])->fn_p_c;
         }
         else if (in_args->arg_types[i] == OIF_USER_DATA) {
-            arg_types[i] = &ffi_type_pointer;
+            arg_types[i + 1] = &ffi_type_pointer;
             OIFUserData *user_data = (OIFUserData *)in_args->arg_values[i];
             if (user_data->src == OIF_LANG_C) {
                 in_args->arg_values[i] = &user_data->c;
@@ -227,7 +233,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         }
         else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
             OIFConfigDict *dict = *(OIFConfigDict **)in_args->arg_values[i];
-            arg_types[i] = &ffi_type_pointer;
+            arg_types[i + 1] = &ffi_type_pointer;
             if (dict != NULL) {
                 // We cannot simply assign `&new_dict` to `in_args->arg_values[i]`
                 // as it gets trashed as soon as we leave this block.
@@ -264,12 +270,12 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         }
     }
 
-    for (unsigned int i = num_in_args; i < num_total_args; ++i) {
+    for (unsigned int i = num_in_args; i < num_total_args - 1; ++i) {
         if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64) {
-            arg_types[i] = &ffi_type_double;
+            arg_types[i + 1] = &ffi_type_double;
         }
         else if (out_args->arg_types[i - num_in_args] == OIF_ARRAY_F64) {
-            arg_types[i] = &ffi_type_pointer;
+            arg_types[i + 1] = &ffi_type_pointer;
         }
         else {
             fprintf(stderr, "[%s] Unknown output arg type: %d\n", prefix_,
@@ -288,10 +294,10 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     // Merge input and output argument values together in `arg_values` array.
     for (size_t i = 0; i < num_in_args; ++i) {
-        arg_values[i] = in_args->arg_values[i];
+        arg_values[i + 1] = in_args->arg_values[i];
     }
-    for (size_t i = num_in_args; i < num_total_args; ++i) {
-        arg_values[i] = out_args->arg_values[i - num_in_args];
+    for (size_t i = num_in_args; i < num_total_args - 1; ++i) {
+        arg_values[i + 1] = out_args->arg_values[i - num_in_args];
     }
 
     ffi_call(&cif, FFI_FN(func), &result, arg_values);
