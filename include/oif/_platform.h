@@ -23,6 +23,8 @@
 // }
 
 #if defined(OIF_OPTION_VERBOSE_DEBUG_INFO)
-#define OIF_FLAG_PRINT_DEBUG_VERBOSE_INFO
+// #define OIF_OPTION_VERBOSE_DEBUG_INFO
+// #error "OIF_OPTION_VERBOSE_DEBUG_INFO is defined"
 #else
+// #error "OIF_OPTION_VERBOSE_DEBUG_INFO is NOT defined"
 #endif
