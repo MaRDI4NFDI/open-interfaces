@@ -24,6 +24,9 @@
 
 static const char *prefix_ = "ivp::dopri5c";
 
+typedef struct self {
+} Self;
+
 double self_t = 0.0;
 double self_rtol = 1e-6;   // relative tolerance
 double self_atol = 1e-12;  // absolute tolerance
@@ -46,7 +49,7 @@ OIFArrayF64 *self_sc = NULL;
 OIFConfigDict *config = NULL;
 void *self_user_data = NULL;
 // Signature for the right-hand side that is provided by the `IVP` interface.
-static oif_ivp_rhs_fn_t OIF_RHS_FN = NULL;
+static rhs_fn_t OIF_RHS_FN = NULL;
 
 static double self_h = 0.0;
 
@@ -141,9 +144,22 @@ compute_initial_step_()
     self_h = MIN(1e2 * h0, h1);
 }
 
-int
-set_initial_value(OIFArrayF64 *y0_in, double t0_in)
+Self *
+malloc_self(void)
 {
+    Self *self = malloc(sizeof(int));
+    if (self == NULL) {
+        fprintf(stderr, "[%s] Could not allocate memory for Self object\n", prefix_);
+        return NULL;
+    }
+
+    return self;
+}
+
+int
+set_initial_value(Self *self, OIFArrayF64 *y0_in, double t0_in)
+{
+    (void)self;
     EXP01 = 0.2L - BETA * 0.75L;
     FACC1 = 1.0L / FACMIN;
     self_t = t0_in;
@@ -188,15 +204,17 @@ set_initial_value(OIFArrayF64 *y0_in, double t0_in)
 }
 
 int
-set_user_data(void *user_data)
+set_user_data(Self *self, void *user_data)
 {
+    (void)self;  // Unused in this implementation.
     self_user_data = user_data;
     return 0;
 }
 
 int
-set_rhs_fn(oif_ivp_rhs_fn_t rhs)
+set_rhs_fn(Self *self, rhs_fn_t rhs)
 {
+    (void)self;  // Unused in this implementation.
     if (rhs == NULL) {
         fprintf(stderr, "[%s] `set_rhs_fn` accepts non-null function pointer only\n", prefix_);
         return 1;
@@ -207,36 +225,40 @@ set_rhs_fn(oif_ivp_rhs_fn_t rhs)
 }
 
 int
-set_tolerances(double rtol, double atol)
+set_tolerances(Self *self, double rtol, double atol)
 {
+    (void)self;  // Unused in this implementation.
     self_rtol = rtol;
     self_atol = atol;
     return 0;
 }
 
 int
-set_integrator(const char *integrator_name, OIFConfigDict *config_)
+set_integrator(Self *self, const char *integrator_name, OIFConfigDict *config_)
 {
+    (void)self;  // Unused in this implementation.
     (void)integrator_name;
     (void)config_;
     fprintf(stderr, "[%s] Method `set_integrator` is not supported\n", prefix_);
-    return 0;
+    return 1;
 }
 
 int
-print_stats(void)
+print_stats(Self *self)
 {
+    (void)self;  // Unused in this implementation.
     printf("[%s] Number of right-hand side evaluations = %zu\n", prefix_, nfcn_);
     return 0;
 }
 
 /**
- * Write into `y` the updated solution at time `t`.
+ * Write into `y_out` the updated solution at time `t`.
  *
  */
 int
-integrate(double t_, OIFArrayF64 *y_out)
+integrate(Self *self, double t_, OIFArrayF64 *y_out)
 {
+    (void)self;  // Unused in this implementation.
     if (t_ <= self_t) {
         fprintf(stderr, "[%s] Time should be larger than the current time\n", prefix_);
     }
@@ -375,4 +397,12 @@ integrate(double t_, OIFArrayF64 *y_out)
     }
 
     return 0;
+}
+
+void
+free_self(Self *self)
+{
+    fprintf(stderr, "[%s] Freeing resources. IMPLEMENT ME!\n", prefix_);
+    free(self);
+    self = NULL;
 }
