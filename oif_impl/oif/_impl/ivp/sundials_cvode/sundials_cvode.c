@@ -470,5 +470,8 @@ oif_ivp_free(void *self_)
         self->config = NULL;
     }
 
+    free(self);
+    self = NULL;
+
     return 0;
 }
