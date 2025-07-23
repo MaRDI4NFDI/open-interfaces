@@ -4,6 +4,8 @@
 
 #include <oif/api.h>
 
+typedef struct self Self;
+
 /**
  * Solve quadratic equation ax**2 + bx + c = 0
  * Assumes that the output array `roots` always has two elements,
@@ -15,5 +17,5 @@
  * @return int
  */
 int
-solve_qeq(double a, double b, double c, OIFArrayF64 *roots);
+solve_qeq(Self *self, double a, double b, double c, OIFArrayF64 *roots);
 #endif

@@ -11,9 +11,12 @@
 #include <oif/api.h>
 #include <oif_impl/linsolve.h>
 
+typedef struct self Self;
+
 int
-solve_lin(OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
+solve_lin(Self *self, OIFArrayF64 *A, OIFArrayF64 *b, OIFArrayF64 *x)
 {
+    (void)self;  // Unused in this implementation.
     lapack_int N;
 
     if (sizeof(N) < sizeof A->dimensions[1]) {
