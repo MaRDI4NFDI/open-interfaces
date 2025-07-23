@@ -92,10 +92,7 @@ unload_impl(ImplInfo *impl_info_)
     }
     CImplInfo *impl_info = (CImplInfo *)impl_info_;
 
-    size_t free_fn_name_len =
-        strlen("oif_") + strlen(impl_info_->interface) + strlen("_free") + 1;
-    char *free_fn_name = malloc(free_fn_name_len);
-    sprintf(free_fn_name, "%s%s%s", "oif_", impl_info_->interface, "_free");
+    char *free_fn_name = "free_self";
     void *free_fn = dlsym(impl_info->impl_lib, free_fn_name);
 
     if (free_fn == NULL) {
@@ -119,7 +116,7 @@ unload_impl(ImplInfo *impl_info_)
 
         fprintf(stderr, "[%s] Calling method '%s' for implementation '%s'\n", prefix_,
                 free_fn_name, impl_info->impl_details);
-        status = call_impl(impl_info_, "oif_ivp_free", &in_args, &out_args);
+        status = call_impl(impl_info_, free_fn_name, &in_args, &out_args);
         if (status != 0) {
             fprintf(stderr,
                     "[%s] !!! Error occurred while calling method '%s' for "
@@ -127,7 +124,6 @@ unload_impl(ImplInfo *impl_info_)
                     prefix_, free_fn_name, impl_info->impl_details);
         }
     }
-    free(free_fn_name);
 
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
     status = dlclose(impl_info->impl_lib);
