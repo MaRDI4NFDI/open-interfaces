@@ -47,7 +47,7 @@ static const char *AVAILABLE_OPTIONS_[] = {
     NULL,
 };
 
-typedef struct oiv_ivp_self {
+typedef struct self {
     /** Number of equations */
     sunindextype N;
     sunrealtype t0;
@@ -57,7 +57,7 @@ typedef struct oiv_ivp_self {
     int integrator;
     // Signature for the right-hand side that is provided by the `IVP` interface
     // of the Open Interfaces.
-    oif_ivp_rhs_fn_t OIF_RHS_FN;
+    rhs_fn_t OIF_RHS_FN;
     OIFConfigDict *config;
     void *user_data;
     // Global state of the module.
@@ -68,7 +68,7 @@ typedef struct oiv_ivp_self {
     SUNNonlinearSolver NLS;
 } Self;
 
-Self *oif_ivp_create(void)
+Self *malloc_self(void)
 {
     Self *self = (Self *)malloc(sizeof(Self));
     if (self == NULL) {
@@ -293,7 +293,7 @@ set_user_data(Self *self, void *user_data)
 }
 
 int
-set_rhs_fn(Self *self, oif_ivp_rhs_fn_t rhs)
+set_rhs_fn(Self *self, rhs_fn_t rhs)
 {
     if (rhs == NULL) {
         fprintf(stderr, "`set_rhs_fn` accepts non-null function pointer only\n");
