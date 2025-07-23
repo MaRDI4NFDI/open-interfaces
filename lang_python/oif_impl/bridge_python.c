@@ -154,9 +154,8 @@ get_numpy_array_from_oif_array_f64(OIFArrayF64 **value)
 }
 
 ImplInfo *
-load_impl(const char *interface, const char *impl_details, size_t version_major, size_t version_minor)
+load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
-    (void)interface;
     PyObject *pFileName, *pModule;
     PyObject *pClass, *pInstance;
     PyObject *pFunc;
