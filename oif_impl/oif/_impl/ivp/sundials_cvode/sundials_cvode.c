@@ -342,6 +342,7 @@ set_integrator(Self *self, const char *integrator_name, OIFConfigDict *config_)
                         "[%s] Passed option '%s' is not one of the available options\n",
                         prefix, keys[i]);
                 oif_util_free(keys);
+                oif_config_dict_free(config_);
                 return 1;
             }
         }
