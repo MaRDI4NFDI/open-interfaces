@@ -27,7 +27,7 @@ typedef struct {
 } ImplInfo;
 
 ImplInfo *
-load_impl(const char *interface, const char *impl_details, size_t version_major, size_t version_minor);
+load_impl(const char *impl_details, size_t version_major, size_t version_minor);
 
 int
 call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args);
