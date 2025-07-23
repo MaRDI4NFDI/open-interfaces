@@ -41,7 +41,6 @@ cvode_rhs(sunrealtype t, N_Vector u, N_Vector u_dot, void *user_data);
 #define SUN_COMM_NULL NULL
 #endif
 
-
 static const char *AVAILABLE_OPTIONS_[] = {
     "max_num_steps",
     NULL,
@@ -68,7 +67,8 @@ typedef struct self {
     SUNNonlinearSolver NLS;
 } Self;
 
-Self *malloc_self(void)
+Self *
+malloc_self(void)
 {
     Self *self = (Self *)malloc(sizeof(Self));
     if (self == NULL) {
@@ -443,7 +443,7 @@ int
 oif_ivp_free(void *self_)
 {
     fprintf(stderr, "%s Freeing resources\n", prefix);
-    Self *self = (Self *) self_;  // Fixed: cast to void to suppress unused parameter warning
+    Self *self = (Self *)self_;  // Fixed: cast to void to suppress unused parameter warning
     assert(self != NULL);
 
     if (self->y0 != NULL) {
