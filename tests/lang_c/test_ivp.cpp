@@ -218,10 +218,10 @@ INSTANTIATE_TEST_SUITE_P(IvpChangeIntegratorsTests, ImplTimesIntegratorsFixture,
                          testing::Values(SolverIntegratorsCombination{"sundials_cvode",
                                                                       {"bdf", "adams"}}
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
-// ,
-// SolverIntegratorsCombination{"scipy_ode",
-//                              {"vode", "lsoda", "dopri5", "dop853"}},
-// SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}
+,
+SolverIntegratorsCombination{"scipy_ode",
+                             {"vode", "lsoda", "dopri5", "dop853"}},
+SolverIntegratorsCombination{"jl_diffeq", {"Tsit5"}}
 #endif
                                          ));
 
