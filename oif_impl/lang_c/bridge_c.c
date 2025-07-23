@@ -54,8 +54,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     if (create_fn != NULL) {
         impl_info->self = create_fn();
         if (impl_info->self == NULL) {
-            fprintf(stderr,
-                    "[%s] Implementation '%s' returned NULL from method '%s'\n",
+            fprintf(stderr, "[%s] Implementation '%s' returned NULL from method '%s'\n",
                     prefix_, impl_details, create_fn_name);
             dlclose(impl_lib);
             oif_util_free(impl_info);
@@ -63,9 +62,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         }
     }
     else {
-        fprintf(stderr,
-                "[%s] Implementation '%s' does not implement method '%s'\n",
-                prefix_, impl_details, create_fn_name);
+        fprintf(stderr, "[%s] Implementation '%s' does not implement method '%s'\n", prefix_,
+                impl_details, create_fn_name);
         impl_info->self = NULL;
     }
 
@@ -182,9 +180,9 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     }
 
     arg_types[0] = &ffi_type_pointer;  // Self *self
-    arg_values[0] = &impl_info->self;   // Pass the `Self *self` argument
-                                        // which for libffi
-                                        // must be passed as `Self **self`.
+    arg_values[0] = &impl_info->self;  // Pass the `Self *self` argument
+                                       // which for libffi
+                                       // must be passed as `Self **self`.
 
     tracker = allocation_tracker_init();
 

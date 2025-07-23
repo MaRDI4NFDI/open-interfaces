@@ -17,7 +17,8 @@ typedef int (*rhs_fn_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_
  *
  * @return Pointer to the allocated `Self` object.
  */
-Self *malloc_self(void);
+Self *
+malloc_self(void);
 
 /**
  * Set right hand side of the system of ordinary differential equations.
@@ -60,4 +61,5 @@ print_stats(Self *self);
  * Free resources allocated for the `Self` object.
  * @param self Pointer to the `Self` object to free.
  */
-void free_self(Self *self);
+void
+free_self(Self *self);
