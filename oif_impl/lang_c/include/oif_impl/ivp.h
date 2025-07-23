@@ -4,44 +4,60 @@
 #include <oif/api.h>
 #include <oif/config_dict.h>
 
+typedef struct self Self;
+
 /**
  * Signature of the right-hand side function f for the system of ODEs.
  */
-typedef int (*oif_ivp_rhs_fn_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_data);
+typedef int (*rhs_fn_t)(double t, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_data);
+
+/**
+ * Allocate and initialize a new `Self` object.
+ * This object is used to store the state of the implementation.
+ *
+ * @return Pointer to the allocated `Self` object.
+ */
+Self *malloc_self(void);
 
 /**
  * Set right hand side of the system of ordinary differential equations.
  */
 int
-oif_ivp_set_rhs_fn(oif_ivp_rhs_fn_t rhs);
+set_rhs_fn(Self *self, rhs_fn_t rhs);
 
 /**
  * Set initial value y(t0) = y0.
  */
 int
-oif_ivp_set_initial_value(OIFArrayF64 *y0, double t0);
+set_initial_value(Self *self, OIFArrayF64 *y0, double t0);
 
 /**
  * Set user data that can be used to pass additional information
  * to the right-hand side function.
  */
 int
-oif_ivp_set_user_data(void *user_data);
+set_user_data(Self *self, void *user_data);
 
 /**
  * Integrate to time `t` and write the solution to `y`.
  */
 int
-oif_ivp_integrate(double t, OIFArrayF64 *y);
+integrate(Self *self, double t, OIFArrayF64 *y);
 
 /**
  * Set integrator and optionally its parameters.
  */
 int
-oif_ivp_set_integrator(const char *integrator_name, OIFConfigDict *config);
+set_integrator(Self *self, const char *integrator_name, OIFConfigDict *config);
 
 /**
  * Print statistics about integration process.
  */
 int
-oif_ivp_print_stats();
+print_stats(Self *self);
+
+/**
+ * Free resources allocated for the `Self` object.
+ * @param self Pointer to the `Self` object to free.
+ */
+void free_self(Self *self);
