@@ -48,10 +48,7 @@ load_impl(const char *interface, const char *impl_details, size_t version_major,
         return NULL;
     }
 
-    size_t create_fn_name_len =
-        strlen("oif_") + strlen(interface) + strlen("_create") + 1;
-    char *create_fn_name = oif_util_malloc(create_fn_name_len);
-    sprintf(create_fn_name, "%s%s%s", "oif_", interface, "_create");
+    char *create_fn_name = "malloc_self";
     void *(*create_fn)() = dlsym(impl_lib, create_fn_name);
 
     if (create_fn != NULL) {
@@ -60,7 +57,6 @@ load_impl(const char *interface, const char *impl_details, size_t version_major,
             fprintf(stderr,
                     "[%s] Implementation '%s' returned NULL from method '%s'\n",
                     prefix_, impl_details, create_fn_name);
-            free(create_fn_name);
             dlclose(impl_lib);
             oif_util_free(impl_info);
             return NULL;
@@ -72,7 +68,6 @@ load_impl(const char *interface, const char *impl_details, size_t version_major,
                 prefix_, impl_details, create_fn_name);
         impl_info->self = NULL;
     }
-    oif_util_free(create_fn_name);
 
     impl_info->impl_lib = impl_lib;
     impl_info->impl_details = oif_util_str_duplicate(impl_details);
