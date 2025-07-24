@@ -45,11 +45,13 @@ static bool INITIALIZED_ = false;
 
 static int IMPL_COUNTER_ = 1000;
 
+static const char prefix_[] = "dispatch";
+
 size_t
 hash_fn(const ImplHandle *key)
 {
     if (*key < 0) {
-        fprintf(stderr, "[dispatch] Was expecting a non-negative number, got %d\n", *key);
+        logerr(prefix_, "Was expecting a non-negative number, got '%d'\n", *key);
         exit(1);
     }
     return *key;
@@ -66,9 +68,9 @@ init_module_(void)
 {
     OIF_IMPL_PATH = getenv("OIF_IMPL_PATH");
     if (OIF_IMPL_PATH == NULL) {
-        fprintf(stderr,
-                "[dispatch] Environment variable 'OIF_IMPL_PATH' must be "
-                "set so that implementations can be found. Cannot proceed\n");
+        logerr(prefix_,
+               "Environment variable 'OIF_IMPL_PATH' must be "
+               "set so that implementations can be found. Cannot proceed\n");
         return -1;
     }
     hashmap_init(&IMPL_MAP, hash_fn, compare_fn);
@@ -127,15 +129,16 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     }
 
     if (conf_file == NULL) {
-        fprintf(stderr, "[dispatch] Cannot open conf file '%s'\n", conf_filename_fixed_part);
-        fprintf(stderr, "[dispatch] Search was done in the following paths: %s\n",
-                oif_impl_path_dup);
+        logerr(prefix_,
+               "Cannot open conf file '%s'\n"
+               "\tSearch was done in the following paths: %s\n",
+               conf_filename_fixed_part, oif_impl_path_dup);
         oif_util_free(oif_impl_path_dup);
         perror("Error message is: ");
         return -1;
     }
     else {
-        fprintf(stderr, "[dispatch] Configuration file: %s\n", conf_filename);
+        fprintf(stderr, "[%s] Configuration file: %s\n", prefix_, conf_filename);
     }
     oif_util_free(oif_impl_path_dup);
 
@@ -145,23 +148,21 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     char *fgets_status;
     buffer = oif_util_malloc(sizeof(char) * buffer_size);
     if (buffer == NULL) {
-        fprintf(stderr,
-                "[dispatch] Could not allocate buffer for parsing "
-                "implementation configuration files\n");
+        logerr(prefix_,
+               "Could not allocate buffer for parsing "
+               "implementation configuration files\n");
         goto cleanup;
     }
     char backend_name[16];
     fgets_status = fgets(buffer, buffer_size, conf_file);
     if (fgets_status == NULL) {
-        fprintf(stderr,
-                "[dispatch] Could not read backend line from configuration "
-                "file '%s'\n",
-                conf_filename);
+        logerr(prefix_, "Could not read backend line from configuration file '%s'\n",
+               conf_filename);
         goto cleanup;
     }
     len = strlen(buffer);
     if (buffer[len - 1] != '\n') {
-        fprintf(stderr, "Backend name is longer than allocated buffer\n");
+        logerr(prefix_, "Backend name is longer than allocated buffer\n");
         goto cleanup;
     }
     else {
@@ -169,18 +170,18 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         buffer[len - 1] = '\0';
     }
     strcpy(backend_name, buffer);
-    fprintf(stderr, "[dispatch] Backend name: %s\n", backend_name);
+    fprintf(stderr, "[%s] Backend name: %s\n", prefix_, backend_name);
 
     fgets_status = fgets(buffer, buffer_size, conf_file);
     if (fgets_status == NULL) {
-        fprintf(stderr,
-                "[dispatch] Could not read implementation details line "
-                "from the configuration file\n");
+        logerr(prefix_,
+               "Could not read implementation details line "
+               "from the configuration file\n");
         goto cleanup;
     }
     len = strlen(buffer);
     if (buffer[len - 1] != '\n') {
-        fprintf(stderr, "[dispatch] Backend name is longer than allocated array\n");
+        logerr(prefix_, "Backend name is longer than allocated array\n");
         goto cleanup;
     }
     else {
@@ -204,15 +205,15 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         dispatch_lang_so = OIF_DISPATCH_JULIA_SO;
     }
     else {
-        fprintf(stderr, "[dispatch] Implementation has unknown backend: '%s'\n", backend_name);
+        logerr(prefix_, "Implementation has unknown backend: '%s'\n", backend_name);
         goto cleanup;
     }
 
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
         lib_handle = dlopen(dispatch_lang_so, RTLD_LOCAL | RTLD_LAZY);
         if (lib_handle == NULL) {
-            fprintf(stderr, "[dispatch] Cannot load shared library '%s'\n", dispatch_lang_so);
-            fprintf(stderr, "Error message: %s\n", dlerror());
+            logerr(prefix_, "Cannot load shared library '%s'\n", dispatch_lang_so);
+            logerr(prefix_, "Error message: %s\n", dlerror());
             goto cleanup;
         }
         OIF_DISPATCH_HANDLES[dh] = lib_handle;
@@ -239,7 +240,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     impl_info->interface = oif_util_str_duplicate(interface);
     int result = hashmap_put(&IMPL_MAP, &impl_info->implh, impl_info);
     if (result != 0) {
-        fprintf(stderr, "[dispatch] hashmap_put had error, result %d\n", result);
+        logerr(prefix_, "[dispatch] hashmap_put had error, result %d\n", result);
         goto cleanup;
     }
     IMPL_COUNTER_++;
@@ -262,10 +263,10 @@ unload_interface_impl(ImplHandle implh)
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
     DispatchHandle dh = impl_info->dh;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
-        fprintf(stderr,
-                "[dispatch] Cannot unload interface implementation "
-                "for language '%s'\n",
-                OIF_LANG_FROM_LANG_ID[dh]);
+        logerr(prefix_,
+               "Cannot unload interface implementation "
+               "for language '%s'\n",
+               OIF_LANG_FROM_LANG_ID[dh]);
         exit(EXIT_FAILURE);
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
@@ -273,28 +274,28 @@ unload_interface_impl(ImplHandle implh)
     int (*unload_impl_fn)(ImplInfo *);
     unload_impl_fn = dlsym(lib_handle, "unload_impl");
     if (unload_impl_fn == NULL) {
-        fprintf(stderr,
-                "[dispatch] Cannot find function 'unload_impl' "
-                "for language '%s'\n",
-                OIF_LANG_FROM_LANG_ID[dh]);
+        logerr(prefix_,
+               "Cannot find function 'unload_impl' "
+               "for language '%s'\n",
+               OIF_LANG_FROM_LANG_ID[dh]);
         return -1;
     }
     // Free resources added by subtypes of ImplInfo.
     fprintf(stderr, "[dispatch] Unloading implementation with id '%d'\n", implh);
     int status = unload_impl_fn(impl_info);
     if (status != 0) {
-        fprintf(stderr,
-                "[dispatch] Error occurred when unloading implementation "
-                "with id '%d'\n",
-                implh);
+        logerr(prefix_,
+               "Error occurred when unloading implementation "
+               "with id '%d'\n",
+               implh);
         return -1;
     }
 
     ImplInfo *result = hashmap_remove(&IMPL_MAP, &implh);
     if (result == NULL || result->implh != implh) {
-        fprintf(stderr,
-                "[dispatch] Error occurred when unloading implementation "
-                "from the implementations table.");
+        logerr(prefix_,
+               "Error occurred when unloading implementation "
+               "from the implementations table.\n");
     }
     oif_util_free(impl_info->interface);
     oif_util_free(impl_info);
@@ -312,10 +313,10 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
     DispatchHandle dh = impl_info->dh;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
-        fprintf(stderr,
-                "[dispatch] Cannot call interface implementation "
-                "for language '%s'\n",
-                OIF_LANG_FROM_LANG_ID[dh]);
+        logerr(prefix_,
+               "Cannot call interface implementation "
+               "for language '%s'\n",
+               OIF_LANG_FROM_LANG_ID[dh]);
         exit(EXIT_FAILURE);
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
@@ -323,19 +324,19 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
     int (*call_impl_fn)(ImplInfo *, const char *, OIFArgs *, OIFArgs *);
     call_impl_fn = dlsym(lib_handle, "call_impl");
     if (call_impl_fn == NULL) {
-        fprintf(stderr,
-                "[dispatch] Could not load function 'call_impl' "
-                "for language '%s'\n",
-                OIF_LANG_FROM_LANG_ID[dh]);
+        logerr(prefix_,
+               "Could not load function 'call_impl' "
+               "for language '%s'\n",
+               OIF_LANG_FROM_LANG_ID[dh]);
         return -1;
     }
     status = call_impl_fn(impl_info, method, in_args, out_args);
 
     if (status) {
-        fprintf(stderr,
-                "[dispatch] ERROR: during execution of the function "
-                "'%s::%s' an error occurred\n",
-                impl_info->interface, method);
+        logerr(prefix_,
+               "During execution of the function "
+               "'%s::%s' an error occurred\n",
+               impl_info->interface, method);
     }
     return status;
 }
@@ -345,7 +346,7 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
 void __attribute__((destructor))
 dtor()
 {
-    fprintf(stderr, "[dispatch] WARNING: running non-optimized build\n");
+    logwarn(prefix_, "WARNING: running non-optimized build\n");
 }
 #endif
 #endif
