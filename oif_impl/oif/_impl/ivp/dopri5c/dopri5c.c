@@ -405,4 +405,16 @@ free_self(Self *self)
     fprintf(stderr, "[%s] Freeing resources. IMPLEMENT ME!\n", prefix_);
     free(self);
     self = NULL;
+    oif_free_array_f64(self_k1);
+    oif_free_array_f64(self_k2);
+    oif_free_array_f64(self_k3);
+    oif_free_array_f64(self_k4);
+    oif_free_array_f64(self_k5);
+    oif_free_array_f64(self_k6);
+
+    oif_free_array_f64(self_y);
+    oif_free_array_f64(self_y1);
+    oif_free_array_f64(self_ysti);
+
+    oif_free_array_f64(self_sc);
 }
