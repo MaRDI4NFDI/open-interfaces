@@ -188,6 +188,18 @@ init_(Self *self)
             return 1;
         }
     }
+    // We set `self` as user data for the solver
+    // because it contains the right-hand side function
+    // and the actual user data passed by the user.
+    status = CVodeSetUserData(self->cvode_mem, self);
+    if (status == CV_MEM_NULL) {
+        fprintf(stderr,
+                "%s Could not set user data as "
+                "CVODE memory block is not yet initialized\n",
+                prefix);
+        return 1;
+    }
+    assert(status == CV_SUCCESS);
 
     // 13. Create nonlinear solver object (optional)
     if (self->NLS != NULL) {
@@ -282,15 +294,6 @@ int
 set_user_data(Self *self, void *user_data)
 {
     self->user_data = user_data;
-    int status = CVodeSetUserData(self->cvode_mem, self);
-    if (status == CV_MEM_NULL) {
-        fprintf(stderr,
-                "%s Could not set user data as "
-                "CVODE memory block is not yet initialized\n",
-                prefix);
-        return 1;
-    }
-    assert(status == CV_SUCCESS);
     return 0;
 }
 
