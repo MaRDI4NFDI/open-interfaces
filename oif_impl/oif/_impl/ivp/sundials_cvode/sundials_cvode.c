@@ -10,16 +10,18 @@
  */
 #include <assert.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <cvode/cvode.h>
 #include <nvector/nvector_serial.h>
+#include <sundials/sundials_context.h>
 #include <sundials/sundials_nvector.h>
 #include <sundials/sundials_types.h>
-#include <sunlinsol/sunlinsol_dense.h>
-#include <sunmatrix/sunmatrix_dense.h>
 #include <sunnonlinsol/sunnonlinsol_fixedpoint.h>
+#include <sundials/sundials_nonlinearsolver.h>
 
 #include "oif/api.h"
 #include "oif/config_dict.h"
@@ -233,7 +235,7 @@ set_initial_value(Self *self, OIFArrayF64 *y0_in, double t0_in)
     }
 
     // 3. Set problem dimensions, etc.
-    if (sizeof(SUNDIALS_INDEX_TYPE) == sizeof(int)) {
+    if (sizeof(sunindextype) == sizeof(int)) {
         if (y0_in->dimensions[0] > INT_MAX) {
             fprintf(stderr,
                     "[sundials_cvode] Dimensions of the array are larger "
