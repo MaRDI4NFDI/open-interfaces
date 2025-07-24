@@ -429,13 +429,71 @@ TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
 // ----------------------------------------------------------------------------
 // BEGIN Tests for `dopri5c` implementation.
 TEST(Dopri5CConfigDictTest, DoesNotAllowSetIntegratorMethod)
+
+TEST(Dopri5CSpecificTests, NoSharedDataInImplementation)
 {
-    ImplHandle implh = oif_load_impl("ivp", "dopri5c", 1, 0);
-    ASSERT_GT(implh, 0);
+    // This test checks that two instances of the same implementation
+    // do not share data.
+    // Precisely, we load the `dopri5c` implementation twice,
+    // and then we integrate the same problem.
+    // We check that the results are the same
+    // after integration to the same time point
+    // by the results are different if one solver is integrated
+    // to, e.g. time t3, while the other is integrated
+    // only to time t2 < t3.
+    int status;
 
-    int status = oif_ivp_set_integrator(implh, (char *)"does not matter", NULL);
-    ASSERT_NE(status, 0);
+    ScalarExpDecayProblem *problem = new ScalarExpDecayProblem();
+    double t0 = 0.0;  // Must be part of the problem definition.
 
-    oif_unload_impl(implh);
+    intptr_t dims[] = {
+        problem->N,
+    };
+    OIFArrayF64 *y01 = oif_init_array_f64_from_data(1, dims, problem->y0);
+    OIFArrayF64 *y02 = oif_init_array_f64_from_data(1, dims, problem->y0);
+    OIFArrayF64 *y1 = oif_create_array_f64(1, dims);
+    OIFArrayF64 *y2 = oif_create_array_f64(1, dims);
+
+    ImplHandle implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
+    ASSERT_GT(implh1, 0);
+    ImplHandle implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
+    ASSERT_GT(implh2, 0);
+
+    status = oif_ivp_set_initial_value(implh1, y01, t0);
+    ASSERT_EQ(status, 0);
+    status = oif_ivp_set_initial_value(implh2, y02, t0);
+    ASSERT_EQ(status, 0);
+
+    status = oif_ivp_set_user_data(implh1, problem);
+    ASSERT_EQ(status, 0);
+    status = oif_ivp_set_user_data(implh2, problem);
+    ASSERT_EQ(status, 0);
+
+    status = oif_ivp_set_rhs_fn(implh1, ODEProblem::rhs_wrapper);
+    ASSERT_EQ(status, 0);
+    status = oif_ivp_set_rhs_fn(implh2, ODEProblem::rhs_wrapper);
+    ASSERT_EQ(status, 0);
+
+    double t_span[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
+    oif_ivp_integrate(implh1, t_span[1], y1);
+    oif_ivp_integrate(implh1, t_span[2], y1);
+    oif_ivp_integrate(implh1, t_span[3], y1);
+
+    oif_ivp_integrate(implh2, t_span[1], y2);
+    ASSERT_NE(y1->data[0], y2->data[0]);
+
+    oif_ivp_integrate(implh2, t_span[2], y2);
+    ASSERT_NE(y1->data[0], y2->data[0]);
+
+    oif_ivp_integrate(implh2, t_span[3], y2);
+    ASSERT_EQ(y1->data[0], y2->data[0]);
+
+    oif_unload_impl(implh1);
+    oif_unload_impl(implh2);
+
+    oif_free_array_f64(y01);
+    oif_free_array_f64(y02);
+    oif_free_array_f64(y1);
+    oif_free_array_f64(y2);
 }
 // END Tests for `dopri5c` implementation.
