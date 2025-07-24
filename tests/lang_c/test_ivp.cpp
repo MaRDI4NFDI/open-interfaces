@@ -1,4 +1,5 @@
-#include <cmath> #include <cstring>
+#include <cmath>
+#include <cstring>
 #include <iostream>
 
 #include "testutils.h"
@@ -202,6 +203,7 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
     oif_free_array_f64(y);
     oif_unload_impl(implh);
 }
+// END Tests that use combinations of implementations and ODE problems.
 
 // ----------------------------------------------------------------------------
 // BEGIN Tests that implementations-integrators.
@@ -422,3 +424,17 @@ TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
 }
 #endif
 // END Tests for integrator parameters via config dicts for `scipy_ode`.
+
+// ----------------------------------------------------------------------------
+// BEGIN Tests for `dopri5c` implementation.
+TEST(Dopri5CConfigDictTest, DoesNotAllowSetIntegratorMethod)
+{
+    ImplHandle implh = oif_load_impl("ivp", "dopri5c", 1, 0);
+    ASSERT_GT(implh, 0);
+
+    int status = oif_ivp_set_integrator(implh, (char *)"does not matter", NULL);
+    ASSERT_NE(status, 0);
+
+    oif_unload_impl(implh);
+}
+// END Tests for `dopri5c` implementation.
