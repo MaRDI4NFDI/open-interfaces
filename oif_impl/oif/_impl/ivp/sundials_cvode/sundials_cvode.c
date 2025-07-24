@@ -441,8 +441,8 @@ cvode_rhs(sunrealtype t, N_Vector y, N_Vector ydot, void *context)
     return result;
 }
 
-int
-oif_ivp_free(void *self_)
+void
+free_self(Self *self_)
 {
     fprintf(stderr, "%s Freeing resources\n", prefix);
     Self *self = (Self *)self_;  // Fixed: cast to void to suppress unused parameter warning
@@ -475,6 +475,4 @@ oif_ivp_free(void *self_)
 
     free(self);
     self = NULL;
-
-    return 0;
 }
