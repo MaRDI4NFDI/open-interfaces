@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <cstddef>
 #include <exception>
 
 /**
@@ -15,7 +16,7 @@
 constexpr double
 constexpr_sqrt(double x)
 {
-    double tol = 1e-8;
+    const double tol = 1e-8;
     double y = x / 2.0;
     int k = 0;
     const int max_iter = 50;
@@ -49,6 +50,7 @@ fsolve(F const &f, Fprime const &fprime)
 
     while (((std::abs(f(x))) > tol) && (k < max_iter)) {
         x = x - f(x) / fprime(x);
+        k++;
     }
 
     if (k > max_iter) {

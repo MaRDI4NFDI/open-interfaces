@@ -1,8 +1,8 @@
 #include <string.h>
+#include <stdio.h>
 
 #include <gtest/gtest.h>
 
-#include <oif/api.h>
 #include <oif/config_dict.h>
 #include <oif/util.h>
 
@@ -53,7 +53,7 @@ TEST(OIFConfigDictTest, SerializeDeserializeBasicCase)
     oif_config_dict_serialize(dict);
     OIFConfigDict *new_dict = oif_config_dict_init();
     oif_config_dict_copy_serialization(new_dict, dict);
-    int status = oif_config_dict_deserialize(new_dict);
+    int const status = oif_config_dict_deserialize(new_dict);
     ASSERT_EQ(status, 0);
 
     ASSERT_EQ(oif_config_dict_get_int(new_dict, "int_option"), 42);
@@ -87,7 +87,7 @@ TEST(OIFConfigDictTest, SerializeDeserializeVeryLongStringCase)
     oif_config_dict_serialize(dict);
     OIFConfigDict *new_dict = oif_config_dict_init();
     oif_config_dict_copy_serialization(new_dict, dict);
-    int status = oif_config_dict_deserialize(new_dict);
+    int const status = oif_config_dict_deserialize(new_dict);
     ASSERT_EQ(status, 0);
 
     for (size_t i = 0; i < N; ++i) {

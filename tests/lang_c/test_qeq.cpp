@@ -1,14 +1,17 @@
+#include <cstdint>
 #include <gtest/gtest.h>
 
 #include "oif/c_bindings.h"
 #include "oif/interfaces/qeq.h"
 
-#include <oif/_platform.h>
+#include <oif/_platform.h>  // IWYU pragma: keep
 
 class QeqGatewayFixture : public ::testing::TestWithParam<const char *> {
    protected:
+    // NOLINTBEGIN
     OIFArrayF64 *roots;
     ImplHandle implh;
+    // NOLINTEND
 
     void
     SetUp() override
@@ -41,7 +44,7 @@ INSTANTIATE_TEST_SUITE_P(QeqGatewayParameterizedTestSuite, QeqGatewayFixture,
 
 TEST_P(QeqGatewayFixture, LinearCase)
 {
-    int status = oif_solve_qeq(implh, 0.0, 2.0, -1.0, roots);
+    const int status = oif_solve_qeq(implh, 0.0, 2.0, -1.0, roots);
     ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], 0.5);
@@ -50,7 +53,7 @@ TEST_P(QeqGatewayFixture, LinearCase)
 
 TEST_P(QeqGatewayFixture, TwoEqualRoots)
 {
-    int status = oif_solve_qeq(implh, 1.0, 2.0, 1.0, roots);
+    const int status = oif_solve_qeq(implh, 1.0, 2.0, 1.0, roots);
     ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], -1.0);
@@ -59,7 +62,7 @@ TEST_P(QeqGatewayFixture, TwoEqualRoots)
 
 TEST_P(QeqGatewayFixture, TwoDistinctRoots)
 {
-    int status = oif_solve_qeq(implh, 1, 5, -14, roots);
+    const int status = oif_solve_qeq(implh, 1, 5, -14, roots);
     ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], -7);
@@ -68,7 +71,7 @@ TEST_P(QeqGatewayFixture, TwoDistinctRoots)
 
 TEST_P(QeqGatewayFixture, ExtremeRoots)
 {
-    int status = oif_solve_qeq(implh, 1, -20'000, 1.0, roots);
+    const int status = oif_solve_qeq(implh, 1, -20'000, 1.0, roots);
     ASSERT_EQ(status, 0);
 
     EXPECT_EQ(roots->data[0], 19999.999949999998);
