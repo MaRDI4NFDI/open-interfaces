@@ -28,30 +28,29 @@ static const char *prefix_ = "ivp::dopri5c";
 typedef struct self {
     int N;            // Length of the solution vector.
     double t;
+    double h;      // Current step size.
     double rtol;   // relative tolerance
     double atol;  // absolute tolerance
+    // Runge--Kutta stages.
+    OIFArrayF64 *k1;
+    OIFArrayF64 *k2;
+    OIFArrayF64 *k3;
+    OIFArrayF64 *k4;
+    OIFArrayF64 *k5;
+    OIFArrayF64 *k6;
+
+    OIFArrayF64 *y;
+    OIFArrayF64 *y1;
+    OIFArrayF64 *ysti;
+
+    OIFArrayF64 *sc;
 } Self;
 
-// Runge--Kutta stages.
-OIFArrayF64 *self_k1 = NULL;
-OIFArrayF64 *self_k2 = NULL;
-OIFArrayF64 *self_k3 = NULL;
-OIFArrayF64 *self_k4 = NULL;
-OIFArrayF64 *self_k5 = NULL;
-OIFArrayF64 *self_k6 = NULL;
-
-OIFArrayF64 *self_y = NULL;
-OIFArrayF64 *self_y1 = NULL;
-OIFArrayF64 *self_ysti = NULL;
-
-OIFArrayF64 *self_sc = NULL;
 
 OIFConfigDict *config = NULL;
 void *self_user_data = NULL;
 // Signature for the right-hand side that is provided by the `IVP` interface.
 static rhs_fn_t OIF_RHS_FN = NULL;
-
-static double self_h = 0.0;
 
 // Number of right-hand side function evaluations.
 static size_t nfcn_ = 0;
@@ -98,21 +97,21 @@ compute_initial_step_(Self *self)
     double h0;
     double h1;
 
-    OIF_RHS_FN(self->t, self_y, self_k1, self_user_data);
+    OIF_RHS_FN(self->t, self->y, self->k1, self_user_data);
 
     for (int i = 0; i < self->N; ++i) {
-        self_sc->data[i] = self->atol + self_y->data[i] * self->rtol;
+        self->sc->data[i] = self->atol + self->y->data[i] * self->rtol;
     }
 
     double d0 = 0.0L;
     for (int i = 0; i < self->N; ++i) {
-        d0 += pow(self_y->data[i] / self_sc->data[i], 2);
+        d0 += pow(self->y->data[i] / self->sc->data[i], 2);
     }
     d0 = sqrt(d0 / self->N);
 
     double d1 = 0.0L;
     for (int i = 0; i < self->N; ++i) {
-        d1 += pow(self_k1->data[i] / self_sc->data[i], 2);
+        d1 += pow(self->k1->data[i] / self->sc->data[i], 2);
     }
     d1 = sqrt(d1 / self->N);
 
@@ -124,13 +123,13 @@ compute_initial_step_(Self *self)
     }
 
     for (int i = 0; i < self->N; ++i) {
-        self_y1->data[i] = self_y->data[i] + h0 * self_k1->data[i];
+        self->y1->data[i] = self->y->data[i] + h0 * self->k1->data[i];
     }
-    OIF_RHS_FN(self->t + self_h, self_y1, self_k2, self_user_data);
+    OIF_RHS_FN(self->t + self->h, self->y1, self->k2, self_user_data);
 
     double d2 = 0.0L;
     for (int i = 0; i < self->N; ++i) {
-        d2 += pow((self_k2->data[i] - self_k1->data[i]) / self_sc->data[i], 2.0);
+        d2 += pow((self->k2->data[i] - self->k1->data[i]) / self->sc->data[i], 2.0);
     }
     d2 = sqrt(d2 / self->N) / h0;
 
@@ -141,7 +140,7 @@ compute_initial_step_(Self *self)
         h1 = pow(1e-2 / MAX(d1, d2), 1.0L / 5.0L);
     }
 
-    self_h = MIN(1e2 * h0, h1);
+    self->h = MIN(1e2 * h0, h1);
 }
 
 Self *
@@ -155,8 +154,22 @@ malloc_self(void)
 
     self->N = 0;
     self->t = 0.0;
+    self->h = 0.0;
     self->rtol = 1e-6;
     self->atol = 1e-12;
+
+    self->k1 = NULL;
+    self->k2 = NULL;
+    self->k3 = NULL;
+    self->k4 = NULL;
+    self->k5 = NULL;
+    self->k6 = NULL;
+
+    self->y = NULL;
+    self->y1 = NULL;
+    self->ysti = NULL;
+
+    self->sc = NULL;
 
     return self;
 }
@@ -174,34 +187,39 @@ set_initial_value(Self *self, OIFArrayF64 *y0_in, double t0_in)
         return 1;
     }
 
-    if (self_y) {
-        oif_free_array_f64(self_y);
-        oif_free_array_f64(self_k1);
-        oif_free_array_f64(self_k2);
-        oif_free_array_f64(self_k3);
-        oif_free_array_f64(self_k4);
-        oif_free_array_f64(self_k5);
-        oif_free_array_f64(self_k6);
+    if (self->y) {
+        oif_free_array_f64(self->y);
+        oif_free_array_f64(self->k1);
+        oif_free_array_f64(self->k2);
+        oif_free_array_f64(self->k3);
+        oif_free_array_f64(self->k4);
+        oif_free_array_f64(self->k5);
+        oif_free_array_f64(self->k6);
+
+        oif_free_array_f64(self->y1);
+        oif_free_array_f64(self->ysti);
+
+        oif_free_array_f64(self->sc);
     }
 
     self->N = y0_in->dimensions[0];
 
-    self_y = oif_create_array_f64(1, y0_in->dimensions);
+    self->y = oif_create_array_f64(1, y0_in->dimensions);
     for (int i = 0; i < self->N; ++i) {
-        self_y->data[i] = y0_in->data[i];
+        self->y->data[i] = y0_in->data[i];
     }
 
-    self_k1 = oif_create_array_f64(1, y0_in->dimensions);
-    self_k2 = oif_create_array_f64(1, y0_in->dimensions);
-    self_k3 = oif_create_array_f64(1, y0_in->dimensions);
-    self_k4 = oif_create_array_f64(1, y0_in->dimensions);
-    self_k5 = oif_create_array_f64(1, y0_in->dimensions);
-    self_k6 = oif_create_array_f64(1, y0_in->dimensions);
+    self->k1 = oif_create_array_f64(1, y0_in->dimensions);
+    self->k2 = oif_create_array_f64(1, y0_in->dimensions);
+    self->k3 = oif_create_array_f64(1, y0_in->dimensions);
+    self->k4 = oif_create_array_f64(1, y0_in->dimensions);
+    self->k5 = oif_create_array_f64(1, y0_in->dimensions);
+    self->k6 = oif_create_array_f64(1, y0_in->dimensions);
 
-    self_y1 = oif_create_array_f64(1, y0_in->dimensions);
-    self_ysti = oif_create_array_f64(1, y0_in->dimensions);
+    self->y1 = oif_create_array_f64(1, y0_in->dimensions);
+    self->ysti = oif_create_array_f64(1, y0_in->dimensions);
 
-    self_sc = oif_create_array_f64(1, y0_in->dimensions);
+    self->sc = oif_create_array_f64(1, y0_in->dimensions);
 
     nfcn_ = 0;
 
@@ -277,65 +295,65 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
 
     bool last = false;
     // 1st stage
-    OIF_RHS_FN(self->t, self_y, self_k1, self_user_data);
+    OIF_RHS_FN(self->t, self->y, self->k1, self_user_data);
 
     // It is not clear why 2, but this is from the Hairer's code.
     nfcn_ += 2;
 
     while (self->t < t_) {
-        if (self->t + self_h >= t_) {
-            self_h = t_ - self->t;
+        if (self->t + self->h >= t_) {
+            self->h = t_ - self->t;
             last = true;
         }
         nstep++;
 
         // 2nd stage
         for (int i = 0; i < self->N; ++i) {
-            self_y1->data[i] = self_y->data[i] + a2[1] * self_h * self_k1->data[i];
+            self->y1->data[i] = self->y->data[i] + a2[1] * self->h * self->k1->data[i];
         }
-        OIF_RHS_FN(self->t + C2 * self_h, self_y1, self_k2, self_user_data);
+        OIF_RHS_FN(self->t + C2 * self->h, self->y1, self->k2, self_user_data);
 
         // 3rd stage
         for (int i = 0; i < self->N; ++i) {
-            self_y1->data[i] = self_y->data[i] +
-                               self_h * (a3[1] * self_k1->data[i] + a3[2] * self_k2->data[i]);
+            self->y1->data[i] = self->y->data[i] +
+                               self->h * (a3[1] * self->k1->data[i] + a3[2] * self->k2->data[i]);
         }
-        OIF_RHS_FN(self->t + C3 * self_h, self_y1, self_k3, self_user_data);
+        OIF_RHS_FN(self->t + C3 * self->h, self->y1, self->k3, self_user_data);
 
         // 4th stage
         for (int i = 0; i < self->N; ++i) {
-            self_y1->data[i] = self_y->data[i] +
-                               self_h * (a4[1] * self_k1->data[i] + a4[2] * self_k2->data[i] +
-                                         a4[3] * self_k3->data[i]);
+            self->y1->data[i] = self->y->data[i] +
+                               self->h * (a4[1] * self->k1->data[i] + a4[2] * self->k2->data[i] +
+                                         a4[3] * self->k3->data[i]);
         }
-        OIF_RHS_FN(self->t + C4 * self_h, self_y1, self_k4, self_user_data);
+        OIF_RHS_FN(self->t + C4 * self->h, self->y1, self->k4, self_user_data);
 
         // 5th stage
         for (int i = 0; i < self->N; ++i) {
-            self_y1->data[i] = self_y->data[i] +
-                               self_h * (a5[1] * self_k1->data[i] + a5[2] * self_k2->data[i] +
-                                         a5[3] * self_k3->data[i] + a5[4] * self_k4->data[i]);
+            self->y1->data[i] = self->y->data[i] +
+                               self->h * (a5[1] * self->k1->data[i] + a5[2] * self->k2->data[i] +
+                                         a5[3] * self->k3->data[i] + a5[4] * self->k4->data[i]);
         }
-        OIF_RHS_FN(self->t + C5 * self_h, self_y1, self_k5, self_user_data);
+        OIF_RHS_FN(self->t + C5 * self->h, self->y1, self->k5, self_user_data);
 
         // step 6.
         for (int i = 0; i < self->N; ++i) {
-            self_ysti->data[i] =
-                self_y->data[i] +
-                self_h * (a6[1] * self_k1->data[i] + a6[2] * self_k2->data[i] +
-                          a6[3] * self_k3->data[i] + a6[4] * self_k4->data[i] +
-                          a6[5] * self_k5->data[i]);
+            self->ysti->data[i] =
+                self->y->data[i] +
+                self->h * (a6[1] * self->k1->data[i] + a6[2] * self->k2->data[i] +
+                          a6[3] * self->k3->data[i] + a6[4] * self->k4->data[i] +
+                          a6[5] * self->k5->data[i]);
         }
-        OIF_RHS_FN(self->t + self_h, self_ysti, self_k6, self_user_data);
+        OIF_RHS_FN(self->t + self->h, self->ysti, self->k6, self_user_data);
 
         // Estimate less accurate.
         for (int i = 0; i < self->N; ++i) {
-            self_y1->data[i] = self_y->data[i] +
-                               self_h * (a7[1] * self_k1->data[i] + a7[3] * self_k3->data[i] +
-                                         a7[4] * self_k4->data[i] + a7[5] * self_k5->data[i] +
-                                         a7[6] * self_k6->data[i]);
+            self->y1->data[i] = self->y->data[i] +
+                               self->h * (a7[1] * self->k1->data[i] + a7[3] * self->k3->data[i] +
+                                         a7[4] * self->k4->data[i] + a7[5] * self->k5->data[i] +
+                                         a7[6] * self->k6->data[i]);
         }
-        OIF_RHS_FN(self->t + self_h, self_y1, self_k2, self_user_data);
+        OIF_RHS_FN(self->t + self->h, self->y1, self->k2, self_user_data);
 
         nfcn_ += 6;
         // --------------------------------------------------------------------
@@ -343,12 +361,12 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
         double err = 0.0;
 
         for (int i = 0; i < self->N; ++i) {
-            self_k4->data[i] = self_h * (e[1] * self_k1->data[i] + e[3] * self_k3->data[i] +
-                                         e[4] * self_k4->data[i] + e[5] * self_k5->data[i] +
-                                         e[6] * self_k6->data[i] + e[7] * self_k2->data[i]);
+            self->k4->data[i] = self->h * (e[1] * self->k1->data[i] + e[3] * self->k3->data[i] +
+                                         e[4] * self->k4->data[i] + e[5] * self->k5->data[i] +
+                                         e[6] * self->k6->data[i] + e[7] * self->k2->data[i]);
             double sk =
-                self->atol + self->rtol * MAX(fabs(self_y->data[i]), fabs(self_y1->data[i]));
-            err += pow(self_k4->data[i] / sk, 2);
+                self->atol + self->rtol * MAX(fabs(self->y->data[i]), fabs(self->y1->data[i]));
+            err += pow(self->k4->data[i] / sk, 2);
         }
         err = sqrt(err / self->N);
 
@@ -357,28 +375,28 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
         FAC = FAC11 / pow(FACOLD, BETA);
         // We require FACMIN <= HNEW/H <= FACMAX
         FAC = MAX(FACC2, MIN(FACC1, FAC / SAFE));
-        double hnew = self_h / FAC;
+        double hnew = self->h / FAC;
 
         if (err < 1.0) {
             // Step is accepted.
             FACOLD = MAX(err, 1.0e-4);
-            self->t += self_h;
+            self->t += self->h;
 
             OIFArrayF64 *tmp = NULL;
 
             // Instead of copying `self_k2` into `self_k1` we just swap pointers.
-            tmp = self_k1;
-            self_k1 = self_k2;
-            self_k2 = tmp;
+            tmp = self->k1;
+            self->k1 = self->k2;
+            self->k2 = tmp;
 
             // Instead of copying `self_y1` into `self_y` we just swap pointers.
-            tmp = self_y;
-            self_y = self_y1;
-            self_y1 = tmp;
+            tmp = self->y;
+            self->y = self->y1;
+            self->y1 = tmp;
 
             if (last) {
                 for (int i = 0; i < self->N; ++i) {
-                    y_out->data[i] = self_y->data[i];
+                    y_out->data[i] = self->y->data[i];
                 }
             }
             n_rejected = 0;
@@ -389,11 +407,11 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
             // right after a step-rejection (Shampine & Watts 1979).
             // Hairer et. al., vol. 1, p. 168.
             /* FACMAX = 1.0; */
-            hnew = self_h / MIN(FACC1, FAC11 / SAFE);
+            hnew = self->h / MIN(FACC1, FAC11 / SAFE);
             n_rejected++;
         }
 
-        self_h = hnew;
+        self->h = hnew;
 
         if (n_rejected > 20) {
             fprintf(stderr, "[%s::integrate] Too many rejected steps\n", prefix_);
@@ -407,19 +425,46 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
 void
 free_self(Self *self)
 {
-    fprintf(stderr, "[%s] Freeing resources. IMPLEMENT ME!\n", prefix_);
-    oif_free_array_f64(self_k1);
-    oif_free_array_f64(self_k2);
-    oif_free_array_f64(self_k3);
-    oif_free_array_f64(self_k4);
-    oif_free_array_f64(self_k5);
-    oif_free_array_f64(self_k6);
+    if (self == NULL) {
+        fprintf(stderr, "[%s] \033[31mERROR\033[0m Self is NULL, nothing to free\n", prefix_);
+        return;
+    }
 
-    oif_free_array_f64(self_y);
-    oif_free_array_f64(self_y1);
-    oif_free_array_f64(self_ysti);
+    fprintf(stderr, "[%s] Freeing resources...\n", prefix_);
+    fprintf(stderr, "[%s] self->k1 = %p\n", prefix_, self->k1);
+    if (self->k1 != NULL) {
+        oif_free_array_f64(self->k1);
+    }
+    if (self->k2 != NULL) {
+        oif_free_array_f64(self->k2);
+    }
+    if (self->k3 != NULL) {
+        oif_free_array_f64(self->k3);
+    }
+    if (self->k4 != NULL) {
+        oif_free_array_f64(self->k4);
+    }
+    if (self->k5 != NULL) {
+        oif_free_array_f64(self->k5);
+    }
+    if (self->k6 != NULL) {
+        oif_free_array_f64(self->k6);
+    }
 
-    oif_free_array_f64(self_sc);
+    if (self->y != NULL) {
+        oif_free_array_f64(self->y);
+    }
+    if (self->y1 != NULL) {
+        oif_free_array_f64(self->y1);
+    }
+    if (self->ysti != NULL) {
+        oif_free_array_f64(self->ysti);
+    }
+
+    if (self->sc != NULL) {
+        oif_free_array_f64(self->sc);
+    }
 
     oif_util_free(self);
+    fprintf(stderr, "[%s] Freeing resources...DONE!\n", prefix_);
 }
