@@ -520,6 +520,7 @@ TEST(Dopri5CSpecificTests, NoSharedDataInImplementation)
     oif_free_array_f64(y1);
     oif_free_array_f64(y2);
 
-    delete problem;
+    oif_unload_impl(implh1);
+    oif_unload_impl(implh2);
 }
 // END Tests for `dopri5c` implementation.
