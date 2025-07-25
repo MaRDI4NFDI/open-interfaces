@@ -1,9 +1,11 @@
+#include <cstdint>
 #include <gtest/gtest.h>
 
+#include <oif/api.h>
 #include "oif/c_bindings.h"
 #include "oif/interfaces/linsolve.h"
 
-#include <oif/_platform.h>
+#include <oif/_platform.h>  // IWYU pragma: keep
 
 class LinearSolverFixture : public ::testing::TestWithParam<const char *> {};
 
@@ -25,13 +27,13 @@ TEST_P(LinearSolverFixture, TestCase1)
     OIFArrayF64 *b = oif_init_array_f64_from_data(1, b_dims, b_data);
     intptr_t roots_dims[] = {2};
     OIFArrayF64 *roots = oif_create_array_f64(1, roots_dims);
-    ImplHandle implh = oif_load_impl("linsolve", GetParam(), 1, 0);
+    const ImplHandle implh = oif_load_impl("linsolve", GetParam(), 1, 0);
 
-    int status = oif_solve_linear_system(implh, A, b, roots);
+    int const status = oif_solve_linear_system(implh, A, b, roots);
     EXPECT_EQ(status, 0);
 
-    intptr_t M = A->dimensions[0];
-    intptr_t N = A->dimensions[1];
+    intptr_t const M = A->dimensions[0];
+    intptr_t const N = A->dimensions[1];
     for (int i = 0; i < M; ++i) {
         float scalar_product = 0.0;
         for (int j = 0; j < N; ++j) {
