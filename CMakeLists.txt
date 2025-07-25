@@ -14,6 +14,11 @@ option(OIF_OPTION_SANITIZE "Enable sanitizers in Debug builds" OFF)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Enforce using `-std=c++11`, without any extensions like `gnu++11`.
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   message("Disable optimizations for Debug build type")
   string(PREPEND CMAKE_C_FLAGS_DEBUG "-O0 ")
