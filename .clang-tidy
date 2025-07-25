@@ -26,5 +26,3 @@ WarningsAsErrors: '*'
 CheckOptions:
     - key: bugprone-assert-side-effect.AssertMacros
       value: 'ASSERT'
-
-ExtraArgs: [-std=c11, -DDEBUG]
