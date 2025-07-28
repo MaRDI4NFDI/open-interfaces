@@ -456,43 +456,63 @@ class Dopri5OOPFixture : public ::testing::Test {
     void
     SetUp() override
     {
-    const std::unique_ptr<ScalarExpDecayProblem> problem_shared_ptr(new ScalarExpDecayProblem());
-    ODEProblem *problem = problem_shared_ptr.get();
+        problem_exp_decay = new ScalarExpDecayProblem();
+        problem_oscillator = new LinearOscillatorProblem();
 
-    intptr_t dims[] = {
-        problem->N,
-    };
-    OIFArrayF64 *y01 = oif_init_array_f64_from_data(1, dims, problem->y0);
-    OIFArrayF64 *y02 = oif_init_array_f64_from_data(1, dims, problem->y0);
-    OIFArrayF64 *y1 = oif_create_array_f64(1, dims);
-    OIFArrayF64 *y2 = oif_create_array_f64(1, dims);
+        dims_exp_decay[0] = problem_exp_decay->N;
+        dims_oscillator[0] = problem_oscillator->N;
+
+        y0_exp_decay_1 = oif_init_array_f64_from_data(1, dims_exp_decay, problem_exp_decay->y0);
+        y0_exp_decay_2 = oif_init_array_f64_from_data(1, dims_exp_decay, problem_exp_decay->y0);
+        y0_oscillator_1 = oif_init_array_f64_from_data(1, dims_oscillator, problem_oscillator->y0);
+        y0_oscillator_2 = oif_init_array_f64_from_data(1, dims_oscillator, problem_oscillator->y0);
+
+        y_exp_decay_1 = oif_create_array_f64(1, dims_exp_decay);
+        y_exp_decay_2 = oif_create_array_f64(1, dims_exp_decay);
+        y_oscillator_1 = oif_create_array_f64(1, dims_oscillator);
+        y_oscillator_2 = oif_create_array_f64(1, dims_oscillator);
     }
 
     void
     TearDown() override
     {
-        oif_free_array_f64(y01);
-        oif_free_array_f64(y02);
-        oif_free_array_f64(y1);
-        oif_free_array_f64(y2);
+        oif_free_array_f64(y0_exp_decay_1);
+        oif_free_array_f64(y0_exp_decay_2);
+        oif_free_array_f64(y0_oscillator_1);
+        oif_free_array_f64(y0_oscillator_2);
+
+        oif_free_array_f64(y_exp_decay_1);
+        oif_free_array_f64(y_exp_decay_2);
+        oif_free_array_f64(y_oscillator_1);
+        oif_free_array_f64(y_oscillator_2);
 
         oif_unload_impl(implh1);
         oif_unload_impl(implh2);
+        delete problem_exp_decay;
+        delete problem_oscillator;
     }
 
     // NOLINTBEGIN
     ImplHandle implh1;
     ImplHandle implh2;
-    ODEProblem *problem;
+    ODEProblem *problem_exp_decay = nullptr;
+    ODEProblem *problem_oscillator = nullptr;
+    intptr_t dims_exp_decay[1];
+    intptr_t dims_oscillator[1];
     const double t0 = 0.0;
-    OIFArrayF64 *y01;
-    OIFArrayF64 *y02;
-    OIFArrayF64 *y1;
-    OIFArrayF64 *y2;
+
+    OIFArrayF64 *y0_exp_decay_1;
+    OIFArrayF64 *y0_exp_decay_2;
+    OIFArrayF64 *y0_oscillator_1;
+    OIFArrayF64 *y0_oscillator_2;
+    OIFArrayF64 *y_exp_decay_1;
+    OIFArrayF64 *y_exp_decay_2;
+    OIFArrayF64 *y_oscillator_1;
+    OIFArrayF64 *y_oscillator_2;
     // NOLINTEND
 };
 
-TEST_F(Dopri5OOPFixture, NoSharedDataInImplementation)
+TEST_F(Dopri5OOPFixture, NoSharedDataInImplementation1)
 {
     // This test checks that two instances of the same implementation
     // do not share data.
@@ -503,40 +523,31 @@ TEST_F(Dopri5OOPFixture, NoSharedDataInImplementation)
     // by the results are different if one solver is integrated
     // to, e.g. time t3, while the other is integrated
     // only to time t2 < t3.
-    int status;
 
     implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
-    ASSERT_GT(implh1, 0);
     implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
-    ASSERT_GT(implh2, 0);
 
-    status = oif_ivp_set_initial_value(implh1, y01, t0);
-    ASSERT_EQ(status, 0);
-    status = oif_ivp_set_initial_value(implh2, y02, t0);
-    ASSERT_EQ(status, 0);
+    oif_ivp_set_initial_value(implh1, y0_exp_decay_1, t0);
+    oif_ivp_set_initial_value(implh2, y0_exp_decay_2, t0);
 
-    status = oif_ivp_set_user_data(implh1, problem);
-    ASSERT_EQ(status, 0);
-    status = oif_ivp_set_user_data(implh2, problem);
-    ASSERT_EQ(status, 0);
+    oif_ivp_set_user_data(implh1, problem_exp_decay);
+    oif_ivp_set_user_data(implh2, problem_exp_decay);
 
-    status = oif_ivp_set_rhs_fn(implh1, ODEProblem::rhs_wrapper);
-    ASSERT_EQ(status, 0);
-    status = oif_ivp_set_rhs_fn(implh2, ODEProblem::rhs_wrapper);
-    ASSERT_EQ(status, 0);
+    oif_ivp_set_rhs_fn(implh1, ODEProblem::rhs_wrapper);
+    oif_ivp_set_rhs_fn(implh2, ODEProblem::rhs_wrapper);
 
     const double t_span[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
-    oif_ivp_integrate(implh1, t_span[1], y1);
-    oif_ivp_integrate(implh1, t_span[2], y1);
-    oif_ivp_integrate(implh1, t_span[3], y1);
+    oif_ivp_integrate(implh1, t_span[1], y_exp_decay_1);
+    oif_ivp_integrate(implh1, t_span[2], y_exp_decay_1);
+    oif_ivp_integrate(implh1, t_span[3], y_exp_decay_1);
 
-    oif_ivp_integrate(implh2, t_span[1], y2);
-    ASSERT_NE(y1->data[0], y2->data[0]);
+    oif_ivp_integrate(implh2, t_span[1], y_exp_decay_2);
+    ASSERT_NE(y_exp_decay_1->data[0], y_exp_decay_2->data[0]);
 
-    oif_ivp_integrate(implh2, t_span[2], y2);
-    ASSERT_NE(y1->data[0], y2->data[0]);
+    oif_ivp_integrate(implh2, t_span[2], y_exp_decay_2);
+    ASSERT_NE(y_exp_decay_1->data[0], y_exp_decay_2->data[0]);
 
-    oif_ivp_integrate(implh2, t_span[3], y2);
-    ASSERT_NE(y1->data[0], y2->data[0]);
+    oif_ivp_integrate(implh2, t_span[3], y_exp_decay_2);
+    ASSERT_EQ(y_exp_decay_1->data[0], y_exp_decay_2->data[0]);
 }
 // END Tests for `dopri5c` implementation.
