@@ -484,7 +484,7 @@ class Dopri5OOPFixture : public ::testing::Test {
     ImplHandle implh1;
     ImplHandle implh2;
     ODEProblem *problem;
-    const double t0;
+    const double t0 = 0.0;
     OIFArrayF64 *y01;
     OIFArrayF64 *y02;
     OIFArrayF64 *y1;
