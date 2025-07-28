@@ -356,8 +356,6 @@ class OrbitEquationsProblem : public ODEProblem {
 // BEGIN Tests for integrator parameters via config dicts for `scipy_ode`.
 
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
-#else
-#error "ASan is enabled"
 class ScipyODEConfigDictTest : public testing::Test {
    protected:
     ScipyODEConfigDictTest()
@@ -453,7 +451,48 @@ TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
 //     oif_unload_impl(implh);
 // }
 
-TEST(Dopri5CSpecificTests, NoSharedDataInImplementation)
+class Dopri5OOPFixture : public ::testing::Test {
+   protected:
+    void
+    SetUp() override
+    {
+    const std::unique_ptr<ScalarExpDecayProblem> problem_shared_ptr(new ScalarExpDecayProblem());
+    ODEProblem *problem = problem_shared_ptr.get();
+
+    intptr_t dims[] = {
+        problem->N,
+    };
+    OIFArrayF64 *y01 = oif_init_array_f64_from_data(1, dims, problem->y0);
+    OIFArrayF64 *y02 = oif_init_array_f64_from_data(1, dims, problem->y0);
+    OIFArrayF64 *y1 = oif_create_array_f64(1, dims);
+    OIFArrayF64 *y2 = oif_create_array_f64(1, dims);
+    }
+
+    void
+    TearDown() override
+    {
+        oif_free_array_f64(y01);
+        oif_free_array_f64(y02);
+        oif_free_array_f64(y1);
+        oif_free_array_f64(y2);
+
+        oif_unload_impl(implh1);
+        oif_unload_impl(implh2);
+    }
+
+    // NOLINTBEGIN
+    ImplHandle implh1;
+    ImplHandle implh2;
+    ODEProblem *problem;
+    const double t0;
+    OIFArrayF64 *y01;
+    OIFArrayF64 *y02;
+    OIFArrayF64 *y1;
+    OIFArrayF64 *y2;
+    // NOLINTEND
+};
+
+TEST_F(Dopri5OOPFixture, NoSharedDataInImplementation)
 {
     // This test checks that two instances of the same implementation
     // do not share data.
@@ -466,21 +505,9 @@ TEST(Dopri5CSpecificTests, NoSharedDataInImplementation)
     // only to time t2 < t3.
     int status;
 
-    const std::unique_ptr<ScalarExpDecayProblem> problem_shared_ptr(new ScalarExpDecayProblem());
-    ODEProblem *problem = problem_shared_ptr.get();
-    const double t0 = 0.0;  // Must be part of the problem definition.
-
-    intptr_t dims[] = {
-        problem->N,
-    };
-    OIFArrayF64 *y01 = oif_init_array_f64_from_data(1, dims, problem->y0);
-    OIFArrayF64 *y02 = oif_init_array_f64_from_data(1, dims, problem->y0);
-    OIFArrayF64 *y1 = oif_create_array_f64(1, dims);
-    OIFArrayF64 *y2 = oif_create_array_f64(1, dims);
-
-    const ImplHandle implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
+    implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
     ASSERT_GT(implh1, 0);
-    const ImplHandle implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
+    implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
     ASSERT_GT(implh2, 0);
 
     status = oif_ivp_set_initial_value(implh1, y01, t0);
@@ -510,17 +537,6 @@ TEST(Dopri5CSpecificTests, NoSharedDataInImplementation)
     ASSERT_NE(y1->data[0], y2->data[0]);
 
     oif_ivp_integrate(implh2, t_span[3], y2);
-    ASSERT_EQ(y1->data[0], y2->data[0]);
-
-    oif_unload_impl(implh1);
-    oif_unload_impl(implh2);
-
-    oif_free_array_f64(y01);
-    oif_free_array_f64(y02);
-    oif_free_array_f64(y1);
-    oif_free_array_f64(y2);
-
-    oif_unload_impl(implh1);
-    oif_unload_impl(implh2);
+    ASSERT_NE(y1->data[0], y2->data[0]);
 }
 // END Tests for `dopri5c` implementation.
