@@ -60,26 +60,24 @@ typedef struct self {
     double FACOLD;
 } Self;
 
-// Signature for the right-hand side that is provided by the `IVP` interface.
-
 
 // Coefficients before time step in expressions like t + c * dt.
-static double C2 = 1.0 / 5.0;
-static double C3 = 3.0 / 10.0;
-static double C4 = 4.0 / 5.0;
-static double C5 = 8.0 / 9.0;
+static double const C2 = 1.0 / 5.0;
+static double const C3 = 3.0 / 10.0;
+static double const C4 = 4.0 / 5.0;
+static double const C5 = 8.0 / 9.0;
 
 // Leading zeros here are only to match the index to the corresponding vector.
-static double a2[] = {0.0, 0.2};
-static double a3[] = {0.0, 3.0 / 40.0, 9.0 / 40.0};
-static double a4[] = {0, 44.0 / 45.0, -56.0 / 15.0, 32.0 / 9.0};
-static double a5[] = {0, 19372.0 / 6561.0, -25360.0 / 2187.0, 64448.0 / 6561.0,
+static double const a2[] = {0.0, 0.2};
+static double const a3[] = {0.0, 3.0 / 40.0, 9.0 / 40.0};
+static double const a4[] = {0, 44.0 / 45.0, -56.0 / 15.0, 32.0 / 9.0};
+static double const a5[] = {0, 19372.0 / 6561.0, -25360.0 / 2187.0, 64448.0 / 6561.0,
                       -212.0 / 729.0};
-static double a6[] = {
+static double const a6[] = {
     0, 9017.0 / 3168.0, -355.0 / 33.0, 46732.0 / 5247.0, 49.0 / 176.0, -5103.0 / 18656.0};
-static double a7[] = {
+static double const a7[] = {
     0, 35.0 / 384.0, 0.0, 500.0 / 1113.0, 125.0 / 192.0, -2187.0 / 6784.0, 11.0 / 84.0};
-static double e[] = {
+static double const e[] = {
     0.0,           71.0 / 57600.0,      0.0,          -71.0 / 16695.0,
     71.0 / 1920.0, -17253.0 / 339200.0, 22.0 / 525.0, -1.0 / 40.0,
 };
