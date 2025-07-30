@@ -85,16 +85,15 @@ static double e[] = {
 };
 
 // Step size control parameters.
-double SAFE = 0.9;
-double BETA = 0.04;
-double EXP01 = 0.0;
-double FACC1;
-double FACC2;
-
-double FACOLD = 1e-4;
+double const SAFE = 0.9;
+double const BETA = 0.04;
+double const EXP01 = 0.2L - BETA * 0.75L;
 double const FACMIN = 0.2;   // In Hairer's code FAC1
 double const FACMAX = 10.0;  // In Hairer's code FAC2
-double FAC = 0.8;
+
+double const FACC1 = 1.0L / FACMIN;
+double const FACC2 = 1.0L / FACMAX;
+
 double const ORDER_OF_ACC = 4;
 
 static void
@@ -183,6 +182,8 @@ malloc_self(void)
     self->nfcn_ = 0;
     self->n_rejected = 0;
 
+    self->FACOLD = 1e-4;
+
     return self;
 }
 
@@ -190,8 +191,8 @@ int
 set_initial_value(Self *self, OIFArrayF64 *y0_in, double t0_in)
 {
     (void)self;
-    EXP01 = 0.2L - BETA * 0.75L;
-    FACC1 = 1.0L / FACMIN;
+    /* EXP01 = 0.2L - BETA * 0.75L; */
+    /* FACC1 = 1.0L / FACMIN; */
     self->t = t0_in;
 
     if (y0_in->nd != 1) {
@@ -299,10 +300,8 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
         fprintf(stderr, "[%s] Time should be larger than the current time\n", prefix_);
     }
 
-    FACOLD = 1e-4;
-    EXP01 = 0.2 - BETA * 0.75;
-    FACC1 = 1.0 / FACMIN;
-    FACC2 = 1.0 / FACMAX;
+    /* FACC1 = 1.0 / FACMIN; */
+    /* FACC2 = 1.0 / FACMAX; */
 
     size_t nstep = 0;
 
@@ -385,14 +384,14 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
 
         double FAC11 = pow(err, EXP01);
         // Lund stabilization.
-        FAC = FAC11 / pow(FACOLD, BETA);
+        double FAC = FAC11 / pow(self->FACOLD, BETA);
         // We require FACMIN <= HNEW/H <= FACMAX
         FAC = MAX(FACC2, MIN(FACC1, FAC / SAFE));
         double hnew = self->h / FAC;
 
         if (err < 1.0) {
             // Step is accepted.
-            FACOLD = MAX(err, 1.0e-4);
+            self->FACOLD = MAX(err, 1.0e-4);
             self->t += self->h;
 
             OIFArrayF64 *tmp = NULL;
