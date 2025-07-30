@@ -51,14 +51,17 @@ typedef struct self {
     void *user_data;
 
     rhs_fn_t rhs_fn;
+
+    // Number of right-hand side function evaluations.
+    size_t nfcn_;
+    // Number of rejected steps.
+    size_t n_rejected;
+
+    double FACOLD;
 } Self;
 
 // Signature for the right-hand side that is provided by the `IVP` interface.
 
-// Number of right-hand side function evaluations.
-static size_t nfcn_ = 0;
-
-size_t n_rejected = 0;
 
 // Coefficients before time step in expressions like t + c * dt.
 static double C2 = 1.0 / 5.0;
@@ -177,6 +180,9 @@ malloc_self(void)
     self->user_data = NULL;
     self->rhs_fn = NULL;
 
+    self->nfcn_ = 0;
+    self->n_rejected = 0;
+
     return self;
 }
 
@@ -227,7 +233,7 @@ set_initial_value(Self *self, OIFArrayF64 *y0_in, double t0_in)
 
     self->sc = oif_create_array_f64(1, y0_in->dimensions);
 
-    nfcn_ = 0;
+    self->nfcn_ = 0;
 
     return 0;
 }
@@ -277,7 +283,7 @@ int
 print_stats(Self *self)
 {
     (void)self;  // Unused in this implementation.
-    printf("[%s] Number of right-hand side evaluations = %zu\n", prefix_, nfcn_);
+    printf("[%s] Number of right-hand side evaluations = %zu\n", prefix_, self->nfcn_);
     return 0;
 }
 
@@ -305,7 +311,7 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
     self->rhs_fn(self->t, self->y, self->k1, self->user_data);
 
     // It is not clear why 2, but this is from the Hairer's code.
-    nfcn_ += 2;
+    self->nfcn_ += 2;
 
     while (self->t < t_) {
         if (self->t + self->h >= t_) {
@@ -362,7 +368,7 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
         }
         self->rhs_fn(self->t + self->h, self->y1, self->k2, self->user_data);
 
-        nfcn_ += 6;
+        self->nfcn_ += 6;
         // --------------------------------------------------------------------
         // Error estimation.
         double err = 0.0;
@@ -406,7 +412,7 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
                     y_out->data[i] = self->y->data[i];
                 }
             }
-            n_rejected = 0;
+            self->n_rejected = 0;
         }
         else {
             // Solution rejected.
@@ -415,12 +421,12 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
             // Hairer et. al., vol. 1, p. 168.
             /* FACMAX = 1.0; */
             hnew = self->h / MIN(FACC1, FAC11 / SAFE);
-            n_rejected++;
+            self->n_rejected++;
         }
 
         self->h = hnew;
 
-        if (n_rejected > 20) {
+        if (self->n_rejected > 20) {
             fprintf(stderr, "[%s::integrate] Too many rejected steps\n", prefix_);
             exit(1);
         }
