@@ -440,16 +440,6 @@ TEST_F(ScipyODEConfigDictTest, ShouldFailForWrongIntegratorParams)
 
 // ----------------------------------------------------------------------------
 // BEGIN Tests for `dopri5c` implementation.
-// TEST(Dopri5CConfigDictTest, DoesNotAllowSetIntegratorMethod)
-// {
-//     ImplHandle implh = oif_load_impl("ivp", "dopri5c", 1, 0);
-//     ASSERT_GT(implh, 0);
-
-//     int status = oif_ivp_set_integrator(implh, (char *)"does not matter", NULL);
-//     ASSERT_NE(status, 0);
-
-//     oif_unload_impl(implh);
-// }
 
 class Dopri5OOPFixture : public ::testing::Test {
    protected:
@@ -512,6 +502,30 @@ class Dopri5OOPFixture : public ::testing::Test {
     // NOLINTEND
 };
 
+class MockCallbackProvider
+{
+    public:
+    static int rhs_1(double /* t */, OIFArrayF64 * /* y */, OIFArrayF64 * /* ydot */, void * /* user_data */)
+    {
+        count_1++;
+        return 0;
+    }
+
+    static int rhs_2(double /* t */, OIFArrayF64 * /* y */, OIFArrayF64 * /* ydot */, void * /* user_data */)
+    {
+        count_2++;
+        return 0;
+    }
+
+    static unsigned count_1;
+    static unsigned count_2;
+};
+
+// This is ugly way in which storage for static data members
+// is allocated in C++ before C++17.
+unsigned MockCallbackProvider::count_1 = 0;
+unsigned MockCallbackProvider::count_2 = 0;
+
 TEST_F(Dopri5OOPFixture, NoSharedDataInImplementation1)
 {
     // This test checks that two instances of the same implementation
@@ -550,4 +564,81 @@ TEST_F(Dopri5OOPFixture, NoSharedDataInImplementation1)
     oif_ivp_integrate(implh2, t_span[3], y_exp_decay_2);
     ASSERT_EQ(y_exp_decay_1->data[0], y_exp_decay_2->data[0]);
 }
+
+TEST_F(Dopri5OOPFixture, TwoDifferentProblems__SolutionsMustNeverMatch)
+{
+    // This test checks that two instances of the same implementation
+    // do not share data.
+    // Precisely, we load the `dopri5c` implementation twice,
+    // and then we integrate two **different** problem.
+    // We check after each integration step
+    // that the results are always different for the first component
+    // of the solution vector (because dimension is different
+    // for the two problems).
+
+    implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
+    implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
+
+    oif_ivp_set_initial_value(implh1, y0_exp_decay_1, t0);
+    oif_ivp_set_initial_value(implh2, y0_oscillator_2, t0);
+
+    oif_ivp_set_user_data(implh1, problem_exp_decay);
+    oif_ivp_set_user_data(implh2, problem_oscillator);
+
+    oif_ivp_set_rhs_fn(implh1, ODEProblem::rhs_wrapper);
+    oif_ivp_set_rhs_fn(implh2, ODEProblem::rhs_wrapper);
+
+    const double t_span[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
+    oif_ivp_integrate(implh1, t_span[1], y_exp_decay_1);
+    oif_ivp_integrate(implh2, t_span[1], y_oscillator_2);
+    ASSERT_NE(y_exp_decay_1->data[0], y_oscillator_2->data[0]);
+
+    oif_ivp_integrate(implh1, t_span[1], y_exp_decay_1);
+    oif_ivp_integrate(implh2, t_span[1], y_oscillator_2);
+    ASSERT_NE(y_exp_decay_1->data[0], y_oscillator_2->data[0]);
+
+    oif_ivp_integrate(implh1, t_span[1], y_exp_decay_1);
+    oif_ivp_integrate(implh2, t_span[1], y_oscillator_2);
+    ASSERT_NE(y_exp_decay_1->data[0], y_oscillator_2->data[0]);
+}
+
+TEST_F(Dopri5OOPFixture, TwoDifferentProblems__MustHaveDifferentCallbacks)
+{
+    MockCallbackProvider::count_1 = 0;
+    MockCallbackProvider::count_2 = 0;
+
+    // Right-hand side function is called twice in `set_rh_fn`
+    // for `dopri5c` because it computes the initial step size.
+    const unsigned ninvokations_per_set = 2;
+
+    implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
+    implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
+
+    oif_ivp_set_initial_value(implh1, y0_exp_decay_1, t0);
+    oif_ivp_set_initial_value(implh2, y0_oscillator_2, t0);
+
+    oif_ivp_set_rhs_fn(implh1, MockCallbackProvider::rhs_1);
+    ASSERT_EQ(MockCallbackProvider::count_1, 1 * ninvokations_per_set);
+    ASSERT_EQ(MockCallbackProvider::count_2, 0);
+    oif_ivp_set_rhs_fn(implh1, MockCallbackProvider::rhs_1);
+    ASSERT_EQ(MockCallbackProvider::count_1, 2 * ninvokations_per_set);
+    ASSERT_EQ(MockCallbackProvider::count_2, 0);
+    oif_ivp_set_rhs_fn(implh1, MockCallbackProvider::rhs_1);
+    ASSERT_EQ(MockCallbackProvider::count_1, 3 * ninvokations_per_set);
+    ASSERT_EQ(MockCallbackProvider::count_2, 0);
+
+    oif_ivp_set_rhs_fn(implh2, MockCallbackProvider::rhs_2);
+    ASSERT_EQ(MockCallbackProvider::count_1, 3 * ninvokations_per_set);
+    ASSERT_EQ(MockCallbackProvider::count_2, 1 * ninvokations_per_set);
+}
+
+TEST_F(Dopri5OOPFixture, DoesNotAllowSetIntegratorMethod)
+{
+    implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
+    implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
+    ASSERT_GT(implh1, 0);
+    int status = oif_ivp_set_integrator(implh1, (char *)"does not matter", NULL);
+    ASSERT_NE(status, 0);
+}
+
 // END Tests for `dopri5c` implementation.
