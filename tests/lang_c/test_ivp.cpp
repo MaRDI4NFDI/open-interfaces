@@ -446,6 +446,9 @@ class Dopri5OOPFixture : public ::testing::Test {
     void
     SetUp() override
     {
+        implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
+        implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
+
         problem_exp_decay = new ScalarExpDecayProblem();
         problem_oscillator = new LinearOscillatorProblem();
 
@@ -538,9 +541,6 @@ TEST_F(Dopri5OOPFixture, NoSharedDataInImplementation1)
     // to, e.g. time t3, while the other is integrated
     // only to time t2 < t3.
 
-    implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
-    implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
-
     oif_ivp_set_initial_value(implh1, y0_exp_decay_1, t0);
     oif_ivp_set_initial_value(implh2, y0_exp_decay_2, t0);
 
@@ -576,9 +576,6 @@ TEST_F(Dopri5OOPFixture, TwoDifferentProblems__SolutionsMustNeverMatch)
     // of the solution vector (because dimension is different
     // for the two problems).
 
-    implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
-    implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
-
     oif_ivp_set_initial_value(implh1, y0_exp_decay_1, t0);
     oif_ivp_set_initial_value(implh2, y0_oscillator_2, t0);
 
@@ -611,9 +608,6 @@ TEST_F(Dopri5OOPFixture, TwoDifferentProblems__MustHaveDifferentCallbacks)
     // for `dopri5c` because it computes the initial step size.
     const unsigned ninvokations_per_set = 2;
 
-    implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
-    implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
-
     oif_ivp_set_initial_value(implh1, y0_exp_decay_1, t0);
     oif_ivp_set_initial_value(implh2, y0_oscillator_2, t0);
 
@@ -634,10 +628,8 @@ TEST_F(Dopri5OOPFixture, TwoDifferentProblems__MustHaveDifferentCallbacks)
 
 TEST_F(Dopri5OOPFixture, DoesNotAllowSetIntegratorMethod)
 {
-    implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
-    implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
     ASSERT_GT(implh1, 0);
-    int status = oif_ivp_set_integrator(implh1, (char *)"does not matter", NULL);
+    int const status = oif_ivp_set_integrator(implh1, (char *)"does not matter", NULL);
     ASSERT_NE(status, 0);
 }
 
