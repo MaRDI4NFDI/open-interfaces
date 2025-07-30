@@ -45,7 +45,8 @@ oif_create_array_f64(int nd, const intptr_t *const dimensions)
 }
 
 OIFArrayF64 *
-oif_init_array_f64_from_data(int nd, const intptr_t *const dimensions, const double *const data)
+oif_init_array_f64_from_data(int nd, const intptr_t *const dimensions,
+                             const double *const data)
 {
     OIFArrayF64 *x = oif_create_array_f64(nd, dimensions);
     int size = 1;

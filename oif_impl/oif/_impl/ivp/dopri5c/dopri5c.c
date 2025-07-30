@@ -26,10 +26,10 @@
 static char const *const prefix_ = "ivp::dopri5c";
 
 typedef struct self {
-    int N;            // Length of the solution vector.
+    int N;  // Length of the solution vector.
     double t;
-    double h;      // Current step size.
-    double rtol;   // relative tolerance
+    double h;     // Current step size.
+    double rtol;  // relative tolerance
     double atol;  // absolute tolerance
 
     // Runge--Kutta stages.
@@ -60,7 +60,6 @@ typedef struct self {
     double FACOLD;
 } Self;
 
-
 // Coefficients before time step in expressions like t + c * dt.
 static double const C2 = 1.0 / 5.0;
 static double const C3 = 3.0 / 10.0;
@@ -72,7 +71,7 @@ static double const a2[] = {0.0, 0.2};
 static double const a3[] = {0.0, 3.0 / 40.0, 9.0 / 40.0};
 static double const a4[] = {0, 44.0 / 45.0, -56.0 / 15.0, 32.0 / 9.0};
 static double const a5[] = {0, 19372.0 / 6561.0, -25360.0 / 2187.0, 64448.0 / 6561.0,
-                      -212.0 / 729.0};
+                            -212.0 / 729.0};
 static double const a6[] = {
     0, 9017.0 / 3168.0, -355.0 / 33.0, 46732.0 / 5247.0, 49.0 / 176.0, -5103.0 / 18656.0};
 static double const a7[] = {
@@ -325,24 +324,25 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
 
         // 3rd stage
         for (int i = 0; i < self->N; ++i) {
-            self->y1->data[i] = self->y->data[i] +
-                               self->h * (a3[1] * self->k1->data[i] + a3[2] * self->k2->data[i]);
+            self->y1->data[i] = self->y->data[i] + self->h * (a3[1] * self->k1->data[i] +
+                                                              a3[2] * self->k2->data[i]);
         }
         self->rhs_fn(self->t + C3 * self->h, self->y1, self->k3, self->user_data);
 
         // 4th stage
         for (int i = 0; i < self->N; ++i) {
-            self->y1->data[i] = self->y->data[i] +
-                               self->h * (a4[1] * self->k1->data[i] + a4[2] * self->k2->data[i] +
-                                         a4[3] * self->k3->data[i]);
+            self->y1->data[i] = self->y->data[i] + self->h * (a4[1] * self->k1->data[i] +
+                                                              a4[2] * self->k2->data[i] +
+                                                              a4[3] * self->k3->data[i]);
         }
         self->rhs_fn(self->t + C4 * self->h, self->y1, self->k4, self->user_data);
 
         // 5th stage
         for (int i = 0; i < self->N; ++i) {
-            self->y1->data[i] = self->y->data[i] +
-                               self->h * (a5[1] * self->k1->data[i] + a5[2] * self->k2->data[i] +
-                                         a5[3] * self->k3->data[i] + a5[4] * self->k4->data[i]);
+            self->y1->data[i] =
+                self->y->data[i] +
+                self->h * (a5[1] * self->k1->data[i] + a5[2] * self->k2->data[i] +
+                           a5[3] * self->k3->data[i] + a5[4] * self->k4->data[i]);
         }
         self->rhs_fn(self->t + C5 * self->h, self->y1, self->k5, self->user_data);
 
@@ -351,17 +351,18 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
             self->ysti->data[i] =
                 self->y->data[i] +
                 self->h * (a6[1] * self->k1->data[i] + a6[2] * self->k2->data[i] +
-                          a6[3] * self->k3->data[i] + a6[4] * self->k4->data[i] +
-                          a6[5] * self->k5->data[i]);
+                           a6[3] * self->k3->data[i] + a6[4] * self->k4->data[i] +
+                           a6[5] * self->k5->data[i]);
         }
         self->rhs_fn(self->t + self->h, self->ysti, self->k6, self->user_data);
 
         // Estimate less accurate.
         for (int i = 0; i < self->N; ++i) {
-            self->y1->data[i] = self->y->data[i] +
-                               self->h * (a7[1] * self->k1->data[i] + a7[3] * self->k3->data[i] +
-                                         a7[4] * self->k4->data[i] + a7[5] * self->k5->data[i] +
-                                         a7[6] * self->k6->data[i]);
+            self->y1->data[i] =
+                self->y->data[i] +
+                self->h * (a7[1] * self->k1->data[i] + a7[3] * self->k3->data[i] +
+                           a7[4] * self->k4->data[i] + a7[5] * self->k5->data[i] +
+                           a7[6] * self->k6->data[i]);
         }
         self->rhs_fn(self->t + self->h, self->y1, self->k2, self->user_data);
 
@@ -371,9 +372,10 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
         double err = 0.0;
 
         for (int i = 0; i < self->N; ++i) {
-            self->k4->data[i] = self->h * (e[1] * self->k1->data[i] + e[3] * self->k3->data[i] +
-                                         e[4] * self->k4->data[i] + e[5] * self->k5->data[i] +
-                                         e[6] * self->k6->data[i] + e[7] * self->k2->data[i]);
+            self->k4->data[i] =
+                self->h * (e[1] * self->k1->data[i] + e[3] * self->k3->data[i] +
+                           e[4] * self->k4->data[i] + e[5] * self->k5->data[i] +
+                           e[6] * self->k6->data[i] + e[7] * self->k2->data[i]);
             double sk =
                 self->atol + self->rtol * MAX(fabs(self->y->data[i]), fabs(self->y1->data[i]));
             err += pow(self->k4->data[i] / sk, 2);

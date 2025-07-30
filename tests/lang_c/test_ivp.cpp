@@ -145,7 +145,7 @@ class OrbitEquationsProblem : public ODEProblem {
     verify(double t, OIFArrayF64 *y) override
     {
         const double u = fsolve([&, t](double u) { return u - eps * sin(u) - t; },
-                          [&](double u) { return 1 - eps * cos(u); });
+                                [&](double u) { return 1 - eps * cos(u); });
         EXPECT_NEAR(y->data[0], cos(u) - eps, 2e-4);
         EXPECT_NEAR(y->data[1], sqrt(1 - pow(eps, 2)) * sin(u), 2e-4);
         EXPECT_NEAR(y->data[2], -sin(u) / (1 - eps * cos(u)), 2e-4);
@@ -166,19 +166,20 @@ struct IvpImplementationsTimesODEProblemsFixture
 
 INSTANTIATE_TEST_SUITE_P(
     IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
-    testing::Combine(testing::Values(
+    testing::Combine(
+        testing::Values(
             // "sundials_cvode",
-                                     "dopri5c"
+            "dopri5c"
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
-                                     ,
-                                     "scipy_ode", "jl_diffeq"
+            ,
+            "scipy_ode", "jl_diffeq"
 #endif
-                                     ),
-                     testing::Values(std::make_shared<ScalarExpDecayProblem>()
-                         // ,
-                         //             std::make_shared<LinearOscillatorProblem>(),
-                         //             std::make_shared<OrbitEquationsProblem>()
-                                     )));
+            ),
+        testing::Values(std::make_shared<ScalarExpDecayProblem>()
+                        // ,
+                        //             std::make_shared<LinearOscillatorProblem>(),
+                        //             std::make_shared<OrbitEquationsProblem>()
+                        )));
 
 TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
 {
@@ -455,10 +456,14 @@ class Dopri5OOPFixture : public ::testing::Test {
         dims_exp_decay[0] = problem_exp_decay->N;
         dims_oscillator[0] = problem_oscillator->N;
 
-        y0_exp_decay_1 = oif_init_array_f64_from_data(1, dims_exp_decay, problem_exp_decay->y0);
-        y0_exp_decay_2 = oif_init_array_f64_from_data(1, dims_exp_decay, problem_exp_decay->y0);
-        y0_oscillator_1 = oif_init_array_f64_from_data(1, dims_oscillator, problem_oscillator->y0);
-        y0_oscillator_2 = oif_init_array_f64_from_data(1, dims_oscillator, problem_oscillator->y0);
+        y0_exp_decay_1 =
+            oif_init_array_f64_from_data(1, dims_exp_decay, problem_exp_decay->y0);
+        y0_exp_decay_2 =
+            oif_init_array_f64_from_data(1, dims_exp_decay, problem_exp_decay->y0);
+        y0_oscillator_1 =
+            oif_init_array_f64_from_data(1, dims_oscillator, problem_oscillator->y0);
+        y0_oscillator_2 =
+            oif_init_array_f64_from_data(1, dims_oscillator, problem_oscillator->y0);
 
         y_exp_decay_1 = oif_create_array_f64(1, dims_exp_decay);
         y_exp_decay_2 = oif_create_array_f64(1, dims_exp_decay);
@@ -505,16 +510,19 @@ class Dopri5OOPFixture : public ::testing::Test {
     // NOLINTEND
 };
 
-class MockCallbackProvider
-{
-    public:
-    static int rhs_1(double /* t */, OIFArrayF64 * /* y */, OIFArrayF64 * /* ydot */, void * /* user_data */)
+class MockCallbackProvider {
+   public:
+    static int
+    rhs_1(double /* t */, OIFArrayF64 * /* y */, OIFArrayF64 * /* ydot */,
+          void * /* user_data */)
     {
         count_1++;
         return 0;
     }
 
-    static int rhs_2(double /* t */, OIFArrayF64 * /* y */, OIFArrayF64 * /* ydot */, void * /* user_data */)
+    static int
+    rhs_2(double /* t */, OIFArrayF64 * /* y */, OIFArrayF64 * /* ydot */,
+          void * /* user_data */)
     {
         count_2++;
         return 0;
