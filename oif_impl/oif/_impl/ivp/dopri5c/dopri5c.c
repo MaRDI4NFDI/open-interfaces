@@ -23,7 +23,7 @@
 #define MIN(i, j) (((i) < (j)) ? (i) : (j))
 #define MAX(i, j) (((i) > (j)) ? (i) : (j))
 
-static const char *prefix_ = "ivp::dopri5c";
+static char const *const prefix_ = "ivp::dopri5c";
 
 typedef struct self {
     int N;            // Length of the solution vector.
@@ -31,6 +31,7 @@ typedef struct self {
     double h;      // Current step size.
     double rtol;   // relative tolerance
     double atol;  // absolute tolerance
+
     // Runge--Kutta stages.
     OIFArrayF64 *k1;
     OIFArrayF64 *k2;
@@ -39,22 +40,25 @@ typedef struct self {
     OIFArrayF64 *k5;
     OIFArrayF64 *k6;
 
+    // Solution vectors to avoid copying.
     OIFArrayF64 *y;
     OIFArrayF64 *y1;
     OIFArrayF64 *ysti;
 
     OIFArrayF64 *sc;
 
+    // User data that are passed to the right-hand side function.
     void *user_data;
+
+    rhs_fn_t rhs_fn;
 } Self;
 
-
-OIFConfigDict *config = NULL;
 // Signature for the right-hand side that is provided by the `IVP` interface.
-static rhs_fn_t OIF_RHS_FN = NULL;
 
 // Number of right-hand side function evaluations.
 static size_t nfcn_ = 0;
+
+size_t n_rejected = 0;
 
 // Coefficients before time step in expressions like t + c * dt.
 static double C2 = 1.0 / 5.0;
@@ -90,15 +94,13 @@ double const FACMAX = 10.0;  // In Hairer's code FAC2
 double FAC = 0.8;
 double const ORDER_OF_ACC = 4;
 
-size_t n_rejected = 0;
-
 static void
 compute_initial_step_(Self *self)
 {
     double h0;
     double h1;
 
-    OIF_RHS_FN(self->t, self->y, self->k1, self->user_data);
+    self->rhs_fn(self->t, self->y, self->k1, self->user_data);
 
     for (int i = 0; i < self->N; ++i) {
         self->sc->data[i] = self->atol + self->y->data[i] * self->rtol;
@@ -126,7 +128,7 @@ compute_initial_step_(Self *self)
     for (int i = 0; i < self->N; ++i) {
         self->y1->data[i] = self->y->data[i] + h0 * self->k1->data[i];
     }
-    OIF_RHS_FN(self->t + self->h, self->y1, self->k2, self->user_data);
+    self->rhs_fn(self->t + self->h, self->y1, self->k2, self->user_data);
 
     double d2 = 0.0L;
     for (int i = 0; i < self->N; ++i) {
@@ -173,6 +175,7 @@ malloc_self(void)
     self->sc = NULL;
 
     self->user_data = NULL;
+    self->rhs_fn = NULL;
 
     return self;
 }
@@ -242,12 +245,11 @@ set_user_data(Self *self, void *user_data)
 int
 set_rhs_fn(Self *self, rhs_fn_t rhs)
 {
-    (void)self;  // Unused in this implementation.
     if (rhs == NULL) {
         fprintf(stderr, "[%s] `set_rhs_fn` accepts non-null function pointer only\n", prefix_);
         return 1;
     }
-    OIF_RHS_FN = rhs;
+    self->rhs_fn = rhs;
     compute_initial_step_(self);
     return 0;
 }
@@ -300,7 +302,7 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
 
     bool last = false;
     // 1st stage
-    OIF_RHS_FN(self->t, self->y, self->k1, self->user_data);
+    self->rhs_fn(self->t, self->y, self->k1, self->user_data);
 
     // It is not clear why 2, but this is from the Hairer's code.
     nfcn_ += 2;
@@ -316,14 +318,14 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
         for (int i = 0; i < self->N; ++i) {
             self->y1->data[i] = self->y->data[i] + a2[1] * self->h * self->k1->data[i];
         }
-        OIF_RHS_FN(self->t + C2 * self->h, self->y1, self->k2, self->user_data);
+        self->rhs_fn(self->t + C2 * self->h, self->y1, self->k2, self->user_data);
 
         // 3rd stage
         for (int i = 0; i < self->N; ++i) {
             self->y1->data[i] = self->y->data[i] +
                                self->h * (a3[1] * self->k1->data[i] + a3[2] * self->k2->data[i]);
         }
-        OIF_RHS_FN(self->t + C3 * self->h, self->y1, self->k3, self->user_data);
+        self->rhs_fn(self->t + C3 * self->h, self->y1, self->k3, self->user_data);
 
         // 4th stage
         for (int i = 0; i < self->N; ++i) {
@@ -331,7 +333,7 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
                                self->h * (a4[1] * self->k1->data[i] + a4[2] * self->k2->data[i] +
                                          a4[3] * self->k3->data[i]);
         }
-        OIF_RHS_FN(self->t + C4 * self->h, self->y1, self->k4, self->user_data);
+        self->rhs_fn(self->t + C4 * self->h, self->y1, self->k4, self->user_data);
 
         // 5th stage
         for (int i = 0; i < self->N; ++i) {
@@ -339,7 +341,7 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
                                self->h * (a5[1] * self->k1->data[i] + a5[2] * self->k2->data[i] +
                                          a5[3] * self->k3->data[i] + a5[4] * self->k4->data[i]);
         }
-        OIF_RHS_FN(self->t + C5 * self->h, self->y1, self->k5, self->user_data);
+        self->rhs_fn(self->t + C5 * self->h, self->y1, self->k5, self->user_data);
 
         // step 6.
         for (int i = 0; i < self->N; ++i) {
@@ -349,7 +351,7 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
                           a6[3] * self->k3->data[i] + a6[4] * self->k4->data[i] +
                           a6[5] * self->k5->data[i]);
         }
-        OIF_RHS_FN(self->t + self->h, self->ysti, self->k6, self->user_data);
+        self->rhs_fn(self->t + self->h, self->ysti, self->k6, self->user_data);
 
         // Estimate less accurate.
         for (int i = 0; i < self->N; ++i) {
@@ -358,7 +360,7 @@ integrate(Self *self, double t_, OIFArrayF64 *y_out)
                                          a7[4] * self->k4->data[i] + a7[5] * self->k5->data[i] +
                                          a7[6] * self->k6->data[i]);
         }
-        OIF_RHS_FN(self->t + self->h, self->y1, self->k2, self->user_data);
+        self->rhs_fn(self->t + self->h, self->y1, self->k2, self->user_data);
 
         nfcn_ += 6;
         // --------------------------------------------------------------------
