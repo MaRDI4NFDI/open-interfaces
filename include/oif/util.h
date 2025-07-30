@@ -59,7 +59,7 @@ oif_util_str_duplicate_(const char *src);
 char *
 oif_util_str_duplicate_verbose(const char *src, const char *file, const char *func, int line);
 
-#define oif_util_str_duplicate(src)                                     \
+#define oif_util_str_duplicate(src)                                                           \
     oif_util_str_duplicate_verbose((src), __FILE__, __func__, __LINE__)
 
 /**
