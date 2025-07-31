@@ -25,7 +25,11 @@ Solve the linear system of equations ``A x = b`` and return ``x``.
 - `b::AbstractVector{Float64}`: Right-hand side vector
 
 """
-function solve(implh::ImplHandle, A::AbstractMatrix{Float64}, b::AbstractVector{Float64})::AbstractVector{Float64}
+function solve(
+    implh::ImplHandle,
+    A::AbstractMatrix{Float64},
+    b::AbstractVector{Float64},
+)::AbstractVector{Float64}
     m, n = size(A)
     result = Vector{Float64}(undef, n)
 

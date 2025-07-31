@@ -3,7 +3,8 @@ module OpenInterfaces
 # See oif/api.h
 
 # Type ids
-export OIF_INT, OIF_FLOAT64, OIF_ARRAY_F64, OIF_STR, OIF_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
+export OIF_INT,
+    OIF_FLOAT64, OIF_ARRAY_F64, OIF_STR, OIF_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
 
 # Language ids
 export OIF_LANG_C, OIF_LANG_CXX, OIF_LANG_PYTHON, OIF_LANG_JULIA, OIF_LANG_R
@@ -102,7 +103,7 @@ function load_impl(interface::String, impl::String, major::Int, minor::Int)::Imp
         interface::Cstring,
         impl::Cstring,
         major::UInt,
-        minor::UInt
+        minor::UInt,
     )::Int
 
     if implh < 0
@@ -112,7 +113,12 @@ function load_impl(interface::String, impl::String, major::Int, minor::Int)::Imp
     return implh
 end
 
-function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Vararg{Any}}, out_user_args::Tuple{Vararg{Any}})::Int
+function call_impl(
+    implh::ImplHandle,
+    func_name::String,
+    in_user_args::Tuple{Vararg{Any}},
+    out_user_args::Tuple{Vararg{Any}},
+)::Int
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
 
@@ -251,36 +257,41 @@ function call_impl(implh::ImplHandle, func_name::String, in_user_args::Tuple{Var
     in_args = Ref(OIFArgs(in_num_args, pointer(in_arg_types), pointer(in_arg_values)))
     out_args = Ref(OIFArgs(out_num_args, pointer(out_arg_types), pointer(out_arg_values)))
 
-    result = GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values temp_refs begin
-        @ccall $(call_interface_impl_fn[])(
-            implh::Int,
-            func_name::Cstring,
-            in_args::Ptr{OIFArgs},
-            out_args::Ptr{OIFArgs}
-        )::Int
-    end
+    result =
+        GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values temp_refs begin
+            @ccall $(call_interface_impl_fn[])(
+                implh::Int,
+                func_name::Cstring,
+                in_args::Ptr{OIFArgs},
+                out_args::Ptr{OIFArgs},
+            )::Int
+        end
 
     if result != 0
-        error("Error occurred while invoking function '$func_name' from implementation with id '$implh'")
+        error(
+            "Error occurred while invoking function '$func_name' from implementation with id '$implh'",
+        )
     end
 
     return result
 end
 
 function unload_impl(implh::ImplHandle)
-    status = @ccall $(unload_interface_impl_fn[])(
-        implh::Cint
-    )::Int
+    status = @ccall $(unload_interface_impl_fn[])(implh::Cint)::Int
 
     if status != 0
         error("Failed to unload interface implementation with id '$impl'")
     end
 end
 
-function make_oif_callback(fn, argtypes::NTuple{N, OIFArgType}, restype::OIFArgType)::OIFCallback where {N}
+function make_oif_callback(
+    fn,
+    argtypes::NTuple{N,OIFArgType},
+    restype::OIFArgType,
+)::OIFCallback where {N}
     @assert restype == OIF_INT "Only OIF_INT is supported as a return type for callbacks because
         it is used to indicate success or failure in a C-compatible way."
-    c_argtypes::Array{Any, 1} = []
+    c_argtypes::Array{Any,1} = []
 
     for argtype in argtypes
         if argtype == OIF_INT
@@ -305,7 +316,7 @@ function make_oif_callback(fn, argtypes::NTuple{N, OIFArgType}, restype::OIFArgT
     # Therefore, I get a compilation error,
     # that `c_argtypes` must be literal tuple.
     # All this black magic with eval is here to overcome this limitation.
-    c_argtypes_expr = Expr(:tuple, (map(t->QuoteNode(t), c_argtypes))...)
+    c_argtypes_expr = Expr(:tuple, (map(t -> QuoteNode(t), c_argtypes))...)
     cfunction_expr = :(@cfunction($fn_wrapper, Cint, $c_argtypes_expr))
 
     fn_p_c = eval(cfunction_expr)
@@ -318,7 +329,11 @@ function make_oif_callback(fn, argtypes::NTuple{N, OIFArgType}, restype::OIFArgT
 end
 
 
-function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, restype::Int32) where {N}
+function _make_c_func_wrapper_over_jl_fn(
+    fn,
+    argtypes::NTuple{N,OIFArgType},
+    restype::Int32,
+) where {N}
     # This function creates a C function wrapper that calls the Julia function.
     # The actual implementation will depend on how you want to handle the arguments and return value.
     oif_argtypes = argtypes
@@ -334,7 +349,7 @@ function _make_c_func_wrapper_over_jl_fn(fn, argtypes::NTuple{N, OIFArgType}, re
                 # Convert the pointer to an array.
                 oif_arr = unsafe_load(arg)
                 dimensions = unsafe_load(oif_arr.dimensions)
-                arr = unsafe_wrap(Array{Float64}, oif_arr.data, dimensions, own=false)
+                arr = unsafe_wrap(Array{Float64}, oif_arr.data, dimensions, own = false)
 
                 push!(jl_args, arr)
             elseif oif_argtypes[i] == OIF_USER_DATA

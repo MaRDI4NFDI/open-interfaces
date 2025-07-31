@@ -1,5 +1,6 @@
 module JlDiffEq
-export Self, set_initial_value, set_rhs_fn, set_tolerances, integrate, set_user_data, set_integrator
+export Self,
+    set_initial_value, set_rhs_fn, set_tolerances, integrate, set_user_data, set_integrator
 
 using OrdinaryDiffEq
 
@@ -8,10 +9,10 @@ mutable struct Self
     y0::Vector{Float64}
     reltol::Float64
     abstol::Float64
-    integrator
-    rhs
-    solver
-    user_data
+    integrator::Any
+    rhs::Any
+    solver::Any
+    user_data::Any
     function Self()
         return new(0.0, [], 1e-6, 1e-12, Tsit5())
     end
@@ -85,17 +86,17 @@ end
 
 function _init(self::Self)
     if !isdefined(self, :user_data)
-        problem = ODEProblem(
-            _rhs_wrapper(self.rhs), self.y0, (self.t0, Inf)
-        )
+        problem = ODEProblem(_rhs_wrapper(self.rhs), self.y0, (self.t0, Inf))
     else
-        problem = ODEProblem(
-            _rhs_wrapper(self.rhs), self.y0, (self.t0, Inf), self.user_data
-        )
+        problem =
+            ODEProblem(_rhs_wrapper(self.rhs), self.y0, (self.t0, Inf), self.user_data)
     end
     self.solver = init(
-        problem, self.integrator;
-        reltol=self.reltol, abstol=self.abstol, save_everystep=false
+        problem,
+        self.integrator;
+        reltol = self.reltol,
+        abstol = self.abstol,
+        save_everystep = false,
     )
 end
 end
