@@ -91,36 +91,16 @@ unload_impl(ImplInfo *impl_info_)
     CImplInfo *impl_info = (CImplInfo *)impl_info_;
 
     char *free_fn_name = "free_self";
-    void *free_fn = dlsym(impl_info->impl_lib, free_fn_name);
+    void *(*free_fn)(void *) = dlsym(impl_info->impl_lib, free_fn_name);
 
     if (free_fn == NULL) {
         logwarn(prefix_, "Implementation '%s' does not implement method '%s'\n",
                 impl_info->impl_details, free_fn_name);
     }
     else {
-        OIFArgType in_arg_types[] = {OIF_USER_DATA};
-        void **in_arg_values = {NULL};
-        OIFArgs in_args = {
-            .num_args = 0,
-            .arg_types = in_arg_types,
-            .arg_values = in_arg_values,
-        };
-
-        OIFArgs out_args = {
-            .num_args = 0,
-            .arg_types = NULL,
-            .arg_values = NULL,
-        };
-
         fprintf(stderr, "[%s] Calling method '%s' for implementation '%s'\n", prefix_,
                 free_fn_name, impl_info->impl_details);
-        status = call_impl(impl_info_, free_fn_name, &in_args, &out_args);
-        if (status != 0) {
-            fprintf(stderr,
-                    "[%s] !!! Error occurred while calling method '%s' for "
-                    "implementation '%s'\n",
-                    prefix_, free_fn_name, impl_info->impl_details);
-        }
+        free_fn(impl_info->self);
     }
 
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
