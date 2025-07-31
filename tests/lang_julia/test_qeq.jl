@@ -19,7 +19,7 @@ end
             a, b, c = 1.0, 5.0, 4.0
             roots = QEQ.solve_qeq(implh, a, b, c)
 
-            @test roots ≈ [-4.0, -1.0] rtol=1e-15 atol=1e-15
+            @test roots ≈ [-4.0, -1.0] rtol = 1e-15 atol = 1e-15
         end
     end
 
@@ -28,7 +28,7 @@ end
             a, b, c = 1.0, -2.0, 1.0
             roots = QEQ.solve_qeq(implh, a, b, c)
 
-            @test roots ≈ [1.0, 1.0] rtol=1e-15
+            @test roots ≈ [1.0, 1.0] rtol = 1e-15
         end
     end
 
@@ -38,7 +38,7 @@ end
             x = QEQ.solve_qeq(implh, a, b, c)
             sort!(x)
 
-            @test x ≈ [5.000000012500001e-05, 19999.999949999998] rtol=1e-15 atol=1e-15
+            @test x ≈ [5.000000012500001e-05, 19999.999949999998] rtol = 1e-15 atol = 1e-15
         end
     end
 end

@@ -36,7 +36,7 @@ function deserialize(sd::Ptr)::Dict
     i = 1
     while i <= length(data)
         key = data[i]
-        value = data[i + 1]
+        value = data[i+1]
 
         resultant_dict[key] = value
         i += 2

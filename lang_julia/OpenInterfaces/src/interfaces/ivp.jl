@@ -1,23 +1,34 @@
 module IVP
 
-using OpenInterfaces: ImplHandle, load_impl, call_impl, unload_impl, make_oif_callback, make_oif_user_data, OIF_FLOAT64, OIF_ARRAY_F64, OIF_INT, OIF_USER_DATA, OIFUserData
+using OpenInterfaces:
+    ImplHandle,
+    load_impl,
+    call_impl,
+    unload_impl,
+    make_oif_callback,
+    make_oif_user_data,
+    OIF_FLOAT64,
+    OIF_ARRAY_F64,
+    OIF_INT,
+    OIF_USER_DATA,
+    OIFUserData
 
 export Self,
-       set_initial_value,
-       set_rhs_fn,
-       set_tolerances,
-       set_user_data,
-       set_integrator,
-       integrate,
-       print_stats
+    set_initial_value,
+    set_rhs_fn,
+    set_tolerances,
+    set_user_data,
+    set_integrator,
+    integrate,
+    print_stats
 
 mutable struct Self
     implh::ImplHandle
     N::Int32
     y::Vector{Float64}
-    rhs_fn_wrapper
+    rhs_fn_wrapper::Any
     user_data_ref::Ref{Any}
-    oif_user_data
+    oif_user_data::Any
     function Self(impl::String)
         implh = load_impl("ivp", impl, 1, 0)
         self = new(ImplHandle(implh), 0, Float64[], Nothing, Nothing, Nothing)

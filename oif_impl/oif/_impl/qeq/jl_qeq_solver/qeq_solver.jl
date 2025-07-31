@@ -2,8 +2,7 @@ module QeqSolver
 export solve_qeq
 
 # This solver does not actually require any context, so Self is empty.
-mutable struct Self
-end
+mutable struct Self end
 
 function solve_qeq(self::Self, a::Float64, b::Float64, c::Float64, roots::Vector{Float64})
     println("Solving quadratic equation with a=$a, b=$b, c=$c")

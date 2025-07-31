@@ -39,10 +39,8 @@ function LinearOscillatorProblem()
 
     function exact(t)
         [
-            y0[1] * cos(omega * t) +
-            +y0[2] * sin(omega * t) / omega,
-            -y0[1] * omega * sin(omega * t) +
-            +y0[2] * cos(omega * t)
+            y0[1] * cos(omega * t) + +y0[2] * sin(omega * t) / omega,
+            -y0[1] * omega * sin(omega * t) + +y0[2] * cos(omega * t),
         ]
     end
 
@@ -98,10 +96,7 @@ function IVPProblemWithUserData()
     end
 
     function exact(t, (a, b)::Tuple{Int,Float64})
-        return [
-            a * (exp(t) - 1),
-            exp(b * t),
-        ]
+        return [a * (exp(t) - 1), exp(b * t)]
     end
 
     IVPProblem(t0, y0, rhs, exact)
@@ -175,7 +170,7 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
                 IVP.integrate(self, t)
             end
 
-            @test self.y ≈ prob.exact(t1) rtol=2e-4
+            @test self.y ≈ prob.exact(t1) rtol = 2e-4
         end
     end
 
@@ -223,7 +218,7 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
                 IVP.integrate(impl_self, t)
             end
 
-            @test impl_self.y ≈ p.exact(t1, params) rtol=1e-5 atol=1e-6
+            @test impl_self.y ≈ p.exact(t1, params) rtol = 1e-5 atol = 1e-6
         end
     end
 
@@ -250,7 +245,7 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
                 IVP.integrate(s, prob.t0 + dt)
                 value_2 = s.y
 
-                @test value_1 ≈ value_2 rtol=1e-1 atol=1e-1
+                @test value_1 ≈ value_2 rtol = 1e-1 atol = 1e-1
             end
         end
     end
@@ -267,7 +262,11 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             IVP.set_initial_value(self, p.y0, p.t0)
             IVP.set_rhs_fn(self, p.rhs)
 
-            @test_throws ErrorException IVP.set_integrator(self, "i-am-not-known-integrator", Dict())
+            @test_throws ErrorException IVP.set_integrator(
+                self,
+                "i-am-not-known-integrator",
+                Dict(),
+            )
         end
     end
 
@@ -340,7 +339,10 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
             IVP.set_rhs_fn(s, p.rhs)
 
             # Should error on the unknown option.
-            @test_throws ErrorException s.set_integrator("bdf", Dict("max_num_steps_typo" => 50))
+            @test_throws ErrorException s.set_integrator(
+                "bdf",
+                Dict("max_num_steps_typo" => 50),
+            )
         end
 
         @testset "test_7__config_dict_jl_diffeq__works" begin

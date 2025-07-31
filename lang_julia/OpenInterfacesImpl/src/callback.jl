@@ -14,17 +14,29 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid})::Function
         oif_y = _oif_array_f64_pointer_from_array_f64(y)
         oif_ydot = _oif_array_f64_pointer_from_array_f64(ydot)
 
-        @ccall $fn_c(t::Float64, oif_y::Ptr{OIFArrayF64}, oif_ydot::Ptr{OIFArrayF64}, user_data::Ptr{Cvoid})::Cint
+        @ccall $fn_c(
+            t::Float64,
+            oif_y::Ptr{OIFArrayF64},
+            oif_ydot::Ptr{OIFArrayF64},
+            user_data::Ptr{Cvoid},
+        )::Cint
         return 0
     end
     return wrapper
 end
 
-function _oif_array_f64_pointer_from_array_f64(arr::AbstractArray{T, N}) where {T<:Float64, N}
+function _oif_array_f64_pointer_from_array_f64(arr::AbstractArray{T,N}) where {T<:Float64,N}
     ndim = ndims(arr)
     dimensions = Base.unsafe_convert(Ptr{Clong}, collect(size(arr)))
     data = Base.unsafe_convert(Ptr{Float64}, arr)
-    oif_arr = Ref(OIFArrayF64(ndim, dimensions, data, OIF_ARRAY_C_CONTIGUOUS | OIF_ARRAY_F_CONTIGUOUS))
+    oif_arr = Ref(
+        OIFArrayF64(
+            ndim,
+            dimensions,
+            data,
+            OIF_ARRAY_C_CONTIGUOUS | OIF_ARRAY_F_CONTIGUOUS,
+        ),
+    )
     return oif_arr
 end
 end
