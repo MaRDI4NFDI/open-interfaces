@@ -49,6 +49,12 @@ repos:
           - id: yamlfmt
             args: [--preserve-quotes]
 
+    # Julia
+    - repo: https://github.com/qiaojunfeng/pre-commit-julia-format
+      rev: v0.2.0
+      hooks:
+          - id: julia-format
+
     # Sphinx documentation
     - repo: https://github.com/sphinx-contrib/sphinx-lint
       rev: v1.0.0
