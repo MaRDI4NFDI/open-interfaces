@@ -261,6 +261,13 @@ int
 unload_interface_impl(ImplHandle implh)
 {
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
+    if (impl_info == NULL) {
+        logerr(prefix_,
+               "Cannot unload interface implementation "
+               "with id '%d' because it was never loaded\n",
+               implh);
+        return -1;
+    }
     DispatchHandle dh = impl_info->dh;
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
         logerr(prefix_,
