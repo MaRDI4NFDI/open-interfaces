@@ -1,7 +1,13 @@
 ---
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+
+ci:
+    autofix_prs: false  # Do not automatically fix PRs using pre-commit.ci service
+    skip: [julia-formatter]
+
 repos:
+    # General purpose hooks
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v5.0.0
       hooks:
@@ -9,28 +15,29 @@ repos:
           - id: end-of-file-fixer
           - id: check-added-large-files
 
-    # C source code
+    # C
     - repo: https://github.com/pre-commit/mirrors-clang-format
       rev: v20.1.8
       hooks:
           - id: clang-format
+
     - repo: https://github.com/cheshirekow/cmake-format-precommit
       rev: v0.6.13
       hooks:
           - id: cmake-format
 
-    # Python source code
+    # Python
     - repo: https://github.com/pycqa/isort
       rev: 6.0.1
       hooks:
           - id: isort
             name: isort (python)
 
-
     - repo: https://github.com/pycqa/flake8
       rev: 7.3.0
       hooks:
           - id: flake8
+
     - repo: https://github.com/psf/black
       rev: 25.1.0
       hooks:
@@ -50,10 +57,10 @@ repos:
             args: [--preserve-quotes]
 
     # Julia
-    - repo: https://github.com/qiaojunfeng/pre-commit-julia-format
-      rev: v0.2.0
+    - repo: https://github.com/domluna/JuliaFormatter.jl
+      rev: v2.1.6  # or whatever the desired release is
       hooks:
-          - id: julia-format
+          - id: julia-formatter
 
     # Sphinx documentation
     - repo: https://github.com/sphinx-contrib/sphinx-lint
