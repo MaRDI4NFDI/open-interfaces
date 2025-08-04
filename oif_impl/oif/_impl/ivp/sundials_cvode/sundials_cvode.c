@@ -331,6 +331,9 @@ set_integrator(Self *self, const char *integrator_name, OIFConfigDict *config_)
                 "[%s] ERROR: Supported values for integrator name are `bdf` and `adams`, got "
                 "instead '%s'\n",
                 prefix, integrator_name);
+        if (config_ != NULL) {
+            oif_config_dict_free(config_);
+        }
         return 1;
     }
 
