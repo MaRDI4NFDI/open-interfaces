@@ -6,6 +6,8 @@ ci:
     autofix_prs: false  # Do not automatically fix PRs using pre-commit.ci service
     skip: [julia-formatter]
 
+default_stages: [pre-push]
+
 repos:
     # General purpose hooks
     - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -32,6 +34,7 @@ repos:
       hooks:
           - id: isort
             name: isort (python)
+            stages: [pre-push]
 
     - repo: https://github.com/pycqa/flake8
       rev: 7.3.0
