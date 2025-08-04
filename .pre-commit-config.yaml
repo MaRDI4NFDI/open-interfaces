@@ -2,6 +2,17 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
+# To run manually, you can use:
+# pre-commit run --all-files
+#
+# To run automatically as Git pre-commit hook:
+# pre-commit install
+#
+# To run automatically as Git pre-push hook:
+# pre-commit install --hook-type pre-push
+#
+# Warning: existing hooks in `.git/hooks` will be overwritten.
+
 # These options are for the pre-commit.ci service integrated with GitHub.
 ci:
     autofix_prs: false  # Do not automatically fix PRs using pre-commit.ci service
