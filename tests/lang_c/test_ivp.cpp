@@ -219,18 +219,17 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
 }
 // END Tests that use combinations of implementations and ODE problems.
 
-
 // ---------------------------------------------------------------------------
 // BEGIN Tests that do not depend on ODE problems.
 struct IvpImplementationsFixture : public testing::TestWithParam<const char *> {};
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsFixture,
-        testing::Values("sundials_cvode"
+                         testing::Values("sundials_cvode"
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
-                        ,
-                        "scipy_ode", "jl_diffeq"
+                                         ,
+                                         "scipy_ode", "jl_diffeq"
 #endif
-            ));
+                                         ));
 
 TEST_P(IvpImplementationsFixture, DoesNotAcceptUnknownIntegratorName)
 {
@@ -251,7 +250,8 @@ TEST_P(IvpImplementationsFixture, DoesNotAcceptUnknownIntegratorNameAndIgnoresCo
 
     OIFConfigDict *config = oif_config_dict_init();
     oif_config_dict_add_int(config, "max_num_steps", 1000);
-    const int status = oif_ivp_set_integrator(implh, (char *)"unknown_integrator_name", config);
+    const int status =
+        oif_ivp_set_integrator(implh, (char *)"unknown_integrator_name", config);
     EXPECT_NE(status, 0);
 
     oif_config_dict_free(config);
