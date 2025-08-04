@@ -2,6 +2,7 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
+# These options are for the pre-commit.ci service integrated with GitHub.
 ci:
     autofix_prs: false  # Do not automatically fix PRs using pre-commit.ci service
     skip: [julia-formatter]
