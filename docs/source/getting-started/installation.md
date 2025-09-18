@@ -14,23 +14,24 @@ package manager for installing dependencies.
 
 We assume that the following software is installed on your system:
 - `curl` or `git` for downloading the source code
-- Package manager such as (`apt`)[https://wiki.debian.org/apt] for Debian-like
+- Package manager such as [`apt`](https://wiki.debian.org/apt) for Debian-like
   systems,
-  (`brew`)[https://brew.sh/] for macOS and Linux, or (`conda`)[https://conda.io]/
-  (`mamba`)[https://mamba.readthedocs.io/en/latest/],
-  for installing dependencies packages.
+  [`brew`](https://brew.sh/) for macOS and Linux, or [`conda`](https://conda.io)/
+  [`mamba`](https://mamba.readthedocs.io/en/latest/) for Linux/macOS/Windows,
+  for installing the dependencies.
 
 Then you can choose one of the following options:
-- If you interested only in Python bindings and implementations,
+- If you interested in C and Python bindings
+  and all implementations, you can install dependencies via `conda`
+  as described [here](#install-via-conda) (this is the recommended option)
+  and then proceed with [building the source code](#building-the-source-code).
+- If you interested only in Python bindings,
   you can install them via `pip` as described
   [here](#install-via-pip), which builds Open Interfaces automatically.
-- If you interested in C and Python bindings
-  and implementations, you can install dependencies via `conda`
-  as described [here](#install-via-conda) and then proceed with building the
-  source code.
 - If you want to use Julia and Julia packages,
   please follow instructions [here](#install-julia).
 
+(building-the-source-code)=
 ## The source code
 
 Download the archive with the source code of the
@@ -61,7 +62,7 @@ cd open-interfaces
 
 ## Dependencies
 
-Open Interfaces depends on several external libraries and tools,
+Open Interfaces depend on several external libraries and tools,
 such as CMake, a C compiler, Python interpreter, Julia, SUNDIALS,
 SciPy, etc.
 
@@ -77,7 +78,13 @@ Interfaces:
     [`clang`](https://clang.llvm.org/) 7+
 - The [CMake](https://cmake.org) meta-build system v3.18+
 - [`libffi`](https://sourceware.org/libffi/) v8+
-- The [Make](https://www.gnu.org/software/make/) build system v4+
+- The [Make](https://www.gnu.org/software/make/) build system v4.3+
+- [`pkg-config`](https://www.freedesktop.org/wiki/Software/pkg-config/) v0.29+
+
+On Ubuntu, these dependencies can be installed via:
+```shell
+sudo apt install build-essential cmake libffi-dev pkg-config
+```
 
 ### Optional recommended dependencies
 
@@ -87,6 +94,7 @@ To really benefit from Open Interfaces, it is recommended to install
 C implementations and Python and Julia interfaces and implementations:
 
 - SUNDIALS v6.0+
+- LAPACK library
 - Python 3.9 with NumPy, SciPy, and Matplotlib packages
 - Julia 1.10+
 
@@ -132,11 +140,36 @@ conda activate open-interfaces
 Note that the environment name `open-interfaces` can be changed at your will.
 
 (install-via-pip)=
-### Option 2: Installation of Python bindings and implementations
+### Option 2: Installation via `pip`
 
-The Python bindings and implementations of the interfaces are available
-from [Python Package Index (PyPI)](https://pypi.org/)
-and can be installed using
+If you are interested mostly in Python bindings as well as
+C and Python implementations,
+then the easiest way to install Open Interfaces
+is via `pip`
+from the [Python Package Index (PyPI)](https://pypi.org/).
+
+First, ensure that essential dependencies are installed.
+On Ubuntu, this can be done via:
+```shell
+sudo apt install build-essential cmake libffi-dev pkg-config python3-dev python3-venv
+```
+
+Optional dependencies include `LAPACK` and `SUNDIALS` libraries
+for C implementations, which can be installed via:
+```shell
+sudo apt install liblapack-dev libsundials-dev
+```
+
+Then it is recommended to create a virtual environment for Python:
+```shell
+python3 -m venv .venv
+```
+and activate it:
+```shell
+source .venv/bin/activate
+```
+
+Finally, install Open Interfaces via `pip`:
 ```shell
 pip install openinterfaces
 ```
@@ -144,13 +177,21 @@ pip install openinterfaces
 (install-julia)=
 ### Installing Julia and Julia packages
 
-Then Julia must be installed via the following command
-from the [official instructions][2]:
+If you are interested in using Julia bindings and implementations,
+you need to install Julia and required Julia packages.
+Currently, Julia packages are not available, but the instructions
+in this section will help you to set up the environment
+and install Julia dependencies via provided project files.
+
+The [recommend way of installing Julia](https://julialang.org/install/)
+is via the following command:
 ```shell
 curl -fsSL https://install.julialang.org | sh
 ```
 
-Then we can activate the environment for Open Interfaces
+Then, assuming that the current working directory is the source code
+of Open Interfaces,
+create and activate a Julia environment for Open Interfaces
 and install required Julia packages:
 ```
 julia --project=. -e "using Pkg; Pkg.instantiate()"
@@ -166,8 +207,8 @@ To build the software, use command
 ```shell
     make release
 ```
-which invokes underlying CMake build and builds Open Interfaces inside
-the `build` directory.
+which invokes `cmake` and builds Open Interfaces inside
+the `build` subdirectory enabling compiler optimizations.
 
 ## Activating the environment
 
@@ -178,6 +219,8 @@ source env.sh
 that sets `PATH`, `LD_LIBRARY_PATH`, and `PYTHONPATH`, and `OIF_IMPL_PATH`
 variables.
 These variables are necessary for running examples and tests.
+The last variable, `OIF_IMPL_PATH`, is used to point to the directories
+where implementations are searched for.
 
 ## Checking the build
 
@@ -237,4 +280,3 @@ on the continuous-integration service.
 
 
 [1]: https://conda.io/projects/conda/en/latest/user-guide/getting-started.html
-[2]: https://julialang.org/downloads/
