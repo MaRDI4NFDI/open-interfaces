@@ -1,4 +1,9 @@
-find_package(SUNDIALS REQUIRED)
+find_package(SUNDIALS)
+
+if(NOT SUNDIALS_FOUND)
+  message("SUNDIALS not found. Skipping `sundials_cvode` implementation.")
+  return()
+endif()
 
 add_library(oif_ivp_sundials_cvode SHARED sundials_cvode.c)
 target_link_libraries(oif_ivp_sundials_cvode PRIVATE m)
