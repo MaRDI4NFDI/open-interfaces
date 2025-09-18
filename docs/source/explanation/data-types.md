@@ -1,7 +1,7 @@
 # Data types
 
 As stated before, we use C data types for intermediate representation, as C
-is the /lingua franca/ of programming languages,
+is the _lingua franca_ of programming languages,
 and they all have facilities to communicate with C
 and making function calls to C.
 Also, popular languages such as Python and Julia
@@ -13,7 +13,8 @@ C `int` data type, provided that the integers are representable
 in 32 bits.
 Also, conversion of binary double-precision floating-point numbers
 is straightforward between C and other languages due to the widespread use
-of the IEEE 754 standard for floating-point arithmetic.
+of the [IEEE 754 standard](https://en.wikipedia.org/wiki/IEEE_754)
+for floating-point arithmetic.
 
 Data marshalling of arrays of double-precision floating-point numbers
 is made possible by using an auxiliary data structure `OIFArrayF64` that,
@@ -68,4 +69,3 @@ It is assumed that each symbolic constant is replaced with the actual data type
 when used in a particular language: for example, `OIF_ARRAY_F64`
 resolves to the provided data structure `OIFArrayF64` in C
 and to NumPy arrays with `dtype=numpy.float64` in Python.
-
