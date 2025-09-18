@@ -1,4 +1,5 @@
 import ctypes
+import importlib.resources
 import os
 import site
 from io import BytesIO
@@ -45,12 +46,12 @@ else:
 # We need to check if the library is in the site-packages directory
 # because this is the only place I could install this library
 # using `scikit-build-core` as a Python packaging build system.
-if os.path.isfile(os.path.join(_site_packages, "lib", "liboif_dispatch.so")):
-    _lib_dispatch = ctypes.PyDLL(
-        os.path.join(_site_packages, "lib", "liboif_dispatch.so")
-    )
+_lib_dispatch_name = "liboif_dispatch.so"
+_installed_lib_path = importlib.resources.files("lib") / _lib_dispatch_name
+if os.path.isfile(_installed_lib_path):
+    _lib_dispatch = ctypes.PyDLL(os.path.join(_installed_lib_path))
 else:
-    _lib_dispatch = ctypes.PyDLL("liboif_dispatch.so")
+    _lib_dispatch = ctypes.PyDLL(_lib_dispatch_name)
 
 elapsed = 0.0
 
