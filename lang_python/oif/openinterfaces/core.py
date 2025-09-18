@@ -1,7 +1,6 @@
 import ctypes
 import importlib.resources
 import os
-import site
 from io import BytesIO
 from typing import Callable, NewType, Union
 
@@ -34,14 +33,15 @@ OIF_LANG_COUNT = 6
 OIF_ARRAY_C_CONTIGUOUS = 0x0001
 OIF_ARRAY_F_CONTIGUOUS = 0x0002
 
-_site_packages = site.getsitepackages()[-1]
-
 # Add path to Python implementations to the environment variable.
-path = os.path.join(_site_packages, "oif", "data")
-if "OIF_IMPL_PATH" not in os.environ:
-    os.environ["OIF_IMPL_PATH"] = path
-else:
-    os.environ["OIF_IMPL_PATH"] += os.pathsep + path
+# This is needed when install was via `pip`.
+path = importlib.resources.files("openinterfaces") / "data"
+path = str(path)
+if os.path.isdir(path):
+    if "OIF_IMPL_PATH" not in os.environ:
+        os.environ["OIF_IMPL_PATH"] = path
+    else:
+        os.environ["OIF_IMPL_PATH"] += os.pathsep + path
 
 # We need to check if the library is in the site-packages directory
 # because this is the only place I could install this library
