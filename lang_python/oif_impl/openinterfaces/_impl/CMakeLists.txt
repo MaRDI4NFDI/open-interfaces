@@ -1,13 +1,3 @@
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ivp/CMakeLists.txt)
-  add_subdirectory(ivp)
-endif()
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/linsolve/CMakeLists.txt)
-  add_subdirectory(linsolve)
-endif()
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/qeq/CMakeLists.txt)
-  add_subdirectory(qeq)
-endif()
-
 file(
   GLOB_RECURSE OIF_IMPL_CONF_FILES
   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}

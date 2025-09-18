@@ -31,3 +31,5 @@ set_target_properties(
   PROPERTIES PREFIX ""
              OUTPUT_NAME "_callback"
              SUFFIX ".${Python_SOABI}${CMAKE_SHARED_MODULE_SUFFIX}")
+
+add_subdirectory(openinterfaces)
