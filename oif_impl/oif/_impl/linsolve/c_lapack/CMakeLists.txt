@@ -1,5 +1,10 @@
 set(BLA_VENDOR Intel10_64_dyn)
-find_package(LAPACK REQUIRED)
+find_package(LAPACK)
+
+if(NOT LAPACK_FOUND)
+  message("LAPACK not found. Skipping `linsolve/c_lapack` implementation.")
+  return()
+endif()
 
 add_library(oif_linsolve_c_lapack SHARED linsolve_impl.c)
 target_include_directories(oif_linsolve_c_lapack
