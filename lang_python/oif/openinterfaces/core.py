@@ -2,6 +2,7 @@ import ctypes
 import importlib.resources
 import os
 from io import BytesIO
+from pathlib import Path
 from typing import Callable, NewType, Union
 
 import _conversion
@@ -47,7 +48,15 @@ if os.path.isdir(path):
 # because this is the only place I could install this library
 # using `scikit-build-core` as a Python packaging build system.
 _lib_dispatch_name = "liboif_dispatch.so"
-_installed_lib_path = importlib.resources.files("lib") / _lib_dispatch_name
+_installed_lib_path = ""
+try:
+    _installed_lib_path = str(importlib.resources.files("lib") / _lib_dispatch_name)
+except ModuleNotFoundError:
+    # In case the package is not installed, e.g. during development
+    # we just ignore the error and try to load the library
+    # from the current working directory.
+    pass
+
 if os.path.isfile(_installed_lib_path):
     _lib_dispatch = ctypes.PyDLL(os.path.join(_installed_lib_path))
 else:
