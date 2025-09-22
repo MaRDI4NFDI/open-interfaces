@@ -158,10 +158,10 @@ oif_config_dict_add_int(dict, "nsteps", 40000);
 status = oif_ivp_set_integrator(implh, "vode", dict);
 ```
 and only then, the solver is able to solve the problem and we arrive at the
-solution Figure {numref}`vdp-solution-vode-40k`,
+solution Figure {numref}`c-vdp-solution-vode-40k`,
 although integration takes a while (about 8 seconds in our experiments).
 
-(vdp-solution-vode-40k)=
+(c-vdp-solution-vode-40k)=
 ```{figure} img/ivp_py_vdp_eq_scipy_ode.pdf
 :alt: Solution of the Van der Pol equation with $mu=1000$ using `scipy_ode` with the `vode` integrator.
 
@@ -181,11 +181,11 @@ oif_ivp_set_integrator(implh, "Rosenbrock23", NULL);
 by supplying an integration option `autodiff=False`;
 we are working currently on enabling use of Automatic Differentiation
 in `jl_diffeq`). Running the code with this implementation,
-we arrive at the solution quickly (about 1 second), see {numref}`vdp-solution-jl_diffeq`.
+we arrive at the solution quickly (about 1 second), see {numref}`c-vdp-solution-jl_diffeq`.
 One can see that the solution is the same as the one obtained
-with the `vode` solver from SciPy, {number}`vdp-solution-vode-40k`.
+with the `vode` solver from SciPy, {numref}`c-vdp-solution-vode-40k`.
 
-(vdp-solution-jl_diffeq)=
+(c-vdp-solution-jl_diffeq)=
 ```{figure} img/ivp_py_vdp_eq_jl_diffeq.pdf
 :alt: Solution of the Van der Pol equation with mu=1000 using the `jl_diffeq` implementation  with the `Rosenbrok23` integrator.
 
