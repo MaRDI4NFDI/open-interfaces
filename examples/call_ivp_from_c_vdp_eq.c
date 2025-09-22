@@ -3,10 +3,10 @@
  * import matplotlib.pyplot as plt
  * import numpy as np
  *
- * u = np.loadtxt("solution.txt")
+ * t, u = np.loadtxt("solution.txt")
  *
  * plt.figure()
- * plt.plot(u, "-")
+ * plt.plot(t, u, "-", label=r"y(t)")
  * plt.show()
  */
 #include <assert.h>
@@ -19,6 +19,7 @@
 
 #include <oif/api.h>
 #include <oif/c_bindings.h>
+#include <oif/config_dict.h>
 #include <oif/interfaces/ivp.h>
 
 // Number of right-hand side evaluations.
@@ -43,140 +44,62 @@ parse_impl(int argc, char *argv[])
 }
 
 char *
+parse_integrator(int argc, char *argv[])
+{
+    return argv[2];
+}
+
+char *
 parse_output_filename(int argc, char *argv[])
 {
     if (argc == 1 || argc == 2) {
         return "solution.txt";
     }
     else {
-        return argv[2];
+        return argv[3];
     }
 }
 
 int
-parse_resolution(int argc, char *argv[])
+rhs(double t, OIFArrayF64 *y, OIFArrayF64 *ydot, void *user_data)
 {
-    if (argc < 3) {
-        return 101;
-    }
-    else {
-        return atoi(argv[3]);
-    }
-}
-
-static int
-compute_initial_condition_(size_t N, OIFArrayF64 *u0, OIFArrayF64 *grid, double *dx,
-                           double *dt_max)
-{
-    double a = 0.0;
-    double b = 2.0;
-    double *x = grid->data;
-    *dx = (b - a) / N;
-
-    for (int i = 0; i < N; ++i) {
-        x[i] = a + i * (*dx);
-    }
-
-    for (int i = 0; i < N; ++i) {
-        u0->data[i] = 0.5 - 0.25 * sin(M_PI * x[i]);
-    }
-
-    double cfl = 0.5;
-    *dt_max = cfl * (*dx);
+    (void)t;  // Unused
+    double mu = *(double *)user_data;
+    ydot->data[0] = y->data[1];
+    ydot->data[1] = mu * (1 - y->data[0] * y->data[0]) * y->data[1] - y->data[0];
 
     return 0;
-}
-
-int
-rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void *user_data)
-{
-    (void)t;         /* Unused */
-    int retval = 1;
-    intptr_t N = y->dimensions[0];
-    assert(N > 1);
-
-    double *u = y->data;
-    double *udot = rhs_out->data;
-
-    // User data is just the spatial step size `dx`.
-    double dx = *((double *)user_data);
-
-    double *flux = malloc(N * sizeof(double));
-    if (flux == NULL) {
-        fprintf(stderr, "Could not allocate memory for the flux array\n");
-        return retval;
-    }
-
-    for (int i = 0; i < N; ++i) {
-        flux[i] = 0.5 * pow(u[i], 2.0);
-    }
-
-    double local_sound_speed = 0.0;
-    for (int i = 0; i < N; ++i) {
-        if (local_sound_speed < fabs(u[i])) {
-            local_sound_speed = fabs(u[i]);
-        }
-    }
-
-    double *flux_hat = malloc((N - 1) * sizeof(double));
-    if (flux_hat == NULL) {
-        fprintf(stderr, "Could not allocate memory for flux_hat\n");
-        retval = 1;
-        goto cleanup;
-    }
-
-    for (int i = 0; i < N - 1; ++i) {
-        flux_hat[i] =
-            0.5 * (flux[i] + flux[i + 1]) - 0.5 * local_sound_speed * (u[i + 1] - u[i]);
-    }
-
-    for (int i = 1; i < N - 1; ++i) {
-        udot[i] = -1.0 / dx * (flux_hat[i] - flux_hat[i - 1]);
-    }
-    double f_rb = 0.5 * (flux[0] + flux[N - 1]) - 0.5 * local_sound_speed * (u[0] - u[N - 1]);
-    double f_lb = f_rb;
-    udot[0] = -1.0 / dx * (flux_hat[0] - f_lb);
-    udot[N - 1] = -1.0 / dx * (f_rb - flux_hat[N - 2]);
-
-    retval = 0;
-
-    N_RHS_EVALS++;
-
-cleanup:
-    if (flux != NULL) {
-        free(flux);
-    }
-    if (flux_hat != NULL) {
-        free(flux_hat);
-    }
-
-    return retval;
 }
 
 int
 main(int argc, char *argv[])
 {
     char *impl = parse_impl(argc, argv);
+    char *integrator = parse_integrator(argc, argv);
     const char *output_filename = parse_output_filename(argc, argv);
     printf("Calling from C an open interface for solving y'(t) = f(t, y)\n");
-    printf("where the system comes from inviscid 1D Burgers' equation\n");
+    printf("where the system comes from the 2nd-order Van der Pol oscillator equation\n");
     printf("Implementation: %s\n", impl);
+    printf("Integrator: %s\n", integrator);
+
 
     int retval = 0;
-    const int N = parse_resolution(argc, argv);
-    double t0 = 0.0;
-    double t_final = 2.0;
+
+    const int N = 2;  // Number of equations in the system.
+
     OIFArrayF64 *y0 = oif_create_array_f64(1, (intptr_t[1]){N});
     // Solution vector.
     OIFArrayF64 *y = oif_create_array_f64(1, (intptr_t[1]){N});
     // Grid
     OIFArrayF64 *grid = oif_create_array_f64(1, (intptr_t[1]){N});
-    double dx;
-    double dt_max;
-    int status = 1;  // Aux variable to check for errors.
 
-    status = compute_initial_condition_(N, y0, grid, &dx, &dt_max);
-    assert(status == 0);
+    double t0 = 0.0;
+    double t_final = 3000;
+    double mu = 1e3; // Stiffness parameter.
+    y0->data[0] = 2.0;
+    y0->data[1] = 0.0;
+
+    int status = 1;  // Aux variable to check for errors.
 
     ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
@@ -191,7 +114,7 @@ main(int argc, char *argv[])
         retval = EXIT_FAILURE;
         goto cleanup;
     }
-    status = oif_ivp_set_user_data(implh, &dx);
+    status = oif_ivp_set_user_data(implh, &mu);
     if (status) {
         fprintf(stderr, "oif_ivp_set_user_data return error\n");
         retval = EXIT_FAILURE;
@@ -208,25 +131,54 @@ main(int argc, char *argv[])
     assert(status == 0);
 
     OIFConfigDict *dict = oif_config_dict_init();
-    oif_config_dict_add_int(dict, "dense", 0);
-    oif_config_dict_add_int(dict, "save_everystep", 0);
 
-    if (strcmp(impl, "scipy_ode") == 0) {
+    if (strcmp(impl, "sundials_cvode") == 0) {
+        oif_config_dict_add_int(dict, "max_num_steps", 30000);
+        status = oif_ivp_set_integrator(implh, "bdf", dict);
+    }
+    else if (strcmp(impl, "scipy_ode") == 0 && strcmp(integrator, "dopri5") == 0) {
+        // It is already the default integrator.
         status = oif_ivp_set_integrator(implh, "dopri5", NULL);
     }
-    else if (strcmp(impl, "jl_diffeq") == 0) {
-        status = oif_ivp_set_integrator(implh, "DP5", NULL);
-        /* status = oif_ivp_set_integrator(implh, "DP5", dict); */
+    else if (strcmp(impl, "scipy_ode") == 0 && strcmp(integrator, "dopri5-100k") == 0) {
+        oif_config_dict_add_int(dict, "nsteps", 100000);
+        status = oif_ivp_set_integrator(implh, "dopri5", dict);
+    }
+    else if (strcmp(impl, "scipy_ode") == 0 && strcmp(integrator, "vode") == 0) {
+        oif_config_dict_add_str(dict, "method", "bdf");
+        status = oif_ivp_set_integrator(implh, "vode", dict);
+    }
+    else if (strcmp(impl, "scipy_ode") == 0 && strcmp(integrator, "vode-40k") == 0) {
+        printf("I AM HERE\n");
+        oif_config_dict_add_str(dict, "method", "bdf");
+        oif_config_dict_add_int(dict, "nsteps", 40000);
+        status = oif_ivp_set_integrator(implh, "vode", dict);
+    }
+    else if (strcmp(impl, "jl_diffeq") == 0 && strcmp(integrator, "rosenbrock23") == 0) {
+        oif_config_dict_add_int(dict, "autodiff", 0);
+        status = oif_ivp_set_integrator(implh, "Rosenbrock23", dict);
+    }
+    else {
+        fprintf(stderr, "Cannot set integrator for implementation '%s'\n", impl);
+        retval = EXIT_FAILURE;
+        goto cleanup;
     }
     assert(status == 0);
+
     double t = 0.0001;
     status = oif_ivp_integrate(implh, t, y);
 
+    const int Nt = 501; // Number of time steps.
+    double dt = (t_final - t0) / (Nt - 1);
+
+    OIFArrayF64 *times = oif_create_array_f64(1, (intptr_t[1]){Nt});
+    OIFArrayF64 *solution = oif_create_array_f64(1, (intptr_t[1]){Nt});
+    times->data[0] = t0;
+    solution->data[0] = y0->data[0];
+
     clock_t tic = clock();
     // Time step.
-    double dt = dt_max;
-    int n_time_steps = (int)(t_final / dt + 1);
-    for (int i = 0; i < n_time_steps; ++i) {
+    for (int i = 1; i < Nt; ++i) {
         double t = t0 + (i + 1) * dt;
         if (t > t_final) {
             t = t_final;
@@ -237,6 +189,8 @@ main(int argc, char *argv[])
             retval = EXIT_FAILURE;
             goto cleanup;
         }
+        times->data[i] = t;
+        solution->data[i] = y->data[0];
     }
     clock_t toc = clock();
     printf("Elapsed time = %.6f seconds\n", (double)(toc - tic) / CLOCKS_PER_SEC);
@@ -248,16 +202,17 @@ main(int argc, char *argv[])
         retval = EXIT_FAILURE;
         goto cleanup;
     }
-    for (int i = 0; i < N; ++i) {
-        fprintf(fp, "%.8f %.8f\n", grid->data[i], y->data[i]);
+    for (int i = 0; i < Nt; ++i) {
+        fprintf(fp, "%.8f %.8f\n", times->data[i], solution->data[i]);
     }
     fclose(fp);
     printf("Solution was written to file `%s`\n", output_filename);
 
 cleanup:
-    oif_free_array_f64(y0);
+    oif_free_array_f64(solution);
+    oif_free_array_f64(times);
     oif_free_array_f64(y);
-    oif_free_array_f64(grid);
+    oif_free_array_f64(y0);
 
     return retval;
 }
