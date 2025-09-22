@@ -52,7 +52,7 @@ parse_integrator(int argc, char *argv[])
 char *
 parse_output_filename(int argc, char *argv[])
 {
-    if (argc == 1 || argc == 2) {
+    if (argc < 4) {
         return "solution.txt";
     }
     else {
