@@ -20,9 +20,10 @@ To solve this second-order ordinary differential equation,
 we first rewrite it as a system of two first-order ordinary differential
 equations:
 ```{math}
-  \frac{\mathrm d u_1}{\mathrm d t} = u_2, \quad
-  \frac{\mathrm d u_2}{\mathrm d t} = \mu (1 - u_1^2) u_2 - u_1, \quad
-  u_1(0) = 2, \quad u_2(0) = 0
+  \frac{\mathrm d u_1}{\mathrm d t} &= u_2, \quad \\
+  \frac{\mathrm d u_2}{\mathrm d t} &= \mu (1 - u_1^2) u_2 - u_1, \quad \\
+  u_1(0) &= 2, \quad \\
+  u_2(0) &= 0,
 ```
 where $u_1 = x$ and $u_2 = \frac{\mathrm d x}{\mathrm d t}$.
 
