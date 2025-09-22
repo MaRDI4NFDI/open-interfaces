@@ -179,7 +179,7 @@ main(int argc, char *argv[])
     clock_t tic = clock();
     // Time step.
     for (int i = 1; i < Nt; ++i) {
-        double t = t0 + (i + 1) * dt;
+        double t = t0 + i * dt;
         if (t > t_final) {
             t = t_final;
         }
