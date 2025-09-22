@@ -82,7 +82,6 @@ main(int argc, char *argv[])
     printf("Implementation: %s\n", impl);
     printf("Integrator: %s\n", integrator);
 
-
     int retval = 0;
 
     const int N = 2;  // Number of equations in the system.
@@ -136,6 +135,7 @@ main(int argc, char *argv[])
     }
     else if (strcmp(impl, "scipy_ode") == 0 && strcmp(integrator, "dopri5") == 0) {
         // It is already the default integrator.
+        // So this call is not strictly necessary.
         status = oif_ivp_set_integrator(implh, "dopri5", NULL);
     }
     else if (strcmp(impl, "scipy_ode") == 0 && strcmp(integrator, "dopri5-100k") == 0) {
@@ -147,7 +147,6 @@ main(int argc, char *argv[])
         status = oif_ivp_set_integrator(implh, "vode", dict);
     }
     else if (strcmp(impl, "scipy_ode") == 0 && strcmp(integrator, "vode-40k") == 0) {
-        printf("I AM HERE\n");
         oif_config_dict_add_str(dict, "method", "bdf");
         oif_config_dict_add_int(dict, "nsteps", 40000);
         status = oif_ivp_set_integrator(implh, "vode", dict);
@@ -175,7 +174,6 @@ main(int argc, char *argv[])
     solution->data[0] = y0->data[0];
 
     clock_t tic = clock();
-    // Time step.
     for (int i = 1; i < Nt; ++i) {
         double t = t0 + i * dt;
         if (t > t_final) {
