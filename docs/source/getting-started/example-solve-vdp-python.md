@@ -119,21 +119,21 @@ to a high value, for example, 40 000 steps:
     solver.set_integrator("vode", {"method": "bdf", "nsteps": 40_000})
 ```
 and only then, the solver is able to solve the problem and we arrive at the
-solution, although integration takes a while.
+solution Figure {numref}`vdp-solution-vode-40k`,
+although integration takes a while.
 
+(vdp-solution-vode-40k)=
 ```{figure} img/ivp_py_vdp_eq_scipy_ode.pdf
+:alt: Solution of the Van der Pol equation with $mu=1000$ using `scipy_ode` with the `vode` integrator.
 
-:name: vdp-solution-vode-40k
-:alt: Solution of the Van der Pol equation with mu=1000
-      using scipy_ode with the `vode` integrator.
-
-:     Solution of the Van der Pol equation with mu=1000
-      using scipy_ode with the `vode` integrator.
+Solution of the Van der Pol equation with $mu=1000$
+using `scipy_ode` with the `vode` integrator.
 ```
 
 Finally, we try to use other implementations of the IVP interface,
-for example, `Rosenbrok23` integrator from the `OrdinaryDiffEq.jl` Julia
-package:
+for example, [`Rosenbrok23` integrator from the `OrdinaryDiffEq.jl` Julia
+package][jl-ordinarydiffeq], which in _Open Interfaces_ is available via the `jl_diffeq`
+implementation:
 ```python
     solver = IVP("jl_diffeq")
     solver.set_integrator("Rosenbrock23", {"autodiff": False,})
@@ -142,30 +142,34 @@ package:
 by supplying an integration option `autodiff=False`;
 we are working currently on enabling use of Automatic Differentiation
 in `jl_diffeq`). Running the code with this implementation,
-we arrive at the solution quickly, see [](#vdp-solution-jl_diffeq).
+we arrive at the solution quickly, see {numref}`vdp-solution-jl_diffeq`.
 One can see that the solution is the same as the one obtained
-with the `vode` solver from SciPy.
+with the `vode` solver from SciPy, {number}`vdp-solution-vode-40k`.
 
 (vdp-solution-jl_diffeq)=
 ```{figure} img/ivp_py_vdp_eq_jl_diffeq.pdf
-:alt: Solution of the Van der Pol equation with mu=1000
-      using `jl_diffeq` implementation  with the `Rosenbrok23` integrator.
+:alt: Solution of the Van der Pol equation with mu=1000 using the `jl_diffeq` implementation  with the `Rosenbrok23` integrator.
 
-      Solution of the Van der Pol equation with mu=1000
-      using `jl_diffeq` implementation  with the `Rosenbrok23` integrator.
+Solution of the Van der Pol equation with mu=1000
+using `jl_diffeq` implementation  with the `Rosenbrok23` integrator.
 ```
 
-
-using different implementations of the IVP interface (interface for solving
-initial-value problems for ordinary differential equations):
+The full code of this example is available in the
+`examples/call_qeq_from_python.py` and can be run as follows:
 ```shell
-python examples/call_qeq_from_python.py [scipy_ode|sundials_cvode|jl_diffeq]
+python examples/call_qeq_from_python.py [implementation]
 ```
-where the implementation argument is optional and defaults to `scipy_ode`.
+where the `implementation` argument is one of the following:
+ - `scipy_ode-dopri5`,
+ - `scipy_ode-dopri5-100k`,
+ - `scipy_ode-vode`,
+ - `scipy_ode-vode-40k`,
+ - `sundials_cvode`,
+ - `jl_diffeq-rosenbrock23`.
 
-This script uses stiff solvers for initial-value problems, why the value
-of the parameter $\mu$ makes the system stiff.
-At the end of the computations, the resultant solution is displayed.
+At the end of the computations, if they are successful,
+the resultant solution is displayed.
 
 
 [vdp-wiki]: https://en.wikipedia.org/wiki/Van_der_Pol_oscillator
+[jl-ordinarydiffeq]: https://docs.sciml.ai/OrdinaryDiffEq/stable/
