@@ -90,8 +90,6 @@ main(int argc, char *argv[])
     OIFArrayF64 *y0 = oif_create_array_f64(1, (intptr_t[1]){N});
     // Solution vector.
     OIFArrayF64 *y = oif_create_array_f64(1, (intptr_t[1]){N});
-    // Grid
-    OIFArrayF64 *grid = oif_create_array_f64(1, (intptr_t[1]){N});
 
     double t0 = 0.0;
     double t_final = 3000;
