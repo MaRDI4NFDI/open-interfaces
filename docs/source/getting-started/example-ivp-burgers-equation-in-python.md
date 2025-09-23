@@ -87,7 +87,7 @@ plt.savefig("examples_burgers_eq.pdf")
 The actual solution at the final time $T = 2$ and the initial condition are
 shown on the figure.
 
-```{figure} img/ivp_burgers_soln_scipy_ode_dopri5.pdf
+```{figure} img/ivp_py_burgers_eq_scipy_ode.pdf
 
 Numerical solution of the problem for Burgers' equation via `IVP` interface
 of Open InterFaces using `scipy_ode_dopri5` implementation.
