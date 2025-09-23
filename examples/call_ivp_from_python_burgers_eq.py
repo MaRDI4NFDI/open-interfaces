@@ -10,6 +10,7 @@ from openinterfaces.interfaces.ivp import IVP
 @dataclasses.dataclass
 class Args:
     impl: str
+    savefig: bool
 
 
 def _parse_args():
@@ -19,6 +20,9 @@ def _parse_args():
         choices=["scipy_ode", "sundials_cvode", "jl_diffeq"],
         default="scipy_ode",
         nargs="?",
+    )
+    p.add_argument(
+        "--savefig", "-s", action="store_true", help="Save figure instead of showing it"
     )
     args = p.parse_args()
     return Args(**vars(args))
@@ -43,8 +47,8 @@ class BurgersEquationProblem:
         self.N = N
 
         self.x, self.dx = np.linspace(0, 2, num=N, retstep=True)
-        self.u = 0.5 - 0.25 * np.sin(np.pi * self.x)
-        self.invariant = np.sum(np.abs(self.u))
+        self.u0 = 0.5 - 0.25 * np.sin(np.pi * self.x)
+        self.invariant = np.sum(np.abs(self.u0))
 
         self.cfl = 0.5
         self.dt_max = self.dx * self.cfl
@@ -52,7 +56,7 @@ class BurgersEquationProblem:
         self.t0 = 0.0
         self.tfinal = 2.0
 
-    def compute_rhs(self, __, u: np.ndarray, udot: np.ndarray, ___) -> None:
+    def compute_rhs(self, __, u: np.ndarray, udot: np.ndarray, ___) -> int:
         dx = self.dx
 
         f = 0.5 * u**2
@@ -69,6 +73,7 @@ class BurgersEquationProblem:
 
         udot[+0] = -1.0 / dx * (f_minus[0] - f_lb)
         udot[-1] = -1.0 / dx * (f_rb - f_plus[-1])
+        return 0
 
 
 def main():
@@ -78,25 +83,27 @@ def main():
     print(f"Implementation: {impl}")
     problem = BurgersEquationProblem(N=1001)
     s = IVP(impl)
-    t0 = 0.0
-    y0 = problem.u
-    s.set_initial_value(y0, t0)
+    s.set_initial_value(problem.u0, problem.t0)
     s.set_rhs_fn(problem.compute_rhs)
 
     times = np.linspace(problem.t0, problem.tfinal, num=11)
-    times = np.arange(problem.t0, problem.tfinal + problem.dt_max, step=problem.dt_max)
 
-    soln = [y0]
+    soln = [problem.u0]
     for t in times[1:]:
         s.integrate(t)
         soln.append(s.y)
 
     plt.plot(problem.x, soln[0], "--", label="Initial condition")
     plt.plot(problem.x, soln[-1], "-", label="Final solution")
+    plt.xlabel(r"$x$")
+    plt.ylabel(r"Solution of Burgers' equation")
     plt.legend(loc="best")
     plt.tight_layout(pad=0.1)
-    plt.savefig(os.path.join("assets", f"ivp_burgers_soln_{impl}.pdf"))
-    print("Finished")
+
+    if args.savefig:
+        plt.savefig(os.path.join("assets", f"ivp_py_burgers_eq_{impl}.pdf"))
+    else:
+        plt.show()
 
 
 if __name__ == "__main__":
