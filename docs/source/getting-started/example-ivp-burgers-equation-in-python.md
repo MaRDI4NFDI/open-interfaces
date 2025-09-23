@@ -31,10 +31,11 @@ use adaptive integration.
 To facilitate this, we will convert the partial differential equation
 into a system of ODEs:
 $$
-\frac{du_i}{dt} = -0.5 \frac{\partial u_i^2}{\partial x}
+\frac{du_i}{dt} = -\frac12 \frac{\partial u_i^2}{\partial x}, \quad i = 0, \dots, N,
 $$
-which is commonly discretized in space (the right-hand side) in the following
-way:
+which is the discretization on the grid with resolution $N$ and spatial step
+$\Delta x = 2 / N$. Further, the partial derivative on the right-hand side is
+approximated as
 ```{math}
 :label: ode-system
 
@@ -46,9 +47,9 @@ There are different ways of approximating $f$, we will use one of the simplest
 ```{math}
 :label: numerical-flux
 
-\hat f = 0.5 * (f_i + f_{i+1}) - 0.5 * c * (u_{i+1} - u_i),
+\hat f = \frac{f_i + f_{i+1}}{2} - \frac{c (u_{i+1} - u_i)}{2},
 ```
-where $c = max(u_i)$, $i = 1, \dots, N$ and $N$ is the grid resolution.
+where $c = \max u_i$, $i = 1, \dots, N$.
 
 We start with necessary imports:
 ```python
@@ -62,7 +63,7 @@ that provides a common interface to different implementations of time integrator
 Next, we define an auxiliary class `BurgersEquationProblem`
 that computes an initial conditions for the given grid resolution $N$,
 defines the time span of the problem,
-and provides the right-hand side of the system {eq}`ode-system`
+and provides the right-hand side of the system {eqref}`ode-system`
 as a method `compute_rhs`:
 ```python
 class BurgersEquationProblem:
@@ -117,21 +118,13 @@ and then instantiate the auxiliary problem class and pass the details
 of the problem to the `IVP` instance:
 ```python
 problem = BurgersEquationProblem(N=101)
-s.set_initial_value(problem.u, problem.t0)
+s.set_initial_value(problem.u0, problem.t0)
 s.set_rhs_fn(problem.compute_rhs)
 ```
-Here we use an auxiliary class `BurgersEquationProblem` that handles details
-of the computations of the initial conditions and the right hand side of the
-equation :eqref:. The details of the actual computations are somewhat irrelevant
-as the most important thing here is that we instantiate the `IVP` interface,
-with a given implementation that we want to use, then we invoke the
-`set_initial_value` method with the actual initial conditions,
-and the `set_rhs_fn` method that takes a callback that evaluates the
-right-hand side of the system {eq}`ode-system`.
-Important here is that callback has a signature `rhs(t, u, udot)`,
-where `t` is time to which we want to integrate currently, `u` is the `ndarray`
-with current values of the ODE system solution vector, and `udot` is `ndarray`
-to which computed right-hand side is written.
+particularly, we set the initial condition using the method `set_initial_value`
+and the right-hand side function using the method `set_rhs_fn`.
+Invoking these two methods is enough to fully define the problem
+as we keep the default tolerances and other parameters of the integrator.
 
 Then we define the time points at which we want to compute the solution:
 ```python
@@ -166,3 +159,18 @@ shown on the figure {numref}`ivp-py-burgers-dopri5`.
 Numerical solution of the problem for Burgers' equation via `IVP` interface
 of Open Interfaces using `scipy_ode` implementation.
 ```
+
+The complete code is available
+[in the repository][burgers_py_src], is compiled during building the source code
+and after building can be run as:
+```shell
+python examples/call_ivp_from_python_burgers_eq.py [implementation]
+```
+where `[implementation]` is the name of the implementation to use,
+one of the following:
+- `scipy_ode` (SciPy ODE solvers in Python),
+- `sundials_cvode` (SUNDIALS CVODE solver in C),
+- `jl_diffeq` (`OrdinaryDiffEq.jl` solvers in Julia).
+
+[burgers_py_src]:
+https://github.com/MaRDI4NFDI/open-interfaces/blob/main/examples/call_ivp_from_python_burgers_eq.py
