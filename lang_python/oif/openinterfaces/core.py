@@ -2,7 +2,6 @@ import ctypes
 import importlib.resources
 import os
 from io import BytesIO
-from pathlib import Path
 from typing import Callable, NewType, Union
 
 import _conversion
