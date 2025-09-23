@@ -25,38 +25,25 @@ marshalling between different languages and a set of interfaces for typical
 numerical problems such as integration of differential equations and
 optimization.
 
+![](assets/pairwise_bindings.png)
+![](assets/oif_bindings.png)
+
 This project is the part of the [_Mathematical Research Data Initiative
 (MaRDI)_](https://mardi4nfdi.de).
 
-## Data flow
+## Documentation
 
-![Architecture of the MaRDI Open Interfaces](https://media.githubusercontent.com/media/MaRDI4NFDI/open-interfaces/refs/heads/main/assets/arch.png)
+Please refer to the documentation at
+<https://mardi4nfdi.github.io/open-interfaces/>
+for deeper view on the goals and implementation details
+as well as installation instructions, tutorials, and API reference.
 
-This figure shows the software architecture of the _MaRDI Open Interfaces_.
-There are two principal decoupled parts. The left part is user-facing
-and allows a user to request an implementation of some numerical procedure
-and then invoke different functions in this implementation to conduct
-computations using a unified interface (Gateway)
-that hides discrepancies between different implementations.
-The other part (on the right) is completely hidden from the user
-and works with an implementation of the interface.
-Particularly, it loads the implementation and its adapter and converts
-user data to the native data for the implementation.
+## Support and Contact
 
-## Installation of Python bindings and implementations
-
-The Python bindings and implementations of the interfaces are available
-from [Python Package Index (PyPI)](https://pypi.org/)
-and can be installed using
-```shell
-pip install openinterfaces
-```
-
-## Run examples
-
-Examples are provided in the `examples` directory in this repository.
-Documentation explaining some of these examples is available here:
-<https://mardi4nfdi.github.io/open-interfaces/>.
+_MaRDI Open Interfaces_ is an open source academic project.
+Please use the
+[issue tracker](https://github.com/MaRDI4NFDI/open-interfaces/issues)
+for bug reports and feature requests and asking questions.
 
 
 ## Funding
