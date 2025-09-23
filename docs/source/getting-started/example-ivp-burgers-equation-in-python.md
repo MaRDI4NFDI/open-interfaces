@@ -1,4 +1,4 @@
-# Example: Solving inviscid Burgers' equation using IVP interface
+# Example: Solving inviscid Burgers' equation from Python using IVP interface
 
 Here we demonstrate how to use the `ivp` (initial-value problem for ordinary
 differential equations, that is, time integration) interface
@@ -42,17 +42,84 @@ way:
 ```
 where $f = 0.5 u^2$ and $\hat f$ is an approximation of $f$.
 There are different ways of approximating $f$, we will use one of the simplest
-just for the sake of a demonstration.
+(called global Lax--Friedrichs flux) just for the sake of demonstration:
+```{math}
+:label: numerical-flux
 
-The code goes like this:
+\hat f = 0.5 * (f_i + f_{i+1}) - 0.5 * c * (u_{i+1} - u_i),
+```
+where $c = max(u_i)$, $i = 1, \dots, N$ and $N$ is the grid resolution.
+
+We start with necessary imports:
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from openinterfaces.interfaces.ivp import IVP
+```
+where the last import is the `IVP` gateway component
+that provides a common interface to different implementations of time integrators.
+
+Next, we define an auxiliary class `BurgersEquationProblem`
+that computes an initial conditions for the given grid resolution $N$,
+defines the time span of the problem,
+and provides the right-hand side of the system {eq}`ode-system`
+as a method `compute_rhs`:
+```python
+class BurgersEquationProblem:
+    def __init__(self, N=101):
+        self.N = N
+
+        self.x, self.dx = np.linspace(0, 2, num=N, retstep=True)
+        self.u = 0.5 - 0.25 * np.sin(np.pi * self.x)
+        self.invariant = np.sum(np.abs(self.u))
+
+        self.cfl = 0.5
+        self.dt_max = self.dx * self.cfl
+
+        self.t0 = 0.0
+        self.tfinal = 2.0
+
+    def compute_rhs(self, t, u, udot, user_data):
+        dx = self.dx
+
+        f = 0.5 * u**2
+        local_ss = np.maximum(np.abs(u[0:-1]), np.abs(u[1:]))
+        local_ss = np.max(np.abs(u))
+        f_hat = 0.5 * (f[0:-1] + f[1:]) - 0.5 * local_ss * (u[1:] - u[0:-1])
+        f_plus = f_hat[1:]
+        f_minus = f_hat[0:-1]
+        udot[1:-1] = -1.0 / dx * (f_plus - f_minus)
+
+        local_ss_rb = np.maximum(np.abs(u[0]), np.abs(u[-1]))
+        f_rb = 0.5 * (f[0] + f[-1]) - 0.5 * local_ss_rb * (u[0] - u[-1])
+        f_lb = f_rb
+
+        udot[+0] = -1.0 / dx * (f_minus[0] - f_lb)
+        udot[-1] = -1.0 / dx * (f_rb - f_plus[-1])
+```
+Note that the method `compute_rhs` has a signature `rhs(t, u, udot, user_data)`,
+defined by the `IVP` interface, where `t` and `u` are the current time
+and the solution vector, respectively, `udot` is the vector
+where the computed right-hand side is written, and `user_data` is an optional
+argument that can be used to pass additional data to the function.
+Here, we ignore this argument because the user data (spatial step `dx`)
+is already stored as a member variable of the class.
+Also, note that the right-hand side function returns `0` to indicate success.
+
+Because this problem is of the hyperbolic type,
+we can use the Dormand--Prince method provided via the `scipy_ode`
+implementation:
 ```python
 impl = "scipy_ode_dopri5"
-problem = BurgersEquationProblem(N=101)
 s = IVP(impl)
+```
+and then instantiate the auxiliary problem class and pass the details
+of the problem to the `IVP` instance:
+```python
+problem = BurgersEquationProblem(N=101)
 s.set_initial_value(problem.u, problem.t0)
 s.set_rhs_fn(problem.compute_rhs)
 ```
-
 Here we use an auxiliary class `BurgersEquationProblem` that handles details
 of the computations of the initial conditions and the right hand side of the
 equation :eqref:. The details of the actual computations are somewhat irrelevant
@@ -66,29 +133,36 @@ where `t` is time to which we want to integrate currently, `u` is the `ndarray`
 with current values of the ODE system solution vector, and `udot` is `ndarray`
 to which computed right-hand side is written.
 
-Once we set the details, we can do actual integrations at given time points:
+Then we define the time points at which we want to compute the solution:
 ```python
-times = np.linspace(problem.t0, problem.tfinal, num=11)
+    times = np.linspace(problem.t0, problem.tfinal, num=11)
+```
+and finally do the actual time integration, acculumating the solution
+at the specified time points:
+```python
+    soln = [problem.u0]
+    for t in times[1:]:
+        s.integrate(t)
+        soln.append(s.y)
+```
 
-soln = [y0]
-for t in times[1:]:
-s.integrate(t)
-print(f"{t:.3f} {s.y[0]:.6f}")
-soln.append(s.y)
-```
-and plot the results:
+After the integration is done, we can plot the results:
 ```python
-import matplotlib.pyplot as plt
-plt.plot(problem.x, soln[0], '--', label="Initial condition")
-plt.plot(problem.x, soln[-1], '-', label="Final solution")
-plt.legend(loc="best")
-plt.savefig("examples_burgers_eq.pdf")
+    plt.plot(problem.x, soln[0], "--", label="Initial condition")
+    plt.plot(problem.x, soln[-1], "-", label="Final solution")
+    plt.xlabel(r"$x$")
+    plt.ylabel(r"Solution of Burgers' equation")
+    plt.legend(loc="best")
+    plt.tight_layout(pad=0.1)
+    plt.show()
 ```
+
 The actual solution at the final time $T = 2$ and the initial condition are
-shown on the figure.
+shown on the figure {numref}`ivp-py-burgers-dopri5`.
 
+(ivp-py-burgers-dopri5)=
 ```{figure} img/ivp_py_burgers_eq_scipy_ode.pdf
 
 Numerical solution of the problem for Burgers' equation via `IVP` interface
-of Open InterFaces using `scipy_ode_dopri5` implementation.
+of Open Interfaces using `scipy_ode` implementation.
 ```
