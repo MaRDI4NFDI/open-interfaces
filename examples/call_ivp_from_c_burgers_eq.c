@@ -90,7 +90,7 @@ compute_initial_condition_(size_t N, OIFArrayF64 *u0, OIFArrayF64 *grid, double 
 int
 rhs(double t, OIFArrayF64 *y, OIFArrayF64 *rhs_out, void *user_data)
 {
-    (void)t;         /* Unused */
+    (void)t; /* Unused */
     int retval = 1;
     intptr_t N = y->dimensions[0];
     assert(N > 1);

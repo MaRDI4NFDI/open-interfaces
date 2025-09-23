@@ -92,7 +92,7 @@ main(int argc, char *argv[])
 
     double t0 = 0.0;
     double t_final = 3000;
-    double mu = 1e3; // Stiffness parameter.
+    double mu = 1e3;  // Stiffness parameter.
     y0->data[0] = 2.0;
     y0->data[1] = 0.0;
 
@@ -152,8 +152,9 @@ main(int argc, char *argv[])
         status = oif_ivp_set_integrator(implh, "vode", dict);
     }
     else if (strcmp(impl, "jl_diffeq") == 0 && strcmp(integrator, "rosenbrock23") == 0) {
-        oif_config_dict_add_int(dict, "autodiff", 0);
-        status = oif_ivp_set_integrator(implh, "Rosenbrock23", dict);
+        /* oif_config_dict_add_int(dict, "autodiff", 0); */
+        /* status = oif_ivp_set_integrator(implh, "Rosenbrock23", dict); */
+        status = oif_ivp_set_integrator(implh, "Rosenbrock23", NULL);
     }
     else {
         fprintf(stderr, "Cannot set integrator for implementation '%s'\n", impl);
@@ -165,7 +166,7 @@ main(int argc, char *argv[])
     double t = 0.0001;
     status = oif_ivp_integrate(implh, t, y);
 
-    const int Nt = 501; // Number of time steps.
+    const int Nt = 501;  // Number of time steps.
     double dt = (t_final - t0) / (Nt - 1);
 
     OIFArrayF64 *times = oif_create_array_f64(1, (intptr_t[1]){Nt});
