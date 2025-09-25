@@ -205,7 +205,7 @@ we can build Open Interfaces.
 
 To build the software, use command
 ```shell
-    make release
+    make
 ```
 which invokes `cmake` and builds Open Interfaces inside
 the `build` subdirectory enabling compiler optimizations.
@@ -245,7 +245,7 @@ please refer to the specific pages in the Table of Contents.
 If you plan to work on the source code,
 it is recommended to build it in the `Debug` mode with the command
 ```shell
-    make
+    make debug
 ```
 which enables additional runtime checks and debugging symbols,
 particularly useful when using a debugger such as `gdb` or `lldb`.
