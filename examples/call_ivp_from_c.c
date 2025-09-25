@@ -45,44 +45,51 @@ main(int argc, char *argv[])
     printf("Calling from C an open interface for solving y'(t) = f(t, y)\n");
     printf("Implementation: %s\n", impl);
 
+    int retval = EXIT_FAILURE;
+
     double t0 = 0.0;
+    // Initial condition.
     OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, (intptr_t[1]){1}, (double[1]){1.0});
+    // Solution vector.
+    OIFArrayF64 *y = oif_create_array_f64(1, (intptr_t[1]){1});
 
     ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
         fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
-        return EXIT_FAILURE;
+        goto cleanup;
     }
 
     int status;  // Aux variable to check for errors.
     status = oif_ivp_set_initial_value(implh, y0, t0);
     if (status) {
         fprintf(stderr, "oif_ivp_set_set_initial_value returned error\n");
-        return EXIT_FAILURE;
+        goto cleanup;
     }
     status = oif_ivp_set_rhs_fn(implh, rhs);
     if (status) {
         fprintf(stderr, "oif_ivp_set_rhs_fn returned error\n");
-        return EXIT_FAILURE;
+        goto cleanup;
     }
 
-    // Solution vector.
-    OIFArrayF64 *y = oif_create_array_f64(1, (intptr_t[1]){1});
     // Time step.
     double dt = 0.1;
     for (double t = t0 + dt; t <= 1.0; t += dt) {
         status = oif_ivp_integrate(implh, t, y);
         if (status) {
-            oif_free_array_f64(y0);
-            oif_free_array_f64(y);
             fprintf(stderr, "oif_ivp_integrate returned error\n");
-            return EXIT_FAILURE;
+            goto cleanup;
         }
         printf("%.3f %.6f\n", t, y->data[0]);
     }
 
+    retval = EXIT_SUCCESS;
+
+cleanup:
+
     oif_free_array_f64(y0);
     oif_free_array_f64(y);
 
-    return 0;
+    oif_unload_impl(implh);
+
+    return retval;
 }

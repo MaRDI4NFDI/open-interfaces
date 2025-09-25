@@ -259,5 +259,8 @@ cleanup:
     oif_free_array_f64(y);
     oif_free_array_f64(grid);
 
+    oif_config_dict_free(dict);
+    oif_unload_impl(implh);
+
     return retval;
 }

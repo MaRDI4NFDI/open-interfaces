@@ -82,7 +82,7 @@ main(int argc, char *argv[])
     printf("Implementation: %s\n", impl);
     printf("Integrator: %s\n", integrator);
 
-    int retval = 0;
+    int retval = 42;
 
     const int N = 2;  // Number of equations in the system.
 
@@ -101,26 +101,22 @@ main(int argc, char *argv[])
     ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
     if (implh == OIF_IMPL_INIT_ERROR) {
         fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
-        retval = EXIT_FAILURE;
         goto cleanup;
     }
 
     status = oif_ivp_set_initial_value(implh, y0, t0);
     if (status) {
         fprintf(stderr, "oif_ivp_set_set_initial_value returned error\n");
-        retval = EXIT_FAILURE;
         goto cleanup;
     }
     status = oif_ivp_set_user_data(implh, &mu);
     if (status) {
         fprintf(stderr, "oif_ivp_set_user_data return error\n");
-        retval = EXIT_FAILURE;
         goto cleanup;
     }
     status = oif_ivp_set_rhs_fn(implh, rhs);
     if (status) {
         fprintf(stderr, "oif_ivp_set_rhs_fn returned error\n");
-        retval = EXIT_FAILURE;
         goto cleanup;
     }
 
@@ -158,13 +154,13 @@ main(int argc, char *argv[])
     }
     else {
         fprintf(stderr, "Cannot set integrator for implementation '%s'\n", impl);
-        retval = EXIT_FAILURE;
         goto cleanup;
     }
     assert(status == 0);
 
     double t = 0.0001;
     status = oif_ivp_integrate(implh, t, y);
+    assert(status == 0);
 
     const int Nt = 501;  // Number of time steps.
     double dt = (t_final - t0) / (Nt - 1);
@@ -183,7 +179,6 @@ main(int argc, char *argv[])
         status = oif_ivp_integrate(implh, t, y);
         if (status) {
             fprintf(stderr, "oif_ivp_integrate returned error\n");
-            retval = EXIT_FAILURE;
             goto cleanup;
         }
         times->data[i] = t;
@@ -196,7 +191,6 @@ main(int argc, char *argv[])
     FILE *fp = fopen(output_filename, "w+e");
     if (fp == NULL) {
         fprintf(stderr, "Could not open file '%s' for writing\n", output_filename);
-        retval = EXIT_FAILURE;
         goto cleanup;
     }
     for (int i = 0; i < Nt; ++i) {
@@ -204,6 +198,8 @@ main(int argc, char *argv[])
     }
     fclose(fp);
     printf("Solution was written to file `%s`\n", output_filename);
+
+    retval = EXIT_SUCCESS;
 
 cleanup:
     oif_free_array_f64(solution);

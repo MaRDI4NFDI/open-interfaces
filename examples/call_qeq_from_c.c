@@ -15,11 +15,12 @@ parse_impl(int argc, char *argv[])
     }
     else {
         if ((strcmp(argv[1], "c_qeq_solver") == 0) ||
-            (strcmp(argv[1], "py_qeq_solver") == 0)) {
+            (strcmp(argv[1], "py_qeq_solver") == 0) ||
+            (strcmp(argv[1], "jl_qeq_solver") == 0)) {
             return argv[1];
         }
         else {
-            fprintf(stderr, "USAGE: %s [c_qeq_solver|py_qeq_solver]\n", argv[0]);
+            fprintf(stderr, "USAGE: %s [c_qeq_solver|jl_qeq_solver|py_qeq_solver]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
     }

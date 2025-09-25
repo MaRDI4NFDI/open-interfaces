@@ -15,11 +15,11 @@ parse_impl(int argc, char *argv[])
         return "c_lapack";
     }
     else {
-        if ((strcmp(argv[1], "c_lapack") == 0) || (strcmp(argv[1], "numpy") == 0)) {
+        if ((strcmp(argv[1], "c_lapack") == 0) || (strcmp(argv[1], "numpy") == 0) || (strcmp(argv[1], "jl_backslash") == 0)) {
             return argv[1];
         }
         else {
-            fprintf(stderr, "USAGE: %s [c_lapack|numpy]\n", argv[0]);
+            fprintf(stderr, "USAGE: %s [c_lapack|jl_backslash|numpy]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
     }
@@ -63,6 +63,8 @@ main(int argc, char *argv[])
     oif_free_array_f64(roots);
     oif_free_array_f64(A);
     oif_free_array_f64(b);
+
+    oif_unload_impl(implh);
 
     return 0;
 }
