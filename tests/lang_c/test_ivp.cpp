@@ -2,6 +2,8 @@
 #include <cstring>
 #include <cstdint>
 #include <memory>
+#include <tuple>
+#include <vector>
 
 #include "testutils.hpp"
 #include <gtest/gtest.h>
@@ -189,13 +191,13 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
 {
     const char *impl = std::get<0>(GetParam());
     ODEProblem *problem = std::get<1>(GetParam()).get();
-    double t0 = 0.0;
+    const double t0 = 0.0;
     intptr_t dims[] = {
         problem->N,
     };
     OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
+    const ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
     ASSERT_GT(implh, 0);
 
     int status;
@@ -204,6 +206,8 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
     status = oif_ivp_set_user_data(implh, problem);
     ASSERT_EQ(status, 0);
     status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
+    ASSERT_EQ(status, 0);
+    status = oif_ivp_set_tolerances(implh, 1e-6, 1e-12);
     ASSERT_EQ(status, 0);
 
     auto t_span = {0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 2.0};
@@ -284,22 +288,23 @@ TEST_P(ImplTimesIntegratorsFixture, SetIntegratorMethodWorks)
 {
     auto param = GetParam();
     const char *impl = param.impl;
-    ODEProblem *problem = new ScalarExpDecayProblem();
-    double t0 = 0.0;
-    double t1 = 0.1;
+    const ODEProblem *problem = new ScalarExpDecayProblem();
+    const double t0 = 0.0;
+    const double t1 = 0.1;
     intptr_t dims[] = {
         problem->N,
     };
     OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
-    ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
+    const ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
     ASSERT_GT(implh, 0);
 
     for (auto integrator_name : param.integrators) {
         int status;
         status = oif_ivp_set_initial_value(implh, y0, t0);
         ASSERT_EQ(status, 0);
-        status = oif_ivp_set_user_data(implh, problem);
+
+        status = oif_ivp_set_user_data(implh, (void *)problem);
         ASSERT_EQ(status, 0);
         status = oif_ivp_set_rhs_fn(implh, ODEProblem::rhs_wrapper);
         ASSERT_EQ(status, 0);
@@ -326,7 +331,7 @@ class SundialsCVODEConfigDictTest : public testing::Test {
     {
         const char *impl = "sundials_cvode";
         problem = new ScalarExpDecayProblem();
-        double t0 = 0.0;
+        const double t0 = 0.0;
         intptr_t dims[] = {
             problem->N,
         };
@@ -369,7 +374,9 @@ TEST_F(SundialsCVODEConfigDictTest, Test01)
     int status = oif_ivp_set_integrator(implh, (char *)"bdf", dict);
     ASSERT_EQ(status, 0);
 
-    oif_ivp_integrate(implh, t1, y);
+    status = oif_ivp_integrate(implh, t1, y);
+    ASSERT_EQ(status, 0);
+
     oif_config_dict_free(dict);
 }
 
@@ -380,7 +387,9 @@ TEST_F(SundialsCVODEConfigDictTest, Test02)
     int status = oif_ivp_set_integrator(implh, (char *)"adams", dict);
     ASSERT_EQ(status, 0);
 
-    oif_ivp_integrate(implh, t1, y);
+    status = oif_ivp_integrate(implh, t1, y);
+    ASSERT_EQ(status, 0);
+
     oif_config_dict_free(dict);
 }
 
@@ -389,10 +398,9 @@ TEST_F(SundialsCVODEConfigDictTest, Test03)
     OIFConfigDict *dict = oif_config_dict_init();
     oif_config_dict_add_int(dict, "max_num_steps", 1000);
     oif_config_dict_add_str(dict, "method", "wrong_key");
-    int status = oif_ivp_set_integrator(implh, (char *)"adams", dict);
+    const int status = oif_ivp_set_integrator(implh, (char *)"adams", dict);
     ASSERT_NE(status, 0);
 
-    oif_ivp_integrate(implh, t1, y);
     oif_config_dict_free(dict);
 }
 // END Tests for integrator parameters via config dicts for `sundials_cvode`.
