@@ -15,7 +15,8 @@ parse_impl(int argc, char *argv[])
         return "c_lapack";
     }
     else {
-        if ((strcmp(argv[1], "c_lapack") == 0) || (strcmp(argv[1], "numpy") == 0) || (strcmp(argv[1], "jl_backslash") == 0)) {
+        if ((strcmp(argv[1], "c_lapack") == 0) || (strcmp(argv[1], "numpy") == 0) ||
+            (strcmp(argv[1], "jl_backslash") == 0)) {
             return argv[1];
         }
         else {
