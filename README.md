@@ -31,7 +31,7 @@ optimization.
 This project is the part of the [_Mathematical Research Data Initiative
 (MaRDI)_](https://mardi4nfdi.de).
 
-## Documentation
+## Installation and Documentation
 
 Please refer to the documentation at
 <https://mardi4nfdi.github.io/open-interfaces/>
