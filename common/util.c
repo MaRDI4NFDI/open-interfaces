@@ -63,7 +63,7 @@ oif_util_free_(void *ptr)
 {
     if (ptr == NULL) {
         fprintf(stderr, "Cannot free a NULL pointer\n");
-        exit(1);
+        return;
     }
 
     size_t *p_oif = (size_t *)ptr;
