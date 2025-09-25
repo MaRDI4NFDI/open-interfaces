@@ -143,3 +143,7 @@ build.debug/
 build.debug_verbose_info/
 build.debug_verbose_info_and_sanitize/
 build.release/
+
+
+# Test coverage files
+coverage.*
