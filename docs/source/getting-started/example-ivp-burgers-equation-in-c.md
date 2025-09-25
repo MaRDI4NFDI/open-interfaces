@@ -36,7 +36,7 @@ $$
 which is commonly discretized in space (the right-hand side) in the following
 way:
 ```{math}
-:label: ode-system
+:label: c-burgers-ode-system
 
 \frac{du_i}{dt} = - \frac{\hat f(u_{i + 1/2}) - \hat f(u_{i - 1/2})}{\Delta x},
 ```
