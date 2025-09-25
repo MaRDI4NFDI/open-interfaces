@@ -23,7 +23,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(CallQEQFromCParameterizedTestFixture, RunsSuccessfully)
 {
-    // We add these tests to `ctest` with WORKING DIRECTORY set to the 
+    // We add these tests to `ctest` with WORKING DIRECTORY set to the
     // root of the build directory ($CMAKE_BINARY_DIR).
     const std::string program = "examples/call_qeq_from_c";
     const std::string arg = GetParam();
@@ -52,7 +52,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(CallLinsolveFromCParameterizedTestFixture, RunsSuccessfully)
 {
-    // We add these tests to `ctest` with WORKING DIRECTORY set to the 
+    // We add these tests to `ctest` with WORKING DIRECTORY set to the
     // root of the build directory ($CMAKE_BINARY_DIR).
     const std::string program = "examples/call_linsolve_from_c";
     const std::string arg = GetParam();
@@ -81,7 +81,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(CallIVPFromCParameterizedTestFixture, RunsSuccessfully)
 {
-    // We add these tests to `ctest` with WORKING DIRECTORY set to the 
+    // We add these tests to `ctest` with WORKING DIRECTORY set to the
     // root of the build directory ($CMAKE_BINARY_DIR).
     const std::string program = "examples/call_ivp_from_c";
     const std::string arg = GetParam();
@@ -110,7 +110,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(CallIVPFromCBurgersEqParameterizedTestFixture, RunsSuccessfully)
 {
-    // We add these tests to `ctest` with WORKING DIRECTORY set to the 
+    // We add these tests to `ctest` with WORKING DIRECTORY set to the
     // root of the build directory ($CMAKE_BINARY_DIR).
     const std::string program = "examples/call_ivp_from_c_burgers_eq";
     const std::string arg = GetParam();
@@ -143,7 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(CallIVPFromCVdPEqParameterizedTestFixture, RunsAsExpected)
 {
-    // We add these tests to `ctest` with WORKING DIRECTORY set to the 
+    // We add these tests to `ctest` with WORKING DIRECTORY set to the
     // root of the build directory ($CMAKE_BINARY_DIR).
     const std::string program = "examples/call_ivp_from_c_vdp_eq";
     const std::string arg1 = std::get<0>(GetParam());
