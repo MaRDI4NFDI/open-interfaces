@@ -28,7 +28,7 @@ oif_create_array_f64(int nd, const intptr_t *const dimensions)
 {
     OIFArrayF64 *x = oif_util_malloc(sizeof(OIFArrayF64));
     x->nd = nd;
-    x->dimensions = (intptr_t *) dimensions;
+    x->dimensions = (intptr_t *)dimensions;
     x->flags = OIF_ARRAY_C_CONTIGUOUS;
 
     if (nd == 1) {

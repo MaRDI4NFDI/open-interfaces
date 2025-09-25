@@ -5,8 +5,8 @@
 #include <cstdlib>
 using namespace std;
 
-
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
     OIFConfigDict *dict = oif_config_dict_init();
 

@@ -33,7 +33,8 @@ target_include_directories(test_output PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 add_executable(run_aux_tests_config_dict run_aux_tests_config_dict.cpp)
 target_link_libraries(run_aux_tests_config_dict GTest::gtest_main oif_c)
-target_include_directories(run_aux_tests_config_dict PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(run_aux_tests_config_dict
+                           PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 gtest_discover_tests(test_qeq)
 gtest_discover_tests(test_linsolve)
