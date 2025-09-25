@@ -1,16 +1,24 @@
 package := openinterfaces
 
+# Build in release mode. Default target
 .PHONY : all
 all :
-	cmake -S . -B build.debug \
+	cmake -S . -B build.release \
 		-G Ninja \
-		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		&& \
-	cmake --build build.debug && \
+	cmake --build build.release && \
 	rm -f build && \
-	ln -sv build.debug build
+	ln -sv build.release build
 
+
+# Build in release mode (alias for `make all` or simply `make`)
+.PHONY : release
+release : all
+
+
+# Run all tests
 .PHONY : test
 test :
 	@echo "=== C tests ==="
@@ -19,6 +27,18 @@ test :
 	julia tests/lang_julia/runtests.jl
 	@echo "=== Python tests ==="
 	pytest tests/lang_python
+
+
+.PHONY : debug
+debug :
+	cmake -S . -B build.debug \
+		-G Ninja \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+		&& \
+	cmake --build build.debug && \
+	rm -f build && \
+	ln -sv build.debug build
 
 .PHONY : pytest-valgrind
 pytest-valgrind :
@@ -54,18 +74,6 @@ debug-verbose-info :
 	cmake --build build.debug_verbose_info && \
 	rm -f build && \
 	ln -sv build.debug_verbose_info build
-
-.PHONY : release
-release :
-	cmake -S . -B build.release \
-		-G Ninja \
-		-DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-		&& \
-	cmake --build build.release && \
-	rm -f build && \
-	ln -sv build.release build
 
 .PHONY : clean
 clean :
