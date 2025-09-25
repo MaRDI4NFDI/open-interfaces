@@ -1,14 +1,8 @@
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 int
 solve_qeq_v1(double a, double b, double c, double *roots)
 {
-    if (roots == NULL) {
-        fprintf(stderr, "Memory for the roots array was not provided\n");
-        exit(EXIT_FAILURE);
-    }
     if (a == 0.0) {
         roots[0] = -c / b;
         roots[1] = -c / b;
