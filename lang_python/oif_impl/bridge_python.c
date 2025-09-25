@@ -290,6 +290,13 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     }
 
     pClass = PyObject_GetAttrString(pModule, className);
+    if (pClass == NULL || !PyCallable_Check(pClass)) {
+        PyErr_Print();
+        fprintf(stderr, "[%s] Cannot find class \"%s\"\n", prefix_, className);
+        Py_DECREF(pModule);
+        return NULL;
+    }
+
     pInitArgs = Py_BuildValue("()");
     pInstance = PyObject_CallObject(pClass, pInitArgs);
     if (pInstance == NULL) {
