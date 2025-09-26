@@ -25,8 +25,9 @@ marshalling between different languages and a set of interfaces for typical
 numerical problems such as integration of differential equations and
 optimization.
 
-![](assets/pairwise_bindings.png)
-![](assets/oif_bindings.png)
+| Traditional pairwise bindings-----|   | Decoupled bindings via _Open Interfaces_ |
+|:----------------------------------|---|-----------------------------------------:|
+| ![](assets/pairwise_bindings.png) |   | ![](assets/oif_bindings.png)             |
 
 This project is the part of the [_Mathematical Research Data Initiative
 (MaRDI)_](https://mardi4nfdi.de).
