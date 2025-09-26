@@ -198,7 +198,16 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
     OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
     const ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
-    ASSERT_GT(implh, 0);
+    if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Bridge component for the implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
+    if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
 
     int status;
     status = oif_ivp_set_initial_value(implh, y0, t0);
@@ -219,7 +228,10 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
 
     oif_free_array_f64(y0);
     oif_free_array_f64(y);
-    oif_unload_impl(implh);
+
+    if (implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        oif_unload_impl(implh);
+    }
 }
 // END Tests that use combinations of implementations and ODE problems.
 
@@ -239,18 +251,39 @@ TEST_P(IvpImplementationsFixture, DoesNotAcceptUnknownIntegratorName)
 {
     const char *impl = GetParam();
     const ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
-    ASSERT_GT(implh, 0);
+    if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Bridge component for the implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
+    if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
 
     const int status = oif_ivp_set_integrator(implh, (char *)"unknown_integrator_name", NULL);
     EXPECT_NE(status, 0);
-    oif_unload_impl(implh);
+
+    if (implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        oif_unload_impl(implh);
+    }
 }
 
 TEST_P(IvpImplementationsFixture, DoesNotAcceptUnknownIntegratorNameAndIgnoresConfig)
 {
     const char *impl = GetParam();
     const ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
-    ASSERT_GT(implh, 0);
+    if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Bridge component for the implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
+    if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
 
     OIFConfigDict *config = oif_config_dict_init();
     oif_config_dict_add_int(config, "max_num_steps", 1000);
@@ -259,7 +292,10 @@ TEST_P(IvpImplementationsFixture, DoesNotAcceptUnknownIntegratorNameAndIgnoresCo
     EXPECT_NE(status, 0);
 
     oif_config_dict_free(config);
-    oif_unload_impl(implh);
+
+    if (implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        oif_unload_impl(implh);
+    }
 }
 // END Tests that do not depend on ODE problems.
 
@@ -297,7 +333,16 @@ TEST_P(ImplTimesIntegratorsFixture, SetIntegratorMethodWorks)
     OIFArrayF64 *y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
     OIFArrayF64 *y = oif_create_array_f64(1, dims);
     const ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
-    ASSERT_GT(implh, 0);
+    if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Bridge component for the implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
+    if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
 
     for (auto integrator_name : param.integrators) {
         int status;
@@ -315,10 +360,13 @@ TEST_P(ImplTimesIntegratorsFixture, SetIntegratorMethodWorks)
         oif_ivp_integrate(implh, t1, y);
     }
 
-    oif_unload_impl(implh);
     oif_free_array_f64(y);
     oif_free_array_f64(y0);
     delete problem;
+
+    if (implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        oif_unload_impl(implh);
+    }
 }
 // END Tests that use combinations of implementations and ODE problems.
 
@@ -338,7 +386,16 @@ class SundialsCVODEConfigDictTest : public testing::Test {
         y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
         y = oif_create_array_f64(1, dims);
         implh = oif_load_impl("ivp", impl, 1, 0);
-        EXPECT_GT(implh, 0);
+        if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+            GTEST_SKIP()
+                << "[TEST] Bridge component for the implementation '"
+                << impl << "' is not available. Skipping the test.";
+        }
+        if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+            GTEST_SKIP()
+                << "[TEST] Implementation '"
+                << impl << "' is not available. Skipping the test.";
+        }
 
         int status;
         status = oif_ivp_set_initial_value(implh, y0, t0);
@@ -354,8 +411,11 @@ class SundialsCVODEConfigDictTest : public testing::Test {
     {
         oif_free_array_f64(y0);
         oif_free_array_f64(y);
-        oif_unload_impl(implh);
         delete problem;
+
+        if (implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+            oif_unload_impl(implh);
+        }
     }
 
     // NOLINTBEGIN
@@ -411,7 +471,8 @@ TEST_F(SundialsCVODEConfigDictTest, Test03)
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
 class ScipyODEConfigDictTest : public testing::Test {
    protected:
-    ScipyODEConfigDictTest()
+       void
+    SetUp() override
     {
         const char *impl = "scipy_ode";
         problem = new ScalarExpDecayProblem();
@@ -422,7 +483,16 @@ class ScipyODEConfigDictTest : public testing::Test {
         y0 = oif_init_array_f64_from_data(1, dims, problem->y0);
         y = oif_create_array_f64(1, dims);
         implh = oif_load_impl("ivp", impl, 1, 0);
-        EXPECT_GT(implh, 0);
+        if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+            GTEST_SKIP()
+                << "[TEST] Bridge component for the implementation '"
+                << impl << "' is not available. Skipping the test.";
+        }
+        if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+            GTEST_SKIP()
+                << "[TEST] Implementation '"
+                << impl << "' is not available. Skipping the test.";
+        }
 
         int status;
         status = oif_ivp_set_initial_value(implh, y0, t0);
@@ -433,12 +503,16 @@ class ScipyODEConfigDictTest : public testing::Test {
         EXPECT_EQ(status, 0);
     }
 
-    ~ScipyODEConfigDictTest()
+    void
+    TearDown() override
     {
         oif_free_array_f64(y0);
         oif_free_array_f64(y);
         delete problem;
-        oif_unload_impl(implh);
+
+        if (implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+            oif_unload_impl(implh);
+        }
     }
 
     // NOLINTBEGIN
@@ -500,6 +574,16 @@ class Dopri5OOPFixture : public ::testing::Test {
     SetUp() override
     {
         implh1 = oif_load_impl("ivp", "dopri5c", 1, 0);
+        if (implh1 == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+            GTEST_SKIP()
+                << "[TEST] Bridge component for the implementation '"
+                << "dopri5c" << "' is not available. Skipping the test.";
+        }
+        if (implh1 == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+            GTEST_SKIP()
+                << "[TEST] Implementation '"
+                << "dopri5c" << "' is not available. Skipping the test.";
+        }
         implh2 = oif_load_impl("ivp", "dopri5c", 1, 0);
 
         problem_exp_decay = new ScalarExpDecayProblem();

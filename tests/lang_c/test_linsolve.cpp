@@ -27,7 +27,19 @@ TEST_P(LinearSolverFixture, TestCase1)
     OIFArrayF64 *b = oif_init_array_f64_from_data(1, b_dims, b_data);
     intptr_t roots_dims[] = {2};
     OIFArrayF64 *roots = oif_create_array_f64(1, roots_dims);
-    const ImplHandle implh = oif_load_impl("linsolve", GetParam(), 1, 0);
+
+    const char *impl = GetParam();
+    const ImplHandle implh = oif_load_impl("linsolve", impl, 1, 0);
+    if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Bridge component for the implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
+    if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        GTEST_SKIP()
+            << "[TEST] Implementation '"
+            << impl << "' is not available. Skipping the test.";
+    }
 
     int const status = oif_solve_linear_system(implh, A, b, roots);
     EXPECT_EQ(status, 0);
@@ -44,5 +56,8 @@ TEST_P(LinearSolverFixture, TestCase1)
     oif_free_array_f64(A);
     oif_free_array_f64(b);
     oif_free_array_f64(roots);
-    oif_unload_impl(implh);
+
+    if (implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        oif_unload_impl(implh);
+    }
 }
