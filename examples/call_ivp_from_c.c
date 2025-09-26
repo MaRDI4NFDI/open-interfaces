@@ -105,9 +105,7 @@ fail:
         return OIF_BRIDGE_NOT_AVAILABLE_ERROR;
     }
     if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
-        fprintf(stderr,
-                "Implementation '%s' is not available. Cannot proceed\n",
-                impl);
+        fprintf(stderr, "Implementation '%s' is not available. Cannot proceed\n", impl);
         return OIF_IMPL_NOT_AVAILABLE_ERROR;
     }
 }
