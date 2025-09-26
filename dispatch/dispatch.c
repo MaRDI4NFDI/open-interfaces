@@ -21,9 +21,15 @@
 #include "oif/internal/bridge_api.h"
 #include "oif/internal/dispatch.h"
 
+#ifdef __APPLE__
+static char OIF_DISPATCH_C_SO[] = "liboif_bridge_c.dylib";
+static char OIF_DISPATCH_PYTHON_SO[] = "liboif_bridge_python.dylib";
+static char OIF_DISPATCH_JULIA_SO[] = "liboif_bridge_julia.dylib";
+#elif __linux__
 static char OIF_DISPATCH_C_SO[] = "liboif_bridge_c.so";
 static char OIF_DISPATCH_PYTHON_SO[] = "liboif_bridge_python.so";
 static char OIF_DISPATCH_JULIA_SO[] = "liboif_bridge_julia.so";
+#endif
 
 static const char *OIF_IMPL_PATH;
 

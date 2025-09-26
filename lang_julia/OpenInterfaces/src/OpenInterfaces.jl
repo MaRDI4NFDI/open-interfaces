@@ -92,7 +92,7 @@ const unload_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 
 
 function __init__()
-    lib_dispatch[] = Libdl.dlopen("liboif_dispatch.so")
+    lib_dispatch[] = Libdl.dlopen("liboif_dispatch.$(Libdl.dlext)")
     load_interface_impl_fn[] = dlsym(lib_dispatch[], :load_interface_impl)
     call_interface_impl_fn[] = dlsym(lib_dispatch[], :call_interface_impl)
     unload_interface_impl_fn[] = dlsym(lib_dispatch[], :unload_interface_impl)
