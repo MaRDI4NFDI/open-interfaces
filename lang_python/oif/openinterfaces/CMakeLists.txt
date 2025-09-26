@@ -11,7 +11,10 @@ target_include_directories(
 target_link_libraries(oif_python_conversion PRIVATE Python::Python)
 target_link_libraries(oif_python_conversion PRIVATE Python::NumPy)
 target_link_libraries(oif_python_conversion PRIVATE PkgConfig::FFI)
-install(TARGETS oif_python_conversion LIBRARY DESTINATION lib)
+if(${SKBUILD})
+  install(TARGETS oif_python_conversion
+          LIBRARY DESTINATION ${SKBUILD_PROJECT_NAME})
+endif()
 
 # Parameter `SUFFIX` adds extension suffix, for example,
 # `.cpython-312-x86_64-linux-gnu.so` that matches the suffix used by Python's
