@@ -1,3 +1,9 @@
+# When using scikit-build-core for building Python package, we do not need C
+# tests and GTest.
+if(${SKBUILD})
+  return()
+endif()
+
 find_package(GTest CONFIG)
 
 if(NOT GTest_FOUND)
