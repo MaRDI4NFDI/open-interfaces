@@ -20,6 +20,12 @@ typedef struct {
     PyObject *pCallbackClass;
 } PythonImplInfo;
 
+#ifdef __APPLE__
+static char SHLIB_EXT[] = ".dylib";
+#elif __linux__
+static char SHLIB_EXT[] = ".so";
+#endif
+
 static int IMPL_COUNTER = 0;
 
 static bool is_python_initialized_by_us = false;
@@ -221,7 +227,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     }
 
     fprintf(stderr, "[%s] libpython path: %s\n", prefix_, libpython_path);
-    sprintf(libpython_name, "libpython%d.%d.so", PY_MAJOR_VERSION, PY_MINOR_VERSION);
+    sprintf(libpython_name, "libpython%d.%d.%s", PY_MAJOR_VERSION, PY_MINOR_VERSION, SHLIB_EXT);
     fprintf(stderr, "[%s] Loading %s\n", prefix_, libpython_name);
     void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
     if (libpython == NULL) {
