@@ -34,9 +34,8 @@ main(int argc, char *argv[])
     printf("Implementation: %s\n", impl);
 
     ImplHandle implh = oif_load_impl("linsolve", impl, 1, 0);
-    if (implh == OIF_IMPL_INIT_ERROR) {
-        fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
-        return EXIT_FAILURE;
+    if (implh < OIF_IMPL_STARTING_NUMBER) {
+        goto fail;
     }
 
     OIFArrayF64 *A =
@@ -68,4 +67,23 @@ main(int argc, char *argv[])
     oif_unload_impl(implh);
 
     return 0;
+
+fail:
+    if (implh == OIF_IMPL_INIT_ERROR) {
+        fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
+        return EXIT_FAILURE;
+    }
+    if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+        fprintf(stderr,
+                "Bridge component for the implementation '%s' is not available. "
+                "Cannot proceed\n",
+                impl);
+        return OIF_BRIDGE_NOT_AVAILABLE_ERROR;
+    }
+    if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        fprintf(stderr,
+                "Implementation '%s' is not available. Cannot proceed\n",
+                impl);
+        return OIF_IMPL_NOT_AVAILABLE_ERROR;
+    }
 }

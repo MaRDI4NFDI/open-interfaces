@@ -84,6 +84,11 @@ main(int argc, char *argv[])
 
     int retval = 42;
 
+    ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
+    if (implh < OIF_IMPL_STARTING_NUMBER) {
+        goto fail;
+    }
+
     const int N = 2;  // Number of equations in the system.
 
     OIFArrayF64 *y0 = oif_create_array_f64(1, (intptr_t[1]){N});
@@ -97,12 +102,6 @@ main(int argc, char *argv[])
     y0->data[1] = 0.0;
 
     int status = 1;  // Aux variable to check for errors.
-
-    ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
-    if (implh == OIF_IMPL_INIT_ERROR) {
-        fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
-        goto cleanup;
-    }
 
     status = oif_ivp_set_initial_value(implh, y0, t0);
     if (status) {
@@ -211,4 +210,23 @@ cleanup:
     oif_unload_impl(implh);
 
     return retval;
+
+fail:
+    if (implh == OIF_IMPL_INIT_ERROR) {
+        fprintf(stderr, "Error during implementation initialization. Cannot proceed\n");
+        return EXIT_FAILURE;
+    }
+    if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+        fprintf(stderr,
+                "Bridge component for the implementation '%s' is not available. "
+                "Cannot proceed\n",
+                impl);
+        return OIF_BRIDGE_NOT_AVAILABLE_ERROR;
+    }
+    if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        fprintf(stderr,
+                "Implementation '%s' is not available. Cannot proceed\n",
+                impl);
+        return OIF_IMPL_NOT_AVAILABLE_ERROR;
+    }
 }
