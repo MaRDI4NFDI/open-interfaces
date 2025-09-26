@@ -259,10 +259,7 @@ set_initial_value(Self *self, OIFArrayF64 *y0_in, double t0_in)
         }
     }
     else {
-        fprintf(stderr,
-                "[sundials_cvode] Assumption that the internal Sundials type "
-                "'sundindextype' is 'int' is violated. Cannot proceed\n");
-        return 2;
+        self->N = (sunindextype)y0_in->dimensions[0];
     }
 
     // 4. Set vector of initial values.
