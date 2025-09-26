@@ -31,14 +31,12 @@ TEST_P(LinearSolverFixture, TestCase1)
     const char *impl = GetParam();
     const ImplHandle implh = oif_load_impl("linsolve", impl, 1, 0);
     if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
-        GTEST_SKIP()
-            << "[TEST] Bridge component for the implementation '"
-            << impl << "' is not available. Skipping the test.";
+        GTEST_SKIP() << "[TEST] Bridge component for the implementation '" << impl
+                     << "' is not available. Skipping the test.";
     }
     if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
-        GTEST_SKIP()
-            << "[TEST] Implementation '"
-            << impl << "' is not available. Skipping the test.";
+        GTEST_SKIP() << "[TEST] Implementation '" << impl
+                     << "' is not available. Skipping the test.";
     }
 
     int const status = oif_solve_linear_system(implh, A, b, roots);

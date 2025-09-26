@@ -28,13 +28,12 @@ TEST_P(CallQEQFromCParameterizedTestFixture, RunsSuccessfully)
 #ifdef __unix__
     status = WEXITSTATUS(status);
 #endif
-    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR)
-    {
+    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         ASSERT_EQ(status, 0);
     }
     else {
-        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '"
-                 << arg << "' is not available. Skipping the test.";
+        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '" << arg
+                     << "' is not available. Skipping the test.";
     }
 }
 
@@ -60,13 +59,12 @@ TEST_P(CallLinsolveFromCParameterizedTestFixture, RunsSuccessfully)
 #ifdef __unix__
     status = WEXITSTATUS(status);
 #endif
-    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR)
-    {
+    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         ASSERT_EQ(status, 0);
     }
     else {
-        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '"
-                 << arg << "' is not available. Skipping the test.";
+        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '" << arg
+                     << "' is not available. Skipping the test.";
     }
 }
 
@@ -91,13 +89,12 @@ TEST_P(CallIVPFromCParameterizedTestFixture, RunsSuccessfully)
 #ifdef __unix__
     status = WEXITSTATUS(status);
 #endif
-    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR)
-    {
+    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         ASSERT_EQ(status, 0);
     }
     else {
-        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '"
-                 << arg << "' is not available. Skipping the test.";
+        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '" << arg
+                     << "' is not available. Skipping the test.";
     }
 }
 
@@ -124,13 +121,12 @@ TEST_P(CallIVPFromCBurgersEqParameterizedTestFixture, RunsSuccessfully)
 #ifdef __unix__
     status = WEXITSTATUS(status);
 #endif
-    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR)
-    {
+    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         ASSERT_EQ(status, 0);
     }
     else {
-        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '"
-                 << arg << "' is not available. Skipping the test.";
+        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '" << arg
+                     << "' is not available. Skipping the test.";
     }
 }
 
@@ -166,8 +162,7 @@ TEST_P(CallIVPFromCVdPEqParameterizedTestFixture, RunsAsExpected)
     status = WEXITSTATUS(status);
 #endif
     std::cout << "Status is: " << status << std::endl;
-    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR)
-    {
+    if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         if (should_succeed)
             ASSERT_EQ(status, 0);
         else {
@@ -176,7 +171,7 @@ TEST_P(CallIVPFromCVdPEqParameterizedTestFixture, RunsAsExpected)
         }
     }
     else {
-        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '"
-                 << arg1 << "' is not available. Skipping the test.";
+        GTEST_SKIP() << "[TEST] Bridge or implementation for the implementation '" << arg1
+                     << "' is not available. Skipping the test.";
     }
 }

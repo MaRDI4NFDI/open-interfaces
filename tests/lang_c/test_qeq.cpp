@@ -7,7 +7,6 @@
 
 #include <oif/_platform.h>  // IWYU pragma: keep
 
-
 class QeqGatewayFixture : public ::testing::TestWithParam<const char *> {
    protected:
     // NOLINTBEGIN
@@ -25,9 +24,8 @@ class QeqGatewayFixture : public ::testing::TestWithParam<const char *> {
         const char *impl = GetParam();
         implh = oif_load_impl("qeq", impl, 1, 0);
         if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
-            GTEST_SKIP()
-                << "[TEST] Bridge component for the implementation "
-                << impl << " is not available. Skipping the test.";
+            GTEST_SKIP() << "[TEST] Bridge component for the implementation " << impl
+                         << " is not available. Skipping the test.";
         }
 
         ASSERT_NE(roots, nullptr);
