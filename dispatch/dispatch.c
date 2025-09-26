@@ -214,6 +214,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         if (lib_handle == NULL) {
             logerr(prefix_, "Cannot load shared library '%s'", dispatch_lang_so);
             logerr(prefix_, "Error message: %s", dlerror());
+            retval = OIF_BRIDGE_NOT_AVAILABLE_ERROR;
             goto cleanup;
         }
         OIF_DISPATCH_HANDLES[dh] = lib_handle;
@@ -233,6 +234,7 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     ImplInfo *impl_info = load_impl_fn(impl_details, version_major, version_minor);
     if (impl_info == NULL) {
         logerr(prefix_, "Could not load implementation '%s'", impl);
+        retval = OIF_IMPL_NOT_AVAILABLE_ERROR;
         goto cleanup;
     }
     impl_info->implh = IMPL_COUNTER_;
