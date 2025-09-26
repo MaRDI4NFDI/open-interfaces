@@ -205,15 +205,15 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
         dispatch_lang_so = OIF_DISPATCH_JULIA_SO;
     }
     else {
-        logerr(prefix_, "Implementation has unknown backend: '%s'\n", backend_name);
+        logerr(prefix_, "Implementation has unknown backend: '%s'", backend_name);
         goto cleanup;
     }
 
     if (OIF_DISPATCH_HANDLES[dh] == NULL) {
         lib_handle = dlopen(dispatch_lang_so, RTLD_LOCAL | RTLD_LAZY);
         if (lib_handle == NULL) {
-            logerr(prefix_, "Cannot load shared library '%s'\n", dispatch_lang_so);
-            logerr(prefix_, "Error message: %s\n", dlerror());
+            logerr(prefix_, "Cannot load shared library '%s'", dispatch_lang_so);
+            logerr(prefix_, "Error message: %s", dlerror());
             goto cleanup;
         }
         OIF_DISPATCH_HANDLES[dh] = lib_handle;
@@ -226,13 +226,13 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     load_impl_fn = dlsym(lib_handle, "load_impl");
 
     if (load_impl_fn == NULL) {
-        fprintf(stderr, "[dispatch] Could not load function %s: %s\n", "load_impl", dlerror());
+        logerr(prefix_, "Could not load function %s: %s\n", "load_impl", dlerror());
         goto cleanup;
     }
 
     ImplInfo *impl_info = load_impl_fn(impl_details, version_major, version_minor);
     if (impl_info == NULL) {
-        fprintf(stderr, "[dispatch] Could not load implementation\n");
+        logerr(prefix_, "Could not load implementation '%s'", impl);
         goto cleanup;
     }
     impl_info->implh = IMPL_COUNTER_;
