@@ -76,6 +76,9 @@ Interfaces:
 - A C compiler supporting the C17 standard, such as
     [`gcc`](https://https://gcc.gnu.org/) 9+ or
     [`clang`](https://clang.llvm.org/) 7+
+- A C++ compiler supporting the C++17 standard, such as
+    [`g++`](https://https://gcc.gnu.org/) 9+ or
+    [`clang++`](https://clang.llvm.org/) 7+
 - The [CMake](https://cmake.org) meta-build system v3.18+
 - [`libffi`](https://sourceware.org/libffi/) v8+
 - The [Make](https://www.gnu.org/software/make/) build system v4.3+
@@ -86,17 +89,37 @@ On Ubuntu, these dependencies can be installed via:
 sudo apt install build-essential cmake libffi-dev pkg-config
 ```
 
+With these dependencies installed, very minimal build can be done
+enabling C bindings and one (test-level) implementation in C.
+It is recommended to follow with the next section before building the source
+code.
+
 ### Optional recommended dependencies
 
 The following dependencies are optional but recommended:
 
-To really benefit from Open Interfaces, it is recommended to install
-C implementations and Python and Julia interfaces and implementations:
+To really benefit from _Open Interfaces_, it is recommended
+to install additional dependencies which enable more implementations
+(and also languages).
 
-- SUNDIALS v6.0+
-- LAPACK library
-- Python 3.9 with NumPy, SciPy, and Matplotlib packages
-- Julia 1.10+
+For C implementations LAPACK library and SUNDIALS v6.0+
+will enable `c_lapack` implementation of the `linsolve` interface
+and `sundials_cvode` implementation of the `ivp` interface, respectively.
+On Ubuntu, one can install them via:
+```shell
+sudo apt install liblapack-dev libsundials-dev
+```
+
+For Python bindings and implementations Python 3.9+ with header files
+along with the NumPy, SciPy, and Matplotlib packages.
+On Ubuntu, one can install them via the system package manager:
+```shell
+sudo apt install python3-dev python3-numpy python3-scipy python3-matplotlib
+```
+
+For Julia bindings and implementations, Julia 1.10+ is required
+along with several Julia packages. The only supported installation method
+for Julia and Julia packages is described [in this section](#install-julia).
 
 To simplify the installation of dependencies,
 C implementations and Python interface and packages can be installed via
@@ -148,11 +171,13 @@ then the easiest way to install Open Interfaces
 is via `pip`
 from the [Python Package Index (PyPI)](https://pypi.org/).
 
-First, ensure that essential dependencies are installed.
-On Ubuntu, this can be done via:
+First, ensure that essential dependencies for Python are installed.
+On Ubuntu, this can be done via (in addition to the mandatory dependencies):
 ```shell
-sudo apt install build-essential cmake libffi-dev pkg-config python3-dev python3-venv
+sudo apt install python3-dev python3-venv python3-numpy python3-scipy python3-msgpack
 ```
+Alternatively, you can install them via `conda` as described
+[in the previous section](#install-via-conda).
 
 Optional dependencies include `LAPACK` and `SUNDIALS` libraries
 for C implementations, which can be installed via:
@@ -230,6 +255,9 @@ you can run the provided tests via command
     make test
 ```
 which should take no more than a few minutes to complete.
+In case when not all dependencies are installed,
+some tests might be skipped if the corresponding implementations
+or languages are not available.
 
 ## Running examples
 
