@@ -1,6 +1,10 @@
 import ctypes
 
-import _callback
+try:
+    import _callback
+except ModuleNotFoundError:
+    import openinterfaces._callback as _callback
+
 import numpy as np
 from oif.core import OIF_ARRAY_F64, OIF_FLOAT64, OIF_INT, OIFArrayF64
 

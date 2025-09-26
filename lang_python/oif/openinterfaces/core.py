@@ -4,7 +4,11 @@ import os
 from io import BytesIO
 from typing import Callable, NewType, Union
 
-import _conversion
+try:
+    import _conversion
+except ModuleNotFoundError:
+    import openinterfaces._conversion as _conversion
+
 import msgpack
 import numpy as np
 
