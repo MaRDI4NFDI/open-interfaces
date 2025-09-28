@@ -21,6 +21,10 @@ fi
 
 export LD_LIBRARY_PATH="$PRJ_ROOT_DIR/build":"$LD_LIBRARY_PATH"
 
+if [[ $OSTYPE == darwin* ]]; then
+    export DYLD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+fi
+
 # Find Python packages inside the `src` directory.
 if [ -n "$PYTHONPATH" ]; then
     export _OLD_PYTHONPATH="$PYTHONPATH"
