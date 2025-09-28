@@ -326,7 +326,7 @@ struct ImplTimesIntegratorsFixture
     {
         auto param = GetParam();
         const char *impl = param.impl;
-        const ImplHandle implh = oif_load_impl("ivp", impl, 1, 0);
+        implh = oif_load_impl("ivp", impl, 1, 0);
         if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
             GTEST_SKIP() << "[TEST] Bridge component for the implementation '" << impl
                          << "' is not available. Skipping the test.";
