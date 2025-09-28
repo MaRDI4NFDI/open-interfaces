@@ -7,7 +7,35 @@
 
 #include <oif/_platform.h>  // IWYU pragma: keep
 
-class LinearSolverFixture : public ::testing::TestWithParam<const char *> {};
+class LinearSolverFixture : public ::testing::TestWithParam<const char *> {
+   protected:
+    // NOLINTBEGIN
+    ImplHandle implh;
+    // NOLINTEND
+
+    void
+    SetUp() override
+    {
+        const char *impl = GetParam();
+        implh = oif_load_impl("linsolve", impl, 1, 0);
+        if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+            GTEST_SKIP() << "[TEST] Bridge component for the implementation '" << impl
+                << "' is not available. Skipping the test.";
+        }
+        if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
+            GTEST_SKIP() << "[TEST] Implementation '" << impl
+                << "' is not available. Skipping the test.";
+        }
+    }
+
+    void
+    TearDown() override
+    {
+        if (implh != 0 && implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+            oif_unload_impl(implh);
+        }
+    }
+};
 
 INSTANTIATE_TEST_SUITE_P(LinearSolverTestSuite, LinearSolverFixture,
                          ::testing::Values("c_lapack"
@@ -28,17 +56,6 @@ TEST_P(LinearSolverFixture, TestCase1)
     intptr_t roots_dims[] = {2};
     OIFArrayF64 *roots = oif_create_array_f64(1, roots_dims);
 
-    const char *impl = GetParam();
-    const ImplHandle implh = oif_load_impl("linsolve", impl, 1, 0);
-    if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
-        GTEST_SKIP() << "[TEST] Bridge component for the implementation '" << impl
-                     << "' is not available. Skipping the test.";
-    }
-    if (implh == OIF_IMPL_NOT_AVAILABLE_ERROR) {
-        GTEST_SKIP() << "[TEST] Implementation '" << impl
-                     << "' is not available. Skipping the test.";
-    }
-
     int const status = oif_solve_linear_system(implh, A, b, roots);
     EXPECT_EQ(status, 0);
 
@@ -54,8 +71,4 @@ TEST_P(LinearSolverFixture, TestCase1)
     oif_free_array_f64(A);
     oif_free_array_f64(b);
     oif_free_array_f64(roots);
-
-    if (implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
-        oif_unload_impl(implh);
-    }
 }
