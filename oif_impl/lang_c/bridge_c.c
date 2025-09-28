@@ -55,9 +55,10 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
                 "[%s] Could not load implementation library '%s', "
                 "error: %s\n",
                 prefix_, impl_details_with_ext, dlerror());
+        oif_util_free(impl_details_with_ext);
         return NULL;
     }
-    free(impl_details_with_ext);
+    oif_util_free(impl_details_with_ext);
 
     CImplInfo *impl_info = oif_util_malloc(sizeof(CImplInfo));
     if (impl_info == NULL) {
