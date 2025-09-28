@@ -169,7 +169,7 @@ class OrbitEquationsProblem : public ODEProblem {
 
 struct IvpImplementationsTimesODEProblemsFixture
     : public testing::TestWithParam<std::tuple<const char *, std::shared_ptr<ODEProblem>>> {
-protected:
+   protected:
     // NOLINTBEGIN
     ImplHandle implh;
     // NOLINTEND
@@ -192,9 +192,8 @@ protected:
     void
     TearDown() override
     {
-        if (implh != 0
-                && implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR
-                && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        if (implh != 0 && implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR &&
+            implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
             oif_unload_impl(implh);
         }
     }
@@ -252,7 +251,7 @@ TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
 // ---------------------------------------------------------------------------
 // BEGIN Tests that do not depend on ODE problems.
 struct IvpImplementationsFixture : public testing::TestWithParam<const char *> {
-protected:
+   protected:
     // NOLINTBEGIN
     ImplHandle implh;
     // NOLINTEND
@@ -275,9 +274,8 @@ protected:
     void
     TearDown() override
     {
-        if (implh != 0
-                && implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR
-                && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        if (implh != 0 && implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR &&
+            implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
             oif_unload_impl(implh);
         }
     }
@@ -318,7 +316,7 @@ struct SolverIntegratorsCombination {
 
 struct ImplTimesIntegratorsFixture
     : public testing::TestWithParam<SolverIntegratorsCombination> {
-protected:
+   protected:
     // NOLINTBEGIN
     ImplHandle implh;
     // NOLINTEND
@@ -342,7 +340,8 @@ protected:
     void
     TearDown() override
     {
-        if (implh != 0 && implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR && implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
+        if (implh != 0 && implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR &&
+            implh != OIF_IMPL_NOT_AVAILABLE_ERROR) {
             oif_unload_impl(implh);
         }
     }

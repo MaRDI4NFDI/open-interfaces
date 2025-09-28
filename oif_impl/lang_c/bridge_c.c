@@ -46,8 +46,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         return NULL;
     }
     sprintf(impl_details_with_ext, "%s%s", impl_details, SHLIB_EXT);
-    fprintf(stderr, "[%s] load_impl impl_details_with_ext = %s\n",
-            prefix_, impl_details_with_ext);
+    fprintf(stderr, "[%s] load_impl impl_details_with_ext = %s\n", prefix_,
+            impl_details_with_ext);
     void *impl_lib = dlopen(impl_details_with_ext, RTLD_LOCAL | RTLD_LAZY);
     if (impl_lib == NULL) {
         fprintf(stderr,
@@ -88,8 +88,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     impl_info->impl_lib = impl_lib;
     impl_info->impl_details = oif_util_str_duplicate(impl_details);
     assert(impl_info->impl_details != NULL);
-    fprintf(stderr, "[%s] load_impl impl_info->impl_details = %s\n",
-            prefix_, impl_info->impl_details);
+    fprintf(stderr, "[%s] load_impl impl_info->impl_details = %s\n", prefix_,
+            impl_info->impl_details);
 
     IMPL_COUNTER_++;
     return (ImplInfo *)impl_info;

@@ -227,7 +227,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     }
 
     fprintf(stderr, "[%s] libpython path: %s\n", prefix_, libpython_path);
-    sprintf(libpython_name, "%s/libpython%d.%d%s", libpython_path, PY_MAJOR_VERSION, PY_MINOR_VERSION, SHLIB_EXT);
+    sprintf(libpython_name, "%s/libpython%d.%d%s", libpython_path, PY_MAJOR_VERSION,
+            PY_MINOR_VERSION, SHLIB_EXT);
     fprintf(stderr, "[%s] Loading %s\n", prefix_, libpython_name);
     void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
     if (libpython == NULL) {
