@@ -21,5 +21,5 @@ target_include_directories(oif_linsolve_c_lapack
                            PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(oif_linsolve_c_lapack
                            PUBLIC ${CMAKE_SOURCE_DIR}/oif_impl/lang_c/include)
-target_include_directories(oif_linsolve_c_lapack ${LAPACKE_INCLUDE_DIR})
+target_include_directories(oif_linsolve_c_lapack PRIVATE ${LAPACKE_INCLUDE_DIR})
 target_link_libraries(oif_linsolve_c_lapack PRIVATE LAPACK::LAPACK)
