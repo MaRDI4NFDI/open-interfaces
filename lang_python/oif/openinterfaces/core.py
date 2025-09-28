@@ -1,7 +1,7 @@
 import ctypes
 import importlib.resources
 import os
-import sysconfig
+import sys
 from io import BytesIO
 from typing import Callable, NewType, Union
 
@@ -51,7 +51,10 @@ if os.path.isdir(path):
 # We need to check if the library is in the site-packages directory
 # because this is the only place I could install this library
 # using `scikit-build-core` as a Python packaging build system.
-_lib_dispatch_name = "liboif_dispatch" + sysconfig.get_config_var("SHLIB_SUFFIX")
+_ext = ".so"
+if sys.platform == "darwin":
+    _ext = ".dylib"
+_lib_dispatch_name = "liboif_dispatch" + _ext
 _installed_lib_path = ""
 try:
     _installed_lib_path = str(importlib.resources.files("lib") / _lib_dispatch_name)
