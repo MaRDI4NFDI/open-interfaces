@@ -121,13 +121,35 @@ function MildlyStiffODESystem()
 end
 
 
-IMPLEMENTATIONS = ["sundials_cvode", "jl_diffeq", "scipy_ode"]
+POTENTIAL_IMPLEMENTATIONS = ["sundials_cvode", "jl_diffeq", "scipy_ode"]
+IMPLEMENTATIONS = []
+for impl in POTENTIAL_IMPLEMENTATIONS
+    implh = load_impl("ivp", impl, 1, 0)
+    if implh == OpenInterfaces.OIF_BRIDGE_NOT_AVAILABLE_ERROR
+        println(
+            "Bridge component for implementation '",
+            impl,
+            "' is not available. Skipping the test",
+        )
+        continue
+    end
+    if implh == OpenInterfaces.OIF_IMPL_NOT_AVAILABLE_ERROR
+        println("Implementation ", impl, " is not available. Skipping the test")
+        continue
+    end
+    push!(IMPLEMENTATIONS, impl)
+end
 
-INTEGRATORS = Dict(
-    "sundials_cvode" => ["adams", "bdf"],
-    "jl_diffeq" => ["DP5", "Tsit5"],
-    "scipy_ode" => ["vode", "lsoda", "dopri5", "dop853"],
-)
+INTEGRATORS = Dict()
+if "sundials_cvode" in IMPLEMENTATIONS
+    INTEGRATORS["sundials_cvode"] = ["adams", "bdf"]
+end
+if "jl_diffeq" in IMPLEMENTATIONS
+    INTEGRATORS["jl_diffeq"] = ["DP5", "Tsit5"]
+end
+if "scipy_ode" in IMPLEMENTATIONS
+    INTEGRATORS["scipy_ode"] = ["vode", "lsoda", "dopri5", "dop853"]
+end
 
 PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsProblem()]
 
@@ -271,98 +293,147 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
     end
 
     @testset "IVP, OIF_CONFIG_DICT tests" begin
-        @testset "test_1__config_dict_scipy_ode__should_accept_alright" begin
-            s = IVP.Self("scipy_ode")
-            p = ScalarExpDecayProblem()
-            IVP.set_initial_value(s, p.y0, p.t0)
-            IVP.set_rhs_fn(s, p.rhs)
+        if "scipy_ode" in IMPLEMENTATIONS
+            @testset "test_1__config_dict_scipy_ode__should_accept_alright" begin
+                s = IVP.Self("scipy_ode")
+                p = ScalarExpDecayProblem()
+                IVP.set_initial_value(s, p.y0, p.t0)
+                IVP.set_rhs_fn(s, p.rhs)
 
-            params = Dict("method" => "bdf", "order" => 1)
-            @test IVP.set_integrator(s, "vode", params) == 0
-        end
-
-        @testset "test_2__config_dict_with_bad_types__should_throw" begin
-            s = IVP.Self("jl_diffeq")
-            p = ScalarExpDecayProblem()
-            IVP.set_initial_value(s, p.y0, p.t0)
-            IVP.set_rhs_fn(s, p.rhs)
-
-            # Value 10^10 is too large to be represented as Int32
-            # and the code should throw an exception.
-            params = Dict("method" => 10^10, "order" => 1)
-            @test_throws ErrorException IVP.set_integrator(s, "vode", params)
-        end
-
-        @testset "test_3__malformed_config_dict_scipy_ode__should_throw" begin
-            s = IVP.Self("scipy_ode")
-            p = ScalarExpDecayProblem()
-            IVP.set_initial_value(s, p.y0, p.t0)
-            IVP.set_rhs_fn(s, p.rhs)
-            params = Dict("method" => "bdf", "wrong-param-name" => 1)
-            @test_throws ErrorException IVP.set_integrator(s, "vode", params)
-        end
-
-        @testset "test_4__config_dict_scipy_ode__should_succeed_with_enough_nsteps" begin
-            s = IVP.Self("scipy_ode")
-            p = MildlyStiffODESystem()
-            IVP.set_initial_value(s, p.y0, p.t0)
-            IVP.set_rhs_fn(s, p.rhs)
-
-            t1 = p.t0 + 1
-
-            # Set a very small number of steps, so that integrator fails.
-            IVP.set_integrator(s, "dopri5", Dict("nsteps" => 1))
-            @test_throws ErrorException IVP.integrate(s, t1)
-
-            # Set large number of steps, so that integrator succeeds.
-            IVP.set_integrator(s, "dopri5", Dict("nsteps" => 10_000))
-            @test IVP.integrate(s, t1) == 0
-        end
-
-        @testset "test_5__config_dict_cvode__fails_when_max_num_steps_too_small" begin
-            s = IVP.Self("sundials_cvode")
-            p = MildlyStiffODESystem()
-            IVP.set_initial_value(s, p.y0, p.t0)
-            IVP.set_rhs_fn(s, p.rhs)
-
-            IVP.set_integrator(s, "bdf", Dict("max_num_steps" => 50))
-
-            t1 = p.t0 + 1
-
-            @test_throws ErrorException s.integrate(t1)
-        end
-
-        @testset "test_6__config_dict_sundials_cvode__fails_with_false_options" begin
-            s = IVP.Self("sundials_cvode")
-            p = MildlyStiffODESystem()
-            IVP.set_initial_value(s, p.y0, p.t0)
-            IVP.set_rhs_fn(s, p.rhs)
-
-            # Should error on the unknown option.
-            @test_throws ErrorException s.set_integrator(
-                "bdf",
-                Dict("max_num_steps_typo" => 50),
+                params = Dict("method" => "bdf", "order" => 1)
+                @test IVP.set_integrator(s, "vode", params) == 0
+            end
+        else
+            @test_skip println(
+                "Implementation 'scipy_ode' not available. Skipping the test",
             )
         end
 
-        @testset "test_7__config_dict_jl_diffeq__works" begin
-            s = IVP.Self("jl_diffeq")
-            p = MildlyStiffODESystem()
-            IVP.set_initial_value(s, p.y0, p.t0)
-            IVP.set_rhs_fn(s, p.rhs)
+        if "jl_diffeq" in IMPLEMENTATIONS
+            @testset "test_2__config_dict_with_bad_types__should_throw" begin
+                s = IVP.Self("jl_diffeq")
+                p = ScalarExpDecayProblem()
+                IVP.set_initial_value(s, p.y0, p.t0)
+                IVP.set_rhs_fn(s, p.rhs)
 
-            params = Dict("chunk_size" => 10, "autodiff" => false)
-            @test IVP.set_integrator(s, "Rosenbrock23", params) == 0
+                # Value 10^10 is too large to be represented as Int32
+                # and the code should throw an exception.
+                params = Dict("method" => 10^10, "order" => 1)
+                @test_throws ErrorException IVP.set_integrator(s, "vode", params)
+            end
+        else
+            @test_skip println(
+                "Implementation 'jl_diffeq' not available. Skipping the test",
+            )
         end
 
-        @testset "test_8__config_dict_jl_diffeq__fails_when_unknown_options" begin
-            s = IVP.Self("jl_diffeq")
-            p = MildlyStiffODESystem()
-            IVP.set_initial_value(s, p.y0, p.t0)
-            IVP.set_rhs_fn(s, p.rhs)
+        if "scipy_ode" in IMPLEMENTATIONS
+            @testset "test_3__malformed_config_dict_scipy_ode__should_throw" begin
+                s = IVP.Self("scipy_ode")
+                p = ScalarExpDecayProblem()
+                IVP.set_initial_value(s, p.y0, p.t0)
+                IVP.set_rhs_fn(s, p.rhs)
+                params = Dict("method" => "bdf", "wrong-param-name" => 1)
+                @test_throws ErrorException IVP.set_integrator(s, "vode", params)
+            end
+        else
+            @test_skip println(
+                "Implementation 'scipy_ode' not available. Skipping the test",
+            )
+        end
 
-            bad_params = Dict("unknown_option" => 10_000)
-            @test_throws ErrorException s.set_integrator("DP5", bad_params)
+        if "scipy_ode" in IMPLEMENTATIONS
+            @testset "test_4__config_dict_scipy_ode__should_succeed_with_enough_nsteps" begin
+                s = IVP.Self("scipy_ode")
+                p = MildlyStiffODESystem()
+                IVP.set_initial_value(s, p.y0, p.t0)
+                IVP.set_rhs_fn(s, p.rhs)
+
+                t1 = p.t0 + 1
+
+                # Set a very small number of steps, so that integrator fails.
+                IVP.set_integrator(s, "dopri5", Dict("nsteps" => 1))
+                @test_throws ErrorException IVP.integrate(s, t1)
+
+                # Set large number of steps, so that integrator succeeds.
+                IVP.set_integrator(s, "dopri5", Dict("nsteps" => 10_000))
+                @test IVP.integrate(s, t1) == 0
+            end
+        else
+            @test_skip println(
+                "Implementation 'scipy_ode' not available. Skipping the test",
+            )
+        end
+
+        if "sundials_cvode" in IMPLEMENTATIONS
+            @testset "test_5__config_dict_cvode__fails_when_max_num_steps_too_small" begin
+                s = IVP.Self("sundials_cvode")
+                p = MildlyStiffODESystem()
+                IVP.set_initial_value(s, p.y0, p.t0)
+                IVP.set_rhs_fn(s, p.rhs)
+
+                IVP.set_integrator(s, "bdf", Dict("max_num_steps" => 50))
+
+                t1 = p.t0 + 1
+
+                @test_throws ErrorException s.integrate(t1)
+            end
+        else
+            @test_skip println(
+                "Implementation 'sundials_cvode' not available. Skipping the test",
+            )
+        end
+
+
+        if "sundials_cvode" in IMPLEMENTATIONS
+            @testset "test_6__config_dict_sundials_cvode__fails_with_false_options" begin
+                s = IVP.Self("sundials_cvode")
+                p = MildlyStiffODESystem()
+                IVP.set_initial_value(s, p.y0, p.t0)
+                IVP.set_rhs_fn(s, p.rhs)
+
+                # Should error on the unknown option.
+                @test_throws ErrorException s.set_integrator(
+                    "bdf",
+                    Dict("max_num_steps_typo" => 50),
+                )
+            end
+        else
+            @test_skip println(
+                "Implementation 'sundials_cvode' not available. Skipping the test",
+            )
+        end
+
+        if "jl_diffeq" in IMPLEMENTATIONS
+            @testset "test_7__config_dict_jl_diffeq__works" begin
+                s = IVP.Self("jl_diffeq")
+                p = MildlyStiffODESystem()
+                IVP.set_initial_value(s, p.y0, p.t0)
+                IVP.set_rhs_fn(s, p.rhs)
+
+                params = Dict("chunk_size" => 10, "autodiff" => false)
+                @test IVP.set_integrator(s, "Rosenbrock23", params) == 0
+            end
+        else
+            @test_skip println(
+                "Implementation 'jl_diffeq' not available. Skipping the test",
+            )
+        end
+
+        if "jl_diffeq" in IMPLEMENTATIONS
+            @test_skip @testset "test_8__config_dict_jl_diffeq__fails_when_unknown_options" begin
+                s = IVP.Self("jl_diffeq")
+                p = MildlyStiffODESystem()
+                IVP.set_initial_value(s, p.y0, p.t0)
+                IVP.set_rhs_fn(s, p.rhs)
+
+                bad_params = Dict("unknown_option" => 10_000)
+                @test_throws ErrorException s.set_integrator("DP5", bad_params)
+            end
+        else
+            @test_skip println(
+                "Implementation 'jl_diffeq' not available. Skipping the test",
+            )
         end
     end
 end

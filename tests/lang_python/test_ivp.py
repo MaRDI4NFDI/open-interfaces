@@ -7,6 +7,26 @@ import pytest
 from openinterfaces.interfaces.ivp import IVP
 from scipy import optimize
 
+POSSIBLE_IMPLEMENTATIONS = ["scipy_ode", "sundials_cvode", "jl_diffeq"]
+IMPLEMENTATION_LIST = []
+
+for impl in POSSIBLE_IMPLEMENTATIONS:
+    try:
+        IVP(impl)
+        IMPLEMENTATION_LIST.append(impl)
+    except ValueError as e:
+        print(f"WARNING: {str(e)}")
+        print(f"WARNING: Skipping tests with implementation {impl}")
+
+# Build allowed pairs of implementations(solvers) and integrators in them.
+SOLVER_INTEGRATOR_PAIRS = []
+if "scipy_ode" in IMPLEMENTATION_LIST:
+    SOLVER_INTEGRATOR_PAIRS.append(("scipy_ode", ["vode", "lsoda", "dopri5", "dop853"]))
+if "sundials_cvode" in IMPLEMENTATION_LIST:
+    SOLVER_INTEGRATOR_PAIRS.append(("sundials_cvode", ["bdf", "adams"]))
+if "jl_diffeq" in IMPLEMENTATION_LIST:
+    SOLVER_INTEGRATOR_PAIRS.append(("jl_diffeq", ["DP5", "Tsit5", "Vern7"]))
+
 
 class IVPProblem(ABC):
     t0: float
@@ -232,6 +252,10 @@ class TestIVP:
 
             npt.assert_allclose(value_1, value_2, 1e-1, 1e-1)
 
+    @pytest.mark.skipif(
+        "scipy_ode" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'scipy_ode' is not available",
+    )
     def test_6__check_that_set_integrator_works_only_after_setting_rhs(self):
         s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
@@ -240,6 +264,10 @@ class TestIVP:
         with pytest.raises(RuntimeError):
             s.set_integrator("vode")
 
+    @pytest.mark.skipif(
+        "scipy_ode" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'scipy_ode' is not available",
+    )
     def test_7__unknown_integrator_name__should_raise_exception(self):
         s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
@@ -251,6 +279,10 @@ class TestIVP:
 
 
 class TestIVPConfigDict:
+    @pytest.mark.skipif(
+        "scipy_ode" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'scipy_ode' is not available",
+    )
     def test_1__config_dict_scipy_ode__should_accept_alright(self):
         s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
@@ -260,6 +292,10 @@ class TestIVPConfigDict:
         params = {"method": "bdf", "order": 1}
         s.set_integrator("vode", params)
 
+    @pytest.mark.skipif(
+        "scipy_ode" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'scipy_ode' is not available",
+    )
     def test_2__malformed_config_dict_scipy_ode__should_raise(self):
         s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
@@ -270,6 +306,10 @@ class TestIVPConfigDict:
             params = {"method": "bdf", "wrong-param-name": 1}
             s.set_integrator("vode", params)
 
+    @pytest.mark.skipif(
+        "scipy_ode" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'scipy_ode' is not available",
+    )
     def test_3__malformed_config_dict_scipy_ode__should_raise(self):
         s = IVP("scipy_ode")
         p = ScalarExpDecayProblem()
@@ -280,6 +320,10 @@ class TestIVPConfigDict:
             params = {"method": "bdf", "wrong-param-name": 1}
             s.set_integrator("vode", params)
 
+    @pytest.mark.skipif(
+        "scipy_ode" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'sundials_cvode' is not available",
+    )
     def test_4__config_dict_scipy_ode__should_be_stable_with_enough_nsteps(self):
         s = IVP("scipy_ode")
         p = MildlyStiffODESystem()
@@ -300,6 +344,10 @@ class TestIVPConfigDict:
         s.set_integrator("dopri5", {"nsteps": 10_000})
         s.integrate(t1)
 
+    @pytest.mark.skipif(
+        "sundials_cvode" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'sundials_cvode' is not available",
+    )
     def test_5__config_dict_cvode__fails_when_max_num_steps_too_small(self):
         s = IVP("sundials_cvode")
         p = MildlyStiffODESystem()
@@ -315,6 +363,10 @@ class TestIVPConfigDict:
             for t in times[1:]:
                 s.integrate(t)
 
+    @pytest.mark.skipif(
+        "sundials_cvode" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'sundials_cvode' is not available",
+    )
     def test_6__config_dict_cvode__fails_with_false_options(self):
         s = IVP("sundials_cvode")
         p = MildlyStiffODESystem()
@@ -325,6 +377,10 @@ class TestIVPConfigDict:
         with pytest.raises(RuntimeError):
             s.set_integrator("bdf", {"max_num_steps_typo": 50})
 
+    @pytest.mark.skipif(
+        "jl_diffeq" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'jl_diffeq' is not available",
+    )
     def test_7__config_dict_jl_diffeq__works(self):
         s = IVP("jl_diffeq")
         p = MildlyStiffODESystem()
@@ -334,6 +390,10 @@ class TestIVPConfigDict:
         params = {"chunk_size": 10, "autodiff": False}
         assert s.set_integrator("Rosenbrock23", params) is None
 
+    @pytest.mark.skipif(
+        "jl_diffeq" not in IMPLEMENTATION_LIST,
+        reason="Implementation 'jl_diffeq' is not available",
+    )
     def test_8__config_dict_jl_diffeq__fails_when_unknown_options(self):
         s = IVP("jl_diffeq")
         p = MildlyStiffODESystem()
@@ -344,7 +404,7 @@ class TestIVPConfigDict:
             s.set_integrator("DP5", {"unknown_option": 10_000})
 
 
-@pytest.fixture(params=["scipy_ode", "sundials_cvode", "jl_diffeq"])
+@pytest.fixture(params=IMPLEMENTATION_LIST)
 def s(request):
     """Instantiate IVP with the specified implementation."""
     print(f"IVP: {request.param}")
@@ -364,12 +424,6 @@ def p(request):
     return request.param
 
 
-@pytest.fixture(
-    params=[
-        ("scipy_ode", ["vode", "lsoda", "dopri5", "dop853"]),
-        ("sundials_cvode", ["bdf", "adams"]),
-        ("jl_diffeq", ["DP5", "Tsit5", "Vern7"]),
-    ]
-)
+@pytest.fixture(params=SOLVER_INTEGRATOR_PAIRS)
 def solver_integrator(request):
     return request.param

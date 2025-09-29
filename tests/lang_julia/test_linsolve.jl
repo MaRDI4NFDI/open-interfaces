@@ -10,6 +10,18 @@ IMPLEMENTATIONS = ["c_lapack", "numpy", "jl_backslash"]
     function test(testCore)
         for impl in IMPLEMENTATIONS
             implh = load_impl("linsolve", impl, 1, 0)
+            if implh == OpenInterfaces.OIF_BRIDGE_NOT_AVAILABLE_ERROR
+                println(
+                    "Bridge component for implementation '",
+                    impl,
+                    "' is not available. Skipping the test",
+                )
+                continue
+            end
+            if implh == OpenInterfaces.OIF_IMPL_NOT_AVAILABLE_ERROR
+                println("Implementation ", impl, " is not available. Skipping the test")
+                continue
+            end
             testCore(implh)
             unload_impl(implh)
         end
