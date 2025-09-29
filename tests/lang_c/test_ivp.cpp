@@ -178,6 +178,7 @@ struct IvpImplementationsTimesODEProblemsFixture
     SetUp() override
     {
         const char *impl = std::get<0>(GetParam());
+        printf("impl = %s\n", impl);
         implh = oif_load_impl("ivp", impl, 1, 0);
         if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
             GTEST_SKIP() << "[TEST] Bridge component for the implementation '" << impl
@@ -203,7 +204,7 @@ INSTANTIATE_TEST_SUITE_P(
     IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
     testing::Combine(
         testing::Values(
-            // "sundials_cvode",
+            "sundials_cvode",
             "dopri5c"
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
             ,
@@ -211,9 +212,9 @@ INSTANTIATE_TEST_SUITE_P(
 #endif
             ),
         testing::Values(std::make_shared<ScalarExpDecayProblem>()
-                        // ,
-                        //             std::make_shared<LinearOscillatorProblem>(),
-                        //             std::make_shared<OrbitEquationsProblem>()
+                        ,
+                                    std::make_shared<LinearOscillatorProblem>(),
+                                    std::make_shared<OrbitEquationsProblem>()
                         )));
 
 TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
@@ -627,6 +628,7 @@ class Dopri5OOPFixture : public ::testing::Test {
     TearDown() override
     {
         oif_free_array_f64(y0_exp_decay_1);
+
         oif_free_array_f64(y0_exp_decay_2);
         oif_free_array_f64(y0_oscillator_1);
         oif_free_array_f64(y0_oscillator_2);
@@ -643,22 +645,22 @@ class Dopri5OOPFixture : public ::testing::Test {
     }
 
     // NOLINTBEGIN
-    ImplHandle implh1;
-    ImplHandle implh2;
+    ImplHandle implh1 = -10000;
+    ImplHandle implh2 = -20000;
     ODEProblem *problem_exp_decay = nullptr;
     ODEProblem *problem_oscillator = nullptr;
     intptr_t dims_exp_decay[1];
     intptr_t dims_oscillator[1];
     const double t0 = 0.0;
 
-    OIFArrayF64 *y0_exp_decay_1;
-    OIFArrayF64 *y0_exp_decay_2;
-    OIFArrayF64 *y0_oscillator_1;
-    OIFArrayF64 *y0_oscillator_2;
-    OIFArrayF64 *y_exp_decay_1;
-    OIFArrayF64 *y_exp_decay_2;
-    OIFArrayF64 *y_oscillator_1;
-    OIFArrayF64 *y_oscillator_2;
+    OIFArrayF64 *y0_exp_decay_1 = nullptr;
+    OIFArrayF64 *y0_exp_decay_2 = nullptr;
+    OIFArrayF64 *y0_oscillator_1 = nullptr;
+    OIFArrayF64 *y0_oscillator_2 = nullptr;
+    OIFArrayF64 *y_exp_decay_1 = nullptr;
+    OIFArrayF64 *y_exp_decay_2 = nullptr;
+    OIFArrayF64 *y_oscillator_1 = nullptr;
+    OIFArrayF64 *y_oscillator_2 = nullptr;
     // NOLINTEND
 };
 
