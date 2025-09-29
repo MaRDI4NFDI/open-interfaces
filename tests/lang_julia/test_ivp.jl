@@ -154,7 +154,7 @@ end
 PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsProblem()]
 
 # The enumeration of tests corresponds to the one from `test_ivp.py`.
-@testset "Testing IVP interface from Julia" begin
+@testset verbose = true "Testing IVP interface from Julia" begin
 
     function fixture_self_prob(test_func)
         for impl in IMPLEMENTATIONS
