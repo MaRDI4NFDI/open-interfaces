@@ -45,9 +45,9 @@ Then open a terminal and go to that directory.
 Alternatively, download and unpack the source code directly from the terminal,
 for example, for the latest release:
 ```shell
-curl -LO https://github.com/MaRDI4NFDI/open-interfaces/archive/refs/tags/v0.6.0.tar.gz
-tar -xzvf v0.6.0.tar.gz
-cd open-interfaces-0.6.0
+curl -LO https://github.com/MaRDI4NFDI/open-interfaces/archive/refs/tags/v0.6.1.tar.gz
+tar -xzvf v0.6.1.tar.gz
+cd open-interfaces-0.6.1
 ```
 
 If you prefer to use the latest development version,
