@@ -223,11 +223,7 @@ of Open Interfaces,
 create and activate a Julia environment for Open Interfaces
 and install required Julia packages:
 ```
-julia --project=. -e 'using Pkg;
-  Pkg.add(["Libdl", "MsgPack", "OrdinaryDiffEq", "NonlinearSolve"]);
-  Pkg.develop(path="lang_julia/OpenInterfaces");
-  Pkg.develop(path="lang_julia/OpenInterfacesImpl");
-  Pkg.instantiate()'
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
 ```
 
 (build-source-code)=
