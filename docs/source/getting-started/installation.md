@@ -194,7 +194,7 @@ dependencies such as Python or OpenBlAS installed via the Homebrew package manag
    ```shell
    python3 -m venv .venv
    source .venv/bin/activate
-   pip install requirements-macos.txt
+   pip install -r requirements-macos.txt
    ```
 
 6. (Optional) Install Julia
