@@ -421,14 +421,14 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
         end
 
         if "jl_diffeq" in IMPLEMENTATIONS
-            @test_skip @testset "test_8__config_dict_jl_diffeq__fails_when_unknown_options" begin
+            @testset "test_8__config_dict_jl_diffeq__fails_when_unknown_options" begin
                 s = IVP.Self("jl_diffeq")
                 p = MildlyStiffODESystem()
                 IVP.set_initial_value(s, p.y0, p.t0)
                 IVP.set_rhs_fn(s, p.rhs)
 
                 bad_params = Dict("unknown_option" => 10_000)
-                @test_throws ErrorException s.set_integrator("DP5", bad_params)
+                @test_throws ErrorException IVP.set_integrator(s, "DP5", bad_params)
             end
         else
             @test_skip println(
