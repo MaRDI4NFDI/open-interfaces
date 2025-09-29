@@ -159,6 +159,43 @@ get_numpy_array_from_oif_array_f64(OIFArrayF64 **value)
     return pValue;
 }
 
+static int
+init_python_()
+{
+    int retval = -1;
+    // For unknown reason, embedded Python does not take into the account
+    // that we can use a virtual environment,
+    // so we have to shape it a bit.
+    const char *venv = getenv("VIRTUAL_ENV");
+    PyStatus status;
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+    if (venv) {
+        fprintf(stderr, "[%s] Detected virtual environment: %s\n", prefix_, venv);
+        char buffer_prog_name[2048];
+        sprintf(buffer_prog_name, "%s/bin/python", venv);
+
+        status = PyConfig_SetBytesString(&config, &config.program_name, buffer_prog_name);
+        if (PyStatus_Exception(status)) {
+            logerr(prefix_, "init_python error: %s\n", status.err_msg);
+            goto cleanup;
+        }
+    }
+    status = Py_InitializeFromConfig(&config);
+    if (PyStatus_Exception(status)) {
+        logerr(prefix_, "init_python error: %s\n", status.err_msg);
+        goto cleanup;
+    }
+    if (IMPL_COUNTER == 0) {
+        is_python_initialized_by_us = true;
+    }
+
+cleanup:
+    PyConfig_Clear(&config);
+
+    return 0;
+}
+
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
@@ -176,9 +213,10 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         fprintf(stderr, "[%s] Backend is already initialized\n", prefix_);
     }
     else {
-        Py_Initialize();
-        if (IMPL_COUNTER == 0) {
-            is_python_initialized_by_us = true;
+        int status;
+        status = init_python_();
+        if (status != 0) {
+            return NULL;
         }
     }
 
