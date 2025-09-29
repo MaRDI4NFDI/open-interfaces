@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 
+#include <oif/api.h>
 #include "oif/c_bindings.h"
 #include "oif/interfaces/qeq.h"
 
@@ -20,7 +21,12 @@ class QeqGatewayFixture : public ::testing::TestWithParam<const char *> {
             2,
         };
         roots = oif_create_array_f64(1, dimensions);
-        implh = oif_load_impl("qeq", GetParam(), 1, 0);
+        const char *impl = GetParam();
+        implh = oif_load_impl("qeq", impl, 1, 0);
+        if (implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+            GTEST_SKIP() << "[TEST] Bridge component for the implementation " << impl
+                         << " is not available. Skipping the test.";
+        }
 
         ASSERT_NE(roots, nullptr);
         ASSERT_GT(implh, 0);
@@ -30,7 +36,9 @@ class QeqGatewayFixture : public ::testing::TestWithParam<const char *> {
     TearDown() override
     {
         oif_free_array_f64(roots);
-        oif_unload_impl(implh);
+        if (implh != OIF_BRIDGE_NOT_AVAILABLE_ERROR) {
+            oif_unload_impl(implh);
+        }
     }
 };
 

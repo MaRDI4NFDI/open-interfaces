@@ -4,7 +4,6 @@ package := openinterfaces
 .PHONY : all
 all :
 	cmake -S . -B build.release \
-		-G Ninja \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		&& \
@@ -32,7 +31,6 @@ test :
 .PHONY : debug
 debug :
 	cmake -S . -B build.debug \
-		-G Ninja \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		&& \

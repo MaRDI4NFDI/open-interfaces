@@ -21,7 +21,10 @@ target_include_directories(
 target_link_libraries(oif_bridge_python_callback PRIVATE Python::Python)
 target_link_libraries(oif_bridge_python_callback PRIVATE Python::NumPy)
 target_link_libraries(oif_bridge_python_callback PRIVATE PkgConfig::FFI)
-install(TARGETS oif_bridge_python_callback DESTINATION lib)
+if(${SKBUILD})
+  install(TARGETS oif_bridge_python_callback
+          DESTINATION ${SKBUILD_PROJECT_NAME})
+endif()
 
 # Parameter `SUFFIX` adds extension suffix, for example,
 # `.cpython-312-x86_64-linux-gnu.so` that matches the suffix used by Python's

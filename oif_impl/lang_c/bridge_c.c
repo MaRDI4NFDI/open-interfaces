@@ -25,6 +25,12 @@ static int IMPL_COUNTER_ = 0;
 
 static char *prefix_ = "bridge_c";
 
+#ifdef __APPLE__
+static char SHLIB_EXT[] = ".dylib";
+#elif __linux__
+static char SHLIB_EXT[] = ".so";
+#endif
+
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
@@ -32,14 +38,26 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     (void)version_minor;
     // For C implementations, `impl_details` must contain the name
     // of the shared library with the methods implemented as functions.
-    void *impl_lib = dlopen(impl_details, RTLD_LOCAL | RTLD_LAZY);
+    char *impl_details_with_ext =
+        oif_util_malloc(strlen(impl_details) + strlen(SHLIB_EXT) + 1);
+    if (impl_details_with_ext == NULL) {
+        fprintf(stderr, "[%s] Could not allocate memory for implementation details\n",
+                prefix_);
+        return NULL;
+    }
+    sprintf(impl_details_with_ext, "%s%s", impl_details, SHLIB_EXT);
+    fprintf(stderr, "[%s] load_impl impl_details_with_ext = %s\n", prefix_,
+            impl_details_with_ext);
+    void *impl_lib = dlopen(impl_details_with_ext, RTLD_LOCAL | RTLD_LAZY);
     if (impl_lib == NULL) {
         fprintf(stderr,
                 "[%s] Could not load implementation library '%s', "
                 "error: %s\n",
-                prefix_, impl_details, dlerror());
+                prefix_, impl_details_with_ext, dlerror());
+        oif_util_free(impl_details_with_ext);
         return NULL;
     }
+    oif_util_free(impl_details_with_ext);
 
     CImplInfo *impl_info = oif_util_malloc(sizeof(CImplInfo));
     if (impl_info == NULL) {
@@ -70,7 +88,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     impl_info->impl_lib = impl_lib;
     impl_info->impl_details = oif_util_str_duplicate(impl_details);
     assert(impl_info->impl_details != NULL);
-    fprintf(stderr, "[dispatch_c] load_impl impl_info->impl_details = %s\n",
+    fprintf(stderr, "[%s] load_impl impl_info->impl_details = %s\n", prefix_,
             impl_info->impl_details);
 
     IMPL_COUNTER_++;

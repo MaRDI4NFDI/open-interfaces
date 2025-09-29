@@ -11,6 +11,15 @@ extern "C" {
 // Handle to an instantiated implementation.
 typedef int ImplHandle;
 
+/**
+ * Starting number for implementation handles.
+ * If an implementation was successfully loaded,
+ * its handle (ID) is guaranteed to be greater or equal than this number.
+ */
+enum {
+    OIF_IMPL_STARTING_NUMBER = 1000,
+};
+
 typedef enum {
     OIF_INT = 1,
     // OIF_FLOAT32 = 2,
@@ -83,8 +92,10 @@ typedef struct {
 } OIFUserData;
 
 enum {
-    OIF_ERROR = -1,
-    OIF_IMPL_INIT_ERROR = -2,
+    OIF_ERROR = 1,
+    OIF_IMPL_INIT_ERROR = 2,
+    OIF_BRIDGE_NOT_AVAILABLE_ERROR = 3,
+    OIF_IMPL_NOT_AVAILABLE_ERROR = 4,
 };
 
 #ifdef __cplusplus

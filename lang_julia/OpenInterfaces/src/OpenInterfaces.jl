@@ -10,7 +10,8 @@ export OIF_INT,
 export OIF_LANG_C, OIF_LANG_CXX, OIF_LANG_PYTHON, OIF_LANG_JULIA, OIF_LANG_R
 
 # Error codes
-export OIF_ERROR, OIF_IMPL_INIT_ERROR
+export OIF_ERROR,
+    OIF_IMPL_INIT_ERROR, OIF_BRIDGE_NOT_AVAILABLE_ERROR, OIF_IMPL_NOT_AVAILABLE_ERROR
 
 # Data structures
 export OIFArgType, OIFArgs, OIFArrayF64, OIFCallback, OIFUserData
@@ -41,8 +42,13 @@ const OIF_LANG_JULIA::Int32 = 4
 const OIF_LANG_R::Int32 = 5
 const OIF_LANG_COUNT::Int32 = 6
 
-OIF_ERROR = -1
-OIF_IMPL_INIT_ERROR = -2
+const OIF_IMPL_STARTING_NUMBER = 1000
+
+# Error codes
+OIF_ERROR = 1
+OIF_IMPL_INIT_ERROR = 2
+OIF_BRIDGE_NOT_AVAILABLE_ERROR = 3
+OIF_IMPL_NOT_AVAILABLE_ERROR = 4
 
 const OIF_ARRAY_C_CONTIGUOUS::Int32 = 0x0001
 const OIF_ARRAY_F_CONTIGUOUS::Int32 = 0x0002
@@ -92,7 +98,13 @@ const unload_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 
 
 function __init__()
-    lib_dispatch[] = Libdl.dlopen("liboif_dispatch.so")
+    try
+        lib_dispatch[] = Libdl.dlopen("liboif_dispatch.$(Libdl.dlext)")
+    catch e
+        if startswith(e.msg, "could not load")
+            return
+        end
+    end
     load_interface_impl_fn[] = dlsym(lib_dispatch[], :load_interface_impl)
     call_interface_impl_fn[] = dlsym(lib_dispatch[], :call_interface_impl)
     unload_interface_impl_fn[] = dlsym(lib_dispatch[], :unload_interface_impl)

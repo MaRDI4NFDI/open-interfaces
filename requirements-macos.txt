@@ -1,0 +1,5 @@
+numpy
+msgpack
+scipy
+matplotlib
+pytest
