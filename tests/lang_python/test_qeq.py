@@ -3,9 +3,20 @@ import numpy.testing as npt
 import pytest
 from openinterfaces.interfaces.qeq import QEQ
 
+POSSIBLE_IMPLEMENTATIONS = ["py_qeq_solver", "c_qeq_solver", "jl_qeq_solver"]
+IMPLEMENTATION_LIST = []
+
+for impl in POSSIBLE_IMPLEMENTATIONS:
+    try:
+        QEQ(impl)
+        IMPLEMENTATION_LIST.append(impl)
+    except ValueError as e:
+        print(f"WARNING: {str(e)}")
+        print(f"WARNING: Skipping tests with implementation {impl}")
+
 
 class TestQEQ:
-    @pytest.fixture(params=["py_qeq_solver", "c_qeq_solver", "jl_qeq_solver"])
+    @pytest.fixture(params=IMPLEMENTATION_LIST)
     def s(self, request):
         return QEQ(request.param)
 

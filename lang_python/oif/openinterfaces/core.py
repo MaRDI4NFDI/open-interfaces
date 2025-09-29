@@ -34,6 +34,19 @@ OIF_LANG_JULIA = 4
 OIF_LANG_R = 5
 OIF_LANG_COUNT = 6
 
+
+# Error codes
+OIF_ERROR = 1
+OIF_IMPL_INIT_ERROR = 2
+OIF_BRIDGE_NOT_AVAILABLE_ERROR = 3
+OIF_IMPL_NOT_AVAILABLE_ERROR = 4
+
+
+# Starting number for implementation handles.
+# If implementation handle lower than this number, it is an error code.
+OIF_IMPL_STARTING_NUMBER = 1000
+
+
 # Bit mask that sets flags in OIFArrayF64 structure.
 OIF_ARRAY_C_CONTIGUOUS = 0x0001
 OIF_ARRAY_F_CONTIGUOUS = 0x0002
@@ -404,7 +417,14 @@ def load_impl(interface: str, impl: str, major: UInt, minor: UInt):
         [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint, ctypes.c_uint],
     )
     implh = load_interface_impl(interface.encode(), impl.encode(), major, minor)
-    if implh < 0:
+    if implh < OIF_IMPL_STARTING_NUMBER:
+        if implh == OIF_BRIDGE_NOT_AVAILABLE_ERROR:
+            raise ValueError(
+                f"Bridge component for implementation {impl} is not available"
+            )
+        if implh == OIF_IMPL_NOT_AVAILABLE_ERROR:
+            raise ValueError(f"Implementation {impl} is not available")
+
         raise RuntimeError(
             "Error occurred "
             f"during initialization of the implementation '{impl}' "
