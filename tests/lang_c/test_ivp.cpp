@@ -202,20 +202,15 @@ struct IvpImplementationsTimesODEProblemsFixture
 
 INSTANTIATE_TEST_SUITE_P(
     IvpImplementationsTests, IvpImplementationsTimesODEProblemsFixture,
-    testing::Combine(
-        testing::Values(
-            "sundials_cvode",
-            "dopri5c"
+    testing::Combine(testing::Values("sundials_cvode", "dopri5c"
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
-            ,
-            "scipy_ode", "jl_diffeq"
+                                     ,
+                                     "scipy_ode", "jl_diffeq"
 #endif
-            ),
-        testing::Values(std::make_shared<ScalarExpDecayProblem>()
-                        ,
-                                    std::make_shared<LinearOscillatorProblem>(),
-                                    std::make_shared<OrbitEquationsProblem>()
-                        )));
+                                     ),
+                     testing::Values(std::make_shared<ScalarExpDecayProblem>(),
+                                     std::make_shared<LinearOscillatorProblem>(),
+                                     std::make_shared<OrbitEquationsProblem>())));
 
 TEST_P(IvpImplementationsTimesODEProblemsFixture, BasicTestCase)
 {
