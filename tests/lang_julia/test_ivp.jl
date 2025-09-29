@@ -137,6 +137,7 @@ for impl in POTENTIAL_IMPLEMENTATIONS
         println("Implementation ", impl, " is not available. Skipping the test")
         continue
     end
+    unload_impl(implh)
     push!(IMPLEMENTATIONS, impl)
 end
 
