@@ -1,6 +1,6 @@
 #include <cstdlib>
 #include <string>
-#ifdef __unix__
+#if defined(__unix__) || defined(__unix) || defined(__APPLE__)
 #include <sys/wait.h>
 #endif
 
@@ -25,7 +25,7 @@ TEST_P(CallQEQFromCParameterizedTestFixture, RunsSuccessfully)
     const std::string arg = GetParam();
     const std::string command = program + " " + arg;
     int status = std::system(command.c_str());
-#ifdef __unix__
+#if defined(__unix__) || defined(__unix) || defined(__APPLE__)
     status = WEXITSTATUS(status);
 #endif
     if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
