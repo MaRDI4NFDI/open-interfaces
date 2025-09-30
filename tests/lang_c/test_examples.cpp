@@ -7,6 +7,21 @@
 #include <gtest/gtest.h>
 #include <oif/api.h>
 
+namespace {
+int
+run_system_command(std::string const &command)
+{
+    // We need to process return exit status when invoking a system command.
+    // Yes, this weird check for __APPLE__ after the check for __unix__
+    // is actually required, because Clang on macOS does not define __unix__.
+    int status = std::system(command.c_str());
+#if defined(__unix__) || defined(__unix) || defined(__APPLE__)
+    status = WEXITSTATUS(status);
+#endif
+    return status;
+}
+}  // namespace
+
 // ----------------------------------------------------------------------------
 // BEGIN Tests for call_qeq_from_c
 class CallQEQFromCParameterizedTestFixture : public ::testing::TestWithParam<std::string> {
@@ -24,10 +39,7 @@ TEST_P(CallQEQFromCParameterizedTestFixture, RunsSuccessfully)
     const std::string program = "examples/call_qeq_from_c";
     const std::string arg = GetParam();
     const std::string command = program + " " + arg;
-    int status = std::system(command.c_str());
-#if defined(__unix__) || defined(__unix) || defined(__APPLE__)
-    status = WEXITSTATUS(status);
-#endif
+    const int status = run_system_command(command);
     if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         ASSERT_EQ(status, 0);
     }
@@ -55,10 +67,7 @@ TEST_P(CallLinsolveFromCParameterizedTestFixture, RunsSuccessfully)
     const std::string program = "examples/call_linsolve_from_c";
     const std::string arg = GetParam();
     const std::string command = program + " " + arg;
-    int status = std::system(command.c_str());
-#ifdef __unix__
-    status = WEXITSTATUS(status);
-#endif
+    const int status = run_system_command(command);
     if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         ASSERT_EQ(status, 0);
     }
@@ -85,10 +94,7 @@ TEST_P(CallIVPFromCParameterizedTestFixture, RunsSuccessfully)
     const std::string program = "examples/call_ivp_from_c";
     const std::string arg = GetParam();
     const std::string command = program + " " + arg;
-    int status = std::system(command.c_str());
-#ifdef __unix__
-    status = WEXITSTATUS(status);
-#endif
+    const int status = run_system_command(command);
     if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         ASSERT_EQ(status, 0);
     }
@@ -117,10 +123,7 @@ TEST_P(CallIVPFromCBurgersEqParameterizedTestFixture, RunsSuccessfully)
     const std::string program = "examples/call_ivp_from_c_burgers_eq";
     const std::string arg = GetParam();
     const std::string command = program + " " + arg;
-    int status = std::system(command.c_str());
-#ifdef __unix__
-    status = WEXITSTATUS(status);
-#endif
+    const int status = run_system_command(command);
     if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         ASSERT_EQ(status, 0);
     }
@@ -133,13 +136,7 @@ TEST_P(CallIVPFromCBurgersEqParameterizedTestFixture, RunsSuccessfully)
 // ----------------------------------------------------------------------------
 // BEGIN Tests for call_ivp_from_c_vdp_eq
 class CallIVPFromCVdPEqParameterizedTestFixture
-    : public ::testing::TestWithParam<std::tuple<std::string, std::string, bool>> {
-   protected:
-    std::string impl;
-    std::string integrator;
-    bool should_succeed;
-};
-
+    : public ::testing::TestWithParam<std::tuple<std::string, std::string, bool>> {};
 INSTANTIATE_TEST_SUITE_P(
     CallIVPFromCVdPEqTests, CallIVPFromCVdPEqParameterizedTestFixture,
     ::testing::Values(std::make_tuple("scipy_ode", "dopri5", false),
@@ -157,11 +154,7 @@ TEST_P(CallIVPFromCVdPEqParameterizedTestFixture, RunsAsExpected)
     const std::string arg2 = std::get<1>(GetParam());
     const bool should_succeed = std::get<2>(GetParam());
     const std::string command = program + " " + arg1 + " " + arg2;
-    int status = std::system(command.c_str());
-#ifdef __unix__
-    status = WEXITSTATUS(status);
-#endif
-    std::cout << "Status is: " << status << std::endl;
+    const int status = run_system_command(command);
     if (status != OIF_BRIDGE_NOT_AVAILABLE_ERROR && status != OIF_IMPL_NOT_AVAILABLE_ERROR) {
         if (should_succeed)
             ASSERT_EQ(status, 0);
