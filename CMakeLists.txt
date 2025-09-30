@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 project(
   oif-toy-example
   LANGUAGES C CXX
-  VERSION 0.6.1)
+  VERSION 0.6.2)
 
 option(OIF_OPTION_VERBOSE_DEBUG_INFO
        "Enable verbose debug info in Debug builds" OFF)
