@@ -1,6 +1,6 @@
 package := openinterfaces
 
-# Build in release mode. Default target
+## Build in release mode. Default target
 .PHONY : all
 all :
 	cmake -S . -B build.release \
@@ -12,12 +12,23 @@ all :
 	ln -sv build.release build
 
 
-# Build in release mode (alias for `make all` or simply `make`)
+## Build in release mode (alias for `make all` or simply `make`)
 .PHONY : release
-release : all
+release: all
+
+## Show this help message
+help:
+	@awk ' \
+		/^##/ {sub(/^##[ ]?/, "", $$0); doc=$$0; next} \
+		/^[a-zA-Z0-9_-]+ ?:/ && doc { \
+			sub(/:.*/, "", $$1); \
+			printf "\033[1;32m%-24s\033[0m %s\n", $$1, doc; \
+			doc=""; \
+		} \
+	' $(MAKEFILE_LIST)
 
 
-# Run all tests
+## Run all tests
 .PHONY : test
 test :
 	@echo "=== C tests ==="
@@ -28,6 +39,7 @@ test :
 	pytest tests/lang_python
 
 
+## Build in debug mode (without optimizations)
 .PHONY : debug
 debug :
 	cmake -S . -B build.debug \
@@ -38,16 +50,16 @@ debug :
 	rm -f build && \
 	ln -sv build.debug build
 
+## Run Python tests checking for memory leaks using Valgrind
 .PHONY : pytest-valgrind
 pytest-valgrind :
 	PYTHONMALLOC=malloc valgrind --show-leak-kinds=definite --log-file=/tmp/valgrind-output \
 	python -m pytest -s -vv --valgrind --valgrind-log=/tmp/valgrind-output
 
-# Build C code with verbose debug information
-# and enable `-fanitize=address` to detect memory errors.
-.PHONY : debug-verbose-info-and-sanitize
-debug-verbose-info-and-sanitize :
-	cmake -S . -B build.debug_verbose_info_and_sanitize \
+## Build C code with verbose debug information and sanitizers to detect memory errors
+.PHONY : debug-verbose-info-and-sanitize-address
+debug-verbose-info-and-sanitize-address :
+	cmake -S . -B build.debug_verbose_info_and_sanitize_address \
 		-G Ninja \
 		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
 		-DCMAKE_BUILD_TYPE=Debug \
@@ -55,11 +67,11 @@ debug-verbose-info-and-sanitize :
         -DOIF_OPTION_VERBOSE_DEBUG_INFO=ON \
         -DOIF_OPTION_SANITIZE=ON \
 		&& \
-	cmake --build build.debug_verbose_info_and_sanitize && \
+	cmake --build build.debug_verbose_info_and_sanitize_address && \
 	rm -f build && \
-	ln -sv build.debug_verbose_info_and_sanitize build
+	ln -sv build.debug_verbose_info_and_sanitize_address build
 
-# Build C code with verbose debug information
+## Build with verbose debug information
 .PHONY : debug-verbose-info
 debug-verbose-info :
 	cmake -S . -B build.debug_verbose_info \
@@ -73,14 +85,17 @@ debug-verbose-info :
 	rm -f build && \
 	ln -sv build.debug_verbose_info build
 
+## Remove all existing build directories
 .PHONY : clean
 clean :
-	$(RM) -r build build.debug build.debug_verbose_info_and_sanitize build.release
+	$(RM) -r build build.debug build.debug_verbose_info_and_sanitize_address build.release
 
+## Build docs in the HTML format
 .PHONY : docs
 docs : | mk-docs-build-dir
 	cd docs && doxygen && make html
 
+## Remove docs and build them from scratch
 .PHONY : docs-from-scratch
 docs-from-scratch:
 	cd docs && rm -rf build && mkdir build && doxygen && make html
@@ -89,7 +104,7 @@ docs-from-scratch:
 mk-docs-build-dir:
 	mkdir -p docs/build
 
-# Build the Python sdist package, unpack it, and open the directory.
+## Build the Python sdist package, unpack it, and open the directory
 .PHONY : build-package-python
 build-package-python :
 	@{ \
@@ -116,6 +131,7 @@ upload-package-python-test :
 	fi; \
 	}
 
+## Upload build Python package
 .PHONY : upload-package-python
 upload-package-python :
 	@{ \
