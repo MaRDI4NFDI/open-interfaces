@@ -285,7 +285,7 @@ from the [Python Package Index (PyPI)](https://pypi.org/).
 First, ensure that essential dependencies for Python are installed.
 On Ubuntu, this can be done via (in addition to the mandatory dependencies):
 ```shell
-sudo apt install python3-dev python3-venv python3-numpy python3-scipy python3-msgpack
+sudo apt install python3-dev python3-venv
 ```
 
 Optional dependencies include `LAPACK` and `SUNDIALS` libraries
@@ -294,7 +294,7 @@ for C implementations, which can be installed via:
 sudo apt install liblapack-dev libsundials-dev
 ```
 
-Then it is recommended to create a virtual environment for Python:
+Then create a virtual environment for Python:
 ```shell
 python3 -m venv .venv
 ```
@@ -306,6 +306,13 @@ source .venv/bin/activate
 Finally, install Open Interfaces via `pip`:
 ```shell
 pip install openinterfaces
+```
+
+To quickly make sure that the installed package work, execute this lines
+in the Python console:
+```python
+from openinterfaces.interfaces.ivp import IVP
+solver = IVP("scipy_ode")
 ```
 
 ## For developers: Building the source code for development
