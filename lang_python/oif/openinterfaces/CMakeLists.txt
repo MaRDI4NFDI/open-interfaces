@@ -7,7 +7,7 @@ add_library(oif_python_conversion MODULE _conversion.c)
 target_include_directories(
   oif_python_conversion
   PRIVATE ${CMAKE_SOURCE_DIR}/include
-  PRIVATE ${FFI_INCLUDE_DIRS})
+  ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_python_conversion PRIVATE Python::Python)
 target_link_libraries(oif_python_conversion PRIVATE Python::NumPy)
 target_link_libraries(oif_python_conversion PRIVATE PkgConfig::FFI)
