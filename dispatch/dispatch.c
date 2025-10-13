@@ -340,7 +340,7 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
                "Cannot call interface implementation "
                "for language '%s'\n",
                OIF_LANG_FROM_LANG_ID[dh]);
-        exit(EXIT_FAILURE);
+        return -2;
     }
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
 
