@@ -342,23 +342,23 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
                OIF_LANG_FROM_LANG_ID[dh]);
         return -2;
     }
-    void *lib_handle = OIF_DISPATCH_HANDLES[dh];
 
+    void *lib_handle = OIF_DISPATCH_HANDLES[dh];
     int (*call_impl_fn)(ImplInfo *, const char *, OIFArgs *, OIFArgs *);
     call_impl_fn = dlsym(lib_handle, "call_impl");
     if (call_impl_fn == NULL) {
         logerr(prefix_,
                "Could not load function 'call_impl' "
-               "for language '%s'\n",
+               "for language '%s'",
                OIF_LANG_FROM_LANG_ID[dh]);
-        return -1;
+        return -3;
     }
     status = call_impl_fn(impl_info, method, in_args, out_args);
 
     if (status) {
         logerr(prefix_,
                "During execution of the function "
-               "'%s::%s' an error occurred\n",
+               "'%s::%s' an error occurred",
                impl_info->interface, method);
     }
     return status;
