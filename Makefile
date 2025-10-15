@@ -85,6 +85,20 @@ debug-verbose-info :
 	rm -f build && \
 	ln -sv build.debug_verbose_info build
 
+## Build with test coverage
+.PHONY : debug-verbose-info
+debug-verbose-info :
+	cmake -S . -B build.debug_coverage \
+		-G Ninja \
+		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+		-DOIF_OPTION_COVERAGE:BOOL=ON \
+		&& \
+	cmake --build build.debug_coverage && \
+	rm -f build && \
+	ln -sv build.debug_coverage build
+
 ## Remove all existing build directories
 .PHONY : clean
 clean :
@@ -93,6 +107,7 @@ clean :
 		build.debug \
 		build.debug_verbose_info_and_sanitize \
 		build.debug_verbose_info \
+		build.debug_coverage \
 		build.release
 
 ## Build docs in the HTML format
