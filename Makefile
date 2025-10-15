@@ -57,19 +57,19 @@ pytest-valgrind :
 	python -m pytest -s -vv --valgrind --valgrind-log=/tmp/valgrind-output
 
 ## Build C code with verbose debug information and sanitizers to detect memory errors
-.PHONY : debug-verbose-info-and-sanitize-address
+.PHONY : debug-verbose-info-and-sanitize
 debug-verbose-info-and-sanitize-address :
-	cmake -S . -B build.debug_verbose_info_and_sanitize_address \
+	cmake -S . -B build.debug_verbose_info_and_sanitize \
 		-G Ninja \
 		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
 		-DCMAKE_BUILD_TYPE=Debug \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -DOIF_OPTION_VERBOSE_DEBUG_INFO=ON \
-        -DOIF_OPTION_SANITIZE=ON \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
+		-DOIF_OPTION_VERBOSE_DEBUG_INFO:BOOL=ON \
+		-DOIF_OPTION_SANITIZE:BOOL=ON \
 		&& \
-	cmake --build build.debug_verbose_info_and_sanitize_address && \
+	cmake --build build.debug_verbose_info_and_sanitize && \
 	rm -f build && \
-	ln -sv build.debug_verbose_info_and_sanitize_address build
+	ln -sv build.debug_verbose_info_and_sanitize build
 
 ## Build with verbose debug information
 .PHONY : debug-verbose-info
@@ -88,7 +88,12 @@ debug-verbose-info :
 ## Remove all existing build directories
 .PHONY : clean
 clean :
-	$(RM) -r build build.debug build.debug_verbose_info_and_sanitize_address build.release
+	$(RM) -r \
+		build \
+		build.debug \
+		build.debug_verbose_info_and_sanitize \
+		build.debug_verbose_info \
+		build.release
 
 ## Build docs in the HTML format
 .PHONY : docs
