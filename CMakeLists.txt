@@ -8,7 +8,8 @@ project(
 option(OIF_OPTION_VERBOSE_DEBUG_INFO
        "Enable verbose debug info in Debug builds" OFF)
 
-option(OIF_OPTION_SANITIZE "Enable sanitizers in Debug builds" OFF)
+option(OIF_OPTION_SANITIZE
+    "Enable sanitizers, only in Debug builds" OFF)
 
 # Enforce using `-std=c11`, without any extensions like `gnu11`.
 set(CMAKE_C_STANDARD 11)
@@ -26,8 +27,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(OIF_OPTION_VERBOSE_DEBUG_INFO)
   endif()
   if(OIF_OPTION_SANITIZE)
-    add_compile_options(-fno-omit-frame-pointer -fsanitize=address)
-    add_link_options(-fno-omit-frame-pointer -fsanitize=address)
+    add_compile_options(-fno-omit-frame-pointer -fsanitize=address,undefined)
+    add_link_options(-fno-omit-frame-pointer -fsanitize=address,undefined)
   endif()
 endif()
 
