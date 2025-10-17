@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(
-  oif-toy-example
-  LANGUAGES C CXX
-  VERSION 0.6.2)
+project(open-interfaces
+  VERSION 0.6.2
+  # SPDX_LICENSE BSD-2-Clause -- Available in CMake 4.2+
+  DESCRIPTION "Improving interoperability in scientific computing"
+  HOMEPAGE_URL https://github.com/MaRDI4NFDI/open-interfaces
+  LANGUAGES C CXX)
 
 option(OIF_OPTION_VERBOSE_DEBUG_INFO
        "Enable verbose debug info in Debug builds" OFF)
