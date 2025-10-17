@@ -1,3 +1,4 @@
+// clang-format Language: C
 /**
  * @file
  * @brief Interface for solving initial-value problems (IVP) for ordinary differential

@@ -1,3 +1,4 @@
+// clang-format Language: C
 /**
  * @file
  * This module defines the interface for solving a quadratic equation.
