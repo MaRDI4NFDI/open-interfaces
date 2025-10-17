@@ -53,7 +53,7 @@ build.debug/CMakeCache.txt :
 
 ## Build C code with verbose debug information and sanitizers to detect memory errors
 .PHONY : debug-verbose-info-and-sanitize
-debug-verbose-info-and-sanitize : build.debug_verbose_info_and_sanitize/CMakeCache.txt 
+debug-verbose-info-and-sanitize : build.debug_verbose_info_and_sanitize/CMakeCache.txt
 	cmake --build $(<D) && \
 	rm -f build && \
 	ln -sv $(<D) build
