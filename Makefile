@@ -50,12 +50,6 @@ debug :
 	rm -f build && \
 	ln -sv build.debug build
 
-## Run Python tests checking for memory leaks using Valgrind
-.PHONY : pytest-valgrind
-pytest-valgrind :
-	PYTHONMALLOC=malloc valgrind --show-leak-kinds=definite --log-file=/tmp/valgrind-output \
-	python -m pytest -s -vv --valgrind --valgrind-log=/tmp/valgrind-output
-
 ## Build C code with verbose debug information and sanitizers to detect memory errors
 .PHONY : debug-verbose-info-and-sanitize
 debug-verbose-info-and-sanitize-address :
@@ -123,6 +117,12 @@ docs-from-scratch:
 .PHONY : mk-docs-build-dir
 mk-docs-build-dir:
 	mkdir -p docs/build
+
+## Run Python tests checking for memory leaks using Valgrind
+.PHONY : pytest-valgrind
+pytest-valgrind :
+	PYTHONMALLOC=malloc valgrind --show-leak-kinds=definite --log-file=/tmp/valgrind-output \
+	python -m pytest -s -vv --valgrind --valgrind-log=/tmp/valgrind-output
 
 ## Build the Python sdist package, unpack it, and open the directory
 .PHONY : build-package-python
