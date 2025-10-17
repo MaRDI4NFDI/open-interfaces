@@ -41,57 +41,59 @@ test :
 
 ## Build in debug mode (without optimizations)
 .PHONY : debug
-debug :
-	cmake -S . -B build.debug \
-		-DCMAKE_BUILD_TYPE=Debug \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-		&& \
-	cmake --build build.debug && \
+debug : build.debug/CMakeCache.txt
+	cmake --build $(<D) && \
 	rm -f build && \
-	ln -sv build.debug build
+	ln -sv $(<D) build
+
+build.debug/CMakeCache.txt :
+	cmake -S . -B $(@D) \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 ## Build C code with verbose debug information and sanitizers to detect memory errors
 .PHONY : debug-verbose-info-and-sanitize
-debug-verbose-info-and-sanitize-address :
-	cmake -S . -B build.debug_verbose_info_and_sanitize \
-		-G Ninja \
+debug-verbose-info-and-sanitize : build.debug_verbose_info_and_sanitize/CMakeCache.txt 
+	cmake --build $(<D) && \
+	rm -f build && \
+	ln -sv $(<D) build
+
+build.debug_verbose_info_and_sanitize/CMakeCache.txt :
+	cmake -S . -B $(@D) \
 		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
 		-DOIF_OPTION_VERBOSE_DEBUG_INFO:BOOL=ON \
-		-DOIF_OPTION_SANITIZE:BOOL=ON \
-		&& \
-	cmake --build build.debug_verbose_info_and_sanitize && \
-	rm -f build && \
-	ln -sv build.debug_verbose_info_and_sanitize build
+		-DOIF_OPTION_SANITIZE:BOOL=ON
 
 ## Build with verbose debug information
 .PHONY : debug-verbose-info
-debug-verbose-info :
-	cmake -S . -B build.debug_verbose_info \
-		-G Ninja \
-		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
-		-DCMAKE_BUILD_TYPE=Debug \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-        -DOIF_OPTION_VERBOSE_DEBUG_INFO=ON \
-		&& \
+debug-verbose-info : build.debug_verbose_info/CMakeCache.txt
 	cmake --build build.debug_verbose_info && \
 	rm -f build && \
 	ln -sv build.debug_verbose_info build
 
+build.debug_verbose_info/CMakeCache.txt :
+	cmake -S . -B $(@D) \
+		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
+		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+	    -DOIF_OPTION_VERBOSE_DEBUG_INFO=ON
+
 ## Build with test coverage
 .PHONY : debug-coverage
-debug-coverage :
-	cmake -S . -B build.debug_coverage \
+debug-coverage : build.debug_coverage/CMakeCache.txt
+	cmake --build @(<D) && \
+	rm -f build && \
+	ln -sv @(<D) build
+
+build.debug_coverage/CMakeCache.txt :
+	cmake -S . -B $(@D) \
 		-G Ninja \
 		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-		-DOIF_OPTION_COVERAGE:BOOL=ON \
-		&& \
-	cmake --build build.debug_coverage && \
-	rm -f build && \
-	ln -sv build.debug_coverage build
+		-DOIF_OPTION_COVERAGE:BOOL=ON
 
 ## Remove all existing build directories
 .PHONY : clean
