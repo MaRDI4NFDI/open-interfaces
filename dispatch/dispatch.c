@@ -328,9 +328,8 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
     ImplInfo *impl_info = hashmap_get(&IMPL_MAP, &implh);
     if (impl_info == NULL) {
         logerr(prefix_,
-            "Cannot find implementation with id '%d' in the list of loaded implementations",
-            implh
-              );
+               "Cannot find implementation with id '%d' in the list of loaded implementations",
+               implh);
         return -1;
     }
 

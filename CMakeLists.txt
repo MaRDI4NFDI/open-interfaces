@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(open-interfaces
+project(
+  open-interfaces
   VERSION 0.6.2
   # SPDX_LICENSE BSD-2-Clause -- Available in CMake 4.2+
   DESCRIPTION "Improving interoperability in scientific computing"
@@ -10,11 +11,9 @@ project(open-interfaces
 option(OIF_OPTION_VERBOSE_DEBUG_INFO
        "Enable verbose debug info in Debug builds" OFF)
 
-option(OIF_OPTION_SANITIZE
-    "Enable sanitizers, only in Debug builds" OFF)
+option(OIF_OPTION_SANITIZE "Enable sanitizers, only in Debug builds" OFF)
 
-option(OIF_OPTION_COVERAGE
-    "Enable test coverage, only in Debug builds" OFF)
+option(OIF_OPTION_COVERAGE "Enable test coverage, only in Debug builds" OFF)
 
 # Enforce using `-std=c11`, without any extensions like `gnu11`.
 set(CMAKE_C_STANDARD 11)

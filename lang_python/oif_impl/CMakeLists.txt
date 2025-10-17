@@ -15,9 +15,8 @@ install(TARGETS oif_bridge_python DESTINATION lib)
 
 add_library(oif_bridge_python_callback MODULE _callback.c)
 target_include_directories(
-  oif_bridge_python_callback
-  PRIVATE ${CMAKE_SOURCE_DIR}/include
-          ${FFI_INCLUDE_DIRS})
+  oif_bridge_python_callback PRIVATE ${CMAKE_SOURCE_DIR}/include
+                                     ${FFI_INCLUDE_DIRS})
 target_link_libraries(oif_bridge_python_callback PRIVATE Python::Python)
 target_link_libraries(oif_bridge_python_callback PRIVATE Python::NumPy)
 target_link_libraries(oif_bridge_python_callback PRIVATE PkgConfig::FFI)
