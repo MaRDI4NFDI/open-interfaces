@@ -86,8 +86,8 @@ debug-verbose-info :
 	ln -sv build.debug_verbose_info build
 
 ## Build with test coverage
-.PHONY : debug-verbose-info
-debug-verbose-info :
+.PHONY : debug-coverage
+debug-coverage :
 	cmake -S . -B build.debug_coverage \
 		-G Ninja \
 		-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \
