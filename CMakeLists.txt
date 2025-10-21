@@ -69,12 +69,16 @@ add_subdirectory(vendor)
 add_subdirectory(common)
 add_subdirectory(dispatch)
 
+if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lang_c")
+  add_subdirectory(lang_c)
+endif()
+
 if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lang_julia")
-add_subdirectory(lang_julia)
+  add_subdirectory(lang_julia)
 endif()
 
 if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lang_python")
-add_subdirectory(lang_python)
+  add_subdirectory(lang_python)
 endif()
 
 if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/oif")
