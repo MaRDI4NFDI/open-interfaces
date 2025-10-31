@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 
 project(
   open-interfaces
-  VERSION 0.6.2
+  VERSION 0.6.3
   # SPDX_LICENSE BSD-2-Clause -- Available in CMake 4.2+
   DESCRIPTION "Improving interoperability in scientific computing"
   HOMEPAGE_URL https://github.com/MaRDI4NFDI/open-interfaces

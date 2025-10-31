@@ -870,13 +870,13 @@ version = "0.3.27+1"
 deps = ["Libdl", "MsgPack"]
 path = "lang_julia/OpenInterfaces"
 uuid = "07cfd324-e924-40a7-85fa-5e46307e7ad7"
-version = "0.6.2"
+version = "0.6.3"
 
 [[deps.OpenInterfacesImpl]]
 deps = ["MsgPack", "OpenInterfaces", "OrdinaryDiffEq", "SciMLBase"]
 path = "lang_julia/OpenInterfacesImpl"
 uuid = "daff4927-7858-4806-96da-915047fb441c"
-version = "0.6.2"
+version = "0.6.3"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]

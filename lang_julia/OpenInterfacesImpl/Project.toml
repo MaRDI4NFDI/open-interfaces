@@ -1,7 +1,7 @@
 name = "OpenInterfacesImpl"
 uuid = "daff4927-7858-4806-96da-915047fb441c"
 authors = ["Dmitry Kabanov <dmitry.kabanov@uni-muenster.de>", "Stephan Rave <stephan.rave@uni-muenster.de", "Mario Ohlberger <mario.ohlberger@uni-muenster.de"]
-version = "0.6.2"
+version = "0.6.3"
 
 [deps]
 MsgPack = "99f44e22-a591-53d1-9472-aa23ef4bd671"
