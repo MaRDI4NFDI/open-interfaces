@@ -53,6 +53,11 @@ Please use the
 for bug reports and feature requests and asking questions.
 
 
+## License
+
+[![License](https://img.shields.io/badge/License-BSD_2--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
+
+
 ## Funding
 
 This work is funded by the _Deutsche Forschungsgemeinschaft_ (DFG, _German
