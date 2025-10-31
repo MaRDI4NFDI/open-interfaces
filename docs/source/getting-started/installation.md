@@ -109,7 +109,7 @@ along with several Julia packages. The only supported installation method
 for Julia and Julia packages is described [in this section](#install-julia).
 
 If your preferred programming language is Python,
-you can install Open Interfaces via `pip` as described
+you can install Open Interfaces via `pip` for Python 3.9+ as described
 [here](#install-via-pip), which builds Open Interfaces automatically,
 so you do not have to build the library by hand.
 
