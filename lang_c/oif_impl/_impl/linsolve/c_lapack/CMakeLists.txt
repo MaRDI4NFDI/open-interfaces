@@ -18,8 +18,8 @@ find_path(
 
 add_library(oif_linsolve_c_lapack SHARED linsolve_impl.c)
 target_include_directories(oif_linsolve_c_lapack
-    PRIVATE ${PROJECT_SOURCE_DIR}/include)
+                           PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(oif_linsolve_c_lapack
-    PUBLIC ${PROJECT_SOURCE_DIR}/lang_c/oif_impl/include)
+                           PUBLIC ${PROJECT_SOURCE_DIR}/lang_c/oif_impl/include)
 target_include_directories(oif_linsolve_c_lapack PRIVATE ${LAPACKE_INCLUDE_DIR})
 target_link_libraries(oif_linsolve_c_lapack PRIVATE LAPACK::LAPACK)
