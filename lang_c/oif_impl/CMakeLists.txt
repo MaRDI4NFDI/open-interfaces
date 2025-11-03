@@ -5,8 +5,10 @@ add_library(oif_bridge_c SHARED bridge_c.c allocation_tracker.c)
 target_include_directories(
   oif_bridge_c
   PRIVATE ${CMAKE_SOURCE_DIR}/include
-  PRIVATE ${FFI_INCLUDE_DIRS})
+  ${FFI_INCLUDE_DIRS})
 
 target_link_libraries(oif_bridge_c PRIVATE oif_common_data_structures)
 target_link_libraries(oif_bridge_c PRIVATE oif_common_util)
 target_link_libraries(oif_bridge_c PRIVATE PkgConfig::FFI)
+
+add_subdirectory(_impl)
