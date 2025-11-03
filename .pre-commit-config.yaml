@@ -42,7 +42,7 @@ repos:
 
     # Python
     - repo: https://github.com/pycqa/isort
-      rev: 6.1.0
+      rev: 7.0.0
       hooks:
           - id: isort
             name: isort (python)
@@ -79,7 +79,7 @@ repos:
 
     # Sphinx documentation
     - repo: https://github.com/sphinx-contrib/sphinx-lint
-      rev: v1.0.0
+      rev: v1.0.1
       hooks:
           - id: sphinx-lint
             args: [--enable=default-role]
