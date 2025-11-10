@@ -11,6 +11,7 @@ from openinterfaces.interfaces.ivp import IVP
 class Args:
     impl: str
     savefig: bool
+    no_plot: bool
 
 
 def _parse_args():
@@ -23,6 +24,11 @@ def _parse_args():
     )
     p.add_argument(
         "--savefig", "-s", action="store_true", help="Save figure instead of showing it"
+    )
+    p.add_argument(
+        "--no-plot",
+        action="store_true",
+        help="Set to avoid plotting, for example, in tests",
     )
     args = p.parse_args()
     return Args(**vars(args))
@@ -103,7 +109,8 @@ def main():
     if args.savefig:
         plt.savefig(os.path.join("assets", f"ivp_py_burgers_eq_{impl}.pdf"))
     else:
-        plt.show()
+        if not args.no_plot:
+            plt.show()
 
 
 if __name__ == "__main__":
