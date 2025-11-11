@@ -14,6 +14,7 @@ RESULT_FIG_FILENAME_TPL = "ivp_py_vdp_eq_{:s}.pdf"
 class Args:
     impl: str
     outdir: str
+    do_not_save_anything: bool
 
 
 def _parse_args():
@@ -25,13 +26,18 @@ def _parse_args():
             "scipy_ode-dopri5-100k",
             "scipy_ode-vode",
             "scipy_ode-vode-40k",
-            "sundials_cvode",
+            "sundials_cvode-default",
             "jl_diffeq-rosenbrock23",
         ],
         default="scipy_ode-dopri5",
         nargs="?",
     )
     p.add_argument("--outdir", default="assets")
+    p.add_argument(
+        "--do-not-save-anything",
+        action="store_true",
+        help="Do not save the solution or figures; useful for testing",
+    )
     args = p.parse_args()
     return Args(**vars(args))
 
@@ -119,14 +125,15 @@ def main():
     data_filename = os.path.join(args.outdir, RESULT_DATA_FILENAME_TPL.format(impl))
     np.savetxt(data_filename, data)
 
-    plt.plot(times, solution[:, 0], "-", label="$y_1$")
-    plt.xlabel("Time")
-    plt.ylabel("Solution")
-    plt.tight_layout(pad=0.1)
-    fig_filename = os.path.join(args.outdir, RESULT_FIG_FILENAME_TPL.format(impl))
-    plt.savefig(fig_filename.format(impl))
-    plt.show()
-    print("Finished")
+    if not args.do_not_save_anything:
+        plt.plot(times, solution[:, 0], "-", label="$y_1$")
+        plt.xlabel("Time")
+        plt.ylabel("Solution")
+        plt.tight_layout(pad=0.1)
+        fig_filename = os.path.join(args.outdir, RESULT_FIG_FILENAME_TPL.format(impl))
+        plt.savefig(fig_filename.format(impl))
+        plt.show()
+        print("Finished")
 
 
 if __name__ == "__main__":
