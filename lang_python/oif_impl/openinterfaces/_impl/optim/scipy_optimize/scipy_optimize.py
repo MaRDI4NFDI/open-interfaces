@@ -55,14 +55,17 @@ class ScipyOptimize(OptimInterface):
     # def set_user_data(self, user_data):
     #     self.user_data = user_data
 
-    def minimize(self):
+    def minimize(self, status, x):
         self.result = optimize.minimize(self.objective_fn, self.x0)
+        status = status
+        x[:] = self.result.x
         return 0
 
     def retrieve_optim_result(self, x):
         x[:] = self.result.x
 
-    def retrieve_minval(self)
+    def retrieve_minval(self, f):
+        return self.result.fun
 
     # def get_n_rhs_evals(self, n_rhs_evals_arr):
     #     n_rhs_evals_arr[0] = self.s._integrator.iwork[16]

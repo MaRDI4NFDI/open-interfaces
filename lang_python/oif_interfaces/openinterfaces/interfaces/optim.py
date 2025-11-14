@@ -7,6 +7,7 @@ where :math:`f : \mathbb R^n \to \mathbb R`.
 """
 
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import TypeAlias
 
 import numpy as np
@@ -33,6 +34,12 @@ ObjectiveFn: TypeAlias = Callable[[np.ndarray, object], int]
 !!!!!!!!!          must be passed to the function (e.g., parameters of the system).
 
 """
+
+
+@dataclass
+class OptimResult:
+    status: int
+    x: np.ndarray
 
 
 class Optim:
@@ -105,11 +112,14 @@ class Optim:
         self.x0: np.ndarray
         """Current value of the state vector."""
         self._N: int = 0
+        self.status = -1
+        self.x: np.ndarray
 
     def set_initial_guess(self, x0: np.ndarray):
         """Set initial guess for the optimization problem"""
         self.x0 = x0
         self._N = len(self.x0)
+        self.x = np.empty((self._N,))
         self._binding.call("set_initial_guess", (x0,), ())
 
     def set_objective_fn(self, objective_fn: ObjectiveFn):
@@ -131,9 +141,20 @@ class Optim:
     #     """Set integrator, if the name is recognizable."""
     #     self._binding.call("set_integrator", (integrator_name, integrator_params), ())
 
-    def minimize(self, t: float):
+    def minimize(self):
         """Integrate to time `t` and write solution to `y`."""
-        self._binding.call("integrate", (t,), (self.y,))
+        self._binding.call(
+            "minimize",
+            (),
+            (
+                self.status,
+                self.x,
+            ),
+        )
+
+        self.result = OptimResult(status=self.status, x=self.x)
+
+        return self.result
 
     # def print_stats(self):
     #     """Print integration statistics."""
