@@ -30,6 +30,11 @@ def main(argv=None):
     s.set_initial_guess(x0)
     s.set_objective_fn(objective_fn)
 
+    result = s.minimize()
+
+    print(f"Status code: {result.status}")
+    print(f"Optimized value: {result.x}")
+
     if not args.no_artefacts:
         print("Finish")
 
