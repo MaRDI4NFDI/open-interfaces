@@ -237,12 +237,14 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         return NULL;
     }
     pModule = PyImport_Import(pFileName);
+    Py_DECREF(pFileName);
 
     if (pModule == NULL) {
         fprintf(stderr, "[%s] Could not import `sysconfig` module\n", prefix_);
         return NULL;
     }
     pFunc = PyObject_GetAttrString(pModule, "get_config_var");
+    Py_DECREF(pModule);
     if (pFunc == NULL || !PyCallable_Check(pFunc)) {
         fprintf(stderr, "[%s] Could not find function `sysconfig.get_config_var`\n", prefix_);
         return NULL;
@@ -396,7 +398,7 @@ cleanup:
     Py_XDECREF(pFileName);
     Py_XDECREF(pModule);
     Py_XDECREF(pClass);
-    /* Py_XDECREF(pInstance); */
+    /* Py_XDECREF(pInstance);  We keep it inside an impl_info object. */
     Py_XDECREF(pFunc);
     Py_XDECREF(pInitArgs);
     Py_XDECREF(pArgs);
