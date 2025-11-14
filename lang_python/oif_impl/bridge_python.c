@@ -205,7 +205,10 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     PyObject *pInitArgs;
     PyObject *pArgs;
     PyObject *pValue;
+
+    ImplInfo *result = NULL;
     int status;
+    int nbytes; // Number of written bytes in snprintf.
 
     (void)version_major;
     (void)version_minor;
@@ -224,6 +227,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     // NumPy initialization fails.
     // Details:
     // https://stackoverflow.com/questions/49784583/numpy-import-fails-on-multiarray-extension-library-when-called-from-embedded-pyt
+    char libpython_path[512];
     char libpython_name[1024];
     pFileName = PyUnicode_DecodeFSDefault("sysconfig");
     if (pFileName == NULL) {
@@ -231,7 +235,6 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         return NULL;
     }
     pModule = PyImport_Import(pFileName);
-    Py_DECREF(pFileName);
 
     if (pModule == NULL) {
         fprintf(stderr, "[%s] Could not import `sysconfig` module\n", prefix_);
@@ -252,45 +255,62 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         return NULL;
     }
     pValue = PyObject_CallObject(pFunc, pArgs);
-    Py_DECREF(pArgs);
     if (pValue == NULL) {
         fprintf(stderr, "[%s] Could not execute `sysconfig.get_config_var`\n", prefix_);
         return NULL;
     }
-    const char *libpython_path = PyUnicode_AsUTF8(pValue);
-    Py_DECREF(pValue);
-    if (libpython_path == NULL) {
-        fprintf(stderr, "[%s] Could not convert path to `libpython`\n", prefix_);
-        return NULL;
+    nbytes = snprintf(libpython_path, sizeof libpython_path, "%s", PyUnicode_AsUTF8(pValue));
+    if (nbytes < 0 || nbytes >= sizeof libpython_path) {
+        logerr(prefix_, "Could not convert path to `libpython`");
+        goto cleanup;
     }
 
     fprintf(stderr, "[%s] libpython path: %s\n", prefix_, libpython_path);
-    sprintf(libpython_name, "%s/libpython%d.%d%s", libpython_path, PY_MAJOR_VERSION,
+    nbytes = snprintf(libpython_name, sizeof libpython_name, "%s/libpython%d.%d%s", libpython_path, PY_MAJOR_VERSION,
             PY_MINOR_VERSION, SHLIB_EXT);
+    if (nbytes < 0 || nbytes >= sizeof libpython_name) {
+        logerr(prefix_, "Could not build a filepath to the Python library");
+        goto cleanup;
+    }
     fprintf(stderr, "[%s] Loading %s\n", prefix_, libpython_name);
     void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
     if (libpython == NULL) {
-        fprintf(stderr, "[%s] Cannot open python library\n", prefix_);
-        exit(EXIT_FAILURE);
+        logerr(prefix_, "Cannot open python library");
+        goto cleanup;
     }
 
-    status = PyRun_SimpleString(
+    char sys_info[512];
+    nbytes = snprintf(sys_info, sizeof sys_info,
         "import sys; "
-        "print('[dispatch_python]', sys.executable); "
-        "print('[dispatch_python]', sys.version)");
+        "print('[%s]', sys.executable); "
+        "print('[%s]', sys.version)",
+        prefix_, prefix_);
+    if (nbytes < 0 || nbytes >= sizeof sys_info) {
+        logerr(prefix_, "An error occurred in formatting a string as a command for Python interpreter");
+        goto cleanup;
+    }
+    status = PyRun_SimpleString(sys_info);
     if (status < 0) {
-        fprintf(stderr, "[%s] An error occurred when initializating Python\n", prefix_);
-        return NULL;
+        logerr(prefix_, "An error occurred when initializating Python");
+        goto cleanup;
     }
 
     import_array2("Failed to initialize NumPy C API", NULL);
 
-    status = PyRun_SimpleString(
+    nbytes = snprintf(sys_info, sizeof sys_info,
         "import numpy; "
-        "print('[dispatch_python] NumPy version: ', numpy.__version__)");
+        "print('[%s] NumPy version: ', numpy.__version__)",
+        prefix_
+    );
+    if (nbytes < 0 || nbytes >= sizeof sys_info) {
+        logerr(prefix_, "An error occurred in formatting a string as a command for Python interpreter");
+        goto cleanup;
+    }
+
+    status = PyRun_SimpleString(sys_info);
     if (status < 0) {
-        fprintf(stderr, "[%s] An error occurred when initializating Python\n", prefix_);
-        return NULL;
+        logerr(prefix_, "An error occurred when initializating Python");
+        goto cleanup;
     }
 
     char moduleName[512] = "\0";
@@ -323,36 +343,31 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
                 "[%s::load_impl] Provided moduleName '%s' "
                 "could not be resolved to file name\n",
                 prefix_, moduleName);
-        return NULL;
+        goto cleanup;
     }
     pModule = PyImport_Import(pFileName);
-    Py_DECREF(pFileName);
 
     if (pModule == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[%s] Failed to load module \"%s\"\n", prefix_, moduleName);
-        return NULL;
+        logerr(prefix_, "Failed to load module \"%s\"\n", moduleName);
+        goto cleanup;
     }
 
     pClass = PyObject_GetAttrString(pModule, className);
     if (pClass == NULL || !PyCallable_Check(pClass)) {
         PyErr_Print();
-        fprintf(stderr, "[%s] Cannot find class \"%s\"\n", prefix_, className);
-        Py_DECREF(pModule);
-        return NULL;
+        logerr(prefix_, "Cannot find class \"%s\"\n", className);
+        goto cleanup;
     }
 
     pInitArgs = Py_BuildValue("()");
     pInstance = PyObject_CallObject(pClass, pInitArgs);
     if (pInstance == NULL) {
         PyErr_Print();
-        fprintf(stderr, "[%s] Failed to instantiate class %s\n", prefix_, className);
-        Py_DECREF(pClass);
-        return NULL;
+        logerr(prefix_, "Failed to instantiate class %s\n", className);
+        goto cleanup;
     }
-    Py_INCREF(pInstance);
-    Py_DECREF(pInitArgs);
-    Py_DECREF(pClass);
+    /* Py_INCREF(pInstance); */
 
     PythonImplInfo *impl_info = oif_util_malloc(sizeof(*impl_info));
     if (impl_info == NULL) {
@@ -367,7 +382,19 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     IMPL_COUNTER++;
 
-    return (ImplInfo *)impl_info;
+    result = (ImplInfo *)impl_info;
+
+cleanup:
+    Py_XDECREF(pFileName);
+    Py_XDECREF(pModule);
+    Py_XDECREF(pClass);
+    /* Py_XDECREF(pInstance); */
+    Py_XDECREF(pFunc);
+    Py_XDECREF(pInitArgs);
+    Py_XDECREF(pArgs);
+    Py_XDECREF(pValue);
+
+    return result;
 }
 
 int
