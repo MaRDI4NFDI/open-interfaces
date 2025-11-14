@@ -208,7 +208,9 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     ImplInfo *result = NULL;
     int status;
-    int nbytes; // Number of written bytes in snprintf.
+    int nbytes_required; // Number of required bytes in snprintf.
+    int nbytes_written;  // Number of written bytes in snprintf.
+    char *cmd;           // Command formatted in snprintf.
 
     (void)version_major;
     (void)version_minor;
@@ -259,16 +261,17 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         fprintf(stderr, "[%s] Could not execute `sysconfig.get_config_var`\n", prefix_);
         return NULL;
     }
-    nbytes = snprintf(libpython_path, sizeof libpython_path, "%s", PyUnicode_AsUTF8(pValue));
-    if (nbytes < 0 || nbytes >= sizeof libpython_path) {
+
+    nbytes_written = snprintf(libpython_path, sizeof libpython_path, "%s", PyUnicode_AsUTF8(pValue));
+    if (nbytes_written < 0 || nbytes_written >= sizeof libpython_path) {
         logerr(prefix_, "Could not convert path to `libpython`");
         goto cleanup;
     }
 
     fprintf(stderr, "[%s] libpython path: %s\n", prefix_, libpython_path);
-    nbytes = snprintf(libpython_name, sizeof libpython_name, "%s/libpython%d.%d%s", libpython_path, PY_MAJOR_VERSION,
+    nbytes_written = snprintf(libpython_name, sizeof libpython_name, "%s/libpython%d.%d%s", libpython_path, PY_MAJOR_VERSION,
             PY_MINOR_VERSION, SHLIB_EXT);
-    if (nbytes < 0 || nbytes >= sizeof libpython_name) {
+    if (nbytes_written < 0 || nbytes_written >= sizeof libpython_name) {
         logerr(prefix_, "Could not build a filepath to the Python library");
         goto cleanup;
     }
@@ -279,17 +282,20 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         goto cleanup;
     }
 
-    char sys_info[512];
-    nbytes = snprintf(sys_info, sizeof sys_info,
+    const char cmd_sys_info[] =
         "import sys; "
         "print('[%s]', sys.executable); "
-        "print('[%s]', sys.version)",
+        "print('[%s]', sys.version)";
+    nbytes_required = snprintf(NULL, 0, cmd_sys_info, prefix_, prefix_) + 1;
+    cmd = malloc(sizeof(char) * nbytes_required);
+    nbytes_written = snprintf(cmd, nbytes_required, cmd_sys_info,
         prefix_, prefix_);
-    if (nbytes < 0 || nbytes >= sizeof sys_info) {
+    if (nbytes_written < 0 || nbytes_written >= nbytes_required) {
         logerr(prefix_, "An error occurred in formatting a string as a command for Python interpreter");
         goto cleanup;
     }
-    status = PyRun_SimpleString(sys_info);
+    status = PyRun_SimpleString(cmd);
+    free(cmd);
     if (status < 0) {
         logerr(prefix_, "An error occurred when initializating Python");
         goto cleanup;
@@ -297,17 +303,19 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     import_array2("Failed to initialize NumPy C API", NULL);
 
-    nbytes = snprintf(sys_info, sizeof sys_info,
-        "import numpy; "
-        "print('[%s] NumPy version: ', numpy.__version__)",
-        prefix_
+    const char *cmd_numpy_fmt = "import numpy; "
+        "print('[%s] NumPy version: ', numpy.__version__)";
+    nbytes_required = snprintf(NULL, 0, cmd_numpy_fmt, prefix_) + 1;
+    cmd = malloc(sizeof(char) * nbytes_required);
+    nbytes_written = snprintf(
+            cmd, nbytes_required, cmd_numpy_fmt, prefix_
     );
-    if (nbytes < 0 || nbytes >= sizeof sys_info) {
+    if (nbytes_written < 0 || nbytes_written >= nbytes_required) {
         logerr(prefix_, "An error occurred in formatting a string as a command for Python interpreter");
         goto cleanup;
     }
-
-    status = PyRun_SimpleString(sys_info);
+    status = PyRun_SimpleString(cmd);
+    free(cmd);
     if (status < 0) {
         logerr(prefix_, "An error occurred when initializating Python");
         goto cleanup;
