@@ -1,14 +1,3 @@
-# def _parse_args():
-#     p = argparse.ArgumentParser()
-#     p.add_argument(
-#         "impl",
-#         choices=["c_qeq_solver", "py_qeq_solver", "jl_qeq_solver"],
-#         default="c_qeq_solver",
-#         nargs="?",
-#     )
-#     args = p.parse_args()
-#     return Args(**vars(args))
-
 using Printf
 
 using OpenInterfaces
@@ -43,7 +32,7 @@ function main(args)
     roots = QEQ.solve_qeq(implh, a, b, c)
 
     println("Solving quadratic equation for a = $a, b = $b, c = $c")
-    println("x = ", roots)
+    println("x = $roots")
 end
 
 
