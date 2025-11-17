@@ -31,7 +31,7 @@ end
 
 function main(args)
     impl = parse_args(args)
-    println("Calling from Python an open interface for initial-value problems")
+    println("Calling from Julia an open interface for initial-value problems (IVP)")
     println("Implementation: $impl")
 
     solver = IVP.Self(impl)
