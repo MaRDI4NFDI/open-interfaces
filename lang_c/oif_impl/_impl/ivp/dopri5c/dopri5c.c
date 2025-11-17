@@ -442,8 +442,6 @@ free_self(Self *self)
         return;
     }
 
-    fprintf(stderr, "[%s] Freeing resources...\n", prefix_);
-    fprintf(stderr, "[%s] self->k1 = %p\n", prefix_, self->k1);
     if (self->k1 != NULL) {
         oif_free_array_f64(self->k1);
     }
