@@ -135,7 +135,7 @@ class IVP:
         # Store `user_data` as the pointer to it saved to `oif_user_data`,
         # and it must remain valid for the duration of the integration.
         self.user_data = user_data
-        self.oif_user_data = make_oif_user_data(user_data)
+        self.oif_user_data = make_oif_user_data(self.user_data)
         self._binding.call("set_user_data", (self.oif_user_data,), ())
 
     def set_integrator(self, integrator_name: str, integrator_params: dict = {}):
