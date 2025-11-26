@@ -120,7 +120,7 @@ to a high value, for example, 40 000 steps:
     solver.set_integrator("vode", {"method": "bdf", "nsteps": 40_000})
 ```
 and only then, the solver is able to solve the problem and we arrive at the
-solution Figure {numref}`vdp-solution-vode-40k`,
+solution {numref}`vdp-solution-vode-40k`,
 although integration takes a while.
 
 (vdp-solution-vode-40k)=
@@ -145,7 +145,7 @@ we are working currently on enabling use of Automatic Differentiation
 in `jl_diffeq`). Running the code with this implementation,
 we arrive at the solution quickly, see {numref}`vdp-solution-jl_diffeq`.
 One can see that the solution is the same as the one obtained
-with the `vode` solver from SciPy, {number}`vdp-solution-vode-40k`.
+with the `vode` solver from SciPy, {numref}`vdp-solution-vode-40k`.
 
 (vdp-solution-jl_diffeq)=
 ```{figure} img/ivp_py_vdp_eq_jl_diffeq.pdf
