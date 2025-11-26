@@ -16,8 +16,29 @@ written in C.
 If the solver doesn't offer Python bindings, the user needs to write
 them with tools like `ctypes`, Python C API, Cython, etc.
 
-With the help of open interfaces, this responsibility can be taken from the
-user, if this particular solver is supported via Open Interfaces.
+If one needs to support $L$ languages and $I$ implementations,
+that is, have bindings for multiple languages,
+then the number of connections will be like shown on
+{numref}`Figure %sA<overview-pairwise-vs-oif-bindings>`.
+
+By introducing _MaRDI Open Interfaces_ --- a mediator library
+that provides generic interfaces for common problems
+in computational mathematics,
+such as optimization or integration of differential equations,
+and automates data marshalling between programming languages ---
+then the number of connections is reduced as shown on
+{numref}`Figure %sB<overview-pairwise-vs-oif-bindings>`.
+
+(overview-pairwise-vs-oif-bindings)=
+```{figure} img/pairwise-vs-oif-bindings.svg
+
+Schematic comparison of two approaches to the problem of mul-
+tiple languages/multiple implementations. **A** Standard pairwise
+bindings **B** Bindings via Open Interfaces (OIF).
+```
+
+With the help of _Open Interfaces_, this responsibility can be taken from the
+user, if this particular solver is supported.
 
 Then the necessary data conversions between Python and C are provided
 automatically, and the time to running the solver from Python is much less.
