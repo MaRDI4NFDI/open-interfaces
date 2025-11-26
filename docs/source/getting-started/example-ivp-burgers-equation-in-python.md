@@ -63,7 +63,7 @@ that provides a common interface to different implementations of time integrator
 Next, we define an auxiliary class `BurgersEquationProblem`
 that computes an initial conditions for the given grid resolution $N$,
 defines the time span of the problem,
-and provides the right-hand side of the system {eqref}`ode-system`
+and provides the right-hand side of the system {eq}`ode-system`
 as a method `compute_rhs`:
 ```python
 class BurgersEquationProblem:

@@ -17,9 +17,6 @@ numfig = True
 math_numfig = True
 numfig_secnum_depth = 2
 math_eqref_format = "Eq. {number}"  # Space after . is non-breaking space!!!
-numfig_format = {
-    "figure": "Figure %s:",
-}
 
 extensions = [
     "myst_parser",
