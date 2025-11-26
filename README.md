@@ -58,6 +58,24 @@ for bug reports and feature requests and asking questions.
 [![License](https://img.shields.io/badge/License-BSD_2--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
 
+## Citing
+
+If you _MaRDI Open Interfaces_, please consider citing
+[this paper](https://openresearchsoftware.metajnl.com/articles/10.5334/jors.569):
+```bibtex
+@Article{KabanovEtAl2025,
+  author    = {Kabanov, Dmitry I. and Rave, Stephan and Ohlberger, Mario},
+  journal   = {Journal of Open Research Software},
+  title     = {Improving Interoperability in Scientific Computing via {MaRDI Open Interfaces}},
+  year      = {2025},
+  issn      = {2049-9647},
+  volume    = {13},
+  doi       = {10.5334/jors.569},
+  publisher = {Ubiquity Press, Ltd.},
+}
+```
+
+
 ## Funding
 
 This work is funded by the _Deutsche Forschungsgemeinschaft_ (DFG, _German
