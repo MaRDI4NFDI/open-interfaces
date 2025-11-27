@@ -5,7 +5,10 @@
   * `pyproject.toml`
   * `version.py`
   * `conf.py`
-- [ ] Run pre-commit
+  * `Project.toml`
+  * `Manifest.toml`
+  * `CITATION.cff`
+- [ ] Run `pre-commit run --all-files`
 - [ ] Make a pull request and make sure it passes all the checks
 - [ ] Merge the pull request to `main`
 - [ ] Go to the GitHub page of the repository and press "Releases"
