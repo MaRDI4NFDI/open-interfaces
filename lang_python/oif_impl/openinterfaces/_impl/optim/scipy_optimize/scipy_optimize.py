@@ -55,11 +55,10 @@ class ScipyOptimize(OptimInterface):
     # def set_user_data(self, user_data):
     #     self.user_data = user_data
 
-    def minimize(self, status, x):
+    def minimize(self, out_x):
         self.result = optimize.minimize(self.objective_fn, self.x0)
-        status = status
-        x[:] = self.result.x
-        return 0
+        out_x[:] = self.result.x
+        return self.result.status
 
     def retrieve_optim_result(self, x):
         x[:] = self.result.x
