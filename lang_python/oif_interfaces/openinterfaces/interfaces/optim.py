@@ -146,10 +146,7 @@ class Optim:
         self._binding.call(
             "minimize",
             (),
-            (
-                self.status,
-                self.x,
-            ),
+            (self.x,),
         )
 
         self.result = OptimResult(status=self.status, x=self.x)
