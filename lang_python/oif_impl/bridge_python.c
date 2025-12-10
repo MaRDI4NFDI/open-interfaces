@@ -409,7 +409,7 @@ cleanup:
 }
 
 int
-call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args, OIFArgs *return_args)
 {
     int result = 1;
     if (impl_info->dh != OIF_LANG_PYTHON) {
@@ -555,6 +555,9 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             else if (out_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
                 pValue = get_numpy_array_from_oif_array_f64(out_args->arg_values[i]);
             }
+            else if (out_args->arg_types[i] == OIF_STR) {
+                pValue = PyArray_SimpleNewFromData(1, (intptr_t[1]){1000}, NPY_UINT8, *(char **)out_args->arg_values[i]);
+            }
             else {
                 pValue = NULL;
             }
@@ -577,6 +580,35 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             PyErr_Print();
             fprintf(stderr, "[%s] Call failed\n", prefix_);
             return 2;
+        }
+
+        if (return_args != NULL) {
+            if (return_args->num_args != PyTuple_GetSize(pValue)) {
+                logerr(prefix_, "Mismatch between requested number of return arguments and the actually return by the function call");
+                goto cleanup;
+            }
+
+            for (size_t i = 0; i < return_args->num_args; ++i) {
+                PyObject *val = PyTuple_GetItem(pValue, i);
+                switch(return_args->arg_types[i]) {
+                case OIF_TYPE_I32:
+                    if (! PyLong_Check(val)) {
+                        logerr(prefix_, "Expected Python integer object, but did not get it");
+                        goto cleanup;
+                    }
+
+                    return_args->arg_values[i] = oif_util_malloc(sizeof(int32_t));
+                    *(int32_t *)return_args->arg_values[i] = PyLong_AsLong(val);
+                    break;
+                case OIF_TYPE_STRING:
+                    if (! PyUnicode_Check(val)) {
+                        logerr(prefix_, "Expected Unicode string object, but did not get it");
+                        goto cleanup;
+                    }
+                    return_args->arg_values[i] = oif_util_malloc(sizeof(char) * PyUnicode_GET_LENGTH(val));
+                    return_args->arg_values[i] = PyUnicode_AsASCIIString(val);
+                }
+            }
         }
     }
     else {
