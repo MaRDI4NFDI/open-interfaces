@@ -105,6 +105,8 @@ if os.path.isfile(_installed_lib_path):
 else:
     _lib_dispatch = ctypes.PyDLL(_lib_dispatch_name)
 
+_liboif_common_util = ctypes.PyDLL("liboif_common_util.so")
+
 elapsed = 0.0
 
 elapsed_call = 0.0
@@ -447,6 +449,22 @@ class OIFPyBinding:
             return_args_packed,
         )
 
+        if return_args_packed is not None:
+            void_pointer = return_args_packed.contents.arg_values[1]
+            __import__("ipdb").set_trace()
+            print(
+                "core.py] string pointer: ",
+                hex(return_args_packed.contents.arg_values[1]),
+            )
+            print(
+                "core.py] string value: ",
+                ctypes.cast(void_pointer, ctypes.c_char_p).value.decode("utf-8"),
+            )
+            oif_util_free_ = _wrap_c_function(
+                _liboif_common_util, "oif_util_free_", None, [ctypes.c_void_p]
+            )
+            # oif_util_free_(ctypes.cast(void_pointer, ctypes.c_void_p))
+            oif_util_free_(ctypes.cast(void_pointer, ctypes.c_void_p).value)
         if status != 0:
             raise RuntimeError(f"Error occurred while executing method '{method}'")
 
