@@ -433,7 +433,7 @@ class OIFPyBinding:
                 (ctypes.c_void_p * len(return_arg_types))(*return_arg_values),
                 ctypes.POINTER(ctypes.c_void_p),
             )
-            return_args_packed = ctypes.byref(
+            return_args_packed = ctypes.pointer(
                 OIFArgs(
                     num_return_args, return_arg_types_ctypes, return_arg_values_ctypes
                 )
@@ -444,6 +444,7 @@ class OIFPyBinding:
             method.encode(),
             ctypes.byref(in_args_packed),
             ctypes.byref(out_packed),
+            return_args_packed,
         )
 
         if status != 0:
