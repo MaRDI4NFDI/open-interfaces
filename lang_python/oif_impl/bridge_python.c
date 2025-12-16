@@ -616,7 +616,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                         goto cleanup;
                     }
                     return_args->arg_values[i] = oif_util_malloc(sizeof(char) * PyUnicode_GET_LENGTH(val));
-                    return_args->arg_values[i] = PyUnicode_AsASCIIString(val);
+                    return_args->arg_values[i] = (void *)PyUnicode_AsUTF8(val);
                 }
             }
         }
