@@ -39,11 +39,12 @@ unload_interface_impl(ImplHandle implh);
  * @param implh Implementat handle that identifies the implementation
  * @param method Name of the method (function) to invoke
  * @param in_args Array of input arguments
- * @param out_args Array of output arguments
+ * @param out_args Array of output (mutable) arguments
+ * @param return_args Array of return arguments
  * @return status code that signals about an error if non-zero
  */
 int
-call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args);
+call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args, OIFArgs *return_args);
 
 #ifdef __cplusplus
 }
