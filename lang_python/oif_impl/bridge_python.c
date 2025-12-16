@@ -572,19 +572,29 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         // Invoke function.
         pValue = PyObject_CallObject(pFunc, pArgs);
         Py_DECREF(pArgs);
-        if (pValue != NULL) {
-            Py_DECREF(pValue);
-        }
-        else {
-            Py_DECREF(pFunc);
+        if (pValue == NULL) {
             PyErr_Print();
-            fprintf(stderr, "[%s] Call failed\n", prefix_);
-            return 2;
+            logerr(prefix_, "Call to the method '%s' has failed\n", method);
+            goto cleanup;
         }
 
         if (return_args != NULL) {
-            if (return_args->num_args != PyTuple_GetSize(pValue)) {
-                logerr(prefix_, "Mismatch between requested number of return arguments and the actually return by the function call");
+            if (return_args->num_args > 1 && !PyTuple_Check(pValue)) {
+                logerr(prefix_,
+                    "Expected %d return arguments, however the method '%s' "
+                    "has not returned a tuple",
+                    return_args->num_args,
+                    method);
+                goto cleanup;
+            }
+            if (return_args->num_args != 1 && return_args->num_args != PyTuple_Size(pValue)) {
+                logerr(
+                    prefix_,
+                    "Expected %d returned arguments, "
+                    "got %d instead in the call to the method '%s'",
+                    return_args->num_args,
+                    PyTuple_Size(pValue),
+                    method);
                 goto cleanup;
             }
 
