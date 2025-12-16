@@ -480,8 +480,9 @@ unload_impl(ImplInfo *impl_info_)
 }
 
 int
-call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *out_args, OIFArgs *return_args)
 {
+    (void)return_args;
     int result = -1;
 
     if (impl_info_->dh != OIF_LANG_JULIA) {

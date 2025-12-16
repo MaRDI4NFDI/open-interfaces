@@ -297,7 +297,7 @@ class OIFPyBinding:
             ],
         )
 
-    def call(self, method, user_args, out_user_args):
+    def call(self, method, user_args, out_user_args, return_arg_types=()):
         num_args = len(user_args)
         arg_types = []
         arg_values = []
@@ -418,6 +418,26 @@ class OIFPyBinding:
             ctypes.POINTER(ctypes.c_void_p),
         )
         out_packed = OIFArgs(num_out_args, out_arg_types_ctypes, out_arg_values_ctypes)
+
+        # Process return arguments, that is the arguments
+        # that the callee should allocate and return to us.
+        return_args_packed = None
+        if return_arg_types:
+            num_return_args = len(return_arg_types)
+            return_arg_types_ctypes = ctypes.cast(
+                (ctypes.c_int * len(return_arg_types))(*return_arg_types),
+                ctypes.POINTER(OIFArgType),
+            )
+            return_arg_values = [None] * len(return_arg_types)
+            return_arg_values_ctypes = ctypes.cast(
+                (ctypes.c_void_p * len(return_arg_types))(*return_arg_values),
+                ctypes.POINTER(ctypes.c_void_p),
+            )
+            return_args_packed = ctypes.byref(
+                OIFArgs(
+                    num_return_args, return_arg_types_ctypes, return_arg_values_ctypes
+                )
+            )
 
         status = self._call_interface_impl(
             self.implh,
