@@ -139,8 +139,9 @@ unload_impl(ImplInfo *impl_info_)
 }
 
 int
-call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *out_args, OIFArgs *return_args)
 {
+    (void)return_args;
     int result = 1;
     ffi_cif cif;
     ffi_type **arg_types = NULL;

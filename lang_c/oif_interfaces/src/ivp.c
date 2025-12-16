@@ -24,7 +24,7 @@ oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs)
         .arg_values = out_arg_values,
     };
 
-    int status = call_interface_impl(implh, "set_rhs_fn", &in_args, &out_args);
+    int status = call_interface_impl(implh, "set_rhs_fn", &in_args, &out_args, NULL);
 
     return status;
 }
@@ -48,7 +48,7 @@ oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0)
         .arg_values = out_arg_values,
     };
 
-    int status = call_interface_impl(implh, "set_initial_value", &in_args, &out_args);
+    int status = call_interface_impl(implh, "set_initial_value", &in_args, &out_args, NULL);
 
     return status;
 }
@@ -78,7 +78,7 @@ oif_ivp_set_user_data(ImplHandle implh, void *user_data)
         .arg_values = out_arg_values,
     };
 
-    int status = call_interface_impl(implh, "set_user_data", &in_args, &out_args);
+    int status = call_interface_impl(implh, "set_user_data", &in_args, &out_args, NULL);
     return status;
 }
 
@@ -101,7 +101,7 @@ oif_ivp_set_tolerances(ImplHandle implh, double rtol, double atol)
         .arg_values = out_arg_values,
     };
 
-    int status = call_interface_impl(implh, "set_tolerances", &in_args, &out_args);
+    int status = call_interface_impl(implh, "set_tolerances", &in_args, &out_args, NULL);
 
     return status;
 }
@@ -125,7 +125,7 @@ oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y)
         .arg_values = out_arg_values,
     };
 
-    int status = call_interface_impl(implh, "integrate", &in_args, &out_args);
+    int status = call_interface_impl(implh, "integrate", &in_args, &out_args, NULL);
 
     return status;
 }
@@ -154,7 +154,7 @@ oif_ivp_set_integrator(ImplHandle implh, char *integrator_name, OIFConfigDict *d
         .arg_values = out_arg_values,
     };
 
-    int status = call_interface_impl(implh, "set_integrator", &in_args, &out_args);
+    int status = call_interface_impl(implh, "set_integrator", &in_args, &out_args, NULL);
     return status;
 }
 
@@ -173,6 +173,6 @@ oif_ivp_print_stats(ImplHandle implh)
         .arg_values = NULL,
     };
 
-    int status = call_interface_impl(implh, "print_stats", &in_args, &out_args);
+    int status = call_interface_impl(implh, "print_stats", &in_args, &out_args, NULL);
     return status;
 }

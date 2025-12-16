@@ -321,7 +321,7 @@ unload_interface_impl(ImplHandle implh)
 }
 
 int
-call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args, OIFArgs *return_args)
 {
     int status;
 
@@ -343,7 +343,7 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
     }
 
     void *lib_handle = OIF_DISPATCH_HANDLES[dh];
-    int (*call_impl_fn)(ImplInfo *, const char *, OIFArgs *, OIFArgs *);
+    int (*call_impl_fn)(ImplInfo *, const char *, OIFArgs *, OIFArgs *, OIFArgs *);
     call_impl_fn = dlsym(lib_handle, "call_impl");
     if (call_impl_fn == NULL) {
         logerr(prefix_,
@@ -352,7 +352,7 @@ call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFA
                OIF_LANG_FROM_LANG_ID[dh]);
         return -3;
     }
-    status = call_impl_fn(impl_info, method, in_args, out_args);
+    status = call_impl_fn(impl_info, method, in_args, out_args, return_args);
 
     if (status) {
         logerr(prefix_,
