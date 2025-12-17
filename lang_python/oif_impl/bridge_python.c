@@ -615,8 +615,14 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                         logerr(prefix_, "Expected Unicode string object, but did not get it");
                         goto cleanup;
                     }
-                    return_args->arg_values[i] = oif_util_malloc(sizeof(char) * PyUnicode_GET_LENGTH(val));
-                    return_args->arg_values[i] = (void *)PyUnicode_AsUTF8(val);
+                    // > The caller is not responsible for deallocating the buffer.
+                    const char *s = PyUnicode_AsUTF8(val);
+                    if (s == NULL) {
+                        logerr(prefix_, "Expected Unicode string object, but did not get it");
+                    }
+                    size_t length = PyUnicode_GET_LENGTH(val) + 1;
+                    return_args->arg_values[i] = oif_util_malloc(sizeof(char) * length);
+                    snprintf(return_args->arg_values[i], length, "%s", s);
                 }
             }
         }
