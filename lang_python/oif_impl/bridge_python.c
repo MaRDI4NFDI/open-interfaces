@@ -608,14 +608,26 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     }
 
                     return_args->arg_values[i] = oif_util_malloc(sizeof(int32_t));
-                    *(int32_t *)return_args->arg_values[i] = PyLong_AsLong(val);
+                    long tmp = PyLong_AsLong(val);
+                    if (tmp == -1 && PyErr_Occurred()) {
+                        logerr(prefix_, "Could not convert Python object to C long value");
+                        goto cleanup;
+                    }
+                    if (tmp >= INT32_MIN && tmp <= INT32_MAX) {
+                        *(int32_t *)return_args->arg_values[i] = tmp;
+                    }
+                    else {
+                        logerr(prefix_, "Return value is outside of the range of int32");
+                        goto cleanup;
+                    }
                     break;
                 case OIF_TYPE_STRING:
                     if (! PyUnicode_Check(val)) {
                         logerr(prefix_, "Expected Unicode string object, but did not get it");
                         goto cleanup;
                     }
-                    // > The caller is not responsible for deallocating the buffer.
+                    // Quote from docs for `PyUnicode_AsUTF8`:
+                    // The caller is not responsible for deallocating the buffer.
                     const char *s = PyUnicode_AsUTF8(val);
                     if (s == NULL) {
                         logerr(prefix_, "Expected Unicode string object, but did not get it");
@@ -623,6 +635,10 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     size_t length = PyUnicode_GET_LENGTH(val) + 1;
                     return_args->arg_values[i] = oif_util_malloc(sizeof(char) * length);
                     snprintf(return_args->arg_values[i], length, "%s", s);
+                    break;
+                default:
+                    logerr(prefix_, "Return type with id '%d' is not supported yet", return_args->arg_types[i]);
+                    goto cleanup;
                 }
             }
         }
