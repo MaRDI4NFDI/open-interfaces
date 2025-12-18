@@ -449,25 +449,22 @@ class OIFPyBinding:
             return_args_packed,
         )
 
+        return_args = []
         if return_args_packed is not None:
             oif_util_free_ = _wrap_c_function(
                 _liboif_common_util, "oif_util_free_", None, [ctypes.c_void_p]
             )
 
-            for arg_type in return_arg_types:
-                __import__("ipdb").set_trace()
+            for i, arg_type in enumerate(return_arg_types):
                 void_pointer = ctypes.c_void_p(
-                    return_args_packed.contents.arg_values[1]
+                    return_args_packed.contents.arg_values[i]
                 )
                 if arg_type == OIF_TYPE_INT:
                     py_var = ctypes.cast(
                         void_pointer, ctypes.POINTER(ctypes.c_int)
-                    ).value
-                    print("Return arg int: ", py_var)
+                    ).contents.value
                 elif arg_type == OIF_TYPE_STRING:
-                    py_var = ctypes.cast(void_pointer, ctypes.c_char_p).value.decode(
-                        "utf-8"
-                    )
+                    py_var = ctypes.string_at(void_pointer).decode("utf-8")
                 else:
                     raise RuntimeError("Cannot convert return argument")
                 return_args.append(py_var)
@@ -475,7 +472,7 @@ class OIFPyBinding:
         if status != 0:
             raise RuntimeError(f"Error occurred while executing method '{method}'")
 
-        return 0
+        return return_args if return_args else status
 
 
 def load_impl(interface: str, impl: str, major: UInt, minor: UInt):
