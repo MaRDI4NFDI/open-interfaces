@@ -18,8 +18,8 @@ class ScipyOptimize(OptimInterface):
         self.N = 0  # Problem dimension.
         self.x0: np.ndarray
         self.objective_fn: Callable
-        # self.s = None
-        # self.user_data = None
+        self.user_data: object
+        self.with_user_data = False
         # self.integrator = "dopri5"
         # self.integrator_params = {"rtol": 1e-6, "atol": 1e-12}
 
@@ -29,13 +29,24 @@ class ScipyOptimize(OptimInterface):
         self.x0 = x0
         self.N = len(x0)
 
+    def set_user_data(self, user_data):
+        self.user_data = user_data
+        self.with_user_data = True
+
     def set_objective_fn(self, objective_fn):
         self.objective_fn = objective_fn
 
         x = np.random.random(size=(self.N,))
         msg = "Wrong signature for the objective function: "
         msg += "expected return value must be of `float64` type"
-        assert type(self.objective_fn(x)) in [float, np.float64], msg
+
+        if self.with_user_data:
+            assert type(self.objective_fn(x, self.user_data)) in [
+                float,
+                np.float64,
+            ], msg
+        else:
+            assert type(self.objective_fn(x)) in [float, np.float64], msg
 
         return 0
 
@@ -52,23 +63,21 @@ class ScipyOptimize(OptimInterface):
     #         self.s.set_initial_value(self.y0, self.t0)
     #     return 0
 
-    # def set_user_data(self, user_data):
-    #     self.user_data = user_data
-
     def minimize(self, out_x):
-        self.result = optimize.minimize(
-            self.objective_fn,
-            self.x0,
-        )
+        if self.with_user_data:
+            result = optimize.minimize(
+                self.objective_fn,
+                self.x0,
+                args=self.user_data,
+            )
+        else:
+            result = optimize.minimize(
+                self.objective_fn,
+                self.x0,
+            )
 
-        out_x[:] = self.result.x
-        return (self.result.status, self.result.message)
-
-    def retrieve_optim_result(self, x):
-        x[:] = self.result.x
-
-    def retrieve_minval(self, f):
-        return self.result.fun
+        out_x[:] = result.x
+        return (result.status, result.message)
 
     # def get_n_rhs_evals(self, n_rhs_evals_arr):
     #     n_rhs_evals_arr[0] = self.s._integrator.iwork[16]
