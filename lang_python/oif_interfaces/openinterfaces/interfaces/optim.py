@@ -14,7 +14,8 @@ import numpy as np
 from openinterfaces.core import (
     OIF_ARRAY_F64,
     OIF_FLOAT64,
-    OIF_INT,
+    OIF_TYPE_INT,
+    OIF_TYPE_STRING,
     OIF_USER_DATA,
     OIFPyBinding,
     load_impl,
@@ -36,14 +37,8 @@ ObjectiveFn: TypeAlias = Callable[[np.ndarray, object], int]
 """
 
 
-@dataclass
-class OptimResult:
-    status: int
-    x: np.ndarray
-
-
 class Optim:
-    """Interface for solving optimization (minimization) problems.
+    r"""Interface for solving optimization (minimization) problems.
 
     This class serves as a gateway to the implementations of the
     solvers for optimization problems.
@@ -56,54 +51,40 @@ class Optim:
     Examples
     --------
 
-    Let's solve the following initial value problem:
+    Let's solve the following convex optimization problem:
 
     .. math::
-        y'(t) = -y(t), \\quad y(0) = 1.
+        minimize \sum_{i = 1}^N x_i^2
+
+    where the solution is :math:`[0, ..., 0]` as the problem is convex.
 
     First, import the necessary modules:
     >>> import numpy as np
-    >>> from oif.interfaces.ivp import IVP
+    >>> from oif.interfaces.optim import Optim
 
-    Define the right-hand side function:
+    Define the objective function:
 
-    >>> def rhs(t, y, ydot, user_data):
-    ...     ydot[0] = -y[0]
-    ...     return 0  # No errors, optional
+    >>> def objective_fn(x):
+    ...     return np.sum(x**2)
 
-    Now define the initial condition:
 
-    >>> y0, t0 = np.array([1.0]), 0.0
+    Create an instance of the optim solver using the implementation "scipy_optimize",
+    which is an adapter to the `scipy.optimize` Python package:
 
-    Create an instance of the IVP solver using the implementation "jl_diffeq",
-    which is an adapter to the `OrdinaryDiffeq.jl` Julia package:
-
-    >>> s = IVP("jl_diffeq")
+    >>> s = Optim("scipy_optimize")
 
     We set the initial value, the right-hand side function, and the tolerance:
 
-    >>> s.set_initial_value(y0, t0)
-    >>> s.set_rhs_fn(rhs)
-    >>> s.set_tolerances(1e-6, 1e-12)
+    >>> s.set_initial_guess([2.718, 3.142])
+    >>> s.set_objective_fn(objective_fn)
 
-    Now we integrate to time `t = 1.0` in a loop, outputting the current value
-    of `y` with time step `0.1`:
+    Now we solve the minimization problem and print the return status and message:
 
-    >>> t = t0
-    >>> times = np.linspace(t0, t0 + 1.0, num=11)
-    >>> for t in times[1:]:
-    ...     s.integrate(t)
-    ...     print(f"{t:.1f} {s.y[0]:.6f}")
-    0.1 0.904837
-    0.2 0.818731
-    0.3 0.740818
-    0.4 0.670320
-    0.5 0.606531
-    0.6 0.548812
-    0.7 0.496585
-    0.8 0.449329
-    0.9 0.406570
-    1.0 0.367879
+    >>> status, message = s.minimize()
+
+    We can print the resultant minimizer by retrieving it from the solver:
+
+    >>> print(f"Minimizer is {s.x}")
 
     """
 
@@ -112,7 +93,6 @@ class Optim:
         self.x0: np.ndarray
         """Current value of the state vector."""
         self._N: int = 0
-        self.status = -1
         self.x: np.ndarray
 
     def set_initial_guess(self, x0: np.ndarray):
@@ -143,15 +123,14 @@ class Optim:
 
     def minimize(self):
         """Integrate to time `t` and write solution to `y`."""
-        self._binding.call(
+        status, message = self._binding.call(
             "minimize",
             (),
             (self.x,),
+            (OIF_TYPE_INT, OIF_TYPE_STRING),
         )
 
-        self.result = OptimResult(status=self.status, x=self.x)
-
-        return self.result
+        return status, message
 
     # def print_stats(self):
     #     """Print integration statistics."""
