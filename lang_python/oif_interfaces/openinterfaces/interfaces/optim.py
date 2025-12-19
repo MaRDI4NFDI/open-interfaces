@@ -132,10 +132,10 @@ class Optim:
     #     """Specify relative and absolute tolerances, respectively."""
     #     self._binding.call("set_tolerances", (rtol, atol), ())
 
-    # def set_user_data(self, user_data: object):
-    #     """Specify additional data that will be used for right-hand side function."""
-    #     self.user_data = make_oif_user_data(user_data)
-    #     self._binding.call("set_user_data", (self.user_data,), ())
+    def set_user_data(self, user_data: object):
+        """Specify additional data that will be used for right-hand side function."""
+        self.user_data = make_oif_user_data(user_data)
+        self._binding.call("set_user_data", (self.user_data,), ())
 
     # def set_integrator(self, integrator_name: str, integrator_params: dict = {}):
     #     """Set integrator, if the name is recognizable."""
