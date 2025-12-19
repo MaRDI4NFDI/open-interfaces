@@ -48,3 +48,19 @@ def test__rosenbrock_problem__converges(s):
     assert status == 0
     assert len(x) == len(x0)
     assert np.all(np.abs(x - 1.0) < 1e-5)  # The solution is [1, 1, ..., 1].
+
+
+def test__parameterized_convex_problem__converges(s):
+    x0 = np.array([0.5, 0.6, 0.7])
+    user_data = np.array([2.0, 3.0, -1.0])
+
+    s.set_initial_guess(x0)
+    s.set_user_data(user_data)
+    s.set_objective_fn(convex_objective_with_args_fn)
+
+    status, message = s.minimize()
+    x = s.x
+
+    assert status == 0
+    assert len(x) == len(x0)
+    assert np.all(np.abs(x - user_data) < 1e-6)
