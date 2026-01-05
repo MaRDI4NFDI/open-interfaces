@@ -24,23 +24,26 @@ def main(argv=None):
         argv = sys.argv
     args = parse_args(argv)
 
-    x0 = np.array([0.5, 0.6, 0.7])
+    x0 = np.array([1.3, 0.7, 0.8, 1.9, 1.2])
 
     s = Optim("scipy_optimize")
     s.set_initial_guess(x0)
-    s.set_objective_fn(objective_fn)
+    s.set_objective_fn(objective_rosen_with_args)
 
-    result = s.minimize()
+    status, message = s.minimize()
 
-    print(f"Status code: {result.status}")
-    print(f"Optimized value: {result.x}")
+    print(f"Status code: {status}")
+    print(f"Solver message: '{message}'")
+    print(f"Optimized value: {s.x}")
 
     if not args.no_artefacts:
         print("Finish")
 
 
-def objective_fn(x):
-    return np.sum(x**2)
+def objective_rosen_with_args(x, params=(0.5, 1.0)):
+    """The Rosenbrock function with additional arguments"""
+    a, b = params
+    return sum(a * (x[1:] - x[:-1] ** 2.0) ** 2.0 + (1 - x[:-1]) ** 2.0) + b
 
 
 if __name__ == "__main__":
