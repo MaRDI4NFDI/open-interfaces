@@ -439,7 +439,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 char *c_str = *((char **)in_args->arg_values[i]);
                 pValue = PyUnicode_FromString(c_str);
             }
-            else if (in_args->arg_types[i] == OIF_CALLBACK) {
+            else if (in_args->arg_types[i] == OIF_TYPE_CALLBACK) {
                 OIFCallback *p = in_args->arg_values[i];
                 if (p->src == OIF_LANG_PYTHON) {
                     pValue = (PyObject *)p->fn_p_py;
@@ -486,7 +486,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 if (!PyCallable_Check(pValue)) {
                     fprintf(stderr,
                             "[%s] Input argument #%zu "
-                            "has type OIF_CALLBACK "
+                            "has type OIF_TYPE_CALLBACK "
                             "but it is actually is not callable\n",
                             prefix_, i);
                     goto cleanup;

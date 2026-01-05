@@ -192,7 +192,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         else if (in_args->arg_types[i] == OIF_TYPE_ARRAY_F64 || in_args->arg_types[i] == OIF_TYPE_STRING) {
             arg_types[i + 1] = &ffi_type_pointer;
         }
-        else if (in_args->arg_types[i] == OIF_CALLBACK) {
+        else if (in_args->arg_types[i] == OIF_TYPE_CALLBACK) {
             arg_types[i + 1] = &ffi_type_pointer;
             // We need to take a pointer to a pointer according to the FFI
             // convention, hence the & operator.

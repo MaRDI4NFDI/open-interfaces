@@ -15,42 +15,55 @@ import numpy as np
 
 UInt = NewType("UInt", int)
 
+# -----------------------------------------------------------------------------
+# Data types identifiers.
 OIF_TYPE_BOOL = 1
+
 OIF_TYPE_CHAR = 2
 OIF_TYPE_I8 = 2
 OIF_TYPE_UCHAR = 3
 OIF_TYPE_U8 = 3
+
 OIF_TYPE_I32 = 4
 OIF_TYPE_INT = 4
 OIF_TYPE_U32 = 5
 OIF_TYPE_UINT = 5
+
 OIF_TYPE_I64 = 6
 OIF_TYPE_U64 = 7
+
 OIF_TYPE_F32 = 8
 OIF_TYPE_F64 = 9
+
 OIF_TYPE_ARRAY_F32 = 10
 OIF_TYPE_ARRAY_F64 = 11
+
 OIF_TYPE_STRING = 12
-OIF_CALLBACK = 13
 OIF_TYPE_CALLBACK = 13
 OIF_USER_DATA = 14
 OIF_TYPE_POINTER = 14
 OIF_CONFIG_DICT = 15
 OIF_TYPE_CONFIG_DICT = 15
+# -----------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# Languages identifiers.
 OIF_LANG_C = 1
 OIF_LANG_CXX = 2
 OIF_LANG_PYTHON = 3
 OIF_LANG_JULIA = 4
 OIF_LANG_R = 5
 OIF_LANG_COUNT = 6
+# -----------------------------------------------------------------------------
 
 
+# -----------------------------------------------------------------------------
 # Error codes
 OIF_ERROR = 1
 OIF_IMPL_INIT_ERROR = 2
 OIF_BRIDGE_NOT_AVAILABLE_ERROR = 3
 OIF_IMPL_NOT_AVAILABLE_ERROR = 4
+# -----------------------------------------------------------------------------
 
 
 # Starting number for implementation handles.
@@ -332,7 +345,7 @@ class OIFPyBinding:
             elif isinstance(arg, OIFCallback):
                 argp = ctypes.pointer(arg)
                 arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
-                arg_types.append(OIF_CALLBACK)
+                arg_types.append(OIF_TYPE_CALLBACK)
             elif isinstance(arg, OIFUserData):
                 argp = ctypes.pointer(arg)
                 arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
