@@ -20,8 +20,8 @@ class ScipyOptimize(OptimInterface):
         self.objective_fn: Callable
         self.user_data: object
         self.with_user_data = False
-        # self.integrator = "dopri5"
-        # self.integrator_params = {"rtol": 1e-6, "atol": 1e-12}
+        self.method = ""
+        self.method_params = {}
 
     def set_initial_guess(self, x0: np.ndarray):
         _p = f"[{_prefix}::set_initial_guess]"
@@ -50,18 +50,10 @@ class ScipyOptimize(OptimInterface):
 
         return 0
 
-    # def set_tolerances(self, rtol, atol):
-    #     if self.s is None:
-    #         raise RuntimeError("`set_rhs_fn` must be called before `set_tolerances`")
-
-    #     self.integrator_params = self.integrator_params | {
-    #         "rtol": rtol,
-    #         "atol": atol,
-    #     }
-    #     self.s.set_integrator(self.integrator, **self.integrator_params)
-    #     if hasattr(self, "y0"):
-    #         self.s.set_initial_value(self.y0, self.t0)
-    #     return 0
+    def set_method(self, method_name, method_params):
+        self.method_name = method_name
+        self.method_params = method_params
+        return 0
 
     def minimize(self, out_x):
         if self.with_user_data:
