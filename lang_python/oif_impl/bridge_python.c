@@ -545,7 +545,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         }
         // Convert output arguments.
         for (size_t i = 0; i < out_args->num_args; ++i) {
-            if (out_args->arg_types[i] == OIF_INT) {
+            if (out_args->arg_types[i] == OIF_TYPE_INT) {
                 int *tmp = *(int **)out_args->arg_values[i];
                 pValue = PyArray_SimpleNewFromData(1, (intptr_t[1]){1}, NPY_INT32, tmp);
             }

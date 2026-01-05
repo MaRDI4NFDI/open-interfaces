@@ -113,7 +113,7 @@ oif_config_dict_add_int(OIFConfigDict *dict, const char *key, int value)
         fprintf(stderr, "Could not add an entry to the config dictionary\n");
         exit(1);
     }
-    entry->type = OIF_INT;
+    entry->type = OIF_TYPE_INT;
     entry->value = oif_util_malloc(sizeof(int));
     if (entry->value == NULL) {
         fprintf(stderr, "Could not allocate memory for adding an int entry\n");
@@ -216,7 +216,7 @@ oif_config_dict_get_int(OIFConfigDict *dict, const char *key)
         exit(1);
     }
 
-    assert(entry->type == OIF_INT);
+    assert(entry->type == OIF_TYPE_INT);
     int int_value = *(int *)entry->value;
     return int_value;
 }
@@ -247,7 +247,7 @@ oif_config_dict_print(OIFConfigDict *dict)
     else {
         hashmap_foreach(key, entry, &dict->map)
         {
-            if (entry->type == OIF_INT) {
+            if (entry->type == OIF_TYPE_INT) {
                 printf("Key = '%s', value = '%d'\n", key, *(int *)entry->value);
             }
             else if (entry->type == OIF_FLOAT64) {
@@ -307,7 +307,7 @@ oif_config_dict_serialize(OIFConfigDict *dict)
         {
             cw_pack_str(pc, key, oif_util_u32_from_size_t(strlen(key)));
 
-            if (entry->type == OIF_INT) {
+            if (entry->type == OIF_TYPE_INT) {
                 int64_t i64_value = *(int *)entry->value;
                 cw_pack_signed(pc, i64_value);
             }

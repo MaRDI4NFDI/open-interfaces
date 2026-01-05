@@ -80,7 +80,7 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
         PyObject *py_type = PyTuple_GET_ITEM(arg_types, i);
         long c_type = PyLong_AsLong(py_type);
         PyObject *py_cur_arg = PyTuple_GET_ITEM(c_args, i);
-        if (c_type == OIF_INT) {
+        if (c_type == OIF_TYPE_INT) {
             cur_arg = py_cur_arg;
         }
         else if (c_type == OIF_FLOAT64) {
@@ -162,7 +162,7 @@ c_wrapper_over_py_callable(void *py_fn, OIFArgs *args)
     for (size_t i = 0; i < num_args; ++i) {
         void *c_arg = args->arg_values[i];
         switch (args->arg_types[i]) {
-            case OIF_INT:
+            case OIF_TYPE_INT:
                 cur_arg = PyLong_FromLong(*(int *)c_arg);
                 break;
             case OIF_FLOAT64:
