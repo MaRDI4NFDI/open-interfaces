@@ -273,7 +273,7 @@ set_initial_value(Self *self, OIFArrayF64 *y0_in, double t0_in)
         return 3;
     }
 
-    // Sanity check that `sunrealtype` is actually the same as OIF_FLOAT64.
+    // Sanity check that `sunrealtype` is actually the same as OIF_TYPE_F64.
     assert(NV_Ith_S(self->y0, 0) == y0_in->data[0]);
 
     self->t0 = t0_in;

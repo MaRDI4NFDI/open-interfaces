@@ -5,7 +5,7 @@
 int
 oif_solve_qeq(ImplHandle implh, double a, double b, double c, OIFArrayF64 *roots)
 {
-    OIFArgType in_arg_types[3] = {OIF_FLOAT64, OIF_FLOAT64, OIF_FLOAT64};
+    OIFArgType in_arg_types[3] = {OIF_TYPE_F64, OIF_TYPE_F64, OIF_TYPE_F64};
     void *in_arg_values[3] = {(void *)&a, (void *)&b, (void *)&c};
     OIFArgs in_args = {
         .num_args = 3,

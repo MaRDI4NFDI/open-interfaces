@@ -83,7 +83,7 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
         if (c_type == OIF_TYPE_INT) {
             cur_arg = py_cur_arg;
         }
-        else if (c_type == OIF_FLOAT64) {
+        else if (c_type == OIF_TYPE_F64) {
             cur_arg = py_cur_arg;
         }
         else if (c_type == OIF_ARRAY_F64) {
@@ -165,7 +165,7 @@ c_wrapper_over_py_callable(void *py_fn, OIFArgs *args)
             case OIF_TYPE_INT:
                 cur_arg = PyLong_FromLong(*(int *)c_arg);
                 break;
-            case OIF_FLOAT64:
+            case OIF_TYPE_F64:
                 cur_arg = PyFloat_FromDouble(*(double *)c_arg);
                 break;
             case OIF_ARRAY_F64:

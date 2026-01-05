@@ -135,7 +135,7 @@ oif_config_dict_add_double(OIFConfigDict *dict, const char *key, double value)
         fprintf(stderr, "Could not add an entry to the config dictionary\n");
         exit(1);
     }
-    entry->type = OIF_FLOAT64;
+    entry->type = OIF_TYPE_F64;
     entry->value = oif_util_malloc(sizeof(double));
     if (entry->value == NULL) {
         fprintf(stderr, "Could not allocate memory for adding a double entry\n");
@@ -230,7 +230,7 @@ oif_config_dict_get_double(OIFConfigDict *dict, const char *key)
         exit(1);
     }
 
-    assert(entry->type == OIF_FLOAT64);
+    assert(entry->type == OIF_TYPE_F64);
     double double_value = *(double *)entry->value;
     return double_value;
 }
@@ -250,7 +250,7 @@ oif_config_dict_print(OIFConfigDict *dict)
             if (entry->type == OIF_TYPE_INT) {
                 printf("Key = '%s', value = '%d'\n", key, *(int *)entry->value);
             }
-            else if (entry->type == OIF_FLOAT64) {
+            else if (entry->type == OIF_TYPE_F64) {
                 printf("Key = '%s', value = '%f'\n", key, *(double *)entry->value);
             }
             else if (entry->type == OIF_STR) {
@@ -311,7 +311,7 @@ oif_config_dict_serialize(OIFConfigDict *dict)
                 int64_t i64_value = *(int *)entry->value;
                 cw_pack_signed(pc, i64_value);
             }
-            else if (entry->type == OIF_FLOAT64) {
+            else if (entry->type == OIF_TYPE_F64) {
                 cw_pack_double(pc, *(double *)entry->value);
             }
             else if (entry->type == OIF_STR) {

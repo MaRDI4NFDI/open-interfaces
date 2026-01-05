@@ -58,7 +58,7 @@ along with integer identifiers allowing to restore the type on the receiver
 end. We use the following symbolic constants
 further in the text to refer to the actual data types:
  - `OIF_TYPE_I32` (or `OIF_TYPE_INT` as an alias): 32-bit integers,
- - `OIF_FLOAT64`: 64-bit binary floating-point numbers,
+ - `OIF_TYPE_F64`: 64-bit binary floating-point numbers,
  - `OIF_ARRAY_F64`: arrays of 64-bit binary floating-point numbers,
  - `OIF_STR`: strings with one-byte characters
  - `OIF_CALLBACK`: callback functions,
