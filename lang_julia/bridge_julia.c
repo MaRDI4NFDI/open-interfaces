@@ -510,7 +510,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         else if (in_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
             cur_julia_arg = get_julia_array_from_oif_arrayf64(in_args->arg_values[i]);
         }
-        else if (in_args->arg_types[i] == OIF_STR) {
+        else if (in_args->arg_types[i] == OIF_TYPE_STRING) {
             cur_julia_arg = jl_cstr_to_string(*((char **)in_args->arg_values[i]));
         }
         else if (in_args->arg_types[i] == OIF_CALLBACK) {

@@ -435,7 +435,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             else if (in_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
                 pValue = get_numpy_array_from_oif_array_f64(in_args->arg_values[i]);
             }
-            else if (in_args->arg_types[i] == OIF_STR) {
+            else if (in_args->arg_types[i] == OIF_TYPE_STRING) {
                 char *c_str = *((char **)in_args->arg_values[i]);
                 pValue = PyUnicode_FromString(c_str);
             }
