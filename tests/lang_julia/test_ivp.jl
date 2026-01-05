@@ -293,7 +293,7 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
         end
     end
 
-    @testset "IVP, OIF_CONFIG_DICT tests" begin
+    @testset "IVP, OIF_TYPE_CONFIG_DICT tests" begin
         if "scipy_ode" in IMPLEMENTATIONS
             @testset "test_1__config_dict_scipy_ode__should_accept_alright" begin
                 s = IVP.Self("scipy_ode")

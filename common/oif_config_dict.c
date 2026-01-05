@@ -67,7 +67,7 @@ oif_config_dict_init(void)
     OIFConfigDict *dict = oif_util_malloc(sizeof(OIFConfigDict));
     assert(dict != NULL);
 
-    dict->type = OIF_CONFIG_DICT;
+    dict->type = OIF_TYPE_CONFIG_DICT;
     dict->src = OIF_LANG_C;
     dict->size = 0;
     dict->buffer = NULL;
@@ -86,7 +86,7 @@ oif_config_dict_free(void *_dict)
         return;
     }
     OIFConfigDict *dict = _dict;
-    assert(dict->type == OIF_CONFIG_DICT);
+    assert(dict->type == OIF_TYPE_CONFIG_DICT);
     const char *key;
     OIFConfigEntry *entry;
     hashmap_foreach(key, entry, &dict->map)
