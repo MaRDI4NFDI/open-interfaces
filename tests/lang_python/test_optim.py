@@ -9,6 +9,10 @@ def convex_objective_fn(x):
     return np.sum(x**2)
 
 
+def convex_objective_with_args_fn(x, args):
+    return np.sum((x - args) ** 2)
+
+
 def rosenbrock_objective_fn(x):
     """The Rosenbrock function with additional arguments"""
     a, b = (0.5, 1.0)
@@ -64,3 +68,20 @@ def test__parameterized_convex_problem__converges(s):
     assert status == 0
     assert len(x) == len(x0)
     assert np.all(np.abs(x - user_data) < 1e-6)
+
+
+def test__parameterized_convex_problem__converges_better_with_tigher_tolerance(s):
+    x0 = np.array([0.5, 0.6, 0.7])
+    user_data = np.array([2.0, 7.0, -1.0])
+
+    s.set_initial_guess(x0)
+    s.set_user_data(user_data)
+    s.set_objective_fn(convex_objective_with_args_fn)
+    s.set_method("nelder-mead", {"xatol": 1e-8})
+
+    status, message = s.minimize()
+    x = s.x
+
+    assert status == 0
+    assert len(x) == len(x0)
+    assert np.all(np.abs(x - user_data) < 1e-16)
