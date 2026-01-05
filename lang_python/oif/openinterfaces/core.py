@@ -42,7 +42,6 @@ OIF_TYPE_STRING = 12
 OIF_TYPE_CALLBACK = 13
 OIF_USER_DATA = 14
 OIF_TYPE_POINTER = 14
-OIF_CONFIG_DICT = 15
 OIF_TYPE_CONFIG_DICT = 15
 # -----------------------------------------------------------------------------
 
@@ -152,7 +151,7 @@ class OIFUserData(ctypes.Structure):
 
 class OIFConfigDict(ctypes.Structure):
     _fields_ = [
-        ("type", ctypes.c_int),  # Type for sanity checks (OIF_CONFIG_DICT)
+        ("type", ctypes.c_int),  # Type for sanity checks (OIF_TYPE_CONFIG_DICT)
         ("src", ctypes.c_int),  # one of OIF_LANG_* constants
         ("size", ctypes.c_size_t),  # Current number of elements in the map
         ("buffer", ctypes.c_char_p),  # Buffer that is used by the pc
@@ -269,7 +268,7 @@ def make_oif_config_dict(arg: dict) -> OIFConfigDict:
     buffer.seek(0)
 
     obj = OIFConfigDict(
-        OIF_CONFIG_DICT,
+        OIF_TYPE_CONFIG_DICT,
         OIF_LANG_PYTHON,
         0,
         buffer.getvalue(),
@@ -357,7 +356,7 @@ class OIFPyBinding:
                     ctypes.pointer(arg_config_dict_p), ctypes.c_void_p
                 )
                 arg_values.append(arg_config_dict_p_p)
-                arg_types.append(OIF_CONFIG_DICT)
+                arg_types.append(OIF_TYPE_CONFIG_DICT)
             else:
                 raise ValueError(f"Cannot convert argument {arg} of type{type(arg)}")
 

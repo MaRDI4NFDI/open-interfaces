@@ -4,7 +4,7 @@ module OpenInterfaces
 
 # Type ids
 export OIF_TYPE_INT, OIF_TYPE_I32,
-    OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_STRING, OIF_TYPE_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
+    OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_STRING, OIF_TYPE_CALLBACK, OIF_USER_DATA, OIF_TYPE_CONFIG_DICT
 
 # Language ids
 export OIF_LANG_C, OIF_LANG_CXX, OIF_LANG_PYTHON, OIF_LANG_JULIA, OIF_LANG_R
@@ -56,7 +56,6 @@ const OIF_TYPE_CALLBACK::OIFArgType = 13
 const OIF_USER_DATA::OIFArgType = 14
 const OIF_TYPE_POINTER::OIFArgType = 14
 
-const OIF_CONFIG_DICT::OIFArgType = 15
 const OIF_TYPE_CONFIG_DICT::OIFArgType = 15
 # -----------------------------------------------------------------------------
 
@@ -241,7 +240,7 @@ function call_impl(
             dict_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, dict_p_ref)
             push!(temp_refs, dict_p_p)
 
-            in_arg_types[i] = OIF_CONFIG_DICT
+            in_arg_types[i] = OIF_TYPE_CONFIG_DICT
             in_arg_values[i] = dict_p_p
         else
             error("Cannot convert input argument $(arg) of type $(typeof(arg))")
@@ -452,7 +451,7 @@ function make_oif_config_dict(dict::Dict)::OIFConfigDict
     seekstart(io)
 
     oif_config_dict_obj = OIFConfigDict(
-        OIF_CONFIG_DICT,
+        OIF_TYPE_CONFIG_DICT,
         OIF_LANG_JULIA,
         0,
         pointer(io.data),

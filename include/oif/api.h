@@ -25,13 +25,11 @@ typedef enum {
 
     OIF_TYPE_CHAR = 2,
     OIF_TYPE_I8 = 2,
-
     OIF_TYPE_UCHAR = 3,
     OIF_TYPE_U8 = 3,
 
     OIF_TYPE_I32 = 4,
     OIF_TYPE_INT = 4,    // Use int as an alias to int32
-
     OIF_TYPE_U32 = 5,
     OIF_TYPE_UINT = 5,   // Use uint as an alias to uint32
 
@@ -39,22 +37,15 @@ typedef enum {
     OIF_TYPE_U64 = 7,
 
     OIF_TYPE_F32 = 8,
-
     OIF_TYPE_F64 = 9,
 
     OIF_TYPE_ARRAY_F32 = 10,
-
     OIF_TYPE_ARRAY_F64 = 11,
 
     OIF_TYPE_STRING = 12,
-
     OIF_TYPE_CALLBACK = 13,
-
     OIF_USER_DATA = 14,
     OIF_TYPE_POINTER = 14,
-
-    OIF_CONFIG_DICT = 15,
-
     OIF_TYPE_CONFIG_DICT = 15,
 } OIFArgType;
 

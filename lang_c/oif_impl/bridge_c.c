@@ -218,7 +218,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                 goto cleanup;
             }
         }
-        else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
+        else if (in_args->arg_types[i] == OIF_TYPE_CONFIG_DICT) {
             OIFConfigDict *dict = *(OIFConfigDict **)in_args->arg_values[i];
             arg_types[i + 1] = &ffi_type_pointer;
             if (dict != NULL) {

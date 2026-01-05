@@ -544,7 +544,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                 cur_julia_arg = NULL;
             }
         }
-        else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
+        else if (in_args->arg_types[i] == OIF_TYPE_CONFIG_DICT) {
             OIFConfigDict *dict = *((OIFConfigDict **)in_args->arg_values[i]);
             cur_julia_arg = deserialize_config_dict(dict);
         }

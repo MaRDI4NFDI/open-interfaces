@@ -63,7 +63,7 @@ further in the text to refer to the actual data types:
  - `OIF_TYPE_STRING`: strings with one-byte characters
  - `OIF_TYPE_CALLBACK`: callback functions,
  - `OIF_USER_DATA`: user-data objects of volatile type,
- - `OIF_CONFIG_DICT`: dictionary of key-value options pairs.
+ - `OIF_TYPE_CONFIG_DICT`: dictionary of key-value options pairs.
 
 It is assumed that each symbolic constant is replaced with the actual data type
 when used in a particular language: for example, `OIF_TYPE_ARRAY_F64`

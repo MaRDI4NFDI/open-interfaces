@@ -511,7 +511,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     pValue = NULL;
                 }
             }
-            else if (in_args->arg_types[i] == OIF_CONFIG_DICT) {
+            else if (in_args->arg_types[i] == OIF_TYPE_CONFIG_DICT) {
                 OIFConfigDict *dict = *((OIFConfigDict **)in_args->arg_values[i]);
                 if (dict != NULL) {
                     PyObject *deserialize_fn = get_deserialization_function();
