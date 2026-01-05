@@ -11,11 +11,10 @@ from typing import TypeAlias, Union
 import matplotlib.pyplot as plt
 import numpy as np
 from line_profiler import profile
+from openinterfaces.core import OIF_TYPE_ARRAY_F64, OIF_TYPE_F64, OIF_TYPE_INT
 from scipy import integrate
 
 CtypesType: TypeAlias = Union[ctypes._SimpleCData, ctypes._Pointer]
-
-from openinterfaces.core import OIF_TYPE_ARRAY_F64, OIF_TYPE_F64, OIF_TYPE_INT
 
 
 class OIFArrayF64(ctypes.Structure):

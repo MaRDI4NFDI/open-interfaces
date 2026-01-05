@@ -29,9 +29,9 @@ typedef enum {
     OIF_TYPE_U8 = 3,
 
     OIF_TYPE_I32 = 4,
-    OIF_TYPE_INT = 4,    // Use int as an alias to int32
+    OIF_TYPE_INT = 4,  // Use int as an alias to int32
     OIF_TYPE_U32 = 5,
-    OIF_TYPE_UINT = 5,   // Use uint as an alias to uint32
+    OIF_TYPE_UINT = 5,  // Use uint as an alias to uint32
 
     OIF_TYPE_I64 = 6,
     OIF_TYPE_U64 = 7,

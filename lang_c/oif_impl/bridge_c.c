@@ -189,7 +189,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         if (in_args->arg_types[i] == OIF_TYPE_F64) {
             arg_types[i + 1] = &ffi_type_double;
         }
-        else if (in_args->arg_types[i] == OIF_TYPE_ARRAY_F64 || in_args->arg_types[i] == OIF_TYPE_STRING) {
+        else if (in_args->arg_types[i] == OIF_TYPE_ARRAY_F64 ||
+                 in_args->arg_types[i] == OIF_TYPE_STRING) {
             arg_types[i + 1] = &ffi_type_pointer;
         }
         else if (in_args->arg_types[i] == OIF_TYPE_CALLBACK) {
