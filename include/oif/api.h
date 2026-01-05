@@ -46,8 +46,6 @@ typedef enum {
 
     OIF_TYPE_ARRAY_F64 = 11,
 
-    OIF_STR = 12,
-
     OIF_TYPE_STRING = 12,
 
     OIF_CALLBACK = 13,

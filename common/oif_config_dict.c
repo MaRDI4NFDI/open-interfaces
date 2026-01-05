@@ -157,7 +157,7 @@ oif_config_dict_add_str(OIFConfigDict *dict, const char *key, const char *value)
         fprintf(stderr, "Could not add an entry to the config dictionary\n");
         exit(1);
     }
-    entry->type = OIF_STR;
+    entry->type = OIF_TYPE_STRING;
     entry->value = oif_util_str_duplicate(value);
     if (entry->value == NULL) {
         fprintf(stderr, "Could not allocate memory for adding a string entry\n");
@@ -253,7 +253,7 @@ oif_config_dict_print(OIFConfigDict *dict)
             else if (entry->type == OIF_TYPE_F64) {
                 printf("Key = '%s', value = '%f'\n", key, *(double *)entry->value);
             }
-            else if (entry->type == OIF_STR) {
+            else if (entry->type == OIF_TYPE_STRING) {
                 printf("Key = '%s', value = '%s'\n", key, (char *)entry->value);
             }
             else {
@@ -314,7 +314,7 @@ oif_config_dict_serialize(OIFConfigDict *dict)
             else if (entry->type == OIF_TYPE_F64) {
                 cw_pack_double(pc, *(double *)entry->value);
             }
-            else if (entry->type == OIF_STR) {
+            else if (entry->type == OIF_TYPE_STRING) {
                 cw_pack_str(pc, (char *)entry->value,
                             oif_util_u32_from_size_t(strlen(entry->value)));
             }

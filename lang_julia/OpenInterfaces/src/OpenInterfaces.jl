@@ -5,6 +5,7 @@ module OpenInterfaces
 # Type ids
 export OIF_TYPE_INT, OIF_TYPE_I32,
     OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_STR, OIF_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
+    # OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_STRING, OIF_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
 
 # Language ids
 export OIF_LANG_C, OIF_LANG_CXX, OIF_LANG_PYTHON, OIF_LANG_JULIA, OIF_LANG_R
@@ -45,7 +46,7 @@ const OIF_TYPE_F32::OIFArgType = 8
 const OIF_TYPE_F64::OIFArgType = 9
 const OIF_TYPE_ARRAY_F32::OIFArgType = 10
 const OIF_TYPE_ARRAY_F64::OIFArgType = 11
-const OIF_STR::OIFArgType = 12
+const OIF_TYPE_ARRAY_F64::OIFArgType = 11
 const OIF_TYPE_STRING::OIFArgType = 12
 const OIF_CALLBACK::OIFArgType = 13
 const OIF_TYPE_CALLBACK::OIFArgType = 13
@@ -210,7 +211,7 @@ function call_impl(
             arg_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, arg_p_ref)
             push!(temp_refs, arg_p_p)
 
-            in_arg_types[i] = OIF_STR
+            in_arg_types[i] = OIF_TYPE_STRING
             in_arg_values[i] = arg_p_p
         elseif typeof(arg) == OIFCallback
             arg_ref = Ref(arg)

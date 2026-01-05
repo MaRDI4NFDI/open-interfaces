@@ -136,7 +136,7 @@ oif_ivp_set_integrator(ImplHandle implh, char *integrator_name, OIFConfigDict *d
     if (dict != NULL) {
         oif_config_dict_serialize(dict);
     }
-    OIFArgType in_arg_types[] = {OIF_STR, OIF_CONFIG_DICT};
+    OIFArgType in_arg_types[] = {OIF_TYPE_STRING, OIF_CONFIG_DICT};
     void *in_arg_values[] = {&integrator_name, &dict};
     size_t in_num_args = sizeof(in_arg_types) / sizeof(*in_arg_types);
     OIFArgs in_args = {
