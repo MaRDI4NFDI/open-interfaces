@@ -14,7 +14,7 @@ where $f(x) : \mathbb R^n \to \mathbb R$ and $g(x)$ are nonlinear functions of $
 Julia package /JuMP/ (Julia Mathematical Programming) is a metapackage
 that contains a lot of packages for different types of optimization problems:
 for example, for integer programming, for linear programming, nonlinear, etc.
-It also supports solvers with commerical licenses.
+It also supports solvers with commercial licenses.
 
 See:
 https://jump.dev/JuMP.jl/stable/tutorials/getting_started/getting_started_with_JuMP
