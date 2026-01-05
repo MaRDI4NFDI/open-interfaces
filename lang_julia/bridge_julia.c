@@ -504,7 +504,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     jl_value_t *cur_julia_arg;
     for (int32_t i = 0; i < in_num_args; ++i) {
         cur_julia_arg = NULL;
-        if (in_args->arg_types[i] == OIF_FLOAT64) {
+        if (in_args->arg_types[i] == OIF_TYPE_F64) {
             cur_julia_arg = jl_box_float64(*(double *)in_args->arg_values[i]);
         }
         else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
@@ -559,7 +559,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     }
 
     for (int32_t i = 0; i < out_num_args; ++i) {
-        if (out_args->arg_types[i] == OIF_FLOAT64) {
+        if (out_args->arg_types[i] == OIF_TYPE_F64) {
             cur_julia_arg = jl_box_float64(*(float *)out_args->arg_values[i]);
         }
         else if (out_args->arg_types[i] == OIF_ARRAY_F64) {

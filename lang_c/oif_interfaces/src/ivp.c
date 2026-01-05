@@ -32,7 +32,7 @@ oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs)
 int
 oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0)
 {
-    OIFArgType in_arg_types[] = {OIF_ARRAY_F64, OIF_FLOAT64};
+    OIFArgType in_arg_types[] = {OIF_ARRAY_F64, OIF_TYPE_F64};
     void *in_arg_values[] = {&y0, &t0};
     OIFArgs in_args = {
         .num_args = 2,
@@ -85,7 +85,7 @@ oif_ivp_set_user_data(ImplHandle implh, void *user_data)
 int
 oif_ivp_set_tolerances(ImplHandle implh, double rtol, double atol)
 {
-    OIFArgType in_arg_types[] = {OIF_FLOAT64, OIF_FLOAT64};
+    OIFArgType in_arg_types[] = {OIF_TYPE_F64, OIF_TYPE_F64};
     void *in_arg_values[] = {&rtol, &atol};
     OIFArgs in_args = {
         .num_args = 2,
@@ -109,7 +109,7 @@ oif_ivp_set_tolerances(ImplHandle implh, double rtol, double atol)
 int
 oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y)
 {
-    OIFArgType in_arg_types[] = {OIF_FLOAT64};
+    OIFArgType in_arg_types[] = {OIF_TYPE_F64};
     void *in_arg_values[] = {&t};
     OIFArgs in_args = {
         .num_args = 1,

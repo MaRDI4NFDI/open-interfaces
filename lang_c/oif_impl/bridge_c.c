@@ -186,7 +186,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     // Merge input and output argument types together in `arg_types` array.
     for (unsigned int i = 0; i < num_in_args; ++i) {
-        if (in_args->arg_types[i] == OIF_FLOAT64) {
+        if (in_args->arg_types[i] == OIF_TYPE_F64) {
             arg_types[i + 1] = &ffi_type_double;
         }
         else if (in_args->arg_types[i] == OIF_ARRAY_F64 || in_args->arg_types[i] == OIF_STR) {
@@ -258,7 +258,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
     }
 
     for (unsigned int i = num_in_args; i < num_total_args - 1; ++i) {
-        if (out_args->arg_types[i - num_in_args] == OIF_FLOAT64) {
+        if (out_args->arg_types[i - num_in_args] == OIF_TYPE_F64) {
             arg_types[i + 1] = &ffi_type_double;
         }
         else if (out_args->arg_types[i - num_in_args] == OIF_ARRAY_F64) {

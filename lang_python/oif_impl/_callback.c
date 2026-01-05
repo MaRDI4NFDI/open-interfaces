@@ -73,7 +73,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
         fprintf(stderr, "[_callback] Could not allocated memory for oif_arg_types\n");
         goto fail_clean_self;
     }
-    self->oif_arg_types[0] = OIF_FLOAT64;
+    self->oif_arg_types[0] = OIF_TYPE_F64;
     self->oif_arg_types[1] = OIF_ARRAY_F64;
     self->oif_arg_types[2] = OIF_ARRAY_F64;
     self->oif_arg_types[3] = OIF_USER_DATA;
@@ -105,7 +105,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
             self->arg_types[i] = &ffi_type_sint64;
             self->arg_values[i] = malloc(sizeof(int));
         }
-        else if (self->oif_arg_types[i] == OIF_FLOAT64) {
+        else if (self->oif_arg_types[i] == OIF_TYPE_F64) {
             self->arg_types[i] = &ffi_type_double;
             self->arg_values[i] = malloc(sizeof(double));
         }
@@ -217,7 +217,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
     // and convert NumPy arrays to OIFArrayF64 structs.
     for (size_t i = 0, j = 0; i < nargs; ++i) {
         PyObject *arg = PyTuple_GetItem(py_args, i);
-        if (arg_type_ids[i] == OIF_FLOAT64) {
+        if (arg_type_ids[i] == OIF_TYPE_F64) {
             if (!PyFloat_Check(arg)) {
                 fprintf(stderr, "[_callback] Expected PyFloat object.\n");
                 return NULL;

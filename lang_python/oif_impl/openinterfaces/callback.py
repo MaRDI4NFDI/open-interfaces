@@ -6,7 +6,7 @@ except ModuleNotFoundError:
     import openinterfaces._callback as _callback
 
 import numpy as np
-from oif.core import OIF_ARRAY_F64, OIF_FLOAT64, OIF_TYPE_INT, OIFArrayF64
+from oif.core import OIF_ARRAY_F64, OIF_TYPE_F64, OIF_TYPE_INT, OIFArrayF64
 
 
 class Callback:
@@ -33,7 +33,7 @@ class Callback:
         raw_pointer = get_pointer_fn(ctypes.py_object(fn_p), id.encode())
 
         self.fn_capsule = fn_p
-        self.arg_types = [OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64]
+        self.arg_types = [OIF_TYPE_F64, OIF_ARRAY_F64, OIF_ARRAY_F64]
 
         c_func_wrapper = ctypes.CFUNCTYPE(
             ctypes.c_int,
@@ -49,7 +49,7 @@ class Callback:
         for i, (t, v) in enumerate(zip(self.arg_types, args)):
             if t == OIF_TYPE_INT:
                 c_args.append(ctypes.c_int(v))
-            elif t == OIF_FLOAT64:
+            elif t == OIF_TYPE_F64:
                 c_args.append(ctypes.c_double(v))
             elif t == OIF_ARRAY_F64:
                 assert v.dtype == np.float64

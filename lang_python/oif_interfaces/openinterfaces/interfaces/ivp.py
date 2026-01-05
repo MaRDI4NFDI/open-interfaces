@@ -12,7 +12,7 @@ from typing import TypeAlias
 import numpy as np
 from openinterfaces.core import (
     OIF_ARRAY_F64,
-    OIF_FLOAT64,
+    OIF_TYPE_F64,
     OIF_TYPE_INT,
     OIF_USER_DATA,
     OIFPyBinding,
@@ -122,7 +122,7 @@ class IVP:
 
         self.wrapper = make_oif_callback(
             rhs_fn,
-            (OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64, OIF_USER_DATA),
+            (OIF_TYPE_F64, OIF_ARRAY_F64, OIF_ARRAY_F64, OIF_USER_DATA),
             OIF_TYPE_INT,
         )
         self._binding.call("set_rhs_fn", (self.wrapper,), ())

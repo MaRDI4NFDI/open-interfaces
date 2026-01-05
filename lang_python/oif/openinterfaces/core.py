@@ -27,7 +27,6 @@ OIF_TYPE_UINT = 5
 OIF_TYPE_I64 = 6
 OIF_TYPE_U64 = 7
 OIF_TYPE_F32 = 8
-OIF_FLOAT64 = 9
 OIF_TYPE_F64 = 9
 OIF_TYPE_ARRAY_F32 = 10
 OIF_ARRAY_F64 = 11
@@ -160,7 +159,7 @@ def make_oif_callback(
 
     ctypes_argtypes: list = []
     for argt in argtypes:
-        if argt == OIF_FLOAT64:
+        if argt == OIF_TYPE_F64:
             ctypes_argtypes.append(ctypes.c_double)
         elif argt == OIF_ARRAY_F64:
             ctypes_argtypes.append(ctypes.POINTER(OIFArrayF64))
@@ -172,7 +171,7 @@ def make_oif_callback(
     ctypes_restype: Union[type[ctypes.c_int], type[ctypes.c_double]]
     if restype == OIF_TYPE_INT:
         ctypes_restype = ctypes.c_int
-    elif restype == OIF_FLOAT64:
+    elif restype == OIF_TYPE_F64:
         ctypes_restype = ctypes.c_double
         # TODO: Add c_void_p type
         # Here there is a discussion why one can use only simple
@@ -201,7 +200,7 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
 
     type_conversion = {
         OIF_TYPE_INT: lambda v: v,
-        OIF_FLOAT64: lambda v: v,
+        OIF_TYPE_F64: lambda v: v,
         # v is a ctypes pointer to OIFArrayF64 struct.
         # v_p is a raw C pointer
         # Initially this block of code used numpy.ctypeslib.as_array
@@ -303,7 +302,7 @@ class OIFPyBinding:
                 arg_p = ctypes.pointer(ctypes.c_double(arg))
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
                 arg_values.append(arg_void_p)
-                arg_types.append(OIF_FLOAT64)
+                arg_types.append(OIF_TYPE_F64)
             elif isinstance(arg, np.ndarray) and arg.dtype == np.float64:
                 assert arg.dtype == np.float64
                 nd = arg.ndim
@@ -374,7 +373,7 @@ class OIFPyBinding:
                 arg_p = ctypes.pointer(ctypes.c_double(arg))
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
                 out_arg_values.append(arg_void_p)
-                out_arg_types.append(OIF_FLOAT64)
+                out_arg_types.append(OIF_TYPE_F64)
             elif isinstance(arg, np.ndarray) and arg.dtype == np.float64:
                 nd = arg.ndim
                 dimensions = (ctypes.c_long * len(arg.shape))(*arg.shape)

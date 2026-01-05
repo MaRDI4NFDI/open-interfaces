@@ -429,7 +429,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     if (pFunc && PyCallable_Check(pFunc)) {
         // Convert input arguments.
         for (size_t i = 0; i < in_args->num_args; ++i) {
-            if (in_args->arg_types[i] == OIF_FLOAT64) {
+            if (in_args->arg_types[i] == OIF_TYPE_F64) {
                 pValue = PyFloat_FromDouble(*(double *)in_args->arg_values[i]);
             }
             else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
@@ -549,7 +549,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 int *tmp = *(int **)out_args->arg_values[i];
                 pValue = PyArray_SimpleNewFromData(1, (intptr_t[1]){1}, NPY_INT32, tmp);
             }
-            else if (out_args->arg_types[i] == OIF_FLOAT64) {
+            else if (out_args->arg_types[i] == OIF_TYPE_F64) {
                 pValue = PyFloat_FromDouble(*(double *)out_args->arg_values[i]);
             }
             else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
