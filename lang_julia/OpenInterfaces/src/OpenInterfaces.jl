@@ -4,8 +4,7 @@ module OpenInterfaces
 
 # Type ids
 export OIF_TYPE_INT, OIF_TYPE_I32,
-    OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_STR, OIF_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
-    # OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_STRING, OIF_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
+    OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_STRING, OIF_TYPE_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
 
 # Language ids
 export OIF_LANG_C, OIF_LANG_CXX, OIF_LANG_PYTHON, OIF_LANG_JULIA, OIF_LANG_R
@@ -29,10 +28,13 @@ const ImplHandle = Int32
 const OIFArgType = Int32
 
 const OIF_TYPE_BOOL::OIFArgType = 1
+
 const OIF_TYPE_CHAR::OIFArgType = 2
 const OIF_TYPE_I8::OIFArgType = 2
+
 const OIF_TYPE_UCHAR::OIFArgType = 3
 const OIF_TYPE_U8::OIFArgType = 3
+
 const OIF_TYPE_I32::OIFArgType = 4
 const OIF_TYPE_INT::OIFArgType = 4
 
@@ -44,14 +46,16 @@ const OIF_TYPE_U64::OIFArgType = 7
 
 const OIF_TYPE_F32::OIFArgType = 8
 const OIF_TYPE_F64::OIFArgType = 9
+
 const OIF_TYPE_ARRAY_F32::OIFArgType = 10
 const OIF_TYPE_ARRAY_F64::OIFArgType = 11
-const OIF_TYPE_ARRAY_F64::OIFArgType = 11
+
 const OIF_TYPE_STRING::OIFArgType = 12
-const OIF_CALLBACK::OIFArgType = 13
 const OIF_TYPE_CALLBACK::OIFArgType = 13
+
 const OIF_USER_DATA::OIFArgType = 14
 const OIF_TYPE_POINTER::OIFArgType = 14
+
 const OIF_CONFIG_DICT::OIFArgType = 15
 const OIF_TYPE_CONFIG_DICT::OIFArgType = 15
 # -----------------------------------------------------------------------------
@@ -218,7 +222,7 @@ function call_impl(
             push!(temp_refs, arg_ref)
             arg_p = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
             push!(temp_refs, arg_p)
-            in_arg_types[i] = OIF_CALLBACK
+            in_arg_types[i] = OIF_TYPE_CALLBACK
             in_arg_values[i] = arg_p
         elseif typeof(arg) == OIFUserData
             arg_ref = Ref(arg)

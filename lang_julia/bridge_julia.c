@@ -513,7 +513,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         else if (in_args->arg_types[i] == OIF_TYPE_STRING) {
             cur_julia_arg = jl_cstr_to_string(*((char **)in_args->arg_values[i]));
         }
-        else if (in_args->arg_types[i] == OIF_CALLBACK) {
+        else if (in_args->arg_types[i] == OIF_TYPE_CALLBACK) {
             OIFCallback *p = in_args->arg_values[i];
             if (p->src == OIF_LANG_JULIA) {
                 jl_value_t *tmp = jl_get_nth_field(p->fn_p_jl, 0);

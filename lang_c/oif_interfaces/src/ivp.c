@@ -8,7 +8,7 @@ int
 oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs)
 {
     OIFCallback rhs_wrapper = {.src = OIF_LANG_C, .fn_p_py = NULL, .fn_p_c = rhs};
-    OIFArgType in_arg_types[] = {OIF_CALLBACK};
+    OIFArgType in_arg_types[] = {OIF_TYPE_CALLBACK};
     void *in_arg_values[] = {&rhs_wrapper};
     OIFArgs in_args = {
         .num_args = 1,
