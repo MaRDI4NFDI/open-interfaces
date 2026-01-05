@@ -29,7 +29,6 @@ OIF_TYPE_U64 = 7
 OIF_TYPE_F32 = 8
 OIF_TYPE_F64 = 9
 OIF_TYPE_ARRAY_F32 = 10
-OIF_ARRAY_F64 = 11
 OIF_TYPE_ARRAY_F64 = 11
 OIF_STR = 12
 OIF_TYPE_STRING = 12
@@ -161,7 +160,7 @@ def make_oif_callback(
     for argt in argtypes:
         if argt == OIF_TYPE_F64:
             ctypes_argtypes.append(ctypes.c_double)
-        elif argt == OIF_ARRAY_F64:
+        elif argt == OIF_TYPE_ARRAY_F64:
             ctypes_argtypes.append(ctypes.POINTER(OIFArrayF64))
         elif argt == OIF_USER_DATA:
             ctypes_argtypes.append(ctypes.c_void_p)
@@ -207,7 +206,7 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
         # to obtain a NumPy array for existing C buffer, but somehow
         # it works very slowly, so we get NumPy arrays now using
         # C extension.
-        OIF_ARRAY_F64: lambda v: _conversion.numpy_array_from_oif_array_f64(
+        OIF_TYPE_ARRAY_F64: lambda v: _conversion.numpy_array_from_oif_array_f64(
             ctypes.addressof(v.contents)
         ),
         # ctypes receives a pointer to PyObject as Python int,
@@ -325,12 +324,12 @@ class OIFPyBinding:
                     ctypes.pointer(oif_array_p), ctypes.c_void_p
                 )
                 arg_values.append(oif_array_p_p)
-                arg_types.append(OIF_ARRAY_F64)
+                arg_types.append(OIF_TYPE_ARRAY_F64)
             elif isinstance(arg, str):
                 arg_p = ctypes.pointer(ctypes.c_char_p(arg.encode()))
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
                 arg_values.append(arg_void_p)
-                arg_types.append(OIF_STR)
+                arg_types.append(OIF_TYPE_STRING)
             elif isinstance(arg, OIFCallback):
                 argp = ctypes.pointer(arg)
                 arg_values.append(ctypes.cast(argp, ctypes.c_void_p))
@@ -395,7 +394,7 @@ class OIFPyBinding:
                     ctypes.pointer(oif_array_p), ctypes.c_void_p
                 )
                 out_arg_values.append(oif_array_p_p)
-                out_arg_types.append(OIF_ARRAY_F64)
+                out_arg_types.append(OIF_TYPE_ARRAY_F64)
             else:
                 raise ValueError(f"Cannot convert argument {arg} of type{type(arg)}")
 

@@ -432,7 +432,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             if (in_args->arg_types[i] == OIF_TYPE_F64) {
                 pValue = PyFloat_FromDouble(*(double *)in_args->arg_values[i]);
             }
-            else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
+            else if (in_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
                 pValue = get_numpy_array_from_oif_array_f64(in_args->arg_values[i]);
             }
             else if (in_args->arg_types[i] == OIF_STR) {
@@ -552,7 +552,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             else if (out_args->arg_types[i] == OIF_TYPE_F64) {
                 pValue = PyFloat_FromDouble(*(double *)out_args->arg_values[i]);
             }
-            else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
+            else if (out_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
                 pValue = get_numpy_array_from_oif_array_f64(out_args->arg_values[i]);
             }
             else {

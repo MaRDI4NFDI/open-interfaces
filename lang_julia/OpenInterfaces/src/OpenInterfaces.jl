@@ -4,7 +4,7 @@ module OpenInterfaces
 
 # Type ids
 export OIF_TYPE_INT, OIF_TYPE_I32,
-    OIF_TYPE_F64, OIF_ARRAY_F64, OIF_STR, OIF_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
+    OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_STR, OIF_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
 
 # Language ids
 export OIF_LANG_C, OIF_LANG_CXX, OIF_LANG_PYTHON, OIF_LANG_JULIA, OIF_LANG_R
@@ -44,7 +44,6 @@ const OIF_TYPE_U64::OIFArgType = 7
 const OIF_TYPE_F32::OIFArgType = 8
 const OIF_TYPE_F64::OIFArgType = 9
 const OIF_TYPE_ARRAY_F32::OIFArgType = 10
-const OIF_ARRAY_F64::OIFArgType = 11
 const OIF_TYPE_ARRAY_F64::OIFArgType = 11
 const OIF_STR::OIFArgType = 12
 const OIF_TYPE_STRING::OIFArgType = 12
@@ -202,7 +201,7 @@ function call_impl(
             push!(temp_refs, arr_p_ref)
             arr_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, arr_p_ref)
 
-            in_arg_types[i] = OIF_ARRAY_F64
+            in_arg_types[i] = OIF_TYPE_ARRAY_F64
             in_arg_values[i] = arr_p_p
         elseif typeof(arg) == String
             arg_p = pointer(arg)
@@ -280,7 +279,7 @@ function call_impl(
             push!(temp_refs, arr_p_ref)
             arr_p_p = Base.unsafe_convert(Ptr{Ptr{Cvoid}}, arr_p_ref)
 
-            out_arg_types[i] = OIF_ARRAY_F64
+            out_arg_types[i] = OIF_TYPE_ARRAY_F64
             out_arg_values[i] = arr_p_p
         else
             error("Cannot convert output argument $(arg) of type $(typeof(arg))")
@@ -331,7 +330,7 @@ function make_oif_callback(
             push!(c_argtypes, Cint)
         elseif argtype == OIF_TYPE_F64
             push!(c_argtypes, Cdouble)
-        elseif argtype == OIF_ARRAY_F64
+        elseif argtype == OIF_TYPE_ARRAY_F64
             push!(c_argtypes, Ptr{OIFArrayF64})
         elseif argtype == OIF_USER_DATA
             push!(c_argtypes, Ptr{Cvoid})
@@ -378,7 +377,7 @@ function _make_c_func_wrapper_over_jl_fn(
                 push!(jl_args, Int(arg))
             elseif oif_argtypes[i] == OIF_TYPE_F64
                 push!(jl_args, Float64(arg))
-            elseif oif_argtypes[i] == OIF_ARRAY_F64
+            elseif oif_argtypes[i] == OIF_TYPE_ARRAY_F64
                 # Convert the pointer to an array.
                 oif_arr = unsafe_load(arg)
                 dimensions = unsafe_load(oif_arr.dimensions)

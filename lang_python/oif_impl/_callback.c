@@ -74,8 +74,8 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
         goto fail_clean_self;
     }
     self->oif_arg_types[0] = OIF_TYPE_F64;
-    self->oif_arg_types[1] = OIF_ARRAY_F64;
-    self->oif_arg_types[2] = OIF_ARRAY_F64;
+    self->oif_arg_types[1] = OIF_TYPE_ARRAY_F64;
+    self->oif_arg_types[2] = OIF_TYPE_ARRAY_F64;
     self->oif_arg_types[3] = OIF_USER_DATA;
 
     self->cif_p = malloc(sizeof(ffi_cif));
@@ -109,7 +109,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
             self->arg_types[i] = &ffi_type_double;
             self->arg_values[i] = malloc(sizeof(double));
         }
-        else if (self->oif_arg_types[i] == OIF_ARRAY_F64) {
+        else if (self->oif_arg_types[i] == OIF_TYPE_ARRAY_F64) {
             self->arg_types[i] = &ffi_type_pointer;
             self->arg_values[i] = malloc(sizeof(OIFArrayF64 **));
             narray_args++;
@@ -225,7 +225,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
             double *double_value = arg_values[i];
             *double_value = PyFloat_AsDouble(arg);
         }
-        else if (arg_type_ids[i] == OIF_ARRAY_F64) {
+        else if (arg_type_ids[i] == OIF_TYPE_ARRAY_F64) {
             PyArrayObject *py_arr = (PyArrayObject *)arg;
             if (!PyArray_Check(py_arr)) {
                 fprintf(stderr,
