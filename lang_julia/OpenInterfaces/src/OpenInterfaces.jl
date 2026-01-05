@@ -23,17 +23,38 @@ using MsgPack
 
 const ImplHandle = Int32
 
+# -----------------------------------------------------------------------------
+# Data type identifiers.
 const OIFArgType = Int32
 
-const OIF_INT::OIFArgType = 1
-# const OIF_FLOAT32::OIFArgType = 2
-const OIF_FLOAT64::OIFArgType = 3
-# const OIF_FLOAT32_P::OIFArgType = 4
-const OIF_ARRAY_F64::OIFArgType = 5
-const OIF_STR::OIFArgType = 6
-const OIF_CALLBACK::OIFArgType = 7
-const OIF_USER_DATA::OIFArgType = 8
-const OIF_CONFIG_DICT::OIFArgType = 9
+const OIF_TYPE_BOOL::OIFArgType = 1
+const OIF_TYPE_CHAR::OIFArgType = 2
+const OIF_TYPE_I8::OIFArgType = 2
+const OIF_TYPE_UCHAR::OIFArgType = 3
+const OIF_TYPE_U8::OIFArgType = 3
+const OIF_TYPE_I32::OIFArgType = 4
+const OIF_TYPE_INT::OIFArgType = 4
+const OIF_INT::OIFArgType = 4
+const OIF_TYPE_U32::OIFArgType = 5
+const OIF_TYPE_UINT::OIFArgType = 5
+
+const OIF_TYPE_I64::OIFArgType = 6
+const OIF_TYPE_U64::OIFArgType = 7
+
+const OIF_TYPE_F32::OIFArgType = 8
+const OIF_FLOAT64::OIFArgType = 9
+const OIF_TYPE_F64::OIFArgType = 9
+const OIF_TYPE_ARRAY_F32::OIFArgType = 10
+const OIF_ARRAY_F64::OIFArgType = 11
+const OIF_TYPE_ARRAY_F64::OIFArgType = 11
+const OIF_STR::OIFArgType = 12
+const OIF_TYPE_STRING::OIFArgType = 12
+const OIF_CALLBACK::OIFArgType = 13
+const OIF_TYPE_CALLBACK::OIFArgType = 13
+const OIF_USER_DATA::OIFArgType = 14
+const OIF_TYPE_POINTER::OIFArgType = 14
+const OIF_CONFIG_DICT::OIFArgType = 15
+const OIF_TYPE_CONFIG_DICT::OIFArgType = 15
 
 const OIF_LANG_C::Int32 = 1
 const OIF_LANG_CXX::Int32 = 2
