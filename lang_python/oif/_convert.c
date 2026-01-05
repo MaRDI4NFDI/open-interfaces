@@ -86,9 +86,9 @@ python_types_from_oif_types(PyObject *py_args, PyObject *c_args, PyObject *arg_t
         else if (c_type == OIF_TYPE_F64) {
             cur_arg = py_cur_arg;
         }
-        else if (c_type == OIF_ARRAY_F64) {
+        else if (c_type == OIF_TYPE_ARRAY_F64) {
             if (!PyObject_HasAttrString(py_cur_arg, "contents")) {
-                fprintf(stderr, "[_convert] Pass OIF_ARRAY_F64 is not ctypes object\n");
+                fprintf(stderr, "[_convert] Passed OIF_TYPE_ARRAY_F64 is not ctypes object\n");
                 exit(EXIT_FAILURE);
             }
 
@@ -168,7 +168,7 @@ c_wrapper_over_py_callable(void *py_fn, OIFArgs *args)
             case OIF_TYPE_F64:
                 cur_arg = PyFloat_FromDouble(*(double *)c_arg);
                 break;
-            case OIF_ARRAY_F64:
+            case OIF_TYPE_ARRAY_F64:
                 arr = *(OIFArrayF64 **)c_arg;
                 assert(arr->nd == 1);
                 cur_arg = PyArray_SimpleNewFromData(arr->nd, arr->dimensions, NPY_FLOAT64,

@@ -507,7 +507,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         if (in_args->arg_types[i] == OIF_TYPE_F64) {
             cur_julia_arg = jl_box_float64(*(double *)in_args->arg_values[i]);
         }
-        else if (in_args->arg_types[i] == OIF_ARRAY_F64) {
+        else if (in_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
             cur_julia_arg = get_julia_array_from_oif_arrayf64(in_args->arg_values[i]);
         }
         else if (in_args->arg_types[i] == OIF_STR) {
@@ -562,7 +562,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         if (out_args->arg_types[i] == OIF_TYPE_F64) {
             cur_julia_arg = jl_box_float64(*(float *)out_args->arg_values[i]);
         }
-        else if (out_args->arg_types[i] == OIF_ARRAY_F64) {
+        else if (out_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
             cur_julia_arg = get_julia_array_from_oif_arrayf64(out_args->arg_values[i]);
         }
         else {

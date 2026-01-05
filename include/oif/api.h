@@ -44,8 +44,6 @@ typedef enum {
 
     OIF_TYPE_ARRAY_F32 = 10,
 
-    OIF_ARRAY_F64 = 11,
-
     OIF_TYPE_ARRAY_F64 = 11,
 
     OIF_STR = 12,

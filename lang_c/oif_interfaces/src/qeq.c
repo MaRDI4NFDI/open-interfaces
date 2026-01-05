@@ -13,7 +13,7 @@ oif_solve_qeq(ImplHandle implh, double a, double b, double c, OIFArrayF64 *roots
         .arg_values = in_arg_values,
     };
 
-    OIFArgType out_arg_types[] = {OIF_ARRAY_F64};
+    OIFArgType out_arg_types[] = {OIF_TYPE_ARRAY_F64};
     void *out_arg_values[] = {&roots};
     OIFArgs out_args = {
         .num_args = 1,

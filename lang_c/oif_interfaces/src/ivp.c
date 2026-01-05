@@ -32,7 +32,7 @@ oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs)
 int
 oif_ivp_set_initial_value(ImplHandle implh, OIFArrayF64 *y0, double t0)
 {
-    OIFArgType in_arg_types[] = {OIF_ARRAY_F64, OIF_TYPE_F64};
+    OIFArgType in_arg_types[] = {OIF_TYPE_ARRAY_F64, OIF_TYPE_F64};
     void *in_arg_values[] = {&y0, &t0};
     OIFArgs in_args = {
         .num_args = 2,
@@ -117,7 +117,7 @@ oif_ivp_integrate(ImplHandle implh, double t, OIFArrayF64 *y)
         .arg_values = in_arg_values,
     };
 
-    OIFArgType out_arg_types[] = {OIF_ARRAY_F64};
+    OIFArgType out_arg_types[] = {OIF_TYPE_ARRAY_F64};
     void *out_arg_values[] = {&y};
     OIFArgs out_args = {
         .num_args = 1,
