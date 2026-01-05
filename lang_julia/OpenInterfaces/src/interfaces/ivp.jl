@@ -9,7 +9,7 @@ using OpenInterfaces:
     make_oif_user_data,
     OIF_FLOAT64,
     OIF_ARRAY_F64,
-    OIF_INT,
+    OIF_TYPE_I32,
     OIF_USER_DATA,
     OIFUserData
 
@@ -53,7 +53,7 @@ function set_rhs_fn(self::Self, rhs_fn::Function)
     self.rhs_fn_wrapper = make_oif_callback(
         rhs_fn,
         (OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64, OIF_USER_DATA),
-        OIF_INT,
+        OIF_TYPE_I32,
     )
     call_impl(self.implh, "set_rhs_fn", (self.rhs_fn_wrapper,), ())
 end

@@ -98,7 +98,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
     }
     unsigned int narray_args = 0;  // Number of arguments of type `OIFArrayF64 *`.
     for (size_t i = 0; i < nargs; ++i) {
-        if (self->oif_arg_types[i] == OIF_INT) {
+        if (self->oif_arg_types[i] == OIF_TYPE_INT) {
             fprintf(stderr,
                     "[_callback] WARNING: There must be better support "
                     "for integer types\n");

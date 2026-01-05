@@ -15,9 +15,7 @@ from scipy import integrate
 
 CtypesType: TypeAlias = Union[ctypes._SimpleCData, ctypes._Pointer]
 
-OIF_INT = 1
-OIF_FLOAT64 = 3
-OIF_ARRAY_F64 = 5
+from openinterfaces.core import OIF_TYPE_ARRAY_F64, OIF_TYPE_F64, OIF_TYPE_INT
 
 
 class OIFArrayF64(ctypes.Structure):
@@ -121,7 +119,7 @@ class TwoConversions:
     def __init__(self, problem):
         self.problem = problem
         # Hardcode is harder than softcode.
-        self.arg_types = [OIF_FLOAT64, OIF_ARRAY_F64, OIF_ARRAY_F64]
+        self.arg_types = [OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_ARRAY_F64]
 
     def compute(self, t: float, u: np.ndarray) -> np.ndarray:
         c_args = self._c_args_from_py_args(t, u)
@@ -137,11 +135,11 @@ class TwoConversions:
         begin = time.time()
         c_args: list[CtypesType] = []
         for i, (t, v) in enumerate(zip(self.arg_types, args)):
-            if t == OIF_INT:
+            if t == OIF_TYPE_INT:
                 c_args.append(ctypes.c_int(v))
-            elif t == OIF_FLOAT64:
+            elif t == OIF_TYPE_F64:
                 c_args.append(ctypes.c_double(v))
-            elif t == OIF_ARRAY_F64:
+            elif t == OIF_TYPE_ARRAY_F64:
                 assert v.dtype == np.float64
                 nd = v.ndim
                 dimensions = (ctypes.c_long * len(v.shape))(*v.shape)

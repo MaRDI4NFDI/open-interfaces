@@ -3,7 +3,7 @@ module OpenInterfaces
 # See oif/api.h
 
 # Type ids
-export OIF_INT,
+export OIF_TYPE_INT, OIF_TYPE_I32,
     OIF_FLOAT64, OIF_ARRAY_F64, OIF_STR, OIF_CALLBACK, OIF_USER_DATA, OIF_CONFIG_DICT
 
 # Language ids
@@ -34,7 +34,7 @@ const OIF_TYPE_UCHAR::OIFArgType = 3
 const OIF_TYPE_U8::OIFArgType = 3
 const OIF_TYPE_I32::OIFArgType = 4
 const OIF_TYPE_INT::OIFArgType = 4
-const OIF_INT::OIFArgType = 4
+
 const OIF_TYPE_U32::OIFArgType = 5
 const OIF_TYPE_UINT::OIFArgType = 5
 
@@ -55,6 +55,7 @@ const OIF_USER_DATA::OIFArgType = 14
 const OIF_TYPE_POINTER::OIFArgType = 14
 const OIF_CONFIG_DICT::OIFArgType = 15
 const OIF_TYPE_CONFIG_DICT::OIFArgType = 15
+# -----------------------------------------------------------------------------
 
 const OIF_LANG_C::Int32 = 1
 const OIF_LANG_CXX::Int32 = 2
@@ -165,7 +166,7 @@ function call_impl(
 
     for (i, arg) in enumerate(in_user_args)
         if typeof(arg) == Int
-            in_arg_types[i] = OIF_INT
+            in_arg_types[i] = OIF_TYPE_I32
             in_arg_values[i] = Ref(arg)
         elseif typeof(arg) == Float64
             in_arg_types[i] = OIF_FLOAT64
@@ -246,7 +247,7 @@ function call_impl(
 
     for (i, arg) in enumerate(out_user_args)
         if typeof(arg) == Int
-            out_arg_types[i] = OIF_INT
+            out_arg_types[i] = OIF_TYPE_I32
             out_arg_values[i] = pointer(arg)
         elseif typeof(arg) == Float64
             out_arg_types[i] = OIF_FLOAT64
@@ -322,12 +323,12 @@ function make_oif_callback(
     argtypes::NTuple{N,OIFArgType},
     restype::OIFArgType,
 )::OIFCallback where {N}
-    @assert restype == OIF_INT "Only OIF_INT is supported as a return type for callbacks because
+    @assert restype == OIF_TYPE_I32 "Only OIF_TYPE_I32 is supported as a return type for callbacks because
         it is used to indicate success or failure in a C-compatible way."
     c_argtypes::Array{Any,1} = []
 
     for argtype in argtypes
-        if argtype == OIF_INT
+        if argtype == OIF_TYPE_I32
             push!(c_argtypes, Cint)
         elseif argtype == OIF_FLOAT64
             push!(c_argtypes, Cdouble)
@@ -374,7 +375,7 @@ function _make_c_func_wrapper_over_jl_fn(
         jl_args = Array{Any}(undef, 0)
 
         for (i, arg) in enumerate(oif_args)
-            if oif_argtypes[i] == OIF_INT
+            if oif_argtypes[i] == OIF_TYPE_I32
                 push!(jl_args, Int(arg))
             elseif oif_argtypes[i] == OIF_FLOAT64
                 push!(jl_args, Float64(arg))

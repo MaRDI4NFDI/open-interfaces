@@ -22,7 +22,6 @@ OIF_TYPE_UCHAR = 3
 OIF_TYPE_U8 = 3
 OIF_TYPE_I32 = 4
 OIF_TYPE_INT = 4
-OIF_INT = 4
 OIF_TYPE_U32 = 5
 OIF_TYPE_UINT = 5
 OIF_TYPE_I64 = 6
@@ -68,8 +67,8 @@ OIF_ARRAY_F_CONTIGUOUS = 0x0002
 
 # Add path to Python implementations to the environment variable.
 # This is needed when install was via `pip`.
-path = importlib.resources.files("openinterfaces") / "data"
-path = str(path)
+path_obj = importlib.resources.files("openinterfaces") / "data"
+path = str(path_obj)
 if os.path.isdir(path):
     if "OIF_IMPL_PATH" not in os.environ:
         os.environ["OIF_IMPL_PATH"] = path
@@ -171,7 +170,7 @@ def make_oif_callback(
             raise ValueError(f"Cannot convert argument type {argt}")
 
     ctypes_restype: Union[type[ctypes.c_int], type[ctypes.c_double]]
-    if restype == OIF_INT:
+    if restype == OIF_TYPE_INT:
         ctypes_restype = ctypes.c_int
     elif restype == OIF_FLOAT64:
         ctypes_restype = ctypes.c_double
@@ -201,7 +200,7 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
             return ctypes.cast(v, ctypes.py_object).value
 
     type_conversion = {
-        OIF_INT: lambda v: v,
+        OIF_TYPE_INT: lambda v: v,
         OIF_FLOAT64: lambda v: v,
         # v is a ctypes pointer to OIFArrayF64 struct.
         # v_p is a raw C pointer
@@ -299,7 +298,7 @@ class OIFPyBinding:
                 argp = ctypes.pointer(ctypes.c_int(arg))
                 arg_void_p = ctypes.cast(argp, ctypes.c_void_p)
                 arg_values.append(arg_void_p)
-                arg_types.append(OIF_INT)
+                arg_types.append(OIF_TYPE_INT)
             elif isinstance(arg, float):
                 arg_p = ctypes.pointer(ctypes.c_double(arg))
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
@@ -370,7 +369,7 @@ class OIFPyBinding:
                 argp = ctypes.pointer(ctypes.c_int(arg))
                 arg_void_p = ctypes.cast(argp, ctypes.c_void_p)
                 out_arg_values.append(arg_void_p)
-                out_arg_types.append(OIF_INT)
+                out_arg_types.append(OIF_TYPE_INT)
             elif isinstance(arg, float):
                 arg_p = ctypes.pointer(ctypes.c_double(arg))
                 arg_void_p = ctypes.cast(arg_p, ctypes.c_void_p)
