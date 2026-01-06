@@ -555,7 +555,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             else if (out_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
                 pValue = get_numpy_array_from_oif_array_f64(out_args->arg_values[i]);
             }
-            else if (out_args->arg_types[i] == OIF_STR) {
+            else if (out_args->arg_types[i] == OIF_TYPE_STRING) {
                 pValue = PyArray_SimpleNewFromData(1, (intptr_t[1]){1000}, NPY_UINT8, *(char **)out_args->arg_values[i]);
             }
             else {
