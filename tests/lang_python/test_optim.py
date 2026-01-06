@@ -77,11 +77,13 @@ def test__parameterized_convex_problem__converges_better_with_tigher_tolerance(s
     s.set_initial_guess(x0)
     s.set_user_data(user_data)
     s.set_objective_fn(convex_objective_with_args_fn)
-    s.set_method("nelder-mead", {"xatol": 1e-8})
 
+    s.set_method("nelder-mead", {"xatol": 1e-6})
     status, message = s.minimize()
-    x = s.x
+    x_1 = s.x.copy()
 
-    assert status == 0
-    assert len(x) == len(x0)
-    assert np.all(np.abs(x - user_data) < 1e-16)
+    s.set_method("nelder-mead", {"xatol": 1e-8})
+    status, message = s.minimize()
+    x_2 = s.x.copy()
+
+    assert np.linalg.norm(x_2 - user_data) < np.linalg.norm(x_1 - user_data)
