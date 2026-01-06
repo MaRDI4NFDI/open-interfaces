@@ -12,8 +12,8 @@ from typing import TypeAlias
 
 import numpy as np
 from openinterfaces.core import (
-    OIF_ARRAY_F64,
-    OIF_FLOAT64,
+    OIF_TYPE_ARRAY_F64,
+    OIF_TYPE_F64,
     OIF_TYPE_INT,
     OIF_TYPE_STRING,
     OIF_USER_DATA,
@@ -104,7 +104,7 @@ class Optim:
 
     def set_objective_fn(self, objective_fn: ObjectiveFn):
         self.wrapper = make_oif_callback(
-            objective_fn, (OIF_ARRAY_F64, OIF_USER_DATA), OIF_FLOAT64
+            objective_fn, (OIF_TYPE_ARRAY_F64, OIF_USER_DATA), OIF_TYPE_F64
         )
         self._binding.call("set_objective_fn", (self.wrapper,), ())
 
