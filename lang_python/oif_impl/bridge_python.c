@@ -607,13 +607,13 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                         goto cleanup;
                     }
 
-                    return_args->arg_values[i] = oif_util_malloc(sizeof(int32_t));
                     long tmp = PyLong_AsLong(val);
                     if (tmp == -1 && PyErr_Occurred()) {
                         logerr(prefix_, "Could not convert Python object to C long value");
                         goto cleanup;
                     }
                     if (tmp >= INT32_MIN && tmp <= INT32_MAX) {
+                        return_args->arg_values[i] = oif_util_malloc(sizeof(int32_t));
                         *(int32_t *)return_args->arg_values[i] = tmp;
                     }
                     else {
