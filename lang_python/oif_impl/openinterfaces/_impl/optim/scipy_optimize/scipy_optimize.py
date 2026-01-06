@@ -20,8 +20,8 @@ class ScipyOptimize(OptimInterface):
         self.objective_fn: Callable
         self.user_data: object
         self.with_user_data = False
-        self.method = ""
-        self.method_params = {}
+        self.method_name = None
+        self.method_params = None
 
     def set_initial_guess(self, x0: np.ndarray):
         _p = f"[{_prefix}::set_initial_guess]"
@@ -61,11 +61,15 @@ class ScipyOptimize(OptimInterface):
                 self.objective_fn,
                 self.x0,
                 args=self.user_data,
+                method=self.method_name,
+                options=self.method_params,
             )
         else:
             result = optimize.minimize(
                 self.objective_fn,
                 self.x0,
+                method=self.method_name,
+                options=self.method_params,
             )
 
         out_x[:] = result.x
