@@ -36,6 +36,7 @@ def test__simple_convex_problem__converges(s):
     x = s.x
 
     assert status == 0
+    assert isinstance(message, str) and len(message) > 0
     assert len(x) == len(x0)
     assert np.all(np.abs(x) < 1e-6)
 
@@ -87,3 +88,8 @@ def test__parameterized_convex_problem__converges_better_with_tigher_tolerance(s
     x_2 = s.x.copy()
 
     assert np.linalg.norm(x_2 - user_data) < np.linalg.norm(x_1 - user_data)
+
+
+def test__set_method_with__wrong_method_params__are_not_accepted(s):
+    with pytest.raises(RuntimeError):
+        s.set_method("nelder-mead", {"wrong_param": 42})
