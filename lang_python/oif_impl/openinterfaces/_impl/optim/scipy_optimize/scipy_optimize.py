@@ -14,14 +14,13 @@ class ScipyOptimize(OptimInterface):
     """
 
     def __init__(self) -> None:
-        self.objective_fn = None  # Right-hand side function.
         self.N = 0  # Problem dimension.
-        self.x0: np.ndarray
-        self.objective_fn: Callable
-        self.user_data: object
+        self.x0: np.ndarray | None = None
+        self.objective_fn: Callable | None = None
+        self.user_data: object | None = None
         self.with_user_data = False
-        self.method_name = None
-        self.method_params = None
+        self.method_name: str | None = None
+        self.method_params: str | None = None
 
     def set_initial_guess(self, x0: np.ndarray):
         _p = f"[{_prefix}::set_initial_guess]"
