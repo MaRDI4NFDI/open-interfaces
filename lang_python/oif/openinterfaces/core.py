@@ -449,6 +449,9 @@ class OIFPyBinding:
             return_args_packed,
         )
 
+        if status != 0:
+            raise RuntimeError(f"Error occurred while executing method '{method}'")
+
         return_args = []
         if return_args_packed is not None:
             oif_util_free_ = _wrap_c_function(
@@ -469,8 +472,6 @@ class OIFPyBinding:
                     raise RuntimeError("Cannot convert return argument")
                 return_args.append(py_var)
                 oif_util_free_(void_pointer.value)
-        if status != 0:
-            raise RuntimeError(f"Error occurred while executing method '{method}'")
 
         return return_args if return_args else status
 
