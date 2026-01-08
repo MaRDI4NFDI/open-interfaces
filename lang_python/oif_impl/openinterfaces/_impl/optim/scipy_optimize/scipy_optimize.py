@@ -69,6 +69,17 @@ class ScipyOptimize(OptimInterface):
         self.method_params = method_params
 
     def minimize(self, out_x):
+        if self.x0 is None:
+            raise RuntimeError("Method `set_initial_guess` must be called first")
+
+        if self.objective_fn is None:
+            raise RuntimeError("Method `set_objective_fn` must be called first")
+
+        if len(self.x0) != len(out_x):
+            raise ValueError(
+                "Shapes of the output array and the initial-guess array differ"
+            )
+
         if self.with_user_data:
             result = optimize.minimize(
                 self.objective_fn,
