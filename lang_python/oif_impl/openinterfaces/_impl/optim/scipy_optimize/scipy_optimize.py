@@ -48,12 +48,21 @@ class ScipyOptimize(OptimInterface):
             assert type(self.objective_fn(x)) in [float, np.float64], msg
 
     def set_method(self, method_name, method_params):
-        available_options = optimize.show_options("minimize", method=method_name)
+        available_options = optimize.show_options(
+            "minimize", method=method_name, disp=False
+        )
 
         for k in method_params.keys():
-            if k not in available_options:
+            candidates = [f"\n{k} :", f"\n{k},"]
+            found = False
+            for c in candidates:
+                if c in available_options:
+                    found = True
+                    break
+
+            if not found:
                 raise ValueError(
-                    f"Option '{k}' is not known for method '{method_name}'"
+                    f"Method option '{k}' is not known for the method '{method_name}'"
                 )
 
         self.method_name = method_name
