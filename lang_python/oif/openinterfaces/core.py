@@ -251,6 +251,11 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
 
 
 def make_oif_user_data(data: object) -> OIFUserData:
+    """Make OIFUserData structure for Python object `data`.
+
+    *IMPORTANT* Keep the reference to `data`, otherwise it can be
+    garbage collected, and then using it becomes a segfault situation.
+    """
     return OIFUserData(OIF_LANG_PYTHON, None, None, ctypes.c_void_p(id(data)))
 
 
