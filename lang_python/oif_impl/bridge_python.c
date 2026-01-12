@@ -199,12 +199,14 @@ cleanup:
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
-    PyObject *pFileName, *pModule;
-    PyObject *pClass, *pInstance;
-    PyObject *pFunc;
-    PyObject *pInitArgs;
-    PyObject *pArgs;
-    PyObject *pValue;
+    PyObject *pFileName = NULL;
+    PyObject *pModule = NULL;
+    PyObject *pClass = NULL;
+    PyObject *pInstance = NULL;
+    PyObject *pFunc = NULL;
+    PyObject *pInitArgs = NULL;
+    PyObject *pArgs = NULL;
+    PyObject *pValue = NULL;
 
     ImplInfo *result = NULL;
     int status;
