@@ -18,6 +18,7 @@ from openinterfaces.core import (
     OIF_TYPE_STRING,
     OIF_USER_DATA,
     OIFPyBinding,
+    OIFUserData,
     load_impl,
     make_oif_callback,
     make_oif_user_data,
@@ -94,6 +95,8 @@ class Optim:
         """Current value of the state vector."""
         self._N: int = 0
         self.x: np.ndarray
+        self.user_data: object
+        self.oif_user_data: OIFUserData
 
     def set_initial_guess(self, x0: np.ndarray):
         """Set initial guess for the optimization problem"""
@@ -110,8 +113,9 @@ class Optim:
 
     def set_user_data(self, user_data: object):
         """Specify additional data that will be used for right-hand side function."""
-        self.user_data = make_oif_user_data(user_data)
-        self._binding.call("set_user_data", (self.user_data,), ())
+        self.user_data = user_data
+        self.oif_user_data = make_oif_user_data(user_data)
+        self._binding.call("set_user_data", (self.oif_user_data,), ())
 
     def set_method(self, method_name: str, method_params: dict = {}):
         """Set integrator, if the name is recognizable."""
