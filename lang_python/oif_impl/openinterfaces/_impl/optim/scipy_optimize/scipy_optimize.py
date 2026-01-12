@@ -23,8 +23,6 @@ class ScipyOptimize(OptimInterface):
         self.method_params: str | None = None
 
     def set_initial_guess(self, x0: np.ndarray):
-        _p = f"[{_prefix}::set_initial_guess]"
-
         self.x0 = x0
         self.N = len(x0)
 

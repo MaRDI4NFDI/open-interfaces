@@ -369,7 +369,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         }
     }
 
-    if (! NUMPY_IS_INITIALIZED_) {
+    if (!NUMPY_IS_INITIALIZED_) {
         init_numpy_();
     }
 
@@ -457,7 +457,8 @@ cleanup:
 }
 
 int
-call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args, OIFArgs *return_args)
+call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args,
+          OIFArgs *return_args)
 {
     int result = 1;
     if (impl_info->dh != OIF_LANG_PYTHON) {
@@ -604,7 +605,8 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 pValue = get_numpy_array_from_oif_array_f64(out_args->arg_values[i]);
             }
             else if (out_args->arg_types[i] == OIF_TYPE_STRING) {
-                pValue = PyArray_SimpleNewFromData(1, (intptr_t[1]){1000}, NPY_UINT8, *(char **)out_args->arg_values[i]);
+                pValue = PyArray_SimpleNewFromData(1, (intptr_t[1]){1000}, NPY_UINT8,
+                                                   *(char **)out_args->arg_values[i]);
             }
             else {
                 pValue = NULL;
@@ -629,64 +631,64 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         if (return_args != NULL) {
             if (return_args->num_args > 1 && !PyTuple_Check(pValue)) {
                 logerr(prefix_,
-                    "Expected %d return arguments, however the method '%s' "
-                    "has not returned a tuple",
-                    return_args->num_args,
-                    method);
+                       "Expected %d return arguments, however the method '%s' "
+                       "has not returned a tuple",
+                       return_args->num_args, method);
                 goto cleanup;
             }
             if (return_args->num_args != 1 && return_args->num_args != PyTuple_Size(pValue)) {
-                logerr(
-                    prefix_,
-                    "Expected %d returned arguments, "
-                    "got %d instead in the call to the method '%s'",
-                    return_args->num_args,
-                    PyTuple_Size(pValue),
-                    method);
+                logerr(prefix_,
+                       "Expected %d returned arguments, "
+                       "got %d instead in the call to the method '%s'",
+                       return_args->num_args, PyTuple_Size(pValue), method);
                 goto cleanup;
             }
 
             for (size_t i = 0; i < return_args->num_args; ++i) {
                 PyObject *val = PyTuple_GetItem(pValue, i);
-                switch(return_args->arg_types[i]) {
-                case OIF_TYPE_I32:
-                    if (! PyLong_Check(val)) {
-                        logerr(prefix_, "Expected Python integer object, but did not get it");
-                        goto cleanup;
-                    }
+                switch (return_args->arg_types[i]) {
+                    case OIF_TYPE_I32:
+                        if (!PyLong_Check(val)) {
+                            logerr(prefix_,
+                                   "Expected Python integer object, but did not get it");
+                            goto cleanup;
+                        }
 
-                    long tmp = PyLong_AsLong(val);
-                    if (tmp == -1 && PyErr_Occurred()) {
-                        logerr(prefix_, "Could not convert Python object to C long value");
+                        long tmp = PyLong_AsLong(val);
+                        if (tmp == -1 && PyErr_Occurred()) {
+                            logerr(prefix_, "Could not convert Python object to C long value");
+                            goto cleanup;
+                        }
+                        if (tmp >= INT32_MIN && tmp <= INT32_MAX) {
+                            return_args->arg_values[i] = oif_util_malloc(sizeof(int32_t));
+                            *(int32_t *)return_args->arg_values[i] = tmp;
+                        }
+                        else {
+                            logerr(prefix_, "Return value is outside of the range of int32");
+                            goto cleanup;
+                        }
+                        break;
+                    case OIF_TYPE_STRING:
+                        if (!PyUnicode_Check(val)) {
+                            logerr(prefix_,
+                                   "Expected Unicode string object, but did not get it");
+                            goto cleanup;
+                        }
+                        // Quote from docs for `PyUnicode_AsUTF8`:
+                        // The caller is not responsible for deallocating the buffer.
+                        const char *s = PyUnicode_AsUTF8(val);
+                        if (s == NULL) {
+                            logerr(prefix_,
+                                   "Expected Unicode string object, but did not get it");
+                        }
+                        size_t length = PyUnicode_GET_LENGTH(val) + 1;
+                        return_args->arg_values[i] = oif_util_malloc(sizeof(char) * length);
+                        snprintf(return_args->arg_values[i], length, "%s", s);
+                        break;
+                    default:
+                        logerr(prefix_, "Return type with id '%d' is not supported yet",
+                               return_args->arg_types[i]);
                         goto cleanup;
-                    }
-                    if (tmp >= INT32_MIN && tmp <= INT32_MAX) {
-                        return_args->arg_values[i] = oif_util_malloc(sizeof(int32_t));
-                        *(int32_t *)return_args->arg_values[i] = tmp;
-                    }
-                    else {
-                        logerr(prefix_, "Return value is outside of the range of int32");
-                        goto cleanup;
-                    }
-                    break;
-                case OIF_TYPE_STRING:
-                    if (! PyUnicode_Check(val)) {
-                        logerr(prefix_, "Expected Unicode string object, but did not get it");
-                        goto cleanup;
-                    }
-                    // Quote from docs for `PyUnicode_AsUTF8`:
-                    // The caller is not responsible for deallocating the buffer.
-                    const char *s = PyUnicode_AsUTF8(val);
-                    if (s == NULL) {
-                        logerr(prefix_, "Expected Unicode string object, but did not get it");
-                    }
-                    size_t length = PyUnicode_GET_LENGTH(val) + 1;
-                    return_args->arg_values[i] = oif_util_malloc(sizeof(char) * length);
-                    snprintf(return_args->arg_values[i], length, "%s", s);
-                    break;
-                default:
-                    logerr(prefix_, "Return type with id '%d' is not supported yet", return_args->arg_types[i]);
-                    goto cleanup;
                 }
             }
         }

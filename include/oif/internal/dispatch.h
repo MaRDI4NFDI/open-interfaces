@@ -44,7 +44,8 @@ unload_interface_impl(ImplHandle implh);
  * @return status code that signals about an error if non-zero
  */
 int
-call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args, OIFArgs *return_args);
+call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args,
+                    OIFArgs *return_args);
 
 #ifdef __cplusplus
 }

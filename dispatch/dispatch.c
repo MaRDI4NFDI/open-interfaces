@@ -321,7 +321,8 @@ unload_interface_impl(ImplHandle implh)
 }
 
 int
-call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args, OIFArgs *return_args)
+call_interface_impl(ImplHandle implh, const char *method, OIFArgs *in_args, OIFArgs *out_args,
+                    OIFArgs *return_args)
 {
     int status;
 
