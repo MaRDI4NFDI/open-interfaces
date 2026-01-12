@@ -133,6 +133,3 @@ Module Contents
    .. py:method:: minimize()
 
       Integrate to time `t` and write solution to `y`.
-
-
-
