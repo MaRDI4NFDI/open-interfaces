@@ -30,6 +30,8 @@ static int IMPL_COUNTER = 0;
 
 static bool is_python_initialized_by_us = false;
 
+static bool NUMPY_IS_INITIALIZED_ = false;
+
 static char prefix_[] = "bridge_python";
 
 PyObject *
@@ -196,8 +198,8 @@ cleanup:
     return 0;
 }
 
-ImplInfo *
-load_impl(const char *impl_details, size_t version_major, size_t version_minor)
+static void *
+init_numpy_()
 {
     PyObject *pFileName = NULL;
     PyObject *pModule = NULL;
@@ -208,25 +210,11 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     PyObject *pArgs = NULL;
     PyObject *pValue = NULL;
 
-    ImplInfo *result = NULL;
     int status;
     int nbytes_required;  // Number of required bytes in snprintf.
     int nbytes_written;   // Number of written bytes in snprintf.
     char *cmd;            // Command formatted in snprintf.
-
-    (void)version_major;
-    (void)version_minor;
-    if (Py_IsInitialized()) {
-        fprintf(stderr, "[%s] Backend is already initialized\n", prefix_);
-    }
-    else {
-        int status;
-        status = init_python_();
-        if (status != 0) {
-            return NULL;
-        }
-    }
-
+                          //
     // We need to `dlopen` the Python library, otherwise,
     // NumPy initialization fails.
     // Details:
@@ -301,12 +289,18 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     }
     status = PyRun_SimpleString(cmd);
     free(cmd);
+    cmd = NULL;
     if (status < 0) {
         logerr(prefix_, "An error occurred when initializating Python");
         goto cleanup;
     }
 
-    import_array2("Failed to initialize NumPy C API", NULL);
+    status = _import_array();
+    if (status != 0) {
+        PyErr_Print();
+        logerr(prefix_, "Failed to initialize NumPy C API");
+        goto cleanup;
+    }
 
     const char *cmd_numpy_fmt =
         "import numpy; "
@@ -321,9 +315,62 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     }
     status = PyRun_SimpleString(cmd);
     free(cmd);
+    cmd = NULL;
     if (status < 0) {
         logerr(prefix_, "An error occurred when initializating Python");
         goto cleanup;
+    }
+
+    NUMPY_IS_INITIALIZED_ = true;
+
+cleanup:
+    Py_XDECREF(pValue);
+    Py_XDECREF(pArgs);
+    Py_XDECREF(pInitArgs);
+    Py_XDECREF(pFunc);
+    Py_XDECREF(pInstance);
+    Py_XDECREF(pClass);
+    // Somehow, the reference to sysconfig must be preserved.
+    // Otherwise, there will be a crash when loading implementations.
+    /* Py_XDECREF(pModule); */
+    Py_XDECREF(pFileName);
+
+    if (cmd != NULL) {
+        free(cmd);
+    }
+    return NULL;
+}
+
+ImplInfo *
+load_impl(const char *impl_details, size_t version_major, size_t version_minor)
+{
+    PyObject *pFileName = NULL;
+    PyObject *pModule = NULL;
+    PyObject *pClass = NULL;
+    PyObject *pInstance = NULL;
+    PyObject *pFunc = NULL;
+    PyObject *pInitArgs = NULL;
+    PyObject *pArgs = NULL;
+    PyObject *pValue = NULL;
+
+    ImplInfo *result = NULL;
+    int status;
+
+    (void)version_major;
+    (void)version_minor;
+    if (Py_IsInitialized()) {
+        fprintf(stderr, "[%s] Backend is already initialized\n", prefix_);
+    }
+    else {
+        int status;
+        status = init_python_();
+        if (status != 0) {
+            return NULL;
+        }
+    }
+
+    if (! NUMPY_IS_INITIALIZED_) {
+        init_numpy_();
     }
 
     char moduleName[512] = "\0";
@@ -380,7 +427,6 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         logerr(prefix_, "Failed to instantiate class %s\n", className);
         goto cleanup;
     }
-    /* Py_INCREF(pInstance); */
 
     PythonImplInfo *impl_info = oif_util_malloc(sizeof(*impl_info));
     if (impl_info == NULL) {
