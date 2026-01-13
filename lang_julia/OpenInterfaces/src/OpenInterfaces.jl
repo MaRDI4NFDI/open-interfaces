@@ -160,6 +160,7 @@ function call_impl(
     func_name::String,
     in_user_args::Tuple{Vararg{Any}},
     out_user_args::Tuple{Vararg{Any}},
+    return_user_args::Tuple{Vararg{Any}}=(),
 )::Int
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
@@ -299,6 +300,10 @@ function call_impl(
     in_args = Ref(OIFArgs(in_num_args, pointer(in_arg_types), pointer(in_arg_values)))
     out_args = Ref(OIFArgs(out_num_args, pointer(out_arg_types), pointer(out_arg_values)))
 
+    if (isempty(return_user_args))
+        return_args = C_NULL
+    end
+
     result =
         GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values temp_refs begin
             @ccall $(call_interface_impl_fn[])(
@@ -306,6 +311,7 @@ function call_impl(
                 func_name::Cstring,
                 in_args::Ptr{OIFArgs},
                 out_args::Ptr{OIFArgs},
+                return_args::Ptr{OIFArgs},
             )::Int
         end
 
