@@ -30,6 +30,8 @@ static int IMPL_COUNTER = 0;
 
 static bool is_python_initialized_by_us = false;
 
+static bool NUMPY_IS_INITIALIZED_ = false;
+
 static char prefix_[] = "bridge_python";
 
 PyObject *
@@ -196,35 +198,23 @@ cleanup:
     return 0;
 }
 
-ImplInfo *
-load_impl(const char *impl_details, size_t version_major, size_t version_minor)
+static void *
+init_numpy_()
 {
-    PyObject *pFileName, *pModule;
-    PyObject *pClass, *pInstance;
-    PyObject *pFunc;
-    PyObject *pInitArgs;
-    PyObject *pArgs;
-    PyObject *pValue;
+    PyObject *pFileName = NULL;
+    PyObject *pModule = NULL;
+    PyObject *pClass = NULL;
+    PyObject *pInstance = NULL;
+    PyObject *pFunc = NULL;
+    PyObject *pInitArgs = NULL;
+    PyObject *pArgs = NULL;
+    PyObject *pValue = NULL;
 
-    ImplInfo *result = NULL;
     int status;
     int nbytes_required;  // Number of required bytes in snprintf.
     int nbytes_written;   // Number of written bytes in snprintf.
     char *cmd;            // Command formatted in snprintf.
-
-    (void)version_major;
-    (void)version_minor;
-    if (Py_IsInitialized()) {
-        fprintf(stderr, "[%s] Backend is already initialized\n", prefix_);
-    }
-    else {
-        int status;
-        status = init_python_();
-        if (status != 0) {
-            return NULL;
-        }
-    }
-
+                          //
     // We need to `dlopen` the Python library, otherwise,
     // NumPy initialization fails.
     // Details:
@@ -299,12 +289,18 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     }
     status = PyRun_SimpleString(cmd);
     free(cmd);
+    cmd = NULL;
     if (status < 0) {
         logerr(prefix_, "An error occurred when initializating Python");
         goto cleanup;
     }
 
-    import_array2("Failed to initialize NumPy C API", NULL);
+    status = _import_array();
+    if (status != 0) {
+        PyErr_Print();
+        logerr(prefix_, "Failed to initialize NumPy C API");
+        goto cleanup;
+    }
 
     const char *cmd_numpy_fmt =
         "import numpy; "
@@ -319,9 +315,62 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     }
     status = PyRun_SimpleString(cmd);
     free(cmd);
+    cmd = NULL;
     if (status < 0) {
         logerr(prefix_, "An error occurred when initializating Python");
         goto cleanup;
+    }
+
+    NUMPY_IS_INITIALIZED_ = true;
+
+cleanup:
+    Py_XDECREF(pValue);
+    Py_XDECREF(pArgs);
+    Py_XDECREF(pInitArgs);
+    Py_XDECREF(pFunc);
+    Py_XDECREF(pInstance);
+    Py_XDECREF(pClass);
+    // Somehow, the reference to sysconfig must be preserved.
+    // Otherwise, there will be a crash when loading implementations.
+    /* Py_XDECREF(pModule); */
+    Py_XDECREF(pFileName);
+
+    if (cmd != NULL) {
+        free(cmd);
+    }
+    return NULL;
+}
+
+ImplInfo *
+load_impl(const char *impl_details, size_t version_major, size_t version_minor)
+{
+    PyObject *pFileName = NULL;
+    PyObject *pModule = NULL;
+    PyObject *pClass = NULL;
+    PyObject *pInstance = NULL;
+    PyObject *pFunc = NULL;
+    PyObject *pInitArgs = NULL;
+    PyObject *pArgs = NULL;
+    PyObject *pValue = NULL;
+
+    ImplInfo *result = NULL;
+    int status;
+
+    (void)version_major;
+    (void)version_minor;
+    if (Py_IsInitialized()) {
+        fprintf(stderr, "[%s] Backend is already initialized\n", prefix_);
+    }
+    else {
+        int status;
+        status = init_python_();
+        if (status != 0) {
+            return NULL;
+        }
+    }
+
+    if (!NUMPY_IS_INITIALIZED_) {
+        init_numpy_();
     }
 
     char moduleName[512] = "\0";
@@ -378,7 +427,6 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         logerr(prefix_, "Failed to instantiate class %s\n", className);
         goto cleanup;
     }
-    /* Py_INCREF(pInstance); */
 
     PythonImplInfo *impl_info = oif_util_malloc(sizeof(*impl_info));
     if (impl_info == NULL) {
@@ -409,7 +457,8 @@ cleanup:
 }
 
 int
-call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args)
+call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args,
+          OIFArgs *return_args)
 {
     int result = 1;
     if (impl_info->dh != OIF_LANG_PYTHON) {
@@ -555,6 +604,10 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             else if (out_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
                 pValue = get_numpy_array_from_oif_array_f64(out_args->arg_values[i]);
             }
+            else if (out_args->arg_types[i] == OIF_TYPE_STRING) {
+                pValue = PyArray_SimpleNewFromData(1, (intptr_t[1]){1000}, NPY_UINT8,
+                                                   *(char **)out_args->arg_values[i]);
+            }
             else {
                 pValue = NULL;
             }
@@ -569,14 +622,75 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
         // Invoke function.
         pValue = PyObject_CallObject(pFunc, pArgs);
         Py_DECREF(pArgs);
-        if (pValue != NULL) {
-            Py_DECREF(pValue);
-        }
-        else {
-            Py_DECREF(pFunc);
+        if (pValue == NULL) {
             PyErr_Print();
-            fprintf(stderr, "[%s] Call failed\n", prefix_);
-            return 2;
+            logerr(prefix_, "Call to the method '%s' has failed\n", method);
+            goto cleanup;
+        }
+
+        if (return_args != NULL) {
+            if (return_args->num_args > 1 && !PyTuple_Check(pValue)) {
+                logerr(prefix_,
+                       "Expected %d return arguments, however the method '%s' "
+                       "has not returned a tuple",
+                       return_args->num_args, method);
+                goto cleanup;
+            }
+            if (return_args->num_args != 1 && return_args->num_args != PyTuple_Size(pValue)) {
+                logerr(prefix_,
+                       "Expected %d returned arguments, "
+                       "got %d instead in the call to the method '%s'",
+                       return_args->num_args, PyTuple_Size(pValue), method);
+                goto cleanup;
+            }
+
+            for (size_t i = 0; i < return_args->num_args; ++i) {
+                PyObject *val = PyTuple_GetItem(pValue, i);
+                switch (return_args->arg_types[i]) {
+                    case OIF_TYPE_I32:
+                        if (!PyLong_Check(val)) {
+                            logerr(prefix_,
+                                   "Expected Python integer object, but did not get it");
+                            goto cleanup;
+                        }
+
+                        long tmp = PyLong_AsLong(val);
+                        if (tmp == -1 && PyErr_Occurred()) {
+                            logerr(prefix_, "Could not convert Python object to C long value");
+                            goto cleanup;
+                        }
+                        if (tmp >= INT32_MIN && tmp <= INT32_MAX) {
+                            return_args->arg_values[i] = oif_util_malloc(sizeof(int32_t));
+                            *(int32_t *)return_args->arg_values[i] = tmp;
+                        }
+                        else {
+                            logerr(prefix_, "Return value is outside of the range of int32");
+                            goto cleanup;
+                        }
+                        break;
+                    case OIF_TYPE_STRING:
+                        if (!PyUnicode_Check(val)) {
+                            logerr(prefix_,
+                                   "Expected Unicode string object, but did not get it");
+                            goto cleanup;
+                        }
+                        // Quote from docs for `PyUnicode_AsUTF8`:
+                        // The caller is not responsible for deallocating the buffer.
+                        const char *s = PyUnicode_AsUTF8(val);
+                        if (s == NULL) {
+                            logerr(prefix_,
+                                   "Expected Unicode string object, but did not get it");
+                        }
+                        size_t length = PyUnicode_GET_LENGTH(val) + 1;
+                        return_args->arg_values[i] = oif_util_malloc(sizeof(char) * length);
+                        snprintf(return_args->arg_values[i], length, "%s", s);
+                        break;
+                    default:
+                        logerr(prefix_, "Return type with id '%d' is not supported yet",
+                               return_args->arg_types[i]);
+                        goto cleanup;
+                }
+            }
         }
     }
     else {

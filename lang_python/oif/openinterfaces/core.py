@@ -105,6 +105,8 @@ if os.path.isfile(_installed_lib_path):
 else:
     _lib_dispatch = ctypes.PyDLL(_lib_dispatch_name)
 
+_liboif_common_util = ctypes.PyDLL("liboif_common_util.so")
+
 elapsed = 0.0
 
 elapsed_call = 0.0
@@ -249,6 +251,11 @@ def _make_c_func_wrapper_from_py_callable(fn: Callable, arg_types: list, restype
 
 
 def make_oif_user_data(data: object) -> OIFUserData:
+    """Make OIFUserData structure for Python object `data`.
+
+    *IMPORTANT* Keep the reference to `data`, otherwise it can be
+    garbage collected, and then using it becomes a segfault situation.
+    """
     return OIFUserData(OIF_LANG_PYTHON, None, None, ctypes.c_void_p(id(data)))
 
 
@@ -297,7 +304,7 @@ class OIFPyBinding:
             ],
         )
 
-    def call(self, method, user_args, out_user_args):
+    def call(self, method, user_args, out_user_args, return_arg_types=()):
         num_args = len(user_args)
         arg_types = []
         arg_values = []
@@ -419,17 +426,59 @@ class OIFPyBinding:
         )
         out_packed = OIFArgs(num_out_args, out_arg_types_ctypes, out_arg_values_ctypes)
 
+        # Process return arguments, that is the arguments
+        # that the callee should allocate and return to us.
+        return_args_packed = None
+        if return_arg_types:
+            num_return_args = len(return_arg_types)
+            return_arg_types_ctypes = ctypes.cast(
+                (ctypes.c_int * len(return_arg_types))(*return_arg_types),
+                ctypes.POINTER(OIFArgType),
+            )
+            return_arg_values = [None] * len(return_arg_types)
+            return_arg_values_ctypes = ctypes.cast(
+                (ctypes.c_void_p * len(return_arg_types))(*return_arg_values),
+                ctypes.POINTER(ctypes.c_void_p),
+            )
+            return_args_packed = ctypes.pointer(
+                OIFArgs(
+                    num_return_args, return_arg_types_ctypes, return_arg_values_ctypes
+                )
+            )
+
         status = self._call_interface_impl(
             self.implh,
             method.encode(),
             ctypes.byref(in_args_packed),
             ctypes.byref(out_packed),
+            return_args_packed,
         )
 
         if status != 0:
             raise RuntimeError(f"Error occurred while executing method '{method}'")
 
-        return 0
+        return_args = []
+        if return_args_packed is not None:
+            oif_util_free_ = _wrap_c_function(
+                _liboif_common_util, "oif_util_free_", None, [ctypes.c_void_p]
+            )
+
+            for i, arg_type in enumerate(return_arg_types):
+                void_pointer = ctypes.c_void_p(
+                    return_args_packed.contents.arg_values[i]
+                )
+                if arg_type == OIF_TYPE_INT:
+                    py_var = ctypes.cast(
+                        void_pointer, ctypes.POINTER(ctypes.c_int)
+                    ).contents.value
+                elif arg_type == OIF_TYPE_STRING:
+                    py_var = ctypes.string_at(void_pointer).decode("utf-8")
+                else:
+                    raise RuntimeError("Cannot convert return argument")
+                return_args.append(py_var)
+                oif_util_free_(void_pointer.value)
+
+        return return_args if return_args else status
 
 
 def load_impl(interface: str, impl: str, major: UInt, minor: UInt):
