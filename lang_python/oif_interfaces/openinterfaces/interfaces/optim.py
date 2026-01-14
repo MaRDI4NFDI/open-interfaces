@@ -103,7 +103,11 @@ class Optim:
         self.x0 = x0
         self._N = len(self.x0)
         self.x = np.empty((self._N,))
-        self._binding.call("set_initial_guess", (x0,), ())
+
+        # It is not clear to me whether we should pass `self.x0`
+        # and therefore keep the reference to `x0` to avoid crashes
+        # or an implementation is supposed to copy it.
+        self._binding.call("set_initial_guess", (self.x0,), ())
 
     def set_objective_fn(self, objective_fn: ObjectiveFn):
         self.wrapper = make_oif_callback(
