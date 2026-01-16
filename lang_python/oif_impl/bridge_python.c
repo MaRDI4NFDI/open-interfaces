@@ -146,7 +146,7 @@ get_numpy_array_from_oif_array_f64(OIFArrayF64 **value)
             // so we need to reverse them for the Fortran style.
             npy_intp *strides = PyArray_STRIDES((PyArrayObject *)pValue);
             for (int j = 0; j < arr->nd / 2; ++j) {
-                npy_int tmp = strides[j];
+                npy_intp tmp = strides[j];
                 strides[j] = strides[arr->nd - j - 1];
                 strides[arr->nd - j - 1] = tmp;
             }
@@ -466,8 +466,8 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     }
     PythonImplInfo *impl = (PythonImplInfo *)impl_info;
 
-    PyObject *pFunc;
-    PyObject *pValue;
+    PyObject *pFunc = NULL;
+    PyObject *pValue = NULL;
 
     size_t num_args = in_args->num_args + out_args->num_args;
     PyObject *pArgs = PyTuple_New(num_args);
