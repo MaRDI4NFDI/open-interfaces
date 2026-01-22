@@ -346,6 +346,35 @@ cleanup:
     return NULL;
 }
 
+static void
+parse_module_and_class_names_(const char *impl_details, char *moduleName, char *className)
+{
+    // This function works only if `impl_details` do not have
+    // extra whitespace, otherwise there is discrepancy
+    // between the indices in the written strings and `impl_details`.
+    // TODO: Make the function more robust in that regard.
+    const size_t N = strlen(impl_details) + 1;
+    size_t i;
+    for (i = 0; i < N; ++i) {
+        if (impl_details[i] != ' ' && impl_details[i] != '\0') {
+            moduleName[i] = impl_details[i];
+        }
+        else {
+            moduleName[i] = '\0';
+            break;
+        }
+    }
+    size_t offset = i + 1;
+    for (; i < N; ++i) {
+        if (impl_details[i] != ' ' && impl_details[i] != '\0') {
+            className[i - offset] = impl_details[i];
+        }
+        else {
+            className[i] = '\0';
+        }
+    }
+}
+
 ImplInfo *
 load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 {
@@ -380,25 +409,7 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     char moduleName[512] = "\0";
     char className[512] = "\0";
-    size_t i;
-    for (i = 0; i < strlen(impl_details); ++i) {
-        if (impl_details[i] != ' ' && impl_details[i] != '\0') {
-            moduleName[i] = impl_details[i];
-        }
-        else {
-            moduleName[i] = '\0';
-            break;
-        }
-    }
-    size_t offset = i + 1;
-    for (; i < strlen(impl_details); ++i) {
-        if (impl_details[i] != ' ' && impl_details[i] != '\0') {
-            className[i - offset] = impl_details[i];
-        }
-        else {
-            className[i] = '\0';
-        }
-    }
+    parse_module_and_class_names_(impl_details, moduleName, className);
 
     fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix_, moduleName);
     fprintf(stderr, "[%s] Provided class name: '%s'\n", prefix_, className);
