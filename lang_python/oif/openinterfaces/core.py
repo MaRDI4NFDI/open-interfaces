@@ -256,7 +256,9 @@ def make_oif_user_data(data: object) -> OIFUserData:
     *IMPORTANT* Keep the reference to `data`, otherwise it can be
     garbage collected, and then using it becomes a segfault situation.
     """
-    return OIFUserData(OIF_LANG_PYTHON, None, None, ctypes.c_void_p(id(data)))
+    return OIFUserData(
+        src=OIF_LANG_PYTHON, c=None, jl=None, py=ctypes.c_void_p(id(data))
+    )
 
 
 def make_oif_config_dict(arg: dict) -> OIFConfigDict:
