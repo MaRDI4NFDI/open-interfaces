@@ -564,6 +564,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                 }
                 else if (user_data->src == OIF_LANG_PYTHON) {
                     pValue = user_data->py;
+                    Py_INCREF(pValue);
                 }
                 else if (user_data->src == OIF_LANG_JULIA) {
                     /* Treat the argument as a raw pointer. */
