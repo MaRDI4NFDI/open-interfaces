@@ -60,7 +60,6 @@ instantiate_callback_class(void)
                 "not be instantiated\n",
                 prefix_, class_name);
     }
-    Py_INCREF(CALLBACK_CLASS_P);
     Py_DECREF(pModule);
 
     return CALLBACK_CLASS_P;
@@ -450,7 +449,8 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
                 "[%s] Could not allocate memory for Python "
                 "implementation information\n",
                 prefix_);
-        return NULL;
+        Py_DECREF(pInstance);
+        goto cleanup;
     }
     impl_info->pInstance = pInstance;
     impl_info->pCallbackClass = NULL;
@@ -626,7 +626,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             else {
                 pValue = NULL;
             }
-            if (!pValue) {
+            if (pValue == NULL) {
                 fprintf(stderr, "[%s] Cannot convert out_arg %zu of type %d\n", prefix_, i,
                         out_args->arg_types[i]);
                 goto cleanup;
@@ -636,7 +636,6 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
 
         // Invoke function.
         pValue = PyObject_CallObject(pFunc, pArgs);
-        Py_DECREF(pArgs);
         if (pValue == NULL) {
             PyErr_Print();
             logerr(prefix_, "Call to the method '%s' has failed\n", method);
@@ -714,8 +713,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
             PyErr_Print();
         }
         fprintf(stderr, "[%s] Cannot find function \"%s\"\n", prefix_, method);
-        Py_XDECREF(pFunc);
-        return -1;
+        goto cleanup;
     }
     Py_DECREF(pFunc);
 
