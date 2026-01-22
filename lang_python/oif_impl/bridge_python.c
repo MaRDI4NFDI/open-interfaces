@@ -34,6 +34,8 @@ static bool NUMPY_IS_INITIALIZED_ = false;
 
 static char prefix_[] = "bridge_python";
 
+static PyObject *DESERIALIZE_FN_ = NULL;
+
 PyObject *
 instantiate_callback_class(void)
 {
@@ -67,6 +69,9 @@ instantiate_callback_class(void)
 static PyObject *
 get_deserialization_function(void)
 {
+    if (DESERIALIZE_FN_) {
+        return DESERIALIZE_FN_;
+    }
     char *moduleName = "_serialization";
     PyObject *pFileName = PyUnicode_FromString(moduleName);
     PyObject *pModule = PyImport_Import(pFileName);
@@ -78,13 +83,13 @@ get_deserialization_function(void)
         exit(1);
     }
 
-    PyObject *pFunc = PyObject_GetAttrString(pModule, "deserialize");
-    if (pFunc == NULL) {
+    DESERIALIZE_FN_ = PyObject_GetAttrString(pModule, "deserialize");
+    if (DESERIALIZE_FN_ == NULL) {
         PyErr_Print();
         fprintf(stderr, "[%s] Could not find function `deserialize`\n", prefix_);
     }
 
-    return pFunc;
+    return DESERIALIZE_FN_;
 }
 
 static PyObject *
@@ -570,6 +575,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     pValue = PyObject_CallObject(deserialize_fn, deserialize_args);
                     Py_DECREF(deserialize_args);
                     Py_DECREF(serialized_dict);
+                    // We do not decref `deserialize_fn` because it is cached.
                 }
                 else {
                     pValue = PyDict_New();
