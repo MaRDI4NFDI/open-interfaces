@@ -28,7 +28,10 @@ oif_create_array_f64(int nd, const intptr_t *const dimensions)
 {
     OIFArrayF64 *x = oif_util_malloc(sizeof(OIFArrayF64));
     x->nd = nd;
-    x->dimensions = (intptr_t *)dimensions;
+    size_t n_dims_bytes = sizeof(dimensions[0] * nd);
+    x->dimensions = oif_util_malloc(n_dims_bytes);
+    memcpy(x->dimensions, dimensions, n_dims_bytes);
+
     x->flags = OIF_ARRAY_C_CONTIGUOUS;
 
     if (nd == 1) {
@@ -65,6 +68,9 @@ oif_free_array_f64(OIFArrayF64 *x)
         fprintf(stderr, "[oif_free_array_f64] Attempt to free NULL pointer\n");
         return;
     }
+
+    oif_util_free(x->dimensions);
+
     if (x->data == NULL) {
         fprintf(stderr, "[oif_free_array_f64] Attempt to free NULL pointer\n");
         return;
