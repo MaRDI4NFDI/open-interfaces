@@ -28,7 +28,10 @@ oif_create_array_f64(int nd, const intptr_t *const dimensions)
 {
     OIFArrayF64 *x = oif_util_malloc(sizeof(OIFArrayF64));
     x->nd = nd;
-    size_t n_dims_bytes = sizeof(dimensions[0] * nd);
+    x->dimensions = NULL;
+    x->data = NULL;
+
+    size_t n_dims_bytes = sizeof(*dimensions) * nd;
     x->dimensions = oif_util_malloc(n_dims_bytes);
     memcpy(x->dimensions, dimensions, n_dims_bytes);
 
