@@ -42,12 +42,26 @@ oif_create_array_f64(int nd, const intptr_t *const dimensions)
     }
 
     int size = 1;
-    for (size_t i = 0; i < nd; ++i) {
+    for (int i = 0; i < nd; i++) {
+        if (dimensions[i] <= 0) {
+            fprintf(stderr, "[oif] Non-positive dimensions are not supported at present\n");
+            goto error;
+        }
+        if (size > (SSIZE_MAX / dimensions[i])) {
+            fprintf(stderr,
+                    "[oif] Overflow when trying to compute the size of the array data\n");
+            goto error;
+        }
         size *= dimensions[i];
     }
     x->data = (double *)oif_util_malloc(size * sizeof(double));
 
     return x;
+
+error:
+    oif_util_free(x->dimensions);
+    oif_util_free(x);
+    return NULL;
 }
 
 OIFArrayF64 *
@@ -55,7 +69,12 @@ oif_init_array_f64_from_data(int nd, const intptr_t *const dimensions,
                              const double *const data)
 {
     OIFArrayF64 *x = oif_create_array_f64(nd, dimensions);
-    int size = 1;
+    if (x == NULL) {
+        fprintf(stderr, "[oif_init_array_f64_from_data] Error when creating array\n");
+        return NULL;
+    }
+
+    size_t size = 1;
     for (size_t i = 0; i < nd; ++i) {
         size *= dimensions[i];
     }
@@ -81,7 +100,6 @@ oif_free_array_f64(OIFArrayF64 *x)
 
     oif_util_free(x->data);
     oif_util_free(x);
-    x = NULL;
 }
 
 void

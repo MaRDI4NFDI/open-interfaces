@@ -36,7 +36,7 @@ test :
 	@echo "=== Julia tests ==="
 	julia tests/lang_julia/runtests.jl
 	@echo "=== Python tests ==="
-	pytest tests/lang_python -vv
+	pytest tests/lang_python -vv -s
 
 
 ## Build in debug mode (without optimizations)
