@@ -7,6 +7,11 @@ extern "C" {
 
 #include <stddef.h>
 #include <stdint.h>
+#include <sys/types.h>
+
+#include <oif/_platform.h>
+
+static_assert(sizeof(intptr_t) == sizeof(ssize_t), "We expect a 64-bit platform");
 
 // Handle to an instantiated implementation.
 typedef int ImplHandle;
@@ -74,7 +79,7 @@ typedef struct {
     // Number of dimensions in the array.
     int nd;
     // Size of each axis, i = 0, .., nd-1.
-    intptr_t *dimensions;
+    ssize_t *dimensions;
     // Pointer to actual data.
     double *data;
     // Flags that describe the array: things like row-major order, etc.

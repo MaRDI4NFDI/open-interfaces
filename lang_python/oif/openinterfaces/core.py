@@ -127,7 +127,7 @@ class OIFArgs(ctypes.Structure):
 class OIFArrayF64(ctypes.Structure):
     _fields_ = [
         ("nd", ctypes.c_int),
-        ("dimensions", ctypes.POINTER(ctypes.c_long)),
+        ("dimensions", ctypes.POINTER(ctypes.c_ssize_t)),
         ("data", ctypes.POINTER(ctypes.c_double)),
         ("flags", ctypes.c_int),
     ]
@@ -325,7 +325,7 @@ class OIFPyBinding:
             elif isinstance(arg, np.ndarray) and arg.dtype == np.float64:
                 assert arg.dtype == np.float64
                 nd = arg.ndim
-                dimensions = (ctypes.c_long * len(arg.shape))(*arg.shape)
+                dimensions = (ctypes.c_ssize_t * len(arg.shape))(*arg.shape)
                 data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
                 flags = 0
@@ -395,7 +395,7 @@ class OIFPyBinding:
                 out_arg_types.append(OIF_TYPE_F64)
             elif isinstance(arg, np.ndarray) and arg.dtype == np.float64:
                 nd = arg.ndim
-                dimensions = (ctypes.c_long * len(arg.shape))(*arg.shape)
+                dimensions = (ctypes.c_ssize_t * len(arg.shape))(*arg.shape)
                 data = arg.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
                 flags = 0

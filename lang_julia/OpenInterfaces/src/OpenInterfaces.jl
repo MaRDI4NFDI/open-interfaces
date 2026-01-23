@@ -91,7 +91,7 @@ end
 
 struct OIFArrayF64
     nd::Int32
-    dimensions::Ptr{Int64}
+    dimensions::Ptr{Cssize_t}
     data::Ptr{Float64}
     flags::Int32
 end
