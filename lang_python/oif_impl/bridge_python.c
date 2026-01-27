@@ -518,7 +518,8 @@ cleanup:
 }
 
 int
-call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args, OIFArgs *return_args)
+call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *out_args,
+          OIFArgs *return_args)
 {
     int result = 1;
     if (impl_info->dh != OIF_LANG_PYTHON) {

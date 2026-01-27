@@ -7,7 +7,6 @@ where :math:`f : \mathbb R^n \to \mathbb R`.
 """
 
 from collections.abc import Callable
-from dataclasses import dataclass
 from typing import TypeAlias
 
 import numpy as np
@@ -28,12 +27,12 @@ from openinterfaces.core import (
 ObjectiveFn: TypeAlias = Callable[[np.ndarray, object], int]
 """Signature of the objective function :math:`f(, y)`.
 
-!!!!!!!!!    The function accepts four arguments:
-!!!!!!!!!        - `t`: current time,
-!!!!!!!!!        - `y`: state vector at time :math:`t`,
-!!!!!!!!!        - `ydot`: output array to which the result of function evalutation is stored,
-!!!!!!!!!        - `user_data`: additional context (user-defined data) that
-!!!!!!!!!          must be passed to the function (e.g., parameters of the system).
+!!!!!!!!! The function accepts four arguments:
+!!!!!!!!!     - `t`: current time,
+!!!!!!!!!     - `y`: state vector at time :math:`t`,
+!!!!!!!!!     - `ydot`: output array to which the result
+!!!!!!!!!     - `user_data`: additional context (user-defined data) that
+!!!!!!!!!       must be passed to the function (e.g., parameters of the system).
 
 """
 

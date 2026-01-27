@@ -16,4 +16,3 @@ and the number of arguments, but it is Bridge that allocates the memory
 and writes into this arguments passing the ownership back to the caller
 (a Converter to be precise) that converts it the return data again
 from the C intermediate representation to the native language of the user.
-
