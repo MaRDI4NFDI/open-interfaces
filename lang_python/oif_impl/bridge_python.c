@@ -17,7 +17,6 @@
 typedef struct {
     ImplInfo base;
     PyObject *pInstance;
-    PyObject *pCallbackClass;
 } PythonImplInfo;
 
 #ifdef __APPLE__
@@ -30,14 +29,18 @@ static int IMPL_COUNTER = 0;
 
 static bool is_python_initialized_by_us = false;
 
+static void *LIBPYTHON_ = NULL;
+
 static bool NUMPY_IS_INITIALIZED_ = false;
+static bool EXTRA_MODULES_ARE_INITIALIZED_ = false;
 
 static char prefix_[] = "bridge_python";
 
+static PyObject *CALLBACK_CLASS_P_ = NULL;
 static PyObject *DESERIALIZE_FN_ = NULL;
 
-PyObject *
-instantiate_callback_class(void)
+static int
+instantiate_callback_class_(void)
 {
     char *moduleName = "_callback";
     char class_name[] = "PythonWrapperForCCallback";
@@ -49,28 +52,27 @@ instantiate_callback_class(void)
     if (pModule == NULL) {
         PyErr_Print();
         fprintf(stderr, "[%s] Failed to load callback module\n", prefix_);
-        exit(1);
+        return 1;
     }
 
-    PyObject *CALLBACK_CLASS_P = PyObject_GetAttrString(pModule, class_name);
-    if (CALLBACK_CLASS_P == NULL) {
+    CALLBACK_CLASS_P_ = PyObject_GetAttrString(pModule, class_name);
+    Py_DECREF(pModule);
+
+    if (CALLBACK_CLASS_P_ == NULL) {
         PyErr_Print();
         fprintf(stderr,
                 "[%s] Cannot proceed as callback class %s could "
                 "not be instantiated\n",
                 prefix_, class_name);
+        return 2;
     }
-    Py_DECREF(pModule);
 
-    return CALLBACK_CLASS_P;
+    return 0;
 }
 
-static PyObject *
-get_deserialization_function(void)
+static int
+instantiate_deserialization_function_(void)
 {
-    if (DESERIALIZE_FN_) {
-        return DESERIALIZE_FN_;
-    }
     char *moduleName = "_serialization";
     PyObject *pFileName = PyUnicode_FromString(moduleName);
     PyObject *pModule = PyImport_Import(pFileName);
@@ -79,20 +81,23 @@ get_deserialization_function(void)
     if (pModule == NULL) {
         PyErr_Print();
         fprintf(stderr, "[%s] Failed to load `serialization` module\n", prefix_);
-        exit(1);
+        return 1;
     }
 
     DESERIALIZE_FN_ = PyObject_GetAttrString(pModule, "deserialize");
+    Py_DECREF(pModule);
+
     if (DESERIALIZE_FN_ == NULL) {
         PyErr_Print();
         fprintf(stderr, "[%s] Could not find function `deserialize`\n", prefix_);
+        return 2;
     }
 
-    return DESERIALIZE_FN_;
+    return 0;
 }
 
 static PyObject *
-convert_oif_callback(OIFCallback *p)
+build_callback_args_(OIFCallback *p)
 {
     const char *id = "123";
     PyObject *fn_p = PyCapsule_New(p->fn_p_c, id, NULL);
@@ -106,8 +111,11 @@ convert_oif_callback(OIFCallback *p)
     unsigned int nargs = 4;
     PyObject *obj = Py_BuildValue("(N, I)", fn_p, nargs);
     if (obj == NULL) {
-        fprintf(stderr, "[%s] Could not build arguments\n", prefix_);
+        PyErr_Print();
+        Py_DECREF(fn_p);
+        logerr(prefix_, "Could not build callback arguments\n");
     }
+
     return obj;
 }
 
@@ -207,17 +215,14 @@ init_numpy_()
 {
     PyObject *pFileName = NULL;
     PyObject *pModule = NULL;
-    PyObject *pClass = NULL;
-    PyObject *pInstance = NULL;
     PyObject *pFunc = NULL;
-    PyObject *pInitArgs = NULL;
     PyObject *pArgs = NULL;
     PyObject *pValue = NULL;
 
     int status;
     int nbytes_required;  // Number of required bytes in snprintf.
     int nbytes_written;   // Number of written bytes in snprintf.
-    char *cmd;            // Command formatted in snprintf.
+    char *cmd = NULL;     // Command formatted in snprintf.
                           //
     // We need to `dlopen` the Python library, otherwise,
     // NumPy initialization fails.
@@ -232,6 +237,7 @@ init_numpy_()
     }
     pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
+    pFileName = NULL;
 
     if (pModule == NULL) {
         fprintf(stderr, "[%s] Could not import `sysconfig` module\n", prefix_);
@@ -239,27 +245,34 @@ init_numpy_()
     }
     pFunc = PyObject_GetAttrString(pModule, "get_config_var");
     Py_DECREF(pModule);
+    pModule = NULL;
+
     if (pFunc == NULL || !PyCallable_Check(pFunc)) {
         fprintf(stderr, "[%s] Could not find function `sysconfig.get_config_var`\n", prefix_);
-        return NULL;
+        goto cleanup;
     }
+
     pArgs = PyTuple_New(1);
     pValue = Py_BuildValue("s", "LIBDIR");
     status = PyTuple_SetItem(pArgs, 0, pValue);
     if (status != 0) {
+        PyErr_Print();
+        Py_DECREF(pValue);
         fprintf(stderr,
                 "[%s] Could not build arguments for executing `sysconfig.get_config_var`\n",
                 prefix_);
-        return NULL;
+        goto cleanup;
     }
-    pValue = PyObject_CallObject(pFunc, pArgs);
-    if (pValue == NULL) {
+
+    PyObject *pResultValue = PyObject_CallObject(pFunc, pArgs);
+    if (pResultValue == NULL) {
         fprintf(stderr, "[%s] Could not execute `sysconfig.get_config_var`\n", prefix_);
-        return NULL;
+        goto cleanup;
     }
 
     nbytes_written =
-        snprintf(libpython_path, sizeof libpython_path, "%s", PyUnicode_AsUTF8(pValue));
+        snprintf(libpython_path, sizeof libpython_path, "%s", PyUnicode_AsUTF8(pResultValue));
+    Py_DECREF(pResultValue);
     if (nbytes_written < 0 || nbytes_written >= sizeof libpython_path) {
         logerr(prefix_, "Could not convert path to `libpython`");
         goto cleanup;
@@ -273,8 +286,8 @@ init_numpy_()
         goto cleanup;
     }
     fprintf(stderr, "[%s] Loading %s\n", prefix_, libpython_name);
-    void *libpython = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
-    if (libpython == NULL) {
+    LIBPYTHON_ = dlopen(libpython_name, RTLD_LAZY | RTLD_GLOBAL);
+    if (LIBPYTHON_ == NULL) {
         logerr(prefix_, "Cannot open python library");
         goto cleanup;
     }
@@ -321,28 +334,73 @@ init_numpy_()
     free(cmd);
     cmd = NULL;
     if (status < 0) {
-        logerr(prefix_, "An error occurred when initializating Python");
+        logerr(prefix_, "An error occurred when checking NumPy version");
         goto cleanup;
     }
 
     NUMPY_IS_INITIALIZED_ = true;
 
 cleanup:
-    Py_XDECREF(pValue);
     Py_XDECREF(pArgs);
-    Py_XDECREF(pInitArgs);
     Py_XDECREF(pFunc);
-    Py_XDECREF(pInstance);
-    Py_XDECREF(pClass);
-    // Somehow, the reference to sysconfig must be preserved.
-    // Otherwise, there will be a crash when loading implementations.
-    /* Py_XDECREF(pModule); */
-    Py_XDECREF(pFileName);
 
     if (cmd != NULL) {
         free(cmd);
     }
     return NULL;
+}
+
+static int
+init_extra_(void)
+{
+    int status;
+
+    status = instantiate_deserialization_function_();
+    if (status) {
+        logerr(prefix_, "Could not import the `deserialize` function");
+        return 1;
+    }
+
+    status = instantiate_callback_class_();
+    if (status) {
+        logerr(prefix_, "Could not instantiate the Callback class");
+        return 2;
+    }
+
+    EXTRA_MODULES_ARE_INITIALIZED_ = true;
+    return 0;
+}
+
+static int
+init_(void)
+{
+    int status;
+
+    if (Py_IsInitialized()) {
+        fprintf(stderr, "[%s] Backend is already initialized\n", prefix_);
+    }
+    else {
+        status = init_python_();
+        if (status != 0) {
+            return 1;
+        }
+    }
+
+    if (!NUMPY_IS_INITIALIZED_) {
+        init_numpy_();
+        if (!NUMPY_IS_INITIALIZED_) {
+            return 2;
+        }
+    }
+
+    if (!EXTRA_MODULES_ARE_INITIALIZED_) {
+        status = init_extra_();
+        if (status) {
+            return 3;
+        }
+    }
+
+    return 0;
 }
 
 static void
@@ -380,30 +438,19 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
     PyObject *pFileName = NULL;
     PyObject *pModule = NULL;
     PyObject *pClass = NULL;
-    PyObject *pInstance = NULL;
-    PyObject *pFunc = NULL;
     PyObject *pInitArgs = NULL;
-    PyObject *pArgs = NULL;
-    PyObject *pValue = NULL;
+    PyObject *pInstance = NULL;
 
     ImplInfo *result = NULL;
     int status;
 
     (void)version_major;
     (void)version_minor;
-    if (Py_IsInitialized()) {
-        fprintf(stderr, "[%s] Backend is already initialized\n", prefix_);
-    }
-    else {
-        int status;
-        status = init_python_();
-        if (status != 0) {
-            return NULL;
-        }
-    }
 
-    if (! NUMPY_IS_INITIALIZED_) {
-        init_numpy_();
+    status = init_();
+    if (status) {
+        logerr(prefix_, "Could not initialize important things. Cannot proceed");
+        return NULL;
     }
 
     char moduleName[512] = "\0";
@@ -412,8 +459,10 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
 
     fprintf(stderr, "[%s] Provided module name: '%s'\n", prefix_, moduleName);
     fprintf(stderr, "[%s] Provided class name: '%s'\n", prefix_, className);
+
     pFileName = PyUnicode_FromString(moduleName);
     if (pFileName == NULL) {
+        PyErr_Print();
         fprintf(stderr,
                 "[%s::load_impl] Provided moduleName '%s' "
                 "could not be resolved to file name\n",
@@ -453,7 +502,6 @@ load_impl(const char *impl_details, size_t version_major, size_t version_minor)
         goto cleanup;
     }
     impl_info->pInstance = pInstance;
-    impl_info->pCallbackClass = NULL;
 
     IMPL_COUNTER++;
 
@@ -463,11 +511,8 @@ cleanup:
     Py_XDECREF(pFileName);
     Py_XDECREF(pModule);
     Py_XDECREF(pClass);
-    /* Py_XDECREF(pInstance);  We keep it inside an impl_info object. */
-    Py_XDECREF(pFunc);
     Py_XDECREF(pInitArgs);
-    Py_XDECREF(pArgs);
-    Py_XDECREF(pValue);
+    /* Py_XDECREF(pInstance);  We keep it inside an impl_info object. */
 
     return result;
 }
@@ -482,182 +527,200 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
     }
     PythonImplInfo *impl = (PythonImplInfo *)impl_info;
 
+    int status;  // To check codes of functions that return 0 on success.
+
     PyObject *pFunc = NULL;
     PyObject *pValue = NULL;
 
     size_t num_args = in_args->num_args + out_args->num_args;
     PyObject *pArgs = PyTuple_New(num_args);
+    if (pArgs == NULL) {
+        logerr(prefix_, "Could not create tuple for function arguments of size %zu", num_args);
+        goto cleanup;
+    }
 
     pFunc = PyObject_GetAttrString(impl->pInstance, method);
 
-    if (pFunc && PyCallable_Check(pFunc)) {
-        // Convert input arguments.
-        for (size_t i = 0; i < in_args->num_args; ++i) {
-            if (in_args->arg_types[i] == OIF_TYPE_F64) {
-                pValue = PyFloat_FromDouble(*(double *)in_args->arg_values[i]);
+    if (pFunc == NULL || !PyCallable_Check(pFunc)) {
+        if (PyErr_Occurred()) {
+            fprintf(stderr, "[%s] An error occurred during the call\n", prefix_);
+            PyErr_Print();
+        }
+        fprintf(stderr, "[%s] Cannot find function \"%s\"\n", prefix_, method);
+        goto cleanup;
+    }
+
+    // Convert input arguments.
+    for (size_t i = 0; i < in_args->num_args; ++i) {
+        if (in_args->arg_types[i] == OIF_TYPE_F64) {
+            pValue = PyFloat_FromDouble(*(double *)in_args->arg_values[i]);
+        }
+        else if (in_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
+            pValue = get_numpy_array_from_oif_array_f64(in_args->arg_values[i]);
+        }
+        else if (in_args->arg_types[i] == OIF_TYPE_STRING) {
+            char *c_str = *((char **)in_args->arg_values[i]);
+            pValue = PyUnicode_FromString(c_str);
+        }
+        else if (in_args->arg_types[i] == OIF_TYPE_CALLBACK) {
+            OIFCallback *p = in_args->arg_values[i];
+            if (p->src == OIF_LANG_PYTHON) {
+                pValue = (PyObject *)p->fn_p_py;
+                /*
+                 * It is important to incref the callback pointed to
+                 * with p->fn_p_py, because somehow a reference count
+                 * to the ctypes object on Python side is not incremented.
+                 * Therefore, when decref of `pArgs` occurs down below,
+                 * the memory pointed to by p->fn_p_py is getting freed
+                 * prematurely with the consequent segfault.
+                 */
+                Py_INCREF(pValue);
             }
-            else if (in_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
-                pValue = get_numpy_array_from_oif_array_f64(in_args->arg_values[i]);
-            }
-            else if (in_args->arg_types[i] == OIF_TYPE_STRING) {
-                char *c_str = *((char **)in_args->arg_values[i]);
-                pValue = PyUnicode_FromString(c_str);
-            }
-            else if (in_args->arg_types[i] == OIF_TYPE_CALLBACK) {
-                OIFCallback *p = in_args->arg_values[i];
-                if (p->src == OIF_LANG_PYTHON) {
-                    pValue = (PyObject *)p->fn_p_py;
-                    /*
-                     * It is important to incref the callback pointed to
-                     * with p->fn_p_py, because somehow a reference count
-                     * to the ctypes object on Python side is not incremented.
-                     * Therefore, when decref of `pArgs` occurs down below,
-                     * the memory pointed to by p->fn_p_py is getting freed
-                     * prematurely with the consequent segfault.
-                     */
-                    Py_INCREF(pValue);
-                }
-                else if (p->src == OIF_LANG_C || p->src == OIF_LANG_JULIA) {
-                    fprintf(stderr,
-                            "[%s] Check what callback to "
-                            "wrap via src field\n",
-                            prefix_);
-                    if (impl->pCallbackClass == NULL) {
-                        impl->pCallbackClass = instantiate_callback_class();
-                    }
-                    PyObject *callback_args = convert_oif_callback(p);
-                    if (callback_args == NULL) {
-                        fprintf(stderr,
-                                "[%s] Could not convert OIFCallback to Python "
-                                "callable object because function 'convert_oif_callback' "
-                                "returned error\n",
-                                prefix_);
-                        pValue = NULL;
-                        goto cleanup;
-                    }
-                    pValue = PyObject_CallObject(impl->pCallbackClass, callback_args);
-                    if (pValue == NULL) {
-                        fprintf(stderr,
-                                "[%s] Could not instantiate "
-                                "Callback class for wrapping C functions\n",
-                                prefix_);
-                    }
-                }
-                else {
-                    fprintf(stderr, "[%s] Cannot determine callback source\n", prefix_);
-                    pValue = NULL;
-                }
-                if (!PyCallable_Check(pValue)) {
-                    fprintf(stderr,
-                            "[%s] Input argument #%zu "
-                            "has type OIF_TYPE_CALLBACK "
-                            "but it is actually is not callable\n",
-                            prefix_, i);
+            else if (p->src == OIF_LANG_C || p->src == OIF_LANG_JULIA) {
+                fprintf(stderr,
+                        "[%s] Check what callback to "
+                        "wrap via src field\n",
+                        prefix_);
+                PyObject *callback_args = build_callback_args_(p);
+                if (callback_args == NULL) {
+                    logerr(prefix_,
+                           "Could not convert OIFCallback to Python "
+                           "callable object returned error\n");
                     goto cleanup;
                 }
-            }
-            else if (in_args->arg_types[i] == OIF_USER_DATA) {
-                OIFUserData *user_data = (OIFUserData *)in_args->arg_values[i];
-                if (user_data->src == OIF_LANG_C) {
-                    /* Treat the argument as a raw pointer. */
-                    pValue = PyCapsule_New(user_data->c, NULL, NULL);
-                }
-                else if (user_data->src == OIF_LANG_PYTHON) {
-                    pValue = user_data->py;
-                    Py_INCREF(pValue);
-                }
-                else if (user_data->src == OIF_LANG_JULIA) {
-                    /* Treat the argument as a raw pointer. */
-                    pValue = PyCapsule_New(user_data->jl, NULL, NULL);
-                }
-                else {
-                    fprintf(stderr, "[%s] Cannot handle user data with src %d\n", prefix_,
-                            user_data->src);
-                    pValue = NULL;
-                }
-            }
-            else if (in_args->arg_types[i] == OIF_TYPE_CONFIG_DICT) {
-                OIFConfigDict *dict = *((OIFConfigDict **)in_args->arg_values[i]);
-                if (dict != NULL) {
-                    PyObject *deserialize_fn = get_deserialization_function();
-                    const uint8_t *buffer = oif_config_dict_get_serialized(dict);
-                    size_t length = oif_config_dict_get_serialized_object_length(dict);
-                    PyObject *serialized_dict = Py_BuildValue("y#", buffer, length);
-                    PyObject *deserialize_args = Py_BuildValue("(O)", serialized_dict);
-                    pValue = PyObject_CallObject(deserialize_fn, deserialize_args);
-                    Py_DECREF(deserialize_args);
-                    Py_DECREF(serialized_dict);
-                    // We do not decref `deserialize_fn` because it is cached.
-                }
-                else {
-                    pValue = PyDict_New();
-                    if (pValue == NULL) {
-                        fprintf(stderr, "[%s] Could not create a dictionary\n", prefix_);
-                    }
+
+                pValue = PyObject_CallObject(CALLBACK_CLASS_P_, callback_args);
+                Py_DECREF(callback_args);
+                if (pValue == NULL) {
+                    fprintf(stderr,
+                            "[%s] Could not instantiate "
+                            "Callback class for wrapping C functions\n",
+                            prefix_);
                 }
             }
             else {
+                fprintf(stderr, "[%s] Cannot determine callback source\n", prefix_);
                 pValue = NULL;
             }
-
-            if (!pValue) {
+            if (!PyCallable_Check(pValue)) {
                 fprintf(stderr,
-                        "[%s] Cannot convert input argument #%zu with "
-                        "provided type id %d\n",
-                        prefix_, i, in_args->arg_types[i]);
+                        "[%s] Input argument #%zu "
+                        "has type OIF_TYPE_CALLBACK "
+                        "but it is actually is not callable\n",
+                        prefix_, i);
                 goto cleanup;
             }
-            PyTuple_SetItem(pArgs, i, pValue);
         }
-        // Convert output arguments.
-        for (size_t i = 0; i < out_args->num_args; ++i) {
-            if (out_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
-                pValue = get_numpy_array_from_oif_array_f64(out_args->arg_values[i]);
+        else if (in_args->arg_types[i] == OIF_USER_DATA) {
+            OIFUserData *user_data = (OIFUserData *)in_args->arg_values[i];
+            if (user_data->src == OIF_LANG_C) {
+                /* Treat the argument as a raw pointer. */
+                pValue = PyCapsule_New(user_data->c, NULL, NULL);
+            }
+            else if (user_data->src == OIF_LANG_PYTHON) {
+                pValue = user_data->py;
+                Py_INCREF(pValue);
+            }
+            else if (user_data->src == OIF_LANG_JULIA) {
+                /* Treat the argument as a raw pointer. */
+                pValue = PyCapsule_New(user_data->jl, NULL, NULL);
             }
             else {
+                fprintf(stderr, "[%s] Cannot handle user data with src %d\n", prefix_,
+                        user_data->src);
                 pValue = NULL;
             }
-            if (pValue == NULL) {
-                fprintf(stderr, "[%s] Cannot convert out_arg %zu of type %d\n", prefix_, i,
-                        out_args->arg_types[i]);
-                goto cleanup;
+        }
+        else if (in_args->arg_types[i] == OIF_TYPE_CONFIG_DICT) {
+            OIFConfigDict *dict = *((OIFConfigDict **)in_args->arg_values[i]);
+            if (dict != NULL) {
+                const uint8_t *buffer = oif_config_dict_get_serialized(dict);
+                size_t length = oif_config_dict_get_serialized_object_length(dict);
+                PyObject *serialized_dict = Py_BuildValue("y#", buffer, length);
+                PyObject *deserialize_args = Py_BuildValue("(O)", serialized_dict);
+                pValue = PyObject_CallObject(DESERIALIZE_FN_, deserialize_args);
+                Py_DECREF(deserialize_args);
+                Py_DECREF(serialized_dict);
             }
-            PyTuple_SetItem(pArgs, i + in_args->num_args, pValue);
+            else {
+                pValue = PyDict_New();
+                if (pValue == NULL) {
+                    fprintf(stderr, "[%s] Could not create a dictionary\n", prefix_);
+                }
+            }
+        }
+        else {
+            pValue = NULL;
         }
 
-        // Invoke function.
-        pValue = PyObject_CallObject(pFunc, pArgs);
-        if (pValue == NULL) {
+        if (!pValue) {
+            fprintf(stderr,
+                    "[%s] Cannot convert input argument #%zu with "
+                    "provided type id %d\n",
+                    prefix_, i, in_args->arg_types[i]);
+            goto cleanup;
+        }
+        status = PyTuple_SetItem(pArgs, i, pValue);
+        if (status) {
             PyErr_Print();
-            logerr(prefix_, "Call to the method '%s' has failed\n", method);
+            Py_DECREF(pValue);
+            logerr(prefix_, "Could not build a tuple of arguments");
+            goto cleanup;
+        }
+    }
+
+    // Convert output arguments.
+    for (size_t i = 0; i < out_args->num_args; ++i) {
+        if (out_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
+            pValue = get_numpy_array_from_oif_array_f64(out_args->arg_values[i]);
+        }
+        else {
+            pValue = NULL;
+        }
+        if (pValue == NULL) {
+            fprintf(stderr, "[%s] Cannot convert out_arg %zu of type %d\n", prefix_, i,
+                    out_args->arg_types[i]);
+            goto cleanup;
+        }
+        status = PyTuple_SetItem(pArgs, i + in_args->num_args, pValue);
+        if (status) {
+            PyErr_Print();
+            Py_DECREF(pValue);
+            logerr(prefix_, "Could not build a tuple of arguments");
+            goto cleanup;
+        }
+    }
+
+    // Invoke function.
+    pValue = PyObject_CallObject(pFunc, pArgs);
+    if (pValue == NULL) {
+        PyErr_Print();
+        logerr(prefix_, "Call to the method '%s' has failed\n", method);
+        goto cleanup;
+    }
+
+    // Convert return arguments.
+    if (return_args != NULL) {
+        if (return_args->num_args > 1 && !PyTuple_Check(pValue)) {
+            logerr(prefix_,
+                   "Expected %d return arguments, however the method '%s' "
+                   "has not returned a tuple",
+                   return_args->num_args, method);
+            goto cleanup;
+        }
+        if (return_args->num_args != 1 && return_args->num_args != PyTuple_Size(pValue)) {
+            logerr(prefix_,
+                   "Expected %d returned arguments, "
+                   "got %d instead in the call to the method '%s'",
+                   return_args->num_args, PyTuple_Size(pValue), method);
             goto cleanup;
         }
 
-        if (return_args != NULL) {
-            if (return_args->num_args > 1 && !PyTuple_Check(pValue)) {
-                logerr(prefix_,
-                    "Expected %d return arguments, however the method '%s' "
-                    "has not returned a tuple",
-                    return_args->num_args,
-                    method);
-                goto cleanup;
-            }
-            if (return_args->num_args != 1 && return_args->num_args != PyTuple_Size(pValue)) {
-                logerr(
-                    prefix_,
-                    "Expected %d returned arguments, "
-                    "got %d instead in the call to the method '%s'",
-                    return_args->num_args,
-                    PyTuple_Size(pValue),
-                    method);
-                goto cleanup;
-            }
-
-            for (size_t i = 0; i < return_args->num_args; ++i) {
-                PyObject *val = PyTuple_GetItem(pValue, i);
-                switch(return_args->arg_types[i]) {
+        for (size_t i = 0; i < return_args->num_args; ++i) {
+            PyObject *val = PyTuple_GetItem(pValue, i);
+            switch (return_args->arg_types[i]) {
                 case OIF_TYPE_I32:
-                    if (! PyLong_Check(val)) {
+                    if (!PyLong_Check(val)) {
                         logerr(prefix_, "Expected Python integer object, but did not get it");
                         goto cleanup;
                     }
@@ -677,7 +740,7 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     }
                     break;
                 case OIF_TYPE_STRING:
-                    if (! PyUnicode_Check(val)) {
+                    if (!PyUnicode_Check(val)) {
                         logerr(prefix_, "Expected Unicode string object, but did not get it");
                         goto cleanup;
                     }
@@ -692,21 +755,12 @@ call_impl(ImplInfo *impl_info, const char *method, OIFArgs *in_args, OIFArgs *ou
                     snprintf(return_args->arg_values[i], length, "%s", s);
                     break;
                 default:
-                    logerr(prefix_, "Return type with id '%d' is not supported yet", return_args->arg_types[i]);
+                    logerr(prefix_, "Return type with id '%d' is not supported yet",
+                           return_args->arg_types[i]);
                     goto cleanup;
-                }
             }
         }
     }
-    else {
-        if (PyErr_Occurred()) {
-            fprintf(stderr, "[%s] An error occurred during the call\n", prefix_);
-            PyErr_Print();
-        }
-        fprintf(stderr, "[%s] Cannot find function \"%s\"\n", prefix_, method);
-        goto cleanup;
-    }
-    Py_DECREF(pFunc);
 
     // Woo-hoo! We got a successful function call without errors.
     result = 0;
@@ -732,7 +786,6 @@ unload_impl(ImplInfo *impl_info_)
     PythonImplInfo *impl_info = (PythonImplInfo *)impl_info_;
 
     Py_DECREF(impl_info->pInstance);
-    Py_XDECREF(impl_info->pCallbackClass);
     IMPL_COUNTER--;
 
     /*
@@ -751,3 +804,14 @@ unload_impl(ImplInfo *impl_info_)
 
     return 0;
 }
+
+#if defined(__GNUC__)
+void __attribute__((destructor))
+dtor()
+{
+    Py_XDECREF(CALLBACK_CLASS_P_);
+    Py_XDECREF(DESERIALIZE_FN_);
+
+    dlclose(LIBPYTHON_);
+}
+#endif
