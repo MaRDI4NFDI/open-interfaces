@@ -160,7 +160,7 @@ function call_impl(
     func_name::String,
     in_user_args::Tuple{Vararg{Any}},
     out_user_args::Tuple{Vararg{Any}},
-    return_user_args::Tuple{Vararg{Any}}=(),
+    return_user_args::Tuple{Vararg{Any}} = (),
 )::Int
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)

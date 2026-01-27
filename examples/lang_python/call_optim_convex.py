@@ -1,7 +1,6 @@
 import argparse
 import dataclasses
 import sys
-from typing import Optional, Union
 
 import numpy as np
 from openinterfaces.interfaces.optim import Optim
