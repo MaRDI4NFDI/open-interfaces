@@ -8,27 +8,15 @@ channels:
 dependencies:
     - python
     - pip
-    - pytest
-    - python-dotenv
+    - libblas=*=*_openblas
+    - blas-devel
+    - liblapacke
     - numpy
     - scipy
     - matplotlib
-    - flake8
-    - black
-    - bandit
-    - mypy
-    - isort
-    - pip:
-          - pre-commit
-          - sphinx
-          - myst_parser
-          - furo  # Sphinx theme
-          - msgpack
+    - msgpack-python
     - cmake
     - c-compiler
     - cxx-compiler
     - fortran-compiler
-    - mkl
-    - openblas
     - sundials
-    - gtest

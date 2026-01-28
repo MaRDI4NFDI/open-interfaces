@@ -1,0 +1,9 @@
+bandit
+black
+flake8
+isort
+mypy
+pre-commit
+psutil
+pytest
+python-dotenv
