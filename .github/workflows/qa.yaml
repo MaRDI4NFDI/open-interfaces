@@ -68,6 +68,9 @@ jobs:
                     echo "JULIA_PROJECT=$JULIA_PROJECT"
                   } >> "$GITHUB_ENV"
 
+            - name: Install dev dependencies
+              run: pip install -r requirements-dev.txt
+
             - name: Show info
               run: |
                   conda info
