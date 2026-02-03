@@ -116,9 +116,48 @@ struct OIFConfigDict
     type::Cint
     src::Cint
     size::Csize_t
-    buffer::Ptr{Cchar}
+    buffer::Ptr{UInt8}
     buffer_length::Csize_t
     native_object::Ptr{Cvoid}
+    _hidden::Vector{UInt8}
+
+    function OIFConfigDict(dict::Dict)::OIFConfigDict
+        println("=== debug === dict = ", dict)
+        io = IOBuffer()
+        for (k, v) in dict
+            pack(io, k)
+            pack(io, v)
+
+            if typeof(v) == Bool || typeof(v) <: Integer || typeof(v) == Float64 || typeof(v) == String
+                if typeof(v) <: Integer
+                    try
+                        Int32(v)
+                    catch
+                        error("Supported integers must be representable as Int32")
+                    end
+                end
+                continue
+            else
+                error("Supported value types for dictionaries are: Bool, Int32, Float64, String")
+            end
+        end
+        seekstart(io)
+
+        data_copy = copy(io.data)
+        data_copy_p = pointer(data_copy)
+
+        obj = new(
+            OIF_TYPE_CONFIG_DICT,
+            OIF_LANG_JULIA,
+            0,
+            pointer(data_copy),
+            io.size,
+            Base.unsafe_convert(Ptr{Cvoid}, Ref(dict)),
+            data_copy,
+        )
+
+        return obj
+    end
 end
 
 const lib_dispatch = Ref{Ptr{Cvoid}}(0)
@@ -236,7 +275,7 @@ function call_impl(
             in_arg_types[i] = OIF_USER_DATA
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
         elseif typeof(arg) <: Dict
-            oif_dict = make_oif_config_dict(arg)
+            oif_dict = OIFConfigDict(arg)
             dict_ref = Ref(oif_dict)
             dict_p = Base.unsafe_convert(Ptr{Cvoid}, dict_ref)
             push!(temp_refs, dict_ref)
@@ -438,40 +477,6 @@ end
 function make_oif_user_data(data::Ref{Any})::OIFUserData
     data_ptr = Base.unsafe_convert(Ptr{Cvoid}, data)
     OIFUserData(OIF_LANG_JULIA, C_NULL, data_ptr, C_NULL)
-end
-
-
-function make_oif_config_dict(dict::Dict)::OIFConfigDict
-    io = IOBuffer()
-    for (k, v) in dict
-        pack(io, k)
-        pack(io, v)
-
-        if typeof(v) <: Integer || typeof(v) == Float64 || typeof(v) == String
-            if typeof(v) <: Integer
-                try
-                    Int32(v)
-                catch
-                    error("Supported integers must be representable as Int32")
-                end
-            end
-            continue
-        else
-            error("Supported types for dictionaries are: Int32, Float64, String")
-        end
-    end
-    seekstart(io)
-
-    oif_config_dict_obj = OIFConfigDict(
-        OIF_TYPE_CONFIG_DICT,
-        OIF_LANG_JULIA,
-        0,
-        pointer(io.data),
-        io.size,
-        Base.unsafe_convert(Ptr{Cvoid}, Ref(dict)),
-    )
-
-    return oif_config_dict_obj
 end
 
 include("interfaces.jl")
