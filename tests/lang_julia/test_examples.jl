@@ -5,6 +5,7 @@ const CALL_QEQ = joinpath(EXAMPLES_PATH, "call_qeq.jl")
 const CALL_LINSOLVE = joinpath(EXAMPLES_PATH, "call_linsolve.jl")
 const CALL_IVP = joinpath(EXAMPLES_PATH, "call_ivp.jl")
 const CALL_IVP_BURGERS = joinpath(EXAMPLES_PATH, "call_ivp_burgers_eq.jl")
+const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
 
 @testset "Testing Julia examples" begin
     @testset "Testing QEQ example with all implementations" begin
@@ -66,4 +67,30 @@ const CALL_IVP_BURGERS = joinpath(EXAMPLES_PATH, "call_ivp_burgers_eq.jl")
         end
     end
 
+    # --------------------------------------------------------------------------
+    # BEGIN Van der Pol equation: unsuccessful and successful runs.
+    @testset "Testing IVP VdP example with all implementations" begin
+        for impl in ["scipy_ode-dopri5", "scipy_ode-dopri5-100k", "scipy_ode-vode"]
+            @testset "call_ivp_vdp.jl $impl fails due to numerics" begin
+                io = IOBuffer()
+                process = try
+                    run(pipeline(`julia $CALL_IVP_VDP $impl --no-plot`, stdout=devnull, stderr=io))
+                catch e
+                end
+                @test occursin("Call to the method 'integrate' has failed", String(io.data))
+            end
+        end
+
+        for impl in ["scipy_ode-vode-40k",
+            # "sundials_cvode-default",  # It is simply too slow to run (40 secs)
+            "jl_diffeq-rosenbrock23",
+        ]
+            @testset "call_ivp_vdp.jl $impl succeeds" begin
+                process = run(pipeline(`julia $CALL_IVP_VDP $impl --no-plot`, stdout=devnull, stderr=devnull))
+                @test process.exitcode == 0
+            end
+        end
+    end
+    # END Van der Pol equation: unsuccessful and successful runs.
+    # --------------------------------------------------------------------------
 end
