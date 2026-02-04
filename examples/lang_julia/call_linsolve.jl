@@ -33,6 +33,7 @@ function main(args)
     b = [6.0, 2.0]
     implh = load_impl("linsolve", impl, 1, 0)
     x = Linsolve.solve(implh, A, b)
+    unload_impl(implh)
 
     println("Solving system of linear equations Ax = b:")
     println("A = $A")
