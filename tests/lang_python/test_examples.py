@@ -7,7 +7,7 @@ import pytest
     "impl_name", ["c_qeq_solver", "py_qeq_solver", "jl_qeq_solver"]
 )
 def test_call_qeq_from_python__exit_success(impl_name: str):
-    p = subprocess.run(["python", "examples/call_qeq_from_python.py", impl_name])
+    p = subprocess.run(["python", "examples/lang_python/call_qeq.py", impl_name])
 
     assert p.returncode == 0
 
@@ -17,7 +17,7 @@ def test_call_qeq_from_python__exit_success(impl_name: str):
     ["c_lapack", "jl_backslash", "numpy"],
 )
 def test_call_linsolve_from_python__exit_success(impl_name: str):
-    p = subprocess.run(["python", "examples/call_linsolve_from_python.py", impl_name])
+    p = subprocess.run(["python", "examples/lang_python/call_linsolve.py", impl_name])
 
     assert p.returncode == 0
 
@@ -27,7 +27,7 @@ def test_call_linsolve_from_python__exit_success(impl_name: str):
     ["sundials_cvode", "jl_diffeq", "scipy_ode"],
 )
 def test_call_ivp_from_python__exit_success(impl_name: str):
-    p = subprocess.run(["python", "examples/call_ivp_from_python.py", impl_name])
+    p = subprocess.run(["python", "examples/lang_python/call_ivp.py", impl_name])
 
     assert p.returncode == 0
 
@@ -41,7 +41,7 @@ def test_call_ivp_from_python_burgers_eq__exit_success(impl_name: str):
     p = subprocess.run(
         [
             "python",
-            "examples/call_ivp_from_python_burgers_eq.py",
+            "examples/lang_python/call_ivp_burgers_eq.py",
             "--no-plot",
             impl_name,
         ]
@@ -64,7 +64,7 @@ def test_call_ivp_from_python_burgers_eq__exit_success(impl_name: str):
 )
 def test_call_ivp_from_python_vdp__dopri5__fails(unsuccessful_impl: str):
     p = subprocess.run(
-        ["python", "examples/call_ivp_from_python_vdp.py", unsuccessful_impl],
+        ["python", "examples/lang_python/call_ivp_vdp.py", unsuccessful_impl],
         capture_output=True,
         text=True,
     )
@@ -84,7 +84,7 @@ def test_call_ivp_from_python_vdp__with_successful_impl_succeeds(successful_impl
     p = subprocess.run(
         [
             "python",
-            "examples/call_ivp_from_python_vdp.py",
+            "examples/lang_python/call_ivp_vdp.py",
             "--do-not-save-anything",
             successful_impl,
         ],
