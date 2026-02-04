@@ -40,7 +40,7 @@ function main(args)
     IVP.set_initial_value(solver, y0, t0)
     IVP.set_rhs_fn(solver, rhs)
 
-    times = range(t0, t0 + 1, length=11)
+    times = range(t0, t0 + 1, length = 11)
 
     @printf "%5s   %8s   %8s\n" "Time" "Numeric" "Exact"
     @printf "---------------------------\n"

@@ -55,7 +55,7 @@ function compute_rhs(__, u, udot, user_data)::Int32
     f_cur = 0.5 * u[1]^2
     f_hat_lb = 0.5 * (f_cur + 0.5 * u[N]^2) - 0.5 * c * (u[1] - u[N])
     f_hat_prev = f_hat_lb
-    @inbounds for i = 1:N-1
+    @inbounds for i = 1:(N-1)
         f_next = 0.5 * u[i+1]^2
         f_hat_cur = 0.5 * ((f_cur+f_next) - c * (u[i+1]-u[i]))
         udot[i] = dx_inv * (f_hat_prev - f_hat_cur)
@@ -73,7 +73,7 @@ function main(args)
 
     # Define grid and initial condition.
     N = 1001
-    x = range(0, 2, length=N)
+    x = range(0, 2, length = N)
     dx = (2 - 0) / N
     u0 = 0.5 .- 0.25 * sin.(pi * x)
 
@@ -85,7 +85,7 @@ function main(args)
     IVP.set_user_data(s, dx)
     IVP.set_rhs_fn(s, compute_rhs)
 
-    times = range(t0, tfinal, length=11)
+    times = range(t0, tfinal, length = 11)
 
     soln = [u0]
     for t in times[2:end]
@@ -93,11 +93,11 @@ function main(args)
         push!(soln, s.y)
     end
 
-    p = plot(x, soln[1], linestyle=:dash, label="Initial condition", linewidth=2)
-    plot!(p, x, soln[end], linestyle=:solid, label="Final solution", linewidth=2)
+    p = plot(x, soln[1], linestyle = :dash, label = "Initial condition", linewidth = 2)
+    plot!(p, x, soln[end], linestyle = :solid, label = "Final solution", linewidth = 2)
     xlabel!(p, "x")
     ylabel!(p, "Solution of Burgers' equation")
-    plot!(p, legend=:best)
+    plot!(p, legend = :best)
 
     if !args.no_plot
         if args.savefig
