@@ -122,7 +122,6 @@ struct OIFConfigDict
     _hidden::Vector{UInt8}
 
     function OIFConfigDict(dict::Dict)::OIFConfigDict
-        println("=== debug === dict = ", dict)
         io = IOBuffer()
         for (k, v) in dict
             pack(io, k)
@@ -199,7 +198,7 @@ function call_impl(
     func_name::String,
     in_user_args::Tuple{Vararg{Any}},
     out_user_args::Tuple{Vararg{Any}},
-    return_user_args::Tuple{Vararg{Any}} = (),
+    return_user_args::Tuple{Vararg{Any}}=(),
 )::Int
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
@@ -436,7 +435,7 @@ function _make_c_func_wrapper_over_jl_fn(
                 # Convert the pointer to an array.
                 oif_arr = unsafe_load(arg)
                 dimensions = unsafe_load(oif_arr.dimensions)
-                arr = unsafe_wrap(Array{Float64}, oif_arr.data, dimensions, own = false)
+                arr = unsafe_wrap(Array{Float64}, oif_arr.data, dimensions, own=false)
 
                 push!(jl_args, arr)
             elseif oif_argtypes[i] == OIF_USER_DATA
