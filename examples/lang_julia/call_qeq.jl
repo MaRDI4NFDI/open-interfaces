@@ -30,6 +30,7 @@ function main(args)
     implh = load_impl("qeq", impl, 1, 0)
     a, b, c = 1.0, 5.0, 4.0
     roots = QEQ.solve_qeq(implh, a, b, c)
+    unload_impl(implh)
 
     println("Solving quadratic equation for a = $a, b = $b, c = $c")
     println("x = $roots")
