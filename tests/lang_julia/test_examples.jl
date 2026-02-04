@@ -15,7 +15,7 @@ const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
                 @test process.exitcode == 0
             end
         end
-        
+
         @testset "call_qeq.jl without args runs successfully" begin
             process = run(pipeline(`julia $CALL_QEQ`, stdout=devnull, stderr=devnull))
             @test process.exitcode == 0
@@ -30,7 +30,7 @@ const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
                 @test process.exitcode == 0
             end
         end
-        
+
         @testset "call_linsolve.jl without args runs successfully" begin
             process = run(pipeline(`julia $CALL_LINSOLVE`, stdout=devnull, stderr=devnull))
             @test process.exitcode == 0
@@ -45,7 +45,7 @@ const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
                 @test process.exitcode == 0
             end
         end
-        
+
         @testset "call_ivp.jl without args runs successfully" begin
             process = run(pipeline(`julia $CALL_IVP`, stdout=devnull, stderr=devnull))
             @test process.exitcode == 0
@@ -60,7 +60,7 @@ const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
                 @test process.exitcode == 0
             end
         end
-        
+
         @testset "call_ivp_burgers_eq.jl without args runs successfully" begin
             process = run(pipeline(`julia $CALL_IVP_BURGERS --no-plot`, stdout=devnull, stderr=devnull))
             @test process.exitcode == 0
