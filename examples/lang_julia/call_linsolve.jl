@@ -29,7 +29,7 @@ function main(args)
     impl = parse_args(args)
     println("Calling from Julia an open interface for linear algebraic systems")
     println("Implementation: $impl")
-    A = [ 1.0 1.0; -3.0 1.0 ]
+    A = [1.0 1.0; -3.0 1.0]
     b = [6.0, 2.0]
     implh = load_impl("linsolve", impl, 1, 0)
     x = Linsolve.solve(implh, A, b)

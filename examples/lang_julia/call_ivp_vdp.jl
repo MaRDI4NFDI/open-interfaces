@@ -62,7 +62,7 @@ end
 
 function main(args)
     args = parse_args(args)
-    chunks = split(args.impl, "-"; limit=2)
+    chunks = split(args.impl, "-"; limit = 2)
     impl = String(chunks[1])
     integrator = String(chunks[2])
     println("Solving van der Pol oscillator with IVP interface using Julia bindings")
@@ -94,18 +94,12 @@ function main(args)
     elseif impl == "scipy_ode" && integrator == "vode-40k"
         IVP.set_integrator(s, "vode", Dict([("method", "bdf"), ("nsteps", 40_000)]))
     elseif impl == "jl_diffeq" && lowercase(integrator) == lowercase("Rosenbrock23")
-        IVP.set_integrator(
-            s,
-            "Rosenbrock23",
-            Dict([
-                ("autodiff", false),
-            ]),
-        )
+        IVP.set_integrator(s, "Rosenbrock23", Dict([("autodiff", false),]))
     else
         throw(ArgumentError(`Cannot set integrator for implementation '$impl'`))
     end
 
-    times = range(t0, tfinal, length=501)
+    times = range(t0, tfinal, length = 501)
     dt = (tfinal - t0) / length(times)
 
     soln = [u0[1]]
@@ -118,10 +112,10 @@ function main(args)
     end
     println()
 
-    p = plot(times, soln, linestyle=:solid, label="\$u_1\$", linewidth=2)
+    p = plot(times, soln, linestyle = :solid, label = "\$u_1\$", linewidth = 2)
     xlabel!(p, "Time")
     ylabel!(p, "Solution")
-    plot!(p, legend=:best)
+    plot!(p, legend = :best)
 
     if !args.no_plot
         if args.savefig
