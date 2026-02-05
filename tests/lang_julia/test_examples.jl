@@ -117,13 +117,16 @@ const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
         ]
             @testset "call_ivp_vdp.jl $impl succeeds" begin
                 io = IOBuffer()
-                process = run(
-                    pipeline(
-                        `julia $CALL_IVP_VDP $impl --no-plot`,
-                        stdout = devnull,
-                        stderr = io,
-                    ),
-                )
+                process = try
+                    run(
+                        pipeline(
+                            `julia $CALL_IVP_VDP $impl --no-plot`,
+                            stdout = devnull,
+                            stderr = io,
+                        ),
+                    )
+                catch e
+                end
                 println("Captured stderr:")
                 println(String(io.data))
                 @test process.exitcode == 0
