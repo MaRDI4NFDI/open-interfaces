@@ -360,7 +360,7 @@ function call_impl(
 
     if result != 0
         error(
-            "Error occurred while invoking function '$func_name' from implementation with id '$implh'",
+            "Error occurred while invoking function '$func_name' from implementation with id '$implh': in_user_args '$in_user_args', out_user_args '$out_user_args'",
         )
     end
 
