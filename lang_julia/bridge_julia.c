@@ -626,3 +626,15 @@ cleanup:
 
     return result;
 }
+
+#if defined(__GNUC__)
+void __attribute__((destructor))
+dtor()
+{
+    fprintf(stderr, "[%s] Cleanup while unloading the library\n", prefix_);
+
+    // If we unload this library, the assumption is that the whole process
+    // is shutting down, so it safe to close the embedded Julia.
+    /* jl_atexit_hook(0); */
+}
+#endif
