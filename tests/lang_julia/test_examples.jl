@@ -95,18 +95,19 @@ const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
     @testset "Testing IVP VdP example with all implementations" begin
         for impl in ["scipy_ode-dopri5", "scipy_ode-dopri5-100k", "scipy_ode-vode"]
             @testset "call_ivp_vdp.jl $impl fails due to numerics" begin
-                io = IOBuffer()
+                io_err = IOBuffer()
                 process = try
                     run(
                         pipeline(
                             `julia $CALL_IVP_VDP $impl --no-plot`,
                             stdout = devnull,
-                            stderr = io,
+                            stderr = io_err,
                         ),
                     )
                 catch e
                 end
-                @test occursin("Call to the method 'integrate' has failed", String(io.data))
+                captured_stderr = String(take!(io_err))
+                @test occursin("Call to the method 'integrate' has failed", captured_stderr)
             end
         end
 
@@ -116,19 +117,16 @@ const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
             "jl_diffeq-rosenbrock23",
         ]
             @testset "call_ivp_vdp.jl $impl succeeds" begin
-                io = IOBuffer()
+                io_err = IOBuffer()
                 process = try
-                    run(
-                        pipeline(
-                            `julia $CALL_IVP_VDP $impl --no-plot`,
-                            stdout = devnull,
-                            stderr = io,
-                        ),
-                    )
+                    run(pipeline(`julia $CALL_IVP_VDP $impl --no-plot`, stderr = io_err))
                 catch e
                 end
+                captured_stderr = String(take!(io_err))
                 println("Captured stderr:")
-                println(String(io.data))
+                println("--- BEGIN")
+                println(captured_stderr)
+                println("--- END")
                 @test process.exitcode == 0
             end
         end
