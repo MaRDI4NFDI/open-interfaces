@@ -224,6 +224,8 @@ static jl_value_t *
 deserialize_config_dict(OIFConfigDict *dict)
 {
     jl_value_t *julia_dict = NULL;
+    jl_value_t *buffer_c_str = NULL;
+    JL_GC_PUSH1(&buffer_c_str);  // NOLINT
     if (SERIALIZATION_MODULE_ == NULL) {
         /* char include_statement[512]; */
         /* int nchars_written = snprintf(include_statement, 512, */
@@ -259,7 +261,7 @@ deserialize_config_dict(OIFConfigDict *dict)
         assert(deserialize_fn != NULL);
         const uint8_t *buffer = oif_config_dict_get_serialized(dict);
         assert(buffer != NULL);
-        jl_value_t *buffer_c_str = jl_box_voidpointer((void *)buffer);
+        buffer_c_str = jl_box_voidpointer((void *)buffer);
         if (jl_exception_occurred()) {
             handle_exception_();
             goto cleanup;
@@ -279,6 +281,8 @@ deserialize_config_dict(OIFConfigDict *dict)
     }
 
 cleanup:
+    JL_GC_POP();
+
     return julia_dict;
 }
 
