@@ -148,8 +148,13 @@ mutable struct OIFConfigDict
 
         buffer_data = take!(io)
         buffer_size = length(buffer_data)
-        buffer_ptr = Ptr{UInt8}(Libc.malloc(buffer_size))
-        unsafe_copyto!(buffer_ptr, pointer(buffer_data), buffer_size)
+
+        if buffer_size > 0
+            buffer_ptr = Ptr{UInt8}(Libc.malloc(buffer_size))
+            unsafe_copyto!(buffer_ptr, pointer(buffer_data), buffer_size)
+        else
+            buffer_ptr = C_NULL
+        end
 
         self = new(
             OIF_TYPE_CONFIG_DICT,
