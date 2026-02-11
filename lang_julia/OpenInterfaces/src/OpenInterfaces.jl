@@ -156,7 +156,7 @@ mutable struct OIFConfigDict
             OIF_LANG_JULIA,
             0,
             buffer_ptr,
-            io.size,
+            buffer_size,
             Base.unsafe_convert(Ptr{Cvoid}, Ref(dict)),
         )
 
@@ -167,8 +167,7 @@ mutable struct OIFConfigDict
 
     function finalizing(self)
         Libc.free(self.buffer)
-        @async println("Finalizing OIFConfigDict $x")
-        ccall(:jl_safe_printf, Cvoid, (Cstring, Cstring), "Finalizing %s.", repr(self))
+        ccall(:jl_safe_printf, Cvoid, (Cstring, Cstring), "Finalizing %s.\n", repr(self))
     end
 end
 
