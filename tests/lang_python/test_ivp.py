@@ -213,21 +213,17 @@ class TestIVP:
             assert errors[k - 1] >= errors[k]
 
     def test_4__check_that_user_data_can_be_used(self, s):
-        print("HERE 1")
         p = IVPProblemWithUserData()
-        print("HERE 2")
         s.set_initial_value(list(p.y0), int(p.t0))
         s.set_user_data((12, 2.7))
         s.set_rhs_fn(p.rhs)
         s.set_tolerances(1e-6, 1e-8)
-        print("HERE 3")
 
         t1 = p.t0 + 1
         times = np.linspace(p.t0, t1, num=11)
 
         for t in times[1:]:
             s.integrate(t)
-        print("HERE 4")
 
         final_value = s.y
         true_value = p.exact(t1)
