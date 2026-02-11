@@ -112,14 +112,13 @@ end
 
 
 # See oif_config_dict.c
-struct OIFConfigDict
+mutable struct OIFConfigDict
     type::Cint
     src::Cint
     size::Csize_t
     buffer::Ptr{UInt8}
     buffer_length::Csize_t
     native_object::Ptr{Cvoid}
-    _hidden::Vector{UInt8}
 
     function OIFConfigDict(dict::Dict)::OIFConfigDict
         io = IOBuffer()
@@ -147,20 +146,29 @@ struct OIFConfigDict
         end
         seekstart(io)
 
-        data_copy = copy(io.data)
-        data_copy_p = pointer(data_copy)
+        buffer_data = take!(io)
+        buffer_size = length(buffer_data)
+        buffer_ptr = Ptr{UInt8}(Libc.malloc(buffer_size))
+        unsafe_copyto!(buffer_ptr, pointer(buffer_data), buffer_size)
 
-        obj = new(
+        self = new(
             OIF_TYPE_CONFIG_DICT,
             OIF_LANG_JULIA,
             0,
-            pointer(data_copy),
+            buffer_ptr,
             io.size,
             Base.unsafe_convert(Ptr{Cvoid}, Ref(dict)),
-            data_copy,
         )
 
-        return obj
+        finalizer(finalizing, self)
+
+        return self
+    end
+
+    function finalizing(self)
+        Libc.free(self.buffer)
+        @async println("Finalizing OIFConfigDict $x")
+        ccall(:jl_safe_printf, Cvoid, (Cstring, Cstring), "Finalizing %s.", repr(self))
     end
 end
 
