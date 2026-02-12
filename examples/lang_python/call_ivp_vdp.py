@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import dataclasses
 import os
@@ -75,7 +76,7 @@ def main():
     impl = args.impl
     impl, integrator = args.impl.split("-", 1)
     print("------------------------------------------------------------------------")
-    print("Solving van der Poll oscillator with IVP interface using Python bindings")
+    print("Solving van der Pol oscillator with IVP interface using Python bindings")
     print(f"Implementation: {impl}")
     if integrator:
         print(f"Integrator options: {integrator}")
@@ -91,7 +92,6 @@ def main():
     solver.set_rhs_fn(problem.compute_rhs)
     solver.set_tolerances(rtol=1e-8, atol=1e-12)
     if impl == "sundials_cvode":
-        solver.set_integrator("bdf")
         solver.set_integrator("bdf", {"max_num_steps": 30_000})
     elif impl == "scipy_ode" and integrator == "dopri5":
         solver.set_integrator("dopri5")  # It is already the default integrator

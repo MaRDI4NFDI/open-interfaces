@@ -1,5 +1,6 @@
 #include <alloca.h>
 #include <assert.h>
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -224,6 +225,8 @@ static jl_value_t *
 deserialize_config_dict(OIFConfigDict *dict)
 {
     jl_value_t *julia_dict = NULL;
+    jl_value_t *buffer_c_str = NULL;
+    JL_GC_PUSH1(&buffer_c_str);  // NOLINT
     if (SERIALIZATION_MODULE_ == NULL) {
         /* char include_statement[512]; */
         /* int nchars_written = snprintf(include_statement, 512, */
@@ -254,16 +257,20 @@ deserialize_config_dict(OIFConfigDict *dict)
         }
     }
 
+    const uint8_t *buffer = NULL;
     if (dict != NULL) {
-        jl_function_t *deserialize_fn = jl_get_function(SERIALIZATION_MODULE_, "deserialize");
-        assert(deserialize_fn != NULL);
-        const uint8_t *buffer = oif_config_dict_get_serialized(dict);
-        assert(buffer != NULL);
-        jl_value_t *buffer_c_str = jl_box_voidpointer((void *)buffer);
+        buffer = oif_config_dict_get_serialized(dict);
+    }
+
+    if (buffer != NULL) {
+        buffer_c_str = jl_box_voidpointer((void *)buffer);
         if (jl_exception_occurred()) {
             handle_exception_();
             goto cleanup;
         }
+        jl_function_t *deserialize_fn = jl_get_function(SERIALIZATION_MODULE_, "deserialize");
+        assert(deserialize_fn != NULL);
+
         julia_dict = jl_call1(deserialize_fn, buffer_c_str);
         if (jl_exception_occurred()) {
             handle_exception_();
@@ -279,6 +286,8 @@ deserialize_config_dict(OIFConfigDict *dict)
     }
 
 cleanup:
+    JL_GC_POP();
+
     return julia_dict;
 }
 
@@ -626,3 +635,15 @@ cleanup:
 
     return result;
 }
+
+#if defined(__GNUC__)
+void __attribute__((destructor))
+dtor()
+{
+    fprintf(stderr, "[%s] Cleanup while unloading the library\n", prefix_);
+
+    // If we unload this library, the assumption is that the whole process
+    // is shutting down, so it safe to close the embedded Julia.
+    /* jl_atexit_hook(0); */
+}
+#endif

@@ -42,8 +42,8 @@ static PyObject *DESERIALIZE_FN_ = NULL;
 static int
 instantiate_callback_class_(void)
 {
-    char *moduleName = "_callback";
-    char class_name[] = "PythonWrapperForCCallback";
+    char const *const moduleName = "_callback";
+    char const *const class_name = "PythonWrapperForCCallback";
 
     PyObject *pFileName = PyUnicode_FromString(moduleName);
     PyObject *pModule = PyImport_Import(pFileName);
@@ -73,7 +73,7 @@ instantiate_callback_class_(void)
 static int
 instantiate_deserialization_function_(void)
 {
-    char *moduleName = "_serialization";
+    char const *const moduleName = "_serialization";
     PyObject *pFileName = PyUnicode_FromString(moduleName);
     PyObject *pModule = PyImport_Import(pFileName);
     Py_DECREF(pFileName);
@@ -99,7 +99,7 @@ instantiate_deserialization_function_(void)
 static PyObject *
 build_callback_args_(OIFCallback *p)
 {
-    const char *id = "123";
+    const char *const id = "123";
     PyObject *fn_p = PyCapsule_New(p->fn_p_c, id, NULL);
 
     if (fn_p == NULL) {
@@ -180,7 +180,7 @@ init_python_()
     // For unknown reason, embedded Python does not take into the account
     // that we can use a virtual environment,
     // so we have to shape it a bit.
-    const char *venv = getenv("VIRTUAL_ENV");
+    const char *const venv = getenv("VIRTUAL_ENV");
     PyStatus status;
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
