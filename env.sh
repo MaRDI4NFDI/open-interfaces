@@ -12,7 +12,10 @@ else
 fi
 
 # Set path to implementations
-export OIF_IMPL_PATH="${PRJ_ROOT_DIR}/lang_c/oif_impl/_impl:${PRJ_ROOT_DIR}/lang_python/oif_impl/openinterfaces/_impl"
+path_c="${PRJ_ROOT_DIR}/lang_c/oif_impl/_impl"
+path_julia="${PRJ_ROOT_DIR}/lang_julia/_impl"
+path_python="${PRJ_ROOT_DIR}/lang_python/oif_impl/openinterfaces/_impl"
+export OIF_IMPL_PATH="${path_c}:${path_julia}:${path_python}"
 
 # Add compiled libraries to the path for the linker.
 if [ -n "$LD_LIBRARY_PATH" ]; then
