@@ -36,6 +36,10 @@ target_link_libraries(run_aux_tests_config_dict GTest::gtest_main oif_c)
 target_include_directories(run_aux_tests_config_dict
                            PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
+add_executable(test_util test_util.cpp)
+target_link_libraries(test_util GTest::gtest_main oif_c)
+target_include_directories(test_util PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
 gtest_discover_tests(test_qeq)
 gtest_discover_tests(test_linsolve)
 gtest_discover_tests(test_ivp)

@@ -1,21 +1,11 @@
-#include <string.h>
-#include <stdio.h>
-
 #include <gtest/gtest.h>
 
 #include <oif/util.h>
 
-TEST(OIFUtilTest, oif)
-char *
-oif_util_str_duplicate_(const char *src)
+TEST(OIFUtilTestSuite, oif_util_make_string_1)
 {
-    const char src[] = "Hello, World!";
-    char *dst = NULL;
-
-    dst = oif_util_str_duplicate_(src);
-
-    oif_config_dict_add_int(dict, "int_option", 42);
-    oif_config_dict_add_double(dict, "double_option", 2.718);
-
-    oif_config_dict_free(dict);
+    char *actual = oif_util_make_string("%s: %d, %s: %.3f %s!", "value1", 42, "value2", 3.14159, "Hello World");
+    char const *const expected = "value1: 42, value2: 3.142 Hello World!";
+    ASSERT_STREQ(actual, expected);
+    oif_util_free(actual);
 }

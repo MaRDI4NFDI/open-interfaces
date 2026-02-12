@@ -80,6 +80,15 @@ oif_strcmp_nocase(const char *s1, const char *s2);
 bool
 oif_util_str_contains(const char **arr, const char *s);
 
+
+/**
+ * Make a string from given format and data and pass it to caller.
+ *
+ * @return Allocated string or NULL on failure
+ */
+char *
+oif_util_make_string(const char *fmt, ...);
+
 /**
  * Log a warning message to stderr.
  *

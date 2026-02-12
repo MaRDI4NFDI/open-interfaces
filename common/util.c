@@ -182,6 +182,41 @@ oif_util_str_contains(const char **arr, const char *s)
     return false;
 }
 
+char *
+oif_util_make_string(const char *fmt, ...)
+{
+    // Number of required bytes for the string *excluding* the null byte.
+    int nbytes_required = 0;
+    // Number of allocated bytes for the string *including* the null byte.
+    size_t str_length;
+
+    va_list args;
+
+    va_start(args, fmt);
+    // `snprintf` with an empty destination string provides
+    // the information about the required number of bytes.
+    nbytes_required = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+    if (nbytes_required < 0) {
+        fprintf(stderr, "[oif_util] Could not make a string\n");
+        return NULL;
+    }
+
+    str_length = (size_t) nbytes_required + 1;
+    char *s = oif_util_malloc(str_length * sizeof(*s));
+
+    va_start(args, fmt);
+    int nbytes_written = vsnprintf(s, str_length, fmt, args);
+    va_end(args);
+    if (nbytes_written + 1 != str_length) {
+        fprintf(stderr, "[oif_util] Could not make a string\n");
+        oif_util_free(s);
+        return NULL;
+    }
+
+    return s;
+}
+
 int
 logwarn(const char *prefix, const char *fmt, ...)
 {
