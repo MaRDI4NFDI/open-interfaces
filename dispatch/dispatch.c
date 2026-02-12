@@ -103,13 +103,9 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     /* One must be a pessimist, while programming in C. */
     ImplHandle retval = OIF_IMPL_INIT_ERROR;
 
-    char conf_filename_fixed_part[512] = {'\0'};
-    strcat(conf_filename_fixed_part, interface);
-    strcat(conf_filename_fixed_part, "/");
-    strcat(conf_filename_fixed_part, impl);
-    strcat(conf_filename_fixed_part, "/");
-    strcat(conf_filename_fixed_part, impl);
-    strcat(conf_filename_fixed_part, ".conf");
+    char *conf_filename_fixed_part = oif_util_make_string(
+        "%s/%s/%s.conf", interface, impl, impl
+    );
 
     // We cannot tokenize OIF_IMPL_PATH because `strtok`
     // modifies the original string during tokenization
@@ -118,33 +114,29 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     // OIF_IMPL_PATH will not have the original value.
     char *oif_impl_path_dup = oif_util_str_duplicate(OIF_IMPL_PATH);
     char *path = strtok((char *)oif_impl_path_dup, ":");
-    char conf_filename[1024] = "";
-    char *conf_filename_p = conf_filename;
+    char *conf_filename = NULL;
     while (path) {
-        strcat(conf_filename_p, path);
-        strcat(conf_filename_p, "/");
-        strcat(conf_filename_p, conf_filename_fixed_part);
-
+        conf_filename = oif_util_make_string("%s/%s", path, conf_filename_fixed_part);
         conf_file = fopen(conf_filename, "re");
         if (conf_file != NULL) {
             break;
         }
+        oif_util_free(conf_filename);
         path = strtok(NULL, ":");
-        conf_filename_p = conf_filename;
-        conf_filename_p[0] = '\0';
     }
 
     if (conf_file == NULL) {
         logerr(prefix_,
                "Cannot open conf file '%s'\n"
-               "\tSearch was done in the following paths: %s\n",
-               conf_filename_fixed_part, oif_impl_path_dup);
+               "\tSearch was done in the following paths: '%s'\n",
+               conf_filename_fixed_part, OIF_IMPL_PATH);
         oif_util_free(oif_impl_path_dup);
         perror("Error message is: ");
         return -1;
     }
     else {
         fprintf(stderr, "[%s] Configuration file: %s\n", prefix_, conf_filename);
+        oif_util_free(conf_filename);
     }
     oif_util_free(oif_impl_path_dup);
 
@@ -261,6 +253,8 @@ cleanup:
     if (conf_file != NULL) {
         fclose(conf_file);
     }
+
+    oif_util_free(conf_filename_fixed_part);
 
     return retval;
 }
