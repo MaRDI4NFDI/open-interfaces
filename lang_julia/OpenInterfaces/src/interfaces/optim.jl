@@ -10,7 +10,7 @@ using OpenInterfaces:
     OIF_TYPE_F64,
     OIF_TYPE_ARRAY_F64,
     OIF_TYPE_I32,
-    OIF_USER_DATA,
+    OIF_TYPE_USER_DATA,
     OIFUserData
 
 export Self,
@@ -53,7 +53,7 @@ end
 function set_objective_fn(self::Self, objective_fn::Function)
     """Specify right-hand side function f."""
     self.objective_fn_wrapper = make_oif_callback(
-        objective_fn, (OIF_TYPE_ARRAY_F64, OIF_USER_DATA), OIF_TYPE_F64,
+        objective_fn, (OIF_TYPE_ARRAY_F64, OIF_TYPE_USER_DATA), OIF_TYPE_F64,
     )
     call_impl(self.implh, "set_objective_fn", (self.objective_fn_wrapper,), ())
 end

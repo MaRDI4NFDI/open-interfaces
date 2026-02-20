@@ -60,6 +60,7 @@ const OIF_TYPE_STRING::OIFArgType = 12
 const OIF_TYPE_CALLBACK::OIFArgType = 13
 
 const OIF_USER_DATA::OIFArgType = 14
+const OIF_TYPE_USER_DATA::OIFArgType = 14
 const OIF_TYPE_POINTER::OIFArgType = 14
 
 const OIF_TYPE_CONFIG_DICT::OIFArgType = 15
