@@ -37,13 +37,10 @@ class ScipyOptimize(OptimInterface):
         msg = "Wrong signature for the objective function: "
         msg += "expected return value must be of `float64` type"
 
-        if self.with_user_data:
-            assert type(self.objective_fn(x, self.user_data)) in [
-                float,
-                np.float64,
-            ], msg
-        else:
-            assert type(self.objective_fn(x)) in [float, np.float64], msg
+        assert type(self.objective_fn(x, self.user_data)) in [
+            float,
+            np.float64,
+        ], msg
 
     def set_method(self, method_name, method_params):
         available_options = optimize.show_options(
@@ -78,21 +75,13 @@ class ScipyOptimize(OptimInterface):
                 "Shapes of the output array and the initial-guess array differ"
             )
 
-        if self.with_user_data:
-            result = optimize.minimize(
-                self.objective_fn,
-                self.x0,
-                args=self.user_data,
-                method=self.method_name,
-                options=self.method_params,
-            )
-        else:
-            result = optimize.minimize(
-                self.objective_fn,
-                self.x0,
-                method=self.method_name,
-                options=self.method_params,
-            )
+        result = optimize.minimize(
+            self.objective_fn,
+            self.x0,
+            args=self.user_data,
+            method=self.method_name,
+            options=self.method_params,
+        )
 
         out_x[:] = result.x
         return (result.status, result.message)
