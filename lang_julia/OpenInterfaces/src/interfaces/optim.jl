@@ -11,6 +11,7 @@ using OpenInterfaces:
     OIF_TYPE_ARRAY_F64,
     OIF_TYPE_I32,
     OIF_TYPE_USER_DATA,
+    OIF_TYPE_STRING,
     OIFUserData
 
 export Self,
@@ -77,7 +78,7 @@ end
 
 function minimize(self::Self)::Tuple{Int, String}
     """Solve minimization problem"""
-    status::Int, message::String = call_impl(self.implh, "minimize", (), (self.x,), (OIF_TYPE_INT, OIF_TYPE_STRING),
+    status::Int, message::String = call_impl(self.implh, "minimize", (), (self.x,), (OIF_TYPE_I32, OIF_TYPE_STRING),
              )
     return status, message
 end
