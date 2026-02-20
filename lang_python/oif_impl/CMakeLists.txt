@@ -20,6 +20,7 @@ target_include_directories(
 target_link_libraries(oif_bridge_python_callback PRIVATE Python::Python)
 target_link_libraries(oif_bridge_python_callback PRIVATE Python::NumPy)
 target_link_libraries(oif_bridge_python_callback PRIVATE PkgConfig::FFI)
+target_link_libraries(oif_bridge_python_callback PRIVATE oif_common_util)
 if(${SKBUILD})
   install(TARGETS oif_bridge_python_callback
           DESTINATION ${SKBUILD_PROJECT_NAME})

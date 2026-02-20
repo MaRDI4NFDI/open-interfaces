@@ -11,6 +11,7 @@
 #include <numpy/arrayobject.h>
 
 #include "oif/api.h"
+#include <oif/util.h>
 
 static char const *const prefix_ = "_callback";
 
@@ -63,7 +64,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
     /* These lines must also parse for argument types list */
     // O = object, I = unsigned int
     if (!PyArg_ParseTuple(args, "OIOI", &capsule, &nargs, &arg_types_list, &restype)) {
-        fprintf(stderr, "[_callback] Could not parse arguments\n");
+        logerr(prefix_, "Could not parse arguments\n");
         return -1;
     }
 
@@ -73,18 +74,19 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
 
     self->oif_arg_types = malloc(sizeof(OIFArgType) * nargs);
     if (self->oif_arg_types == NULL) {
-        fprintf(stderr, "[_callback] Could not allocated memory for oif_arg_types\n");
+        logerr(prefix_, "Could not allocated memory for oif_arg_types\n");
         goto fail_clean_self;
     }
     for (int i = 0; i < nargs; i++ ) {
         PyObject *pyNum = PyList_GET_ITEM(arg_types_list, i);
         if (pyNum == NULL) {
-            fprintf(stderr, "[%s] Could not get an item from the list\n", prefix_);
+            logerr(prefix_,
+                   "Could not get an item %d from the list `arg_types_list` "
+                   "with expected size %d\n", i, nargs);
             goto fail_clean_oif_arg_types;
         }
 
         OIFArgType at = PyLong_AsLong(pyNum);
-        fprintf(stderr, "=== debug === at = %d\n", at);
         self->oif_arg_types[i] = at;
     }
 
@@ -95,7 +97,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
 
     self->arg_types = malloc(nargs * sizeof(ffi_type *));
     if (self->arg_types == NULL) {
-        fprintf(stderr, "[_callback] Could not allocate memory for `arg_types`\n");
+        logerr(prefix_, "Could not allocate memory for the `arg_types` array\n");
         goto fail_clean_cif_p;
     }
 
@@ -103,7 +105,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
     // that the lifetime of the arguments ends after `ffi_call` below.
     self->arg_values = calloc(nargs, sizeof(void *));
     if (self->arg_values == NULL) {
-        fprintf(stderr, "[_callback] Could not allocate memory for `arg_values`\n");
+        logerr(prefix_, "Could not allocate memory for `arg_values`\n");
         goto fail_clean_arg_types;
     }
     unsigned int narray_args = 0;  // Number of arguments of type `OIFArrayF64 *`.
@@ -129,8 +131,8 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
             self->arg_values[i] = malloc(sizeof(void *));
         }
         else {
-            fprintf(stderr, "[_callback] Unknown input arg type: %d\n",
-                    self->oif_arg_types[i]);
+            logerr(prefix_, "[_callback] Unknown input arg type #%d: %d\n",
+                   i, self->oif_arg_types[i]);
             goto fail_clean_arg_values;
         }
         if (self->arg_values[i] == NULL) {
@@ -143,13 +145,13 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
 
     self->oif_arrays = calloc(narray_args, sizeof(OIFArrayF64 *));
     if (self->oif_arrays == NULL) {
-        fprintf(stderr, "[_callback] Could not allocate memory for `oif_arrays`\n");
+        logerr(prefix_, "Could not allocate memory for `oif_arrays`\n");
         goto fail_clean_arg_values;
     }
     for (Py_ssize_t i = 0; i < narray_args; ++i) {
         self->oif_arrays[i] = malloc(sizeof(OIFArrayF64));
         if (self->oif_arrays[i] == NULL) {
-            fprintf(stderr, "[_callback] Could not allocate memory for `oif_arrays[%ld]`\n",
+            logerr(prefix_, "Could not allocate memory for `oif_arrays[%ld]`\n",
                     i);
             goto fail_clean_oif_arrays;
         }
@@ -198,8 +200,8 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
 
     Py_ssize_t nargs_s = PyTuple_Size(py_args);
     if (nargs_s < 0) {
-        fprintf(stderr,
-                "[_callback] Unexpected negative value for the size "
+        logerr(prefix_,
+                "Unexpected negative value for the size "
                 "of the tuple of args for the callback function\n");
         return NULL;
     }
@@ -208,9 +210,9 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         nargs = (unsigned int)nargs_s;  // Explicit cast to eliminate compiler warning
     }
     else {
-        fprintf(stderr,
-                "[_callback] Could not convert size of the tuple of args "
-                "to 'unsigned int' type\n");
+        logerr(prefix_,
+               "Could not convert size of the tuple of args "
+               "to 'unsigned int' type\n");
         return NULL;
     }
     // assert(nargs == self->nargs);
@@ -229,7 +231,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         PyObject *arg = PyTuple_GetItem(py_args, i);
         if (arg_type_ids[i] == OIF_TYPE_F64) {
             if (!PyFloat_Check(arg)) {
-                fprintf(stderr, "[%s] Expected PyFloat object, while receiving arg_type_id[%zu]=%d.\n", prefix_, i, arg_type_ids[i]);
+                logerr(prefix_, "Expected PyFloat object, while receiving arg_type_id[%zu]=%d.\n", i, arg_type_ids[i]);
                 return NULL;
             }
             double *double_value = arg_values[i];
@@ -238,8 +240,8 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         else if (arg_type_ids[i] == OIF_TYPE_ARRAY_F64) {
             PyArrayObject *py_arr = (PyArrayObject *)arg;
             if (!PyArray_Check(py_arr)) {
-                fprintf(stderr,
-                        "[_callback] Expected PyArrayObject (NumPy ndarray) "
+                logerr(prefix_,
+                        "Expected PyArrayObject (NumPy ndarray) "
                         "object\n");
                 return NULL;
             }
@@ -263,14 +265,14 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
                 *p_user_data = PyCapsule_GetPointer(arg, NULL);
             }
             else {
-                fprintf(stderr,
-                        "[_callback] Python object corresponding to 'OIF_USER_DATA' argument "
+                logerr(prefix_,
+                        "Python object corresponding to 'OIF_USER_DATA' argument "
                         "must be either None or PyCapsule\n");
                 return NULL;
             }
         }
         else {
-            fprintf(stderr, "[_callback] Unknown input arg type: %d\n", arg_type_ids[i]);
+            logerr(prefix_, "Unknown input arg type: %d\n", arg_type_ids[i]);
             return NULL;
         }
     }
@@ -283,7 +285,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         restype = &ffi_type_double;
     }
     else {
-        fprintf(stderr, "[_callback] Unsupported return type for callback functions\n");
+        logerr(prefix_, "Unsupported return type for callback functions\n");
         return NULL;
     }
 
@@ -291,7 +293,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, restype, self->arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
-        fprintf(stderr, "[_callback] ffi_prep_cif was not OK");
+        logerr(prefix_, "ffi_prep_cif was not OK");
         return NULL;
     }
 
@@ -384,13 +386,13 @@ PyInit__callback(void)
     import_array();
 
     if (PyType_Ready(&PythonWrapperForCCallbackType) < 0) {
-        fprintf(stderr, "[_callback] Type is not ready\n");
+        logerr(prefix_, "Type is not ready\n");
         return NULL;
     }
 
     m = PyModule_Create(&callbackmodule);
     if (m == NULL) {
-        fprintf(stderr, "[_callback] Could not create module\n");
+        logerr(prefix_, "Could not create module\n");
         return NULL;
     }
 
@@ -401,7 +403,7 @@ PyInit__callback(void)
 
     PyObject *capsule = PyCapsule_New((void *)test_fn_, "123", NULL);
     if (PyModule_AddObject(m, "capsule", capsule) < 0) {
-        fprintf(stderr, "[_callback] Could not add stub capsule\n");
+        logerr(prefix_, "Could not add stub capsule\n");
         Py_DECREF(capsule);
         goto fail;
     }
