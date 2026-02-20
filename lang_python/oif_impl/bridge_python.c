@@ -107,9 +107,19 @@ build_callback_args_(OIFCallback *p)
         return NULL;
     }
 
-    fprintf(stderr, "[%s] HARDCODE!!!!!!\n", prefix_);
-    unsigned int nargs = 4;
-    PyObject *obj = Py_BuildValue("(N, I)", fn_p, nargs);
+    PyObject *py_arg_types = PyList_New(p->nargs);
+    if (py_arg_types == NULL) {
+        logerr(prefix_, "Could not create a Python list for argument types\n");
+        return NULL;
+    }
+
+    for (unsigned int i = 0; i < p->nargs; i++) {
+        // PyList_SET_ITEM does not check if there is something at position i
+        // which is completely safe here as we construct the list from scratch.
+        PyList_SET_ITEM(py_arg_types, i, PyLong_FromLong(p->arg_types[i]));
+    }
+
+    PyObject *obj = Py_BuildValue("(N, I, N, I)", fn_p, p->nargs, py_arg_types, p->restype);
     if (obj == NULL) {
         PyErr_Print();
         Py_DECREF(fn_p);

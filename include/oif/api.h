@@ -98,6 +98,9 @@ typedef struct {
     void *fn_p_c;   // Function pointer in C
     void *fn_p_jl;  // Function pointer in Julia
     void *fn_p_py;  // Function pointer in Python
+    unsigned int nargs;  // Number of arguments
+    OIFArgType *arg_types;
+    OIFArgType restype;
 } OIFCallback;
 
 /**

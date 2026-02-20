@@ -102,6 +102,9 @@ struct OIFCallback
     fn_p_c::Ptr{Cvoid}
     fn_p_jl::Ptr{Cvoid}
     fn_p_py::Ptr{Cvoid}
+    nargs::UInt32
+    arg_types::Ptr{OIFArgType}
+    restype::OIFArgType
 end
 
 struct OIFUserData
@@ -393,8 +396,6 @@ function make_oif_callback(
     argtypes::NTuple{N,OIFArgType},
     restype::OIFArgType,
 )::OIFCallback where {N}
-    @assert restype == OIF_TYPE_I32 "Only OIF_TYPE_I32 is supported as a return type for callbacks because
-        it is used to indicate success or failure in a C-compatible way."
     c_argtypes::Array{Any,1} = []
 
     for argtype in argtypes
@@ -411,6 +412,15 @@ function make_oif_callback(
         end
     end
 
+    if restype == OIF_TYPE_I32 || restype == OIF_TYPE_INT
+        # The second condition is just for explicitness, as `INT` is an alias to `I32`.
+        c_restype = Cint
+    elseif restype == OIF_TYPE_F64
+        c_restype = Cdouble
+    else
+        error("Unsupported return type: $restype. Only supported types are Cint and Cdouble")
+    end
+
     fn_wrapper = _make_c_func_wrapper_over_jl_fn(fn, argtypes, restype)
 
     # Build the function wrapper in C.
@@ -421,7 +431,7 @@ function make_oif_callback(
     # that `c_argtypes` must be literal tuple.
     # All this black magic with eval is here to overcome this limitation.
     c_argtypes_expr = Expr(:tuple, (map(t -> QuoteNode(t), c_argtypes))...)
-    cfunction_expr = :(@cfunction($fn_wrapper, Cint, $c_argtypes_expr))
+    cfunction_expr = :(@cfunction($fn_wrapper, $c_restype, $c_argtypes_expr))
 
     fn_p_c = eval(cfunction_expr)
     # Convert the Julia function to a pointer.
@@ -429,14 +439,17 @@ function make_oif_callback(
     # Python pointer should be null.
     fn_p_py = C_NULL
 
-    return OIFCallback(OIF_LANG_JULIA, fn_p_c, fn_p_jl, fn_p_py)
+    # c_argtypes = Base.unsafe_convert(Ptr{OIFArgType}, argtypes_arr)
+    println("=== argtypes = ", argtypes)
+    oif_argtypes_c_arr = pointer(collect(argtypes))
+    return OIFCallback(OIF_LANG_JULIA, fn_p_c, fn_p_jl, fn_p_py, length(argtypes), oif_argtypes_c_arr, restype)
 end
 
 
 function _make_c_func_wrapper_over_jl_fn(
     fn,
     argtypes::NTuple{N,OIFArgType},
-    restype::Int32,
+    restype::Union{Int32,Float64},
 ) where {N}
     # This function creates a C function wrapper that calls the Julia function.
     # The actual implementation will depend on how you want to handle the arguments and return value.
@@ -473,11 +486,17 @@ function _make_c_func_wrapper_over_jl_fn(
         end
 
         # Call the Julia function with the converted arguments.
-        result::Int32 = fn(jl_args...)
+        result = fn(jl_args...)
 
         if result == nothing
             return Int32(0)
         end
+
+        if typeof(result) <: Int
+            return Int32(result)
+        end
+
+        @assert typeof(result) == Float64
 
         return result
     end

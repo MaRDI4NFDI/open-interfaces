@@ -12,6 +12,8 @@
 
 #include "oif/api.h"
 
+static char const *const prefix_ = "_callback";
+
 typedef struct {
     PyObject_HEAD void *fn_p;   // raw C function pointer retrieved from PyCapsule
     unsigned int nargs;         // Number of function arguments
@@ -21,6 +23,7 @@ typedef struct {
     void **arg_values;          // Memory for the data converted to C
     unsigned int narray_args;   // Number of arrays among argument types
     OIFArrayF64 **oif_arrays;
+    OIFArgType restype;
 } PythonWrapperForCCallbackObject;
 
 static void
@@ -52,31 +55,38 @@ static int
 PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *args,
                                PyObject *Py_UNUSED(kwds))
 {
-    PyObject *capsule;
+    PyObject *capsule = NULL;
     unsigned int nargs;
+    PyObject *arg_types_list = NULL;
+    OIFArgType restype;
 
     /* These lines must also parse for argument types list */
     // O = object, I = unsigned int
-    if (!PyArg_ParseTuple(args, "OI", &capsule, &nargs)) {
+    if (!PyArg_ParseTuple(args, "OIOI", &capsule, &nargs, &arg_types_list, &restype)) {
         fprintf(stderr, "[_callback] Could not parse arguments\n");
         return -1;
     }
 
     self->fn_p = PyCapsule_GetPointer(capsule, "123");
-
-    assert(nargs == 4);
-    nargs = 4;
     self->nargs = nargs;
+    self->restype = restype;
 
     self->oif_arg_types = malloc(sizeof(OIFArgType) * nargs);
     if (self->oif_arg_types == NULL) {
         fprintf(stderr, "[_callback] Could not allocated memory for oif_arg_types\n");
         goto fail_clean_self;
     }
-    self->oif_arg_types[0] = OIF_TYPE_F64;
-    self->oif_arg_types[1] = OIF_TYPE_ARRAY_F64;
-    self->oif_arg_types[2] = OIF_TYPE_ARRAY_F64;
-    self->oif_arg_types[3] = OIF_USER_DATA;
+    for (int i = 0; i < nargs; i++ ) {
+        PyObject *pyNum = PyList_GET_ITEM(arg_types_list, i);
+        if (pyNum == NULL) {
+            fprintf(stderr, "[%s] Could not get an item from the list\n", prefix_);
+            goto fail_clean_oif_arg_types;
+        }
+
+        OIFArgType at = PyLong_AsLong(pyNum);
+        fprintf(stderr, "=== debug === at = %d\n", at);
+        self->oif_arg_types[i] = at;
+    }
 
     self->cif_p = malloc(sizeof(ffi_cif));
     if (self->cif_p == NULL) {
@@ -219,7 +229,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         PyObject *arg = PyTuple_GetItem(py_args, i);
         if (arg_type_ids[i] == OIF_TYPE_F64) {
             if (!PyFloat_Check(arg)) {
-                fprintf(stderr, "[_callback] Expected PyFloat object.\n");
+                fprintf(stderr, "[%s] Expected PyFloat object, while receiving arg_type_id[%zu]=%d.\n", prefix_, i, arg_type_ids[i]);
                 return NULL;
             }
             double *double_value = arg_values[i];
@@ -265,18 +275,35 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         }
     }
 
+    ffi_type *restype;
+    if (self->restype == OIF_TYPE_INT) {
+        restype = &ffi_type_sint;
+    }
+    else if (self->restype == OIF_TYPE_F64) {
+        restype = &ffi_type_double;
+    }
+    else {
+        fprintf(stderr, "[_callback] Unsupported return type for callback functions\n");
+        return NULL;
+    }
+
     ffi_status status =
-        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, &ffi_type_sint, self->arg_types);
+        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, restype, self->arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
         fprintf(stderr, "[_callback] ffi_prep_cif was not OK");
         return NULL;
     }
 
-    int result;
+    double result;
     ffi_call(&cif, FFI_FN(fn_p), &result, arg_values);
 
-    retval = PyLong_FromLong(result);
+    if (self->restype == OIF_TYPE_INT) {
+        retval = PyLong_FromLong(result);
+    }
+    else if (self->restype == OIF_TYPE_F64) {
+        retval = PyFloat_FromDouble(result);
+    }
 
     return retval;
 }
