@@ -8,7 +8,7 @@ IMPLEMENTATIONS = ["scipy_optimize"]
 
 # -----------------------------------------------------------------------------
 # Problems
-function convex_objective_fn(x)
+function convex_objective_fn(x, __)
     return sum(x .^2 )
 end
 
@@ -18,7 +18,7 @@ function convex_objective_with_args_fn(x, args)
 end
 
 
-function rosenbrock_objective_fn(x)
+function rosenbrock_objective_fn(x, __)
     """The Rosenbrock function with additional arguments"""
     a, b = (0.5, 1.0)
     return sum(a * (x[2:end] - x[1:end-1] .^ 2.0) .^ 2.0 + (1 - x[1:end-1]) .^ 2.0) + b

@@ -5,7 +5,7 @@ from openinterfaces.interfaces.optim import Optim
 
 # -----------------------------------------------------------------------------
 # Problems
-def convex_objective_fn(x):
+def convex_objective_fn(x, __):
     return np.sum(x**2)
 
 
@@ -13,7 +13,7 @@ def convex_objective_with_args_fn(x, args):
     return np.sum((x - args) ** 2)
 
 
-def rosenbrock_objective_fn(x):
+def rosenbrock_objective_fn(x, __):
     """The Rosenbrock function with additional arguments"""
     a, b = (0.5, 1.0)
     return sum(a * (x[1:] - x[:-1] ** 2.0) ** 2.0 + (1 - x[:-1]) ** 2.0) + b
