@@ -42,7 +42,7 @@ end
         Optim.set_initial_guess(self, x0)
         Optim.set_objective_fn(self, convex_objective_fn)
 
-        status, message = Optim.minimize(implh)
+        status, message = Optim.minimize(self)
         x = self.x
 
         @test status == 0
