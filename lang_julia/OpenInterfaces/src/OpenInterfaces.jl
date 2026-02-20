@@ -219,7 +219,7 @@ function call_impl(
     func_name::String,
     in_user_args::Tuple{Vararg{Any}},
     out_user_args::Tuple{Vararg{Any}},
-    return_user_args::Tuple{Vararg{Any}} = (),
+    return_arg_types::Tuple{Vararg{Any}} = (),
 )::Int
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
@@ -359,8 +359,18 @@ function call_impl(
     in_args = Ref(OIFArgs(in_num_args, pointer(in_arg_types), pointer(in_arg_values)))
     out_args = Ref(OIFArgs(out_num_args, pointer(out_arg_types), pointer(out_arg_values)))
 
-    if (isempty(return_user_args))
-        return_args = C_NULL
+    return_args = C_NULL
+    if (!isempty(return_arg_types))
+        num_return_args = length(return_arg_types)
+        return_arg_types_c = pointer(collect(return_arg_types))
+        return_arg_values = Vector{Ptr{Cvoid}}(undef, num_return_args)
+        return_arg_values_c = pointer(return_arg_values)
+
+        return_args = Ref(
+            OIFArgs(
+                num_return_args, return_arg_types_c, return_arg_values_c
+            )
+        )
     end
 
     result =
