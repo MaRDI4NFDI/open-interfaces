@@ -176,7 +176,6 @@ mutable struct OIFConfigDict
 
     function finalizing(self)
         Libc.free(self.buffer)
-        ccall(:jl_safe_printf, Cvoid, (Cstring, Cstring), "Finalizing %s.\n", repr(self))
     end
 end
 
