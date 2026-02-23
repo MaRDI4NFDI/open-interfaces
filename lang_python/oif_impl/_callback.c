@@ -77,12 +77,13 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
         logerr(prefix_, "Could not allocated memory for oif_arg_types\n");
         goto fail_clean_self;
     }
-    for (int i = 0; i < nargs; i++ ) {
+    for (int i = 0; i < nargs; i++) {
         PyObject *pyNum = PyList_GET_ITEM(arg_types_list, i);
         if (pyNum == NULL) {
             logerr(prefix_,
                    "Could not get an item %d from the list `arg_types_list` "
-                   "with expected size %d\n", i, nargs);
+                   "with expected size %d\n",
+                   i, nargs);
             goto fail_clean_oif_arg_types;
         }
 
@@ -131,8 +132,8 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
             self->arg_values[i] = malloc(sizeof(void *));
         }
         else {
-            logerr(prefix_, "[_callback] Unknown input arg type #%d: %d\n",
-                   i, self->oif_arg_types[i]);
+            logerr(prefix_, "[_callback] Unknown input arg type #%d: %d\n", i,
+                   self->oif_arg_types[i]);
             goto fail_clean_arg_values;
         }
         if (self->arg_values[i] == NULL) {
@@ -151,8 +152,7 @@ PythonWrapperForCCallback_init(PythonWrapperForCCallbackObject *self, PyObject *
     for (Py_ssize_t i = 0; i < narray_args; ++i) {
         self->oif_arrays[i] = malloc(sizeof(OIFArrayF64));
         if (self->oif_arrays[i] == NULL) {
-            logerr(prefix_, "Could not allocate memory for `oif_arrays[%ld]`\n",
-                    i);
+            logerr(prefix_, "Could not allocate memory for `oif_arrays[%ld]`\n", i);
             goto fail_clean_oif_arrays;
         }
     }
@@ -201,8 +201,8 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
     Py_ssize_t nargs_s = PyTuple_Size(py_args);
     if (nargs_s < 0) {
         logerr(prefix_,
-                "Unexpected negative value for the size "
-                "of the tuple of args for the callback function\n");
+               "Unexpected negative value for the size "
+               "of the tuple of args for the callback function\n");
         return NULL;
     }
     unsigned int nargs;
@@ -231,7 +231,9 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         PyObject *arg = PyTuple_GetItem(py_args, i);
         if (arg_type_ids[i] == OIF_TYPE_F64) {
             if (!PyFloat_Check(arg)) {
-                logerr(prefix_, "Expected PyFloat object, while receiving arg_type_id[%zu]=%d.\n", i, arg_type_ids[i]);
+                logerr(prefix_,
+                       "Expected PyFloat object, while receiving arg_type_id[%zu]=%d.\n", i,
+                       arg_type_ids[i]);
                 return NULL;
             }
             double *double_value = arg_values[i];
@@ -241,8 +243,8 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
             PyArrayObject *py_arr = (PyArrayObject *)arg;
             if (!PyArray_Check(py_arr)) {
                 logerr(prefix_,
-                        "Expected PyArrayObject (NumPy ndarray) "
-                        "object\n");
+                       "Expected PyArrayObject (NumPy ndarray) "
+                       "object\n");
                 return NULL;
             }
             oif_arrays[j]->nd = PyArray_NDIM(py_arr);
@@ -266,8 +268,8 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
             }
             else {
                 logerr(prefix_,
-                        "Python object corresponding to 'OIF_USER_DATA' argument "
-                        "must be either None or PyCapsule\n");
+                       "Python object corresponding to 'OIF_USER_DATA' argument "
+                       "must be either None or PyCapsule\n");
                 return NULL;
             }
         }
@@ -289,8 +291,7 @@ PythonWrapperForCCallback_call(PyObject *myself, PyObject *args, PyObject *Py_UN
         return NULL;
     }
 
-    ffi_status status =
-        ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, restype, self->arg_types);
+    ffi_status status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, nargs, restype, self->arg_types);
     if (status != FFI_OK) {
         fflush(stdout);
         logerr(prefix_, "ffi_prep_cif was not OK");

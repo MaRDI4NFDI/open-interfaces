@@ -36,7 +36,7 @@ function minimize(self::Self, out_x)::Tuple{Int, String}
     @variable(model, x, start = self.x0)
     @objective(model, Min, self.objective_fn)
     optimize!(model)
-    
+
 
     return (status, message)
 end

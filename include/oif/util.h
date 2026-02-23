@@ -80,7 +80,6 @@ oif_strcmp_nocase(const char *s1, const char *s2);
 bool
 oif_util_str_contains(const char **arr, const char *s);
 
-
 /**
  * Make a string from given format and data and pass it to caller.
  *

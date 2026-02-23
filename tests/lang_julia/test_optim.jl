@@ -10,7 +10,7 @@ IMPLEMENTATIONS = ["scipy_optimize"]
 # -----------------------------------------------------------------------------
 # Problems
 function convex_objective_fn(x, __)
-    return sum(x .^2 )
+    return sum(x .^ 2)
 end
 
 
@@ -22,7 +22,7 @@ end
 function rosenbrock_objective_fn(x, __)
     """The Rosenbrock function with additional arguments"""
     a, b = (0.5, 1.0)
-    return sum(a * (x[2:end] - x[1:end-1] .^ 2.0) .^ 2.0 + (1 .- x[1:end-1]) .^ 2.0) + b
+    return sum(a * (x[2:end] - x[1:(end-1)] .^ 2.0) .^ 2.0 + (1 .- x[1:(end-1)]) .^ 2.0) + b
 end
 # -----------------------------------------------------------------------------
 
@@ -111,7 +111,9 @@ end
     @testset "test__set_method_with__wrong_method_params__are_not_accepted" begin
         test() do self
             @test_throws ErrorException Optim.set_method(
-                 self, "nelder-mead", Dict("wrong_param" =>  42)
+                self,
+                "nelder-mead",
+                Dict("wrong_param" => 42),
             )
         end
     end

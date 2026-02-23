@@ -103,9 +103,8 @@ load_interface_impl(const char *interface, const char *impl, size_t version_majo
     /* One must be a pessimist, while programming in C. */
     ImplHandle retval = OIF_IMPL_INIT_ERROR;
 
-    char *conf_filename_fixed_part = oif_util_make_string(
-        "%s/%s/%s.conf", interface, impl, impl
-    );
+    char *conf_filename_fixed_part =
+        oif_util_make_string("%s/%s/%s.conf", interface, impl, impl);
 
     // We cannot tokenize OIF_IMPL_PATH because `strtok`
     // modifies the original string during tokenization

@@ -225,7 +225,7 @@ function call_impl(
     in_user_args::Tuple{Vararg{Any}},
     out_user_args::Tuple{Vararg{Any}},
     return_arg_types::Tuple{Vararg{Any}} = (),
-    )::Union{Int, Vector{Any}}
+)::Union{Int,Vector{Any}}
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
 
@@ -372,12 +372,8 @@ function call_impl(
         return_arg_values = Vector{Ptr{Cvoid}}(undef, num_return_args)
         return_arg_values_c = pointer(return_arg_values)
 
-        return_args = OIFArgs(
-                num_return_args, return_arg_types_c, return_arg_values_c
-            )
-        return_args_ref = Ref(
-            return_args
-        )
+        return_args = OIFArgs(num_return_args, return_arg_types_c, return_arg_values_c)
+        return_args_ref = Ref(return_args)
     end
 
     result =
@@ -455,7 +451,9 @@ function make_oif_callback(
     elseif restype == OIF_TYPE_F64
         c_restype = Cdouble
     else
-        error("Unsupported return type: $restype. Only supported types are Cint and Cdouble")
+        error(
+            "Unsupported return type: $restype. Only supported types are Cint and Cdouble",
+        )
     end
 
     fn_wrapper = _make_c_func_wrapper_over_jl_fn(fn, argtypes, restype)
@@ -477,7 +475,15 @@ function make_oif_callback(
     fn_p_py = C_NULL
 
     oif_argtypes_c_arr = pointer(collect(argtypes))
-    return OIFCallback(OIF_LANG_JULIA, fn_p_c, fn_p_jl, fn_p_py, length(argtypes), oif_argtypes_c_arr, restype)
+    return OIFCallback(
+        OIF_LANG_JULIA,
+        fn_p_c,
+        fn_p_jl,
+        fn_p_py,
+        length(argtypes),
+        oif_argtypes_c_arr,
+        restype,
+    )
 end
 
 

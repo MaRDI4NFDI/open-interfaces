@@ -54,7 +54,9 @@ end
 function set_objective_fn(self::Self, objective_fn::Function)
     """Specify right-hand side function f."""
     self.objective_fn_wrapper = make_oif_callback(
-        objective_fn, (OIF_TYPE_ARRAY_F64, OIF_TYPE_USER_DATA), OIF_TYPE_F64,
+        objective_fn,
+        (OIF_TYPE_ARRAY_F64, OIF_TYPE_USER_DATA),
+        OIF_TYPE_F64,
     )
     call_impl(self.implh, "set_objective_fn", (self.objective_fn_wrapper,), ())
 end
@@ -76,10 +78,10 @@ function set_method(self::Self, method_name::String, method_params::Dict)
     call_impl(self.implh, "set_method", (method_name, method_params), ())
 end
 
-function minimize(self::Self)::Tuple{Int, String}
+function minimize(self::Self)::Tuple{Int,String}
     """Solve minimization problem"""
-    status::Int, message::String = call_impl(self.implh, "minimize", (), (self.x,), (OIF_TYPE_I32, OIF_TYPE_STRING),
-             )
+    status::Int, message::String =
+        call_impl(self.implh, "minimize", (), (self.x,), (OIF_TYPE_I32, OIF_TYPE_STRING))
     return status, message
 end
 

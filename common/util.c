@@ -202,7 +202,7 @@ oif_util_make_string(const char *fmt, ...)
         return NULL;
     }
 
-    str_length = (size_t) nbytes_required + 1;
+    str_length = (size_t)nbytes_required + 1;
     char *s = oif_util_malloc(str_length * sizeof(*s));
 
     va_start(args, fmt);
