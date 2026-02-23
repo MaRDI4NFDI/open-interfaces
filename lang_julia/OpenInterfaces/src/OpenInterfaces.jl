@@ -185,6 +185,9 @@ const load_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 const call_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 const unload_interface_impl_fn = Ref{Ptr{Cvoid}}(0)
 
+const lib_util = Ref{Ptr{Cvoid}}(0)
+const oif_util_free_fn = Ref{Ptr{Cvoid}}(0)
+
 
 function __init__()
     try
@@ -197,6 +200,9 @@ function __init__()
     load_interface_impl_fn[] = dlsym(lib_dispatch[], :load_interface_impl)
     call_interface_impl_fn[] = dlsym(lib_dispatch[], :call_interface_impl)
     unload_interface_impl_fn[] = dlsym(lib_dispatch[], :unload_interface_impl)
+
+    lib_util[] = Libdl.dlopen("liboif_common_util.$(Libdl.dlext)")
+    oif_util_free_fn[] = dlsym(lib_util[], :oif_util_free_)
 end
 
 function load_impl(interface::String, impl::String, major::Int, minor::Int)::ImplHandle
@@ -220,7 +226,7 @@ function call_impl(
     in_user_args::Tuple{Vararg{Any}},
     out_user_args::Tuple{Vararg{Any}},
     return_arg_types::Tuple{Vararg{Any}} = (),
-)::Int
+    )::Union{Int, Vector{Any}}
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
 
@@ -359,17 +365,19 @@ function call_impl(
     in_args = Ref(OIFArgs(in_num_args, pointer(in_arg_types), pointer(in_arg_values)))
     out_args = Ref(OIFArgs(out_num_args, pointer(out_arg_types), pointer(out_arg_values)))
 
-    return_args = C_NULL
+    return_args = nothing
+    return_args_ref = C_NULL
     if (!isempty(return_arg_types))
         num_return_args = length(return_arg_types)
         return_arg_types_c = pointer(collect(return_arg_types))
         return_arg_values = Vector{Ptr{Cvoid}}(undef, num_return_args)
         return_arg_values_c = pointer(return_arg_values)
 
-        return_args = Ref(
-            OIFArgs(
+        return_args = OIFArgs(
                 num_return_args, return_arg_types_c, return_arg_values_c
             )
+        return_args_ref = Ref(
+            return_args
         )
     end
 
@@ -380,9 +388,29 @@ function call_impl(
                 func_name::Cstring,
                 in_args::Ptr{OIFArgs},
                 out_args::Ptr{OIFArgs},
-                return_args::Ptr{OIFArgs},
+                return_args_ref::Ptr{OIFArgs},
             )::Int
         end
+
+    return_args_jl = Vector{Any}()
+    if return_args != nothing
+        for i = 1:return_args.num_args
+            arg_type = return_arg_types[i]
+            void_pointer = Base.unsafe_load(return_args.arg_values, i)
+            if arg_type == OIF_TYPE_I32
+                # Note that OIF supports only 32-bit integers,
+                # and Julia sets Int to 64-bit on modern machines,
+                # so this code works as long as it works.
+                jl_var = Base.unsafe_load(Ptr{Int32}(void_pointer))
+            elseif arg_type == OIF_TYPE_STRING
+                jl_var = Base.unsafe_string(Ptr{Cchar}(void_pointer))
+            else
+                throw("Unsupported return argument type")
+            end
+            push!(return_args_jl, jl_var)
+            @ccall $(oif_util_free_fn[])(void_pointer::Ptr{Cvoid})::Cvoid
+        end
+    end
 
     if result != 0
         error(
@@ -390,7 +418,7 @@ function call_impl(
         )
     end
 
-    return result
+    return length(return_args_jl) > 0 ? return_args_jl : result
 end
 
 function unload_impl(implh::ImplHandle)
@@ -449,8 +477,6 @@ function make_oif_callback(
     # Python pointer should be null.
     fn_p_py = C_NULL
 
-    # c_argtypes = Base.unsafe_convert(Ptr{OIFArgType}, argtypes_arr)
-    println("=== argtypes = ", argtypes)
     oif_argtypes_c_arr = pointer(collect(argtypes))
     return OIFCallback(OIF_LANG_JULIA, fn_p_c, fn_p_jl, fn_p_py, length(argtypes), oif_argtypes_c_arr, restype)
 end
