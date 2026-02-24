@@ -234,7 +234,8 @@ main(int argc, char *argv[])
         }
         status = oif_ivp_integrate(implh, t, y);
         if (status) {
-            fprintf(stderr, "oif_ivp_integrate returned error\n");
+            fprintf(stderr,
+                    "oif_ivp_integrate returned error when integrating to time %.16f\n", t);
             retval = EXIT_FAILURE;
             goto cleanup;
         }
