@@ -180,6 +180,7 @@ main(int argc, char *argv[])
     double dx;
     double dt_max;
     int status = 1;  // Aux variable to check for errors.
+    OIFConfigDict *dict = NULL;
 
     status = compute_initial_condition_(N, y0, grid, &dx, &dt_max);
     assert(status == 0);
@@ -206,7 +207,7 @@ main(int argc, char *argv[])
     status = oif_ivp_set_tolerances(implh, 1e-8, 1e-12);
     assert(status == 0);
 
-    OIFConfigDict *dict = oif_config_dict_init();
+    dict = oif_config_dict_init();
     oif_config_dict_add_int(dict, "dense", 0);
     oif_config_dict_add_int(dict, "save_everystep", 0);
 
@@ -220,6 +221,7 @@ main(int argc, char *argv[])
     assert(status == 0);
     double t = 0.0001;
     status = oif_ivp_integrate(implh, t, y);
+    assert(status == 0);
 
     clock_t tic = clock();
     // Time step.
