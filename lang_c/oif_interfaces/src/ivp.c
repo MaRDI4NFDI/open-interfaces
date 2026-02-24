@@ -7,7 +7,15 @@
 int
 oif_ivp_set_rhs_fn(ImplHandle implh, oif_ivp_rhs_fn_t rhs)
 {
-    OIFCallback rhs_wrapper = {.src = OIF_LANG_C, .fn_p_py = NULL, .fn_p_c = rhs};
+    OIFArgType callback_arg_types[] = {OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_ARRAY_F64,
+                                       OIF_TYPE_USER_DATA};
+    OIFCallback rhs_wrapper = {.src = OIF_LANG_C,
+                               .fn_p_c = rhs,
+                               .fn_p_jl = NULL,
+                               .fn_p_py = NULL,
+                               .nargs = 4,
+                               .arg_types = callback_arg_types,
+                               .restype = OIF_TYPE_INT};
     OIFArgType in_arg_types[] = {OIF_TYPE_CALLBACK};
     void *in_arg_values[] = {&rhs_wrapper};
     OIFArgs in_args = {

@@ -50,6 +50,7 @@ typedef enum {
     OIF_TYPE_STRING = 12,
     OIF_TYPE_CALLBACK = 13,
     OIF_USER_DATA = 14,
+    OIF_TYPE_USER_DATA = 14,
     OIF_TYPE_POINTER = 14,
     OIF_TYPE_CONFIG_DICT = 15,
 } OIFArgType;
