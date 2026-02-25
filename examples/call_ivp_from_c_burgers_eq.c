@@ -56,8 +56,11 @@ parse_output_filename(int argc, char *argv[])
 int
 parse_resolution(int argc, char *argv[])
 {
-        return 101;
-    if (argc == 3) {
+    printf("argc = %d\n", argc);
+    if (argc <= 3) {
+        /* return 101; */
+        /* TODO: return 101!!! */
+        return 10;
     }
     else {
         return atoi(argv[3]);
@@ -236,10 +239,23 @@ main(int argc, char *argv[])
         if (t > t_final) {
             t = t_final;
         }
+        char const *sep = "";
+        printf("Timestep %d, time %.16f\n", i, t);
+        for (int k = 0; k < N; k++) {
+            printf("%s%2d:%.3f", sep, k, y->data[k]);
+            sep = " ";
+            if ((k + 1) % 10 == 0) {
+                printf("\n");
+                sep = "";
+            }
+        }
+        printf("\n");
         status = oif_ivp_integrate(implh, t, y);
         if (status) {
             fprintf(stderr,
-                    "oif_ivp_integrate returned error when integrating to time %.16f, timestep %d\n", t, i);
+                    "oif_ivp_integrate returned error when integrating to time %.16f, "
+                    "timestep %d\n",
+                    t, i);
             retval = EXIT_FAILURE;
             goto cleanup;
         }
