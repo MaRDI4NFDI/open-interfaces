@@ -226,21 +226,31 @@ main(int argc, char *argv[])
         /* status = oif_ivp_set_integrator(implh, "DP5", dict); */
     }
     assert(status == 0);
-    double t = 0.0001;
-    status = oif_ivp_integrate(implh, t, y);
+
+    // Warm up integration, to make sure that the right-hand side is called
+    // which is important to do outside of the benchmark process.
+    status = oif_ivp_integrate(implh, 0.001, y);
+    assert(status == 0);
+    // Reset the initial condition.
+    status = oif_ivp_set_initial_value(implh, y0, t0);
     assert(status == 0);
 
     clock_t tic = clock();
     // Time step.
     double dt = dt_max;
-    int n_time_steps = (int)(t_final / dt + 1);
+    int n_time_steps = ceil((t_final - t0) / dt);
+    printf("n_time_steps = %d\n", n_time_steps);
+
+    double t;         // Current time.
+    char const *sep;  // Auxiliary variable that holds SEParator for output.
     for (int i = 0; i < n_time_steps; ++i) {
-        double t = t0 + (i + 1) * dt;
-        if (t > t_final) {
+        t = t0 + (i + 1) * dt;
+        if (t > t_final - 1e-14) {
+            printf("Final time has reached\n");
             t = t_final;
         }
-        char const *sep = "";
-        printf("Timestep %d, time %.16f\n", i, t);
+        sep = "";
+        printf("Timestep %d, time %.20f\n", i + 1, t);
         for (int k = 0; k < N; k++) {
             printf("%s%2d:%.3f", sep, k, y->data[k]);
             sep = " ";
@@ -253,9 +263,9 @@ main(int argc, char *argv[])
         status = oif_ivp_integrate(implh, t, y);
         if (status) {
             fprintf(stderr,
-                    "oif_ivp_integrate returned error when integrating to time %.16f, "
-                    "timestep %d\n",
-                    t, i);
+                    "`oif_ivp_integrate` returned error when integrating to time %.16f "
+                    "at timestep %d\n",
+                    t, i + 1);
             retval = EXIT_FAILURE;
             goto cleanup;
         }
