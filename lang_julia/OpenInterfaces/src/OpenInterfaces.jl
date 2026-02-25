@@ -533,6 +533,15 @@ function _make_c_func_wrapper_over_jl_fn(
             return Int32(0)
         elseif typeof(result) == Int32
             return result
+        elseif typeof(result) == Int64
+            try
+                return Int32(result)
+            catch InexactError
+                throw(
+                    "Return type of the callback is Int64 with value `result = $(result)` " *
+                    "and cannot be converted to 32-bit integer due to truncation",
+                )
+            end
         elseif typeof(result) == Float64
             return result
         else
