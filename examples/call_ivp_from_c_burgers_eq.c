@@ -161,6 +161,7 @@ main(int argc, char *argv[])
     printf("Calling from C an open interface for solving y'(t) = f(t, y)\n");
     printf("where the system comes from inviscid 1D Burgers' equation\n");
     printf("Implementation: %s\n", impl);
+    printf("Output filename: %s\n", output_filename);
 
     int retval = 0;
 
@@ -170,6 +171,7 @@ main(int argc, char *argv[])
     }
 
     const int N = parse_resolution(argc, argv);
+    printf("N = %d\n", N);
     double t0 = 0.0;
     double t_final = 2.0;
     OIFArrayF64 *y0 = oif_create_array_f64(1, (intptr_t[1]){N});
@@ -184,6 +186,8 @@ main(int argc, char *argv[])
 
     status = compute_initial_condition_(N, y0, grid, &dx, &dt_max);
     assert(status == 0);
+    printf("dx = %.16f\n", dx);
+    printf("dt_max = %.16f\n", dt_max);
 
     status = oif_ivp_set_initial_value(implh, y0, t0);
     if (status) {
@@ -235,7 +239,7 @@ main(int argc, char *argv[])
         status = oif_ivp_integrate(implh, t, y);
         if (status) {
             fprintf(stderr,
-                    "oif_ivp_integrate returned error when integrating to time %.16f\n", t);
+                    "oif_ivp_integrate returned error when integrating to time %.16f, timestep %d\n", t, i);
             retval = EXIT_FAILURE;
             goto cleanup;
         }
