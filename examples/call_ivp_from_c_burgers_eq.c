@@ -56,8 +56,8 @@ parse_output_filename(int argc, char *argv[])
 int
 parse_resolution(int argc, char *argv[])
 {
-    if (argc < 3) {
         return 101;
+    if (argc == 3) {
     }
     else {
         return atoi(argv[3]);
