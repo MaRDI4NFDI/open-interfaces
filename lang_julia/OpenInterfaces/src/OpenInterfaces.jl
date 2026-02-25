@@ -531,13 +531,17 @@ function _make_c_func_wrapper_over_jl_fn(
 
         if result == nothing
             return Int32(0)
+        elseif typeof(result) == Int32
+            return result
+        elseif typeof(result) == Float64
+            return result
+        else
+            error(
+                "Unsupported type `$(typeof(result))`, where `result = $(result)` " *
+                "for callback return value. " *
+                "Supported return types are Int32 and Float64",
+            )
         end
-
-        if typeof(result) <: Int
-            return Int32(result)
-        end
-
-        @assert typeof(result) == Float64
 
         return result
     end
