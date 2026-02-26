@@ -387,6 +387,13 @@ function call_impl(
             )::Int32
         end
 
+
+    if result != 0
+        error(
+            "Error occurred while invoking function '$func_name' from implementation with id '$implh': in_user_args '$in_user_args', out_user_args '$out_user_args'",
+        )
+    end
+
     return_args_jl = Vector{Any}()
     if return_args != nothing
         for i = 1:return_args.num_args
@@ -405,12 +412,6 @@ function call_impl(
             push!(return_args_jl, jl_var)
             @ccall $(oif_util_free_fn[])(void_pointer::Ptr{Cvoid})::Cvoid
         end
-    end
-
-    if result != 0
-        error(
-            "Error occurred while invoking function '$func_name' from implementation with id '$implh': in_user_args '$in_user_args', out_user_args '$out_user_args'",
-        )
     end
 
     return length(return_args_jl) > 0 ? return_args_jl : result
