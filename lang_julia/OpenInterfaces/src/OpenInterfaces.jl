@@ -225,7 +225,7 @@ function call_impl(
     in_user_args::Tuple{Vararg{Any}},
     out_user_args::Tuple{Vararg{Any}},
     return_arg_types::Tuple{Vararg{Any}} = (),
-)::Union{Int,Vector{Any}}
+)::Union{Int32,Vector{Any}}
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
 
@@ -384,7 +384,7 @@ function call_impl(
                 in_args::Ptr{OIFArgs},
                 out_args::Ptr{OIFArgs},
                 return_args_ref::Ptr{OIFArgs},
-            )::Int
+            )::Int32
         end
 
     return_args_jl = Vector{Any}()
