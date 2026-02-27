@@ -37,9 +37,15 @@ function set_method(self, method_name, method_params)
 end
 
 function minimize(self::Self, out_x)::Tuple{Int, String}
+    if !isdefined(self, :user_data)
+        self.user_data = nothing
+    end
     model = Model(Ipopt.Optimizer)
-    @variable(model, x, start = self.x0)
-    @objective(model, Min, self.objective_fn)
+    N = length(self.x0)
+    @variable(model, x[1:N])
+    set_start_value.(x, self.x0)
+    wrapper(x) = self.objective_fn(x, self.user_data)
+    @objective(model, Min, wrapper(x))
     optimize!(model)
 
     jump_status = termination_status(model)
