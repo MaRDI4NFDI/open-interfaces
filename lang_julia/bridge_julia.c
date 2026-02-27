@@ -649,6 +649,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                     size_t n = strlen(s);
                     return_args->arg_values[i] = oif_util_malloc(sizeof(char) * (n + 1));
                     snprintf(return_args->arg_values[i], n + 1, "%s", s);
+                    break;
 
                 default:
                     logerr(prefix_, "Could not convert return type");
