@@ -1,5 +1,6 @@
 #include <alloca.h>
 #include <assert.h>
+#include <limits.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -492,7 +493,6 @@ int
 call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *out_args,
           OIFArgs *return_args)
 {
-    (void)return_args;
     int result = -1;
 
     if (impl_info_->dh != OIF_LANG_JULIA) {
@@ -646,9 +646,11 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                         goto cleanup;
                     }
                     const char *s = jl_string_ptr(item);
-                    size_t n = strlen(s);
-                    return_args->arg_values[i] = oif_util_malloc(sizeof(char) * (n + 1));
-                    snprintf(return_args->arg_values[i], n + 1, "%s", s);
+                    size_t n = jl_string_len(item);
+                    char *buffer  = oif_util_malloc(sizeof(char) * (n + 1));
+                    snprintf(buffer, n + 1, "%s", s);
+                    buffer[n] = '\0';
+                    return_args->arg_values[i] = buffer;
                     break;
 
                 default:
