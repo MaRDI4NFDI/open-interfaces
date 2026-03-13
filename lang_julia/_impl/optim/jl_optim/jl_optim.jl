@@ -18,7 +18,6 @@ mutable struct Self
 end
 
 function set_initial_guess(self::Self, x0)
-    println("=== debug == x0 = ", x0)
     self.x0 = x0
     return nothing
 end
@@ -28,7 +27,6 @@ function set_user_data(self::Self, user_data)
 end
 
 function set_objective_fn(self::Self, objective_fn)
-    println("=== debug === objective_fn = ", objective_fn)
     self.objective_fn = objective_fn
 end
 
