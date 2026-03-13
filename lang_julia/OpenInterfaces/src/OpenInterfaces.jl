@@ -105,6 +105,7 @@ struct OIFCallback
     nargs::UInt32
     arg_types::Ptr{OIFArgType}
     restype::OIFArgType
+    hidden::Any
 end
 
 struct OIFUserData
@@ -471,6 +472,7 @@ function make_oif_callback(
 
     fn_p_c = eval(cfunction_expr)
     # Convert the Julia function to a pointer.
+    fn_ref = Ref(fn)
     fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, Ref(fn))
     # Python pointer should be null.
     fn_p_py = C_NULL
@@ -484,6 +486,7 @@ function make_oif_callback(
         length(argtypes),
         oif_argtypes_c_arr,
         restype,
+        fn_ref,
     )
 end
 
