@@ -49,16 +49,19 @@ function minimize(self::Self, out_x)::Tuple{Int, String}
     optimize!(model)
 
     jump_status = termination_status(model)
-    if jump_status == OPTIMAL
+    if jump_status == OPTIMAL || jump_status == LOCALLY_SOLVED
         status = 0
     else
         status = -1
     end
 
     if jump_status == OPTIMAL
-        message = "Optimization was successful"
+        message = "The algorithm found a globally optimal solution."
     else
-        message = "Optimization has failed"
+        message = "The algorithm converged to a stationary point, " *
+            "local optimal solution, " *
+            "could not find directions for improvement, " *
+            "or otherwise completed its search without global guarantees."
     end
 
     return (status, message)
