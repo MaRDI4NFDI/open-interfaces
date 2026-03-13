@@ -224,10 +224,11 @@ function call_impl(
     func_name::String,
     in_user_args::Tuple{Vararg{Any}},
     out_user_args::Tuple{Vararg{Any}},
-    return_arg_types::Tuple{Vararg{Any}} = (),
+    return_arg_types_tuple::Tuple{Vararg{Any}} = (),
 )::Union{Int32,Vector{Any}}
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
+    return_num_args = length(return_arg_types_tuple)
 
     temp_refs = Vector{Any}()
 
@@ -366,18 +367,17 @@ function call_impl(
 
     return_args = nothing
     return_args_ref = C_NULL
+    return_arg_types = collect(return_arg_types_tuple)
+    return_arg_types_ptr = Ptr{OIFArgType}(pointer(return_arg_types))
+    return_arg_values = Vector{Ptr{Cvoid}}(undef, return_num_args)
+    return_arg_values_ptr = Ptr{Ptr{Cvoid}}(pointer(return_arg_values))
     if (!isempty(return_arg_types))
-        num_return_args = length(return_arg_types)
-        return_arg_types_c = pointer(collect(return_arg_types))
-        return_arg_values = Vector{Ptr{Cvoid}}(undef, num_return_args)
-        return_arg_values_c = pointer(return_arg_values)
-
-        return_args = OIFArgs(num_return_args, return_arg_types_c, return_arg_values_c)
+        return_args = OIFArgs(return_num_args, return_arg_types_ptr, return_arg_values_ptr)
         return_args_ref = Ref(return_args)
     end
 
     result =
-        GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values temp_refs begin
+        GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values return_arg_types return_arg_values temp_refs begin
             @ccall $(call_interface_impl_fn[])(
                 implh::Int,
                 func_name::Cstring,
