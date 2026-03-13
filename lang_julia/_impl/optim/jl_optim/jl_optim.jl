@@ -45,6 +45,7 @@ function minimize(self::Self, out_x)::Tuple{Int, String}
     wrapper(x) = self.objective_fn(x, self.user_data)
     @objective(model, Min, wrapper(x))
     optimize!(model)
+    out_x .= value.(x)
 
     jump_status = termination_status(model)
     if jump_status == OPTIMAL || jump_status == LOCALLY_SOLVED
