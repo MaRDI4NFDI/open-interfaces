@@ -1,4 +1,4 @@
-module JlOptim
+module IpoptJl
 
 export Self, set_initial_guess
 
@@ -67,4 +67,4 @@ function minimize(self::Self, out_x)::Tuple{Int, String}
 end
 
 
-end  # module JlOptim
+end  # module IpoptJl
