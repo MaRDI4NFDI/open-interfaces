@@ -73,6 +73,9 @@ const OIF_LANG_JULIA::Int32 = 4
 const OIF_LANG_R::Int32 = 5
 const OIF_LANG_COUNT::Int32 = 6
 
+# Starting number for implementation IDs, that a function `load_impl` returns.
+# The caller of `load_impl` should check that the returned ID is no less than this.
+# Otherwise, it is one of the error codes below.
 const OIF_IMPL_STARTING_NUMBER = 1000
 
 # Error codes
