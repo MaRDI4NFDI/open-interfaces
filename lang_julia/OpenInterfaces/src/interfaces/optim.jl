@@ -12,7 +12,8 @@ using OpenInterfaces:
     OIF_TYPE_I32,
     OIF_TYPE_USER_DATA,
     OIF_TYPE_STRING,
-    OIFUserData
+    OIFUserData,
+    OIF_IMPL_STARTING_NUMBER
 
 export Self,
     set_initial_value,
@@ -33,13 +34,18 @@ mutable struct Self
     oif_user_data::Any
     function Self(impl::String)
         implh = load_impl("optim", impl, 1, 0)
+        if implh < OIF_IMPL_STARTING_NUMBER
+            error("Could not load implementation '`$impl`' of the `optim` interface")
+        end
         self = new(ImplHandle(implh), 0, Float64[], Float64[], Nothing, Nothing, Nothing)
         finalizer(finalizing, self)
     end
 
     function finalizing(self::Self)
         """Finalization function to clean up resources."""
-        unload_impl(self.implh)
+        if self.implh >= OIF_IMPL_STARTING_NUMBER
+            unload_impl(self.implh)
+        end
     end
 end
 
