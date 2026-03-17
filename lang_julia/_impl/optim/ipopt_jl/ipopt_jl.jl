@@ -10,10 +10,11 @@ using Ipopt
 
 mutable struct Self
     x0::Vector{Float64}
-    objective_fn::Function
+    objective_fn::Union{Function, Nothing}
     user_data::Any
+    options::Dict
     function Self()
-        return new()
+        return new([], nothing, nothing, Dict())
     end
 end
 
