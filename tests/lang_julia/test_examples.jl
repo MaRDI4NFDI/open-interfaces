@@ -50,9 +50,14 @@ const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
     @testset "Testing IVP example with all implementations" begin
         for impl in ["sundials_cvode", "jl_diffeq", "scipy_ode"]
             @testset "call_ivp.jl $impl runs successfully" begin
-                process = run(
-                    pipeline(`julia $CALL_IVP $impl`, stdout = devnull, stderr = devnull),
-                )
+                io_err = IOBuffer()
+                process = try
+                    run(pipeline(`julia $CALL_IVP $impl`, stdout = devnull, stderr = devnull))
+                catch e
+                    captured_stderr = String(take!(io_err))
+                    println("=== error in execution of $CALL_IVP")
+                    println(captured_stderr)
+                end
                 @test process.exitcode == 0
             end
         end
