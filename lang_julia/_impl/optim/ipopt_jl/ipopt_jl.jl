@@ -32,7 +32,8 @@ function set_objective_fn(self::Self, objective_fn)
 end
 
 function set_method(self, method_name, method_params)
-    throw(MethodError())
+    println("[ipopt_jl] `method_name` is not supported by this implementation")
+    self.options = merge(self.options, method_params)
 end
 
 function minimize(self::Self, out_x)::Tuple{Int, String}
@@ -42,6 +43,10 @@ function minimize(self::Self, out_x)::Tuple{Int, String}
     model = Model(Ipopt.Optimizer)
     N = length(self.x0)
     @variable(model, x[1:N])
+
+    for (key, value) in self.options
+        set_attribute(model, key, value)
+    end
     set_start_value.(x, self.x0)
     wrapper(x) = self.objective_fn(x, self.user_data)
     @objective(model, Min, wrapper(x))
