@@ -10,7 +10,7 @@ using Ipopt
 
 mutable struct Self
     x0::Vector{Float64}
-    objective_fn::Union{Function, Nothing}
+    objective_fn::Union{Function,Nothing}
     user_data::Any
     options::Dict
     function Self()
@@ -36,7 +36,7 @@ function set_method(self, method_name, method_params)
     self.options = merge(self.options, method_params)
 end
 
-function minimize(self::Self, out_x)::Tuple{Int, String}
+function minimize(self::Self, out_x)::Tuple{Int,String}
     if !isdefined(self, :user_data)
         self.user_data = nothing
     end
@@ -63,7 +63,8 @@ function minimize(self::Self, out_x)::Tuple{Int, String}
     if jump_status == OPTIMAL
         message = "The algorithm found a globally optimal solution."
     else
-        message = "The algorithm converged to a stationary point, " *
+        message =
+            "The algorithm converged to a stationary point, " *
             "local optimal solution, " *
             "could not find directions for improvement, " *
             "or otherwise completed its search without global guarantees."
