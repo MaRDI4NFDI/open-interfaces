@@ -605,9 +605,8 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         for (int i = 0; i < return_args->num_args; i++) {
             jl_value_t *item = jl_fieldref(retval_, i);
             switch (return_args->arg_types[i]) {
-                case OIF_TYPE_INT:
-                    ;  // clang-tidy complains that declaration after label
-                       // is a "C23 extension" :-(
+                case OIF_TYPE_INT:;  // clang-tidy complains that declaration after label
+                                     // is a "C23 extension" :-(
                     int temp;
                     if (jl_is_int64(item)) {
                         int64_t temp_64 = jl_unbox_int64(item);
@@ -615,11 +614,9 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                             temp = temp_64;
                         }
                         else {
-                            logerr(
-                                prefix_,
-                                "Truncation error due to default integers in Julia being "
-                                "64-bit wide, while supported integers are 32-bit wide"
-                            );
+                            logerr(prefix_,
+                                   "Truncation error due to default integers in Julia being "
+                                   "64-bit wide, while supported integers are 32-bit wide");
                             goto cleanup;
                         }
                     }
@@ -629,8 +626,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                     else {
                         logerr(
                             prefix_,
-                            "Could not convert return value from Julia to C representation"
-                        );
+                            "Could not convert return value from Julia to C representation");
                         goto cleanup;
                     }
                     return_args->arg_values[i] = oif_util_malloc(sizeof(int32_t));
@@ -639,15 +635,12 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
                 case OIF_TYPE_STRING:
                     if (!jl_is_string(item)) {
-                        logerr(
-                            prefix_,
-                            "Expected string as a return value"
-                        );
+                        logerr(prefix_, "Expected string as a return value");
                         goto cleanup;
                     }
                     const char *s = jl_string_ptr(item);
                     size_t n = jl_string_len(item);
-                    char *buffer  = oif_util_malloc(sizeof(char) * (n + 1));
+                    char *buffer = oif_util_malloc(sizeof(char) * (n + 1));
                     snprintf(buffer, n + 1, "%s", s);
                     buffer[n] = '\0';
                     return_args->arg_values[i] = buffer;
