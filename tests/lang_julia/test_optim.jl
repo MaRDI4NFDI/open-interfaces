@@ -4,8 +4,28 @@ using Test
 using OpenInterfaces
 using OpenInterfaces.Interfaces.Optim
 
-IMPLEMENTATIONS = ["scipy_optimize"]
-
+# -----------------------------------------------------------------------------
+# Checking what implementations are available.
+POTENTIAL_IMPLEMENTATIONS = ["scipy_optimize", "ipopt_jl"]
+IMPLEMENTATIONS = []
+for impl in POTENTIAL_IMPLEMENTATIONS
+    implh = load_impl("optim", impl, 1, 0)
+    if implh == OpenInterfaces.OIF_BRIDGE_NOT_AVAILABLE_ERROR
+        println(
+            "Bridge component for implementation '",
+            impl,
+            "' is not available. Skipping the test",
+        )
+        continue
+    end
+    if implh == OpenInterfaces.OIF_IMPL_NOT_AVAILABLE_ERROR
+        println("Implementation ", impl, " is not available. Skipping the test")
+        continue
+    end
+    unload_impl(implh)
+    push!(IMPLEMENTATIONS, impl)
+end
+# -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
 # Problems
