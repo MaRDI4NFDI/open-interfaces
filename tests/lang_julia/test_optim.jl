@@ -158,9 +158,7 @@ end
             @test norm(x_2 .- x_expected) < norm(x_1 .- x_expected)
         end
     else
-        @test_skip println(
-            "Implementation 'ipopt_jl' not available. Skipping the test",
-        )
+        @test_skip println("Implementation 'ipopt_jl' not available. Skipping the test")
     end
     # -------------------------------------------------------------------------
 
