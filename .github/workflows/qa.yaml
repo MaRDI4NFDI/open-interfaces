@@ -13,7 +13,8 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python-version: ['3.10', '3.11', '3.12', '3.13']
+                python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+                julia-version: ['1.10', '1.12']
         defaults:
             run:
                 shell: bash -l {0}
@@ -21,6 +22,7 @@ jobs:
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
+
             - name: Setup conda environment
               uses: conda-incubator/setup-miniconda@v3
               with:
@@ -28,9 +30,10 @@ jobs:
                   miniforge-version: latest
                   activate-environment: test
                   environment-file: environment-linux.yaml
+
             - name: Get Date
               id: get-date
-              run: echo "name=date::$(/bin/date -u "+%Y%m%d")" >> "$GITHUB_OUTPUT"
+              run: echo "date=$(/bin/date -u "+%Y%m%d")" >> "$GITHUB_OUTPUT"
 
             - name: Cache Conda env
               uses: actions/cache@v4
@@ -51,7 +54,8 @@ jobs:
             - name: Set up Julia
               uses: julia-actions/setup-julia@v2
               with:
-                  version: '1.11'
+                  version: ${{ matrix.julia-version }}
+
             - name: Cache Julia artifacts
               uses: julia-actions/cache@v2
             - name: Activate Julia environment
