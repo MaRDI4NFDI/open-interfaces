@@ -73,6 +73,9 @@ const OIF_LANG_JULIA::Int32 = 4
 const OIF_LANG_R::Int32 = 5
 const OIF_LANG_COUNT::Int32 = 6
 
+# Starting number for implementation IDs, that a function `load_impl` returns.
+# The caller of `load_impl` should check that the returned ID is no less than this.
+# Otherwise, it is one of the error codes below.
 const OIF_IMPL_STARTING_NUMBER = 1000
 
 # Error codes
@@ -105,6 +108,7 @@ struct OIFCallback
     nargs::UInt32
     arg_types::Ptr{OIFArgType}
     restype::OIFArgType
+    hidden::Any
 end
 
 struct OIFUserData
@@ -224,10 +228,11 @@ function call_impl(
     func_name::String,
     in_user_args::Tuple{Vararg{Any}},
     out_user_args::Tuple{Vararg{Any}},
-    return_arg_types::Tuple{Vararg{Any}} = (),
-)::Union{Int,Vector{Any}}
+    return_arg_types_tuple::Tuple{Vararg{Any}} = (),
+)::Union{Int32,Vector{Any}}
     in_num_args = length(in_user_args)
     out_num_args = length(out_user_args)
+    return_num_args = length(return_arg_types_tuple)
 
     temp_refs = Vector{Any}()
 
@@ -366,26 +371,32 @@ function call_impl(
 
     return_args = nothing
     return_args_ref = C_NULL
+    return_arg_types = collect(return_arg_types_tuple)
+    return_arg_types_ptr = Ptr{OIFArgType}(pointer(return_arg_types))
+    return_arg_values = Vector{Ptr{Cvoid}}(undef, return_num_args)
+    return_arg_values_ptr = Ptr{Ptr{Cvoid}}(pointer(return_arg_values))
     if (!isempty(return_arg_types))
-        num_return_args = length(return_arg_types)
-        return_arg_types_c = pointer(collect(return_arg_types))
-        return_arg_values = Vector{Ptr{Cvoid}}(undef, num_return_args)
-        return_arg_values_c = pointer(return_arg_values)
-
-        return_args = OIFArgs(num_return_args, return_arg_types_c, return_arg_values_c)
+        return_args = OIFArgs(return_num_args, return_arg_types_ptr, return_arg_values_ptr)
         return_args_ref = Ref(return_args)
     end
 
     result =
-        GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values temp_refs begin
+        GC.@preserve in_arg_types in_arg_values out_arg_types out_arg_values return_arg_types return_arg_values temp_refs begin
             @ccall $(call_interface_impl_fn[])(
                 implh::Int,
                 func_name::Cstring,
                 in_args::Ptr{OIFArgs},
                 out_args::Ptr{OIFArgs},
                 return_args_ref::Ptr{OIFArgs},
-            )::Int
+            )::Int32
         end
+
+
+    if result != 0
+        error(
+            "Error occurred while invoking function '$func_name' from implementation with id '$implh': in_user_args '$in_user_args', out_user_args '$out_user_args'",
+        )
+    end
 
     return_args_jl = Vector{Any}()
     if return_args != nothing
@@ -405,12 +416,6 @@ function call_impl(
             push!(return_args_jl, jl_var)
             @ccall $(oif_util_free_fn[])(void_pointer::Ptr{Cvoid})::Cvoid
         end
-    end
-
-    if result != 0
-        error(
-            "Error occurred while invoking function '$func_name' from implementation with id '$implh': in_user_args '$in_user_args', out_user_args '$out_user_args'",
-        )
     end
 
     return length(return_args_jl) > 0 ? return_args_jl : result
@@ -470,11 +475,13 @@ function make_oif_callback(
 
     fn_p_c = eval(cfunction_expr)
     # Convert the Julia function to a pointer.
-    fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, Ref(fn))
+    fn_ref = Ref(fn)
+    fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, fn_ref)
     # Python pointer should be null.
     fn_p_py = C_NULL
 
-    oif_argtypes_c_arr = pointer(collect(argtypes))
+    oif_argtypes_vec = collect(argtypes)
+    oif_argtypes_c_arr = pointer(oif_argtypes_vec)
     return OIFCallback(
         OIF_LANG_JULIA,
         fn_p_c,
@@ -483,6 +490,7 @@ function make_oif_callback(
         length(argtypes),
         oif_argtypes_c_arr,
         restype,
+        (fn_ref, oif_argtypes_vec),
     )
 end
 

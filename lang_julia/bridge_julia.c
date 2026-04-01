@@ -1,5 +1,6 @@
 #include <alloca.h>
 #include <assert.h>
+#include <limits.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -492,7 +493,6 @@ int
 call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *out_args,
           OIFArgs *return_args)
 {
-    (void)return_args;
     int result = -1;
 
     if (impl_info_->dh != OIF_LANG_JULIA) {
@@ -601,25 +601,61 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
         goto cleanup;
     }
 
-    if (retval_ == jl_nothing) {
-        result = 0;
+    if (return_args != NULL) {
+        for (int i = 0; i < return_args->num_args; i++) {
+            jl_value_t *item = jl_fieldref(retval_, i);
+            switch (return_args->arg_types[i]) {
+                case OIF_TYPE_INT:;  // clang-tidy complains that declaration after label
+                                     // is a "C23 extension" :-(
+                    int temp;
+                    if (jl_is_int64(item)) {
+                        int64_t temp_64 = jl_unbox_int64(item);
+                        if (temp_64 >= INT_MIN && temp_64 <= INT_MAX) {
+                            temp = temp_64;
+                        }
+                        else {
+                            logerr(prefix_,
+                                   "Truncation error due to default integers in Julia being "
+                                   "64-bit wide, while supported integers are 32-bit wide");
+                            goto cleanup;
+                        }
+                    }
+                    else if (jl_is_int32(item)) {
+                        temp = jl_unbox_int32(item);
+                    }
+                    else {
+                        logerr(
+                            prefix_,
+                            "Could not convert return value from Julia to C representation");
+                        goto cleanup;
+                    }
+                    return_args->arg_values[i] = oif_util_malloc(sizeof(int32_t));
+                    *(int32_t *)return_args->arg_values[i] = temp;
+                    break;
+
+                case OIF_TYPE_STRING:
+                    if (!jl_is_string(item)) {
+                        logerr(prefix_, "Expected string as a return value");
+                        goto cleanup;
+                    }
+                    const char *s = jl_string_ptr(item);
+                    size_t n = jl_string_len(item);
+                    char *buffer = oif_util_malloc(sizeof(char) * (n + 1));
+                    snprintf(buffer, n + 1, "%s", s);
+                    buffer[n] = '\0';
+                    return_args->arg_values[i] = buffer;
+                    break;
+
+                default:
+                    logerr(prefix_, "Could not convert return type");
+                    break;
+            }
+        }
     }
-    else if (jl_typeis(retval_, jl_int64_type)) {
-        result = (int)jl_unbox_int64(retval_);
-    }
-    else if (jl_typeis(retval_, jl_int32_type)) {
-        result = jl_unbox_int32(retval_);
-    }
-    else {
-        fprintf(stderr,
-                "[%s] Return value from calling a Julia implementation's "
-                "method '%s' is not of one of the following types "
-                "{nothing, int32, int64} and cannot be converted. "
-                "Make sure that the method returns zero or `nothing` "
-                "if there were no errors.\n",
-                prefix_, method);
-        goto cleanup;
-    }
+    result = 0;
+
+cleanup:
+    JL_GC_POP();
 
     if (result != 0) {
         fprintf(stderr,
@@ -629,9 +665,6 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
                 "error message\n",
                 prefix_, method);
     }
-
-cleanup:
-    JL_GC_POP();
 
     return result;
 }

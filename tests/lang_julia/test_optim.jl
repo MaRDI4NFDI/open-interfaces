@@ -4,8 +4,28 @@ using Test
 using OpenInterfaces
 using OpenInterfaces.Interfaces.Optim
 
-IMPLEMENTATIONS = ["scipy_optimize"]
-
+# -----------------------------------------------------------------------------
+# Checking what implementations are available.
+POTENTIAL_IMPLEMENTATIONS = ["scipy_optimize", "ipopt_jl"]
+IMPLEMENTATIONS = []
+for impl in POTENTIAL_IMPLEMENTATIONS
+    implh = load_impl("optim", impl, 1, 0)
+    if implh == OpenInterfaces.OIF_BRIDGE_NOT_AVAILABLE_ERROR
+        println(
+            "Bridge component for implementation '",
+            impl,
+            "' is not available. Skipping the test",
+        )
+        continue
+    end
+    if implh == OpenInterfaces.OIF_IMPL_NOT_AVAILABLE_ERROR
+        println("Implementation ", impl, " is not available. Skipping the test")
+        continue
+    end
+    unload_impl(implh)
+    push!(IMPLEMENTATIONS, impl)
+end
+# -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
 # Problems
@@ -27,7 +47,7 @@ end
 # -----------------------------------------------------------------------------
 
 
-@testset "Testing Optim interface from Julia" begin
+@testset verbose = true "Testing Optim interface from Julia" begin
 
     function test(testCore)
         for impl in IMPLEMENTATIONS
@@ -87,14 +107,17 @@ end
         end
     end
 
-    @testset "test__parameterized_convex_problem__converges_better_with_tigher_tolerance" begin
-        test() do self
+    # -------------------------------------------------------------------------
+    if "scipy_optimize" in IMPLEMENTATIONS
+        @testset "scipy_minimize__rosenbrock_fn__converges_better_with_tighter_tol" begin
+            self = Optim.Self("scipy_optimize")
             x0 = [0.5, 0.6, 0.7]
-            user_data = [2.0, 7.0, -1.0]
+            x_expected = [1.0, 1.0, 1.0]
+            user_data = (10, -1)
 
             Optim.set_initial_guess(self, x0)
             Optim.set_user_data(self, user_data)
-            Optim.set_objective_fn(self, convex_objective_with_args_fn)
+            Optim.set_objective_fn(self, rosenbrock_objective_fn)
 
             Optim.set_method(self, "nelder-mead", Dict("xatol" => 1e-6))
             status, message = Optim.minimize(self)
@@ -104,9 +127,40 @@ end
             status, message = Optim.minimize(self)
             x_2 = copy(self.x)
 
-            @test norm(x_2 .- user_data) < norm(x_1 .- user_data)
+            @test norm(x_2 .- x_expected) < norm(x_1 .- x_expected)
         end
+    else
+        @test_skip println(
+            "Implementation 'scipy_optimize' not available. Skipping the test",
+        )
     end
+
+    # -------------------------------------------------------------------------
+    if "ipopt_jl" in IMPLEMENTATIONS
+        @testset "ipopt_jl__rosenbrock_fn__converges_better_with_tighter_tol" begin
+            self = Optim.Self("ipopt_jl")
+            x0 = [0.5, 0.6, 0.7]
+            x_expected = [1.0, 1.0, 1.0]
+            user_data = (10, -1)
+
+            Optim.set_initial_guess(self, x0)
+            Optim.set_user_data(self, user_data)
+            Optim.set_objective_fn(self, rosenbrock_objective_fn)
+
+            Optim.set_method(self, "", Dict("tol" => 1e-1))
+            status, message = Optim.minimize(self)
+            x_1 = copy(self.x)
+
+            Optim.set_method(self, "", Dict("tol" => 1e-4))
+            status, message = Optim.minimize(self)
+            x_2 = copy(self.x)
+
+            @test norm(x_2 .- x_expected) < norm(x_1 .- x_expected)
+        end
+    else
+        @test_skip println("Implementation 'ipopt_jl' not available. Skipping the test")
+    end
+    # -------------------------------------------------------------------------
 
     @testset "test__set_method_with__wrong_method_params__are_not_accepted" begin
         test() do self
