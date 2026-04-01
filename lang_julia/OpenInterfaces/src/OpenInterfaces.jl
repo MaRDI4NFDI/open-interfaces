@@ -476,11 +476,12 @@ function make_oif_callback(
     fn_p_c = eval(cfunction_expr)
     # Convert the Julia function to a pointer.
     fn_ref = Ref(fn)
-    fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, Ref(fn))
+    fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, fn_ref)
     # Python pointer should be null.
     fn_p_py = C_NULL
 
-    oif_argtypes_c_arr = pointer(collect(argtypes))
+    oif_argtypes_vec = collect(argtypes)
+    oif_argtypes_c_arr = pointer(oif_argtypes_vec)
     return OIFCallback(
         OIF_LANG_JULIA,
         fn_p_c,
@@ -489,7 +490,7 @@ function make_oif_callback(
         length(argtypes),
         oif_argtypes_c_arr,
         restype,
-        fn_ref,
+        (fn_ref, oif_argtypes_vec),
     )
 end
 
