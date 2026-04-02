@@ -96,6 +96,16 @@ double const ORDER_OF_ACC = 4;
 static void
 compute_initial_step_(Self *self)
 {
+    if (self->rhs_fn == NULL) {
+        logerr(prefix_, "Invoke `set_rhs_fn` first");
+        return;
+    }
+
+    if (self->y == NULL) {
+        logerr(prefix_, "Invoke `set_initial_value` first");
+        return;
+    }
+
     double h0;
     double h1;
 
@@ -264,6 +274,7 @@ set_tolerances(Self *self, double rtol, double atol)
     (void)self;  // Unused in this implementation.
     self->rtol = rtol;
     self->atol = atol;
+    compute_initial_step_(self);
     return 0;
 }
 
