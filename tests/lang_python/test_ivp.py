@@ -7,7 +7,7 @@ import pytest
 from openinterfaces.interfaces.ivp import IVP
 from scipy import optimize
 
-POSSIBLE_IMPLEMENTATIONS = ["scipy_ode", "sundials_cvode", "jl_diffeq"]
+POSSIBLE_IMPLEMENTATIONS = ["scipy_ode", "dopri5c", "sundials_cvode", "jl_diffeq"]
 IMPLEMENTATION_LIST = []
 
 for impl in POSSIBLE_IMPLEMENTATIONS:
