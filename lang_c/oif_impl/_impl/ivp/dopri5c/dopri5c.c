@@ -284,6 +284,7 @@ set_integrator(Self *self, const char *integrator_name, OIFConfigDict *config_)
     (void)self;  // Unused in this implementation.
     (void)integrator_name;
     (void)config_;
+    oif_config_dict_free(config_);
     fprintf(stderr, "[%s] Method `set_integrator` is not supported\n", prefix_);
     return 1;
 }
