@@ -278,7 +278,7 @@ struct IvpImplementationsFixture : public testing::TestWithParam<const char *> {
 };
 
 INSTANTIATE_TEST_SUITE_P(IvpImplementationsTests, IvpImplementationsFixture,
-                         testing::Values("sundials_cvode"
+                         testing::Values("sundials_cvode", "dopri5c"
 #if !defined(OIF_SANITIZE_ADDRESS_ENABLED)
                                          ,
                                          "scipy_ode", "jl_diffeq"

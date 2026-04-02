@@ -121,7 +121,7 @@ function MildlyStiffODESystem()
 end
 
 
-POTENTIAL_IMPLEMENTATIONS = ["sundials_cvode", "jl_diffeq", "scipy_ode"]
+POTENTIAL_IMPLEMENTATIONS = ["sundials_cvode", "dopri5c", "jl_diffeq", "scipy_ode"]
 IMPLEMENTATIONS = []
 for impl in POTENTIAL_IMPLEMENTATIONS
     implh = load_impl("ivp", impl, 1, 0)
@@ -151,6 +151,9 @@ end
 if "scipy_ode" in IMPLEMENTATIONS
     INTEGRATORS["scipy_ode"] = ["vode", "lsoda", "dopri5", "dop853"]
 end
+if "dopri5c" in IMPLEMENTATIONS
+    INTEGRATORS["dopri5c"] = []
+end
 
 PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsProblem()]
 
@@ -176,8 +179,12 @@ PROBLEMS = [ScalarExpDecayProblem(), LinearOscillatorProblem(), OrbitEquationsPr
     function fixture_impl_integrators_prob(test_func)
         for impl in IMPLEMENTATIONS
             integrators = INTEGRATORS[impl]
-            prob = OrbitEquationsProblem()
-            test_func(impl, integrators, prob)
+            if length(integrators) == 0
+                println("Implementation $(impl) does not support setting integrators")
+            else
+                prob = OrbitEquationsProblem()
+                test_func(impl, integrators, prob)
+            end
         end
     end
 
