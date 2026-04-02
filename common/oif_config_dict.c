@@ -31,6 +31,8 @@ static size_t SIZE_ = 65;
 #define MAX_KEY_LENGTH_ 1024
 #define BUF_SIZE_ 128
 
+static char prefix_[] = "oif_config_dict";
+
 static char *
 copy_key_(const char *key)
 {
@@ -280,6 +282,18 @@ oif_config_dict_print(OIFConfigDict *dict)
 void
 oif_config_dict_serialize(OIFConfigDict *dict)
 {
+    if (dict == NULL) {
+        logerr(prefix_, "Serialization is possible only for non-NULL dict");
+        exit(1);
+    }
+
+    // Probably, not the best solution, as multiple invocation of serialization
+    // should be possible, but I just want to rectify a memory leak for now.
+    if (dict->pc != NULL) {
+        logerr(prefix_, "Serialization was already done");
+        exit(1);
+    }
+
     cw_pack_context *pc = oif_util_malloc(sizeof(*pc));
     if (pc == NULL) {
         fprintf(stderr,
@@ -471,7 +485,8 @@ oif_config_dict_copy_serialization(OIFConfigDict *to, const OIFConfigDict *from)
     }
     memcpy(to->buffer, from->buffer, from->buffer_length);
     to->buffer_length = from->buffer_length;
-    to->buffer[to->buffer_length] = '\0';  // Ensure null-termination.
+    // We put nul-terminator to be able to print out the buffer as a string.
+    to->buffer[to->buffer_length] = '\0';
     return 0;
 }
 
