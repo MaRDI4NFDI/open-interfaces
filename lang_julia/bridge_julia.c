@@ -47,27 +47,34 @@ typedef struct {
 static void
 handle_exception_(void)
 {
-    jl_value_t *exc = jl_exception_occurred();
+    jl_value_t *exc;  // Exception
+    jl_value_t *sprint_fn;
+    jl_value_t *showerror_fn;
+    jl_value_t *catch_backtrace_fn;
+    jl_value_t *backtrace;
+    JL_GC_PUSH5(&exc, &sprint_fn, &showerror_fn, &catch_backtrace_fn, &backtrace);
+
+    exc = jl_exception_occurred();
     if (exc == NULL) {
         fprintf(stderr, "[%s] No exception occurred\n", prefix_);
         exit(1);
     }
-    jl_value_t *sprint_fn = jl_get_function(jl_base_module, "sprint");
+    sprint_fn = jl_get_function(jl_base_module, "sprint");
     if (sprint_fn == NULL) {
         fprintf(stderr, "[%s] Could not find `sprint` function in the Base module\n", prefix_);
     }
-    jl_value_t *showerror_fn = jl_get_function(jl_base_module, "showerror");
+    showerror_fn = jl_get_function(jl_base_module, "showerror");
     if (showerror_fn == NULL) {
         fprintf(stderr, "[%s] Could not find `showerror` function in the Base module\n",
                 prefix_);
     }
-    jl_value_t *catch_backtrace_fn = jl_get_function(jl_base_module, "catch_backtrace");
+    catch_backtrace_fn = jl_get_function(jl_base_module, "catch_backtrace");
     if (catch_backtrace_fn == NULL) {
         fprintf(stderr, "[%s] Could not find `catch_backtrace` function in the Base module\n",
                 prefix_);
     }
 
-    jl_value_t *backtrace = jl_call0(catch_backtrace_fn);
+    backtrace = jl_call0(catch_backtrace_fn);
     if (backtrace == NULL) {
         fprintf(stderr, "[%s] Could not get backtrace\n", prefix_);
         exit(1);
@@ -76,6 +83,8 @@ handle_exception_(void)
     logerr(prefix_, "%s", exc_msg);
 
     jl_exception_clear();
+
+    JL_GC_POP();
 }
 
 static void
@@ -299,9 +308,11 @@ static inline jl_value_t *
 get_julia_array_from_oif_arrayf64(OIFArrayF64 **value)
 {
     jl_value_t *julia_array;
+    jl_value_t *arr_type;
+    JL_GC_PUSH1(&arr_type);  // Root `arr_type` to prevent garbage collecting.
 
     OIFArrayF64 *oif_array = *value;
-    jl_value_t *arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, oif_array->nd);
+    arr_type = jl_apply_array_type((jl_value_t *)jl_float64_type, oif_array->nd);
     jl_value_t *dims =
         build_julia_tuple_from_size_t_array(oif_array->dimensions, oif_array->nd);
     bool own_buffer = false;
@@ -313,6 +324,7 @@ get_julia_array_from_oif_arrayf64(OIFArrayF64 **value)
         julia_array = jl_call1(transpose_fn, julia_array);
     }
 
+    JL_GC_POP();
     return julia_array;
 }
 
@@ -571,7 +583,7 @@ call_impl(ImplInfo *impl_info_, const char *method, OIFArgs *in_args, OIFArgs *o
 
     for (int32_t i = 0; i < out_num_args; ++i) {
         if (out_args->arg_types[i] == OIF_TYPE_F64) {
-            cur_julia_arg = jl_box_float64(*(float *)out_args->arg_values[i]);
+            cur_julia_arg = jl_box_float64(*(double *)out_args->arg_values[i]);
         }
         else if (out_args->arg_types[i] == OIF_TYPE_ARRAY_F64) {
             cur_julia_arg = get_julia_array_from_oif_arrayf64(out_args->arg_values[i]);
