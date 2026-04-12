@@ -94,7 +94,7 @@ jobs:
 
             - name: Build
               run: |
-                  make
+                  make debug
             - name: Run tests
               run: |
                   make test
