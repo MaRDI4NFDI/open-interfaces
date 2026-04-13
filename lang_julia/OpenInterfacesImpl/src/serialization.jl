@@ -30,7 +30,10 @@ function deserialize(sd::Ptr)::Dict
         i += 1
     end
 
-    @assert length(data) % 2 == 0 "Expected to deserialize to a list of even length. Got this: $data"
+    @assert length(data) % 2 == 0 (
+        "Expected to deserialize the string '$sd_str' to a list of even length.\n" *
+        "Got this list instead: $data"
+    )
 
     resultant_dict = Dict()
     i = 1
