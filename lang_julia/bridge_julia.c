@@ -47,11 +47,11 @@ typedef struct {
 static void
 handle_exception_(void)
 {
-    jl_value_t *exc;  // Exception
-    jl_value_t *sprint_fn;
-    jl_value_t *showerror_fn;
-    jl_value_t *catch_backtrace_fn;
-    jl_value_t *backtrace;
+    jl_value_t *exc = NULL;  // Exception
+    jl_value_t *sprint_fn = NULL;
+    jl_value_t *showerror_fn = NULL;
+    jl_value_t *catch_backtrace_fn = NULL;
+    jl_value_t *backtrace = NULL;
     JL_GC_PUSH5(&exc, &sprint_fn, &showerror_fn, &catch_backtrace_fn, &backtrace);
 
     exc = jl_exception_occurred();
