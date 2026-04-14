@@ -98,7 +98,6 @@ mutable struct OIFArrayF64
     dimensions::Ptr{Cssize_t}
     data::Ptr{Float64}
     flags::Int32
-    hidden::Tuple
 
     function OIFArrayF64(arr::AbstractArray{Float64})
         dims = collect(Cssize_t, size(arr))
@@ -113,10 +112,9 @@ mutable struct OIFArrayF64
             Base.unsafe_convert(Ptr{Cssize_t}, dims),
             Base.unsafe_convert(Ptr{Float64}, arr),
             flags,
-            (dims,),  # Preserve array `dims`, otherwise, it leads to a dangling pointer.
         )
 
-        return self
+        return GC.@preserve dims self
     end
 end
 
