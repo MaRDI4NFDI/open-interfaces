@@ -458,7 +458,8 @@ function make_oif_callback(
     c_argtypes_expr = Expr(:tuple, (map(t -> QuoteNode(t), c_argtypes))...)
     cfunction_expr = :(@cfunction($fn_wrapper, $c_restype, $c_argtypes_expr))
 
-    fn_p_c = eval(cfunction_expr)
+    fn_c = eval(cfunction_expr)
+    fn_p_c = Base.unsafe_convert(Ptr{Cvoid}, fn_c)
     # Convert the Julia function to a pointer.
     fn_ref = Ref(fn)
     fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, fn_ref)
@@ -475,7 +476,7 @@ function make_oif_callback(
         length(argtypes),
         oif_argtypes_c_arr,
         restype,
-        (fn_ref, oif_argtypes_vec),
+        (fn_c, fn_ref, oif_argtypes_vec),
     )
 end
 
