@@ -13,7 +13,8 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                python-version: ['3.10', '3.11', '3.12', '3.13']
+                python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+                julia-version: ['1.11', '1.12']
         defaults:
             run:
                 shell: bash -l {0}
@@ -21,6 +22,7 @@ jobs:
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
+
             - name: Setup conda environment
               uses: conda-incubator/setup-miniconda@v3
               with:
@@ -28,32 +30,35 @@ jobs:
                   miniforge-version: latest
                   activate-environment: test
                   environment-file: environment-linux.yaml
+
             - name: Get Date
               id: get-date
-              run: echo "name=date::$(/bin/date -u "+%Y%m%d")" >> "$GITHUB_OUTPUT"
+              run: echo "date=$(/bin/date -u "+%Y%m%d")" >> "$GITHUB_OUTPUT"
 
-            - name: Cache Conda env
-              uses: actions/cache@v4
-              env:
-                  # Increase this value to reset cache
-                  # if etc/example-environment.yml has not changed.
-                  CACHE_NUMBER: 0
-              with:
-                  path: ~/conda_pkgs_dir
-                  key: ${{ runner.os }}-python-${{ matrix.python-version }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment-linux.yaml') }}
-              id: cache
+            # - name: Cache Conda env
+            #   uses: actions/cache@v4
+            #   env:
+            #       # Increase this value to reset cache
+            #       # if etc/example-environment.yml has not changed.
+            #       CACHE_NUMBER: 1
+            #   with:
+            #       path: ~/conda_pkgs_dir
+            #       key: ${{ runner.os }}-python-${{ matrix.python-version }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment-linux.yaml') }}
+            #   id: cache
 
-            - name: Update environment
-              run: |
-                  conda env update --file environment-linux.yaml --name test
-              if: steps.cache.outputs.cache-hit != 'true'
+#             - name: Update environment
+#               run: |
+#                   conda env update --file environment-linux.yaml --name test
+#               # if: steps.cache.outputs.cache-hit != 'true'
 
             - name: Set up Julia
               uses: julia-actions/setup-julia@v2
               with:
-                  version: '1.11'
-            - name: Cache Julia artifacts
-              uses: julia-actions/cache@v2
+                  version: ${{ matrix.julia-version }}
+
+            # - name: Cache Julia artifacts
+            #   uses: julia-actions/cache@v1
+
             - name: Activate Julia environment
               run: |
                   julia --project=. -e "using Pkg; Pkg.instantiate()"
@@ -90,7 +95,7 @@ jobs:
 
             - name: Build
               run: |
-                  make
+                  make debug
             - name: Run tests
               run: |
                   make test

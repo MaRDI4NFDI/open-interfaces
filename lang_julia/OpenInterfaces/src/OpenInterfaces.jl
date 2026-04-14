@@ -93,11 +93,29 @@ struct OIFArgs
     arg_values::Ptr{Ptr{Cvoid}}
 end
 
-struct OIFArrayF64
+mutable struct OIFArrayF64
     nd::Int32
     dimensions::Ptr{Cssize_t}
     data::Ptr{Float64}
     flags::Int32
+
+    function OIFArrayF64(arr::AbstractArray{Float64})
+        dims = collect(Cssize_t, size(arr))
+        flags = OIF_ARRAY_F_CONTIGUOUS
+
+        if length(dims) == 1
+            flags = OIF_ARRAY_C_CONTIGUOUS | OIF_ARRAY_F_CONTIGUOUS
+        end
+
+        self = new(
+            ndims(arr),
+            Base.unsafe_convert(Ptr{Cssize_t}, dims),
+            Base.unsafe_convert(Ptr{Float64}, arr),
+            flags,
+        )
+
+        return GC.@preserve dims self
+    end
 end
 
 struct OIFCallback
@@ -252,24 +270,7 @@ function call_impl(
             push!(temp_refs, arg_ref)
             in_arg_values[i] = Base.unsafe_convert(Ptr{Cvoid}, arg_ref)
         elseif typeof(arg) <: AbstractArray{Float64}
-            nd = ndims(arg)
-
-            dims_jl = collect(size(arg))
-            push!(temp_refs, dims_jl)
-            dimensions = Base.unsafe_convert(Ptr{Clong}, dims_jl)
-            push!(temp_refs, dimensions)
-            data = pointer(arg)
-            push!(temp_refs, data)
-
-            if nd == 1
-                # One-dimensional arrays are both C and Fortran-contiguous.
-                flags = OIF_ARRAY_C_CONTIGUOUS | OIF_ARRAY_F_CONTIGUOUS
-            else
-                # Julia arrays are Fortran-contiguous by default.
-                flags = OIF_ARRAY_F_CONTIGUOUS
-            end
-
-            arr = OIFArrayF64(nd, dimensions, data, flags)
+            arr = OIFArrayF64(arg)
             push!(temp_refs, arr)
 
             arr_ref = Ref(arr)
@@ -331,23 +332,7 @@ function call_impl(
             out_arg_types[i] = OIF_TYPE_F64
             out_arg_values[i] = pointer(arg)
         elseif typeof(arg) <: AbstractArray{Float64}
-            nd = ndims(arg)
-            dims_jl = collect(size(arg))
-            push!(temp_refs, dims_jl)
-            dimensions = Base.unsafe_convert(Ptr{Clong}, dims_jl)
-            push!(temp_refs, dimensions)
-            data = pointer(arg)
-            push!(temp_refs, data)
-
-            if nd == 1
-                # One-dimensional arrays are both C and Fortran-contiguous.
-                flags = OIF_ARRAY_C_CONTIGUOUS | OIF_ARRAY_F_CONTIGUOUS
-            else
-                # Julia arrays are Fortran-contiguous by default.
-                flags = OIF_ARRAY_F_CONTIGUOUS
-            end
-
-            arr = OIFArrayF64(nd, dimensions, data, flags)
+            arr = OIFArrayF64(arg)
             push!(temp_refs, arr)
 
             arr_ref = Ref(arr)
@@ -473,7 +458,8 @@ function make_oif_callback(
     c_argtypes_expr = Expr(:tuple, (map(t -> QuoteNode(t), c_argtypes))...)
     cfunction_expr = :(@cfunction($fn_wrapper, $c_restype, $c_argtypes_expr))
 
-    fn_p_c = eval(cfunction_expr)
+    fn_c = eval(cfunction_expr)
+    fn_p_c = Base.unsafe_convert(Ptr{Cvoid}, fn_c)
     # Convert the Julia function to a pointer.
     fn_ref = Ref(fn)
     fn_p_jl = Base.unsafe_convert(Ptr{Cvoid}, fn_ref)
@@ -490,7 +476,7 @@ function make_oif_callback(
         length(argtypes),
         oif_argtypes_c_arr,
         restype,
-        (fn_ref, oif_argtypes_vec),
+        (fn_c, fn_ref, oif_argtypes_vec),
     )
 end
 
