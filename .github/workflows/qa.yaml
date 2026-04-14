@@ -46,10 +46,10 @@ jobs:
             #       key: ${{ runner.os }}-python-${{ matrix.python-version }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment-linux.yaml') }}
             #   id: cache
 
-            - name: Update environment
-              run: |
-                  conda env update --file environment-linux.yaml --name test
-              # if: steps.cache.outputs.cache-hit != 'true'
+#             - name: Update environment
+#               run: |
+#                   conda env update --file environment-linux.yaml --name test
+#               # if: steps.cache.outputs.cache-hit != 'true'
 
             - name: Set up Julia
               uses: julia-actions/setup-julia@v2
