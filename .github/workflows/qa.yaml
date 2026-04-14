@@ -56,8 +56,9 @@ jobs:
               with:
                   version: ${{ matrix.julia-version }}
 
-            - name: Cache Julia artifacts
-              uses: julia-actions/cache@v1
+            # - name: Cache Julia artifacts
+            #   uses: julia-actions/cache@v1
+
             - name: Activate Julia environment
               run: |
                   julia --project=. -e "using Pkg; Pkg.instantiate()"
