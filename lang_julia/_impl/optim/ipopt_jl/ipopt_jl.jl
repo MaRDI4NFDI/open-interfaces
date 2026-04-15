@@ -32,7 +32,10 @@ function set_objective_fn(self::Self, objective_fn)
 end
 
 function set_method(self, method_name, method_params)
-    println("[ipopt_jl] `method_name` is not supported by this implementation")
+    println(
+        "[ivp::ipopt_jl::set_method] Parameter `method_name` is not supported " *
+        "by this implementation"
+    )
 
     # To check that we have valid parameters,
     # we use a simple model and optimize a convex problem on it.
