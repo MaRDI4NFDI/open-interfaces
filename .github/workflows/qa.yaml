@@ -90,7 +90,7 @@ jobs:
 
             - name: Build
               run: |
-                  make debug
+                  make release
             - name: Run tests
               run: |
                   make test
