@@ -147,3 +147,7 @@ build.release/
 
 # Test coverage files
 coverage.*
+
+
+# Julia artifacts
+Manifest.toml
