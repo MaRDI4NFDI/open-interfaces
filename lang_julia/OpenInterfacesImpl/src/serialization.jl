@@ -2,11 +2,12 @@ module OIFSerialization
 export deserialize
 import MsgPack
 
-function deserialize(sd::Ptr)::Dict
+function deserialize(sd::Ptr, len::Csize_t)::Dict
     # We get unsigned bytes and it is important to keep them this way
     # to get correct conversion.
     sd_str = unsafe_string(Ptr{UInt8}(sd))
-    io = IOBuffer(sd_str)
+    sd_bytes = unsafe_wrap(Array, Ptr{UInt8}(sd), len; own=false);
+    io = IOBuffer(sd_bytes)
 
     data = []
     i = 1
