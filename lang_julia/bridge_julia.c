@@ -236,7 +236,8 @@ deserialize_config_dict(OIFConfigDict *dict)
 {
     jl_value_t *julia_dict = NULL;
     jl_value_t *buffer_c_str = NULL;
-    JL_GC_PUSH1(&buffer_c_str);  // NOLINT
+    jl_value_t *buffer_len = NULL;
+    JL_GC_PUSH2(&buffer_c_str, &buffer_len);  // NOLINT
     if (SERIALIZATION_MODULE_ == NULL) {
         /* char include_statement[512]; */
         /* int nchars_written = snprintf(include_statement, 512, */
@@ -278,10 +279,15 @@ deserialize_config_dict(OIFConfigDict *dict)
             handle_exception_();
             goto cleanup;
         }
+        buffer_len = jl_box_uint64(oif_config_dict_get_serialized_object_length(dict));
+        if (jl_exception_occurred()) {
+            handle_exception_();
+            goto cleanup;
+        }
         jl_function_t *deserialize_fn = jl_get_function(SERIALIZATION_MODULE_, "deserialize");
         assert(deserialize_fn != NULL);
 
-        julia_dict = jl_call1(deserialize_fn, buffer_c_str);
+        julia_dict = jl_call2(deserialize_fn, buffer_c_str, buffer_len);
         if (jl_exception_occurred()) {
             handle_exception_();
             goto cleanup;
