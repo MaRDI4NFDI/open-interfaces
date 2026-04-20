@@ -6,6 +6,10 @@ export Self, set_initial_guess
 
 using Optim
 
+GENERAL_OPTIONS_NAMES = [
+        "x_abstol", "x_reltol",
+        "f_abstol", "f_reltol", "g_abstol", "f_calls_limit", "g_calls_limit", "h_calls_limit", "allow_f_increases", "successive_f_tol", "iterations", "time_limit", "callback"]
+
 
 mutable struct Self
     x0::Vector{Float64}
@@ -14,8 +18,9 @@ mutable struct Self
     method_name::String
     method_params::Dict
     method::Any
+    general_options::Dict
     function Self()
-        return new([], nothing, nothing, "BFGS", Dict(), BFGS())
+        return new([], nothing, nothing, "BFGS", Dict(), BFGS(), Dict())
     end
 end
 
@@ -33,11 +38,15 @@ function set_objective_fn(self::Self, objective_fn)
 end
 
 function set_method(self, method_name, method_params)
+    println(
+        "[optim::optim_jl] To check available configuration options, " *
+        "see https://julianlsolvers.github.io/Optim.jl/stable/user/config/"
+    )
     general_options = Dict()
     method_options = Dict()
 
     for (k, v) in method_params
-        if k in general_options_names
+        if k in GENERAL_OPTIONS_NAMES
             general_options[k] = v
         else
             method_options[k] = v
@@ -46,11 +55,12 @@ function set_method(self, method_name, method_params)
 
     method_symbol = Symbol(method_name)
     if (!isdefined(Optim, method_symbol))
-        error("Unknown or unsupported method '$method_name'. Supported methods are: $supported_methods")
+        error("Unknown or unsupported method '$method_name'")
     end
     self.method_name = method_name
     self.method_params = merge(self.method_params, method_params)
     self.method = getfield(Optim, method_symbol)(; method_options)
+    self.general_options = general_options
 end
 
 function minimize(self::Self, out_x)::Tuple{Int,String}
@@ -61,7 +71,7 @@ function minimize(self::Self, out_x)::Tuple{Int,String}
 
     wrapper(x) = self.objective_fn(x, self.user_data)
 
-    result::Optim.MultivariateOptimizationResults = optimize(wrapper, self.x0, self.method)
+    result::Optim.MultivariateOptimizationResults = optimize(wrapper, self.x0, self.method, Optim.Options(; self.general_options...))
     out_x[:] = copy(Optim.minimizer(result))
 
     println("res = ", result)
