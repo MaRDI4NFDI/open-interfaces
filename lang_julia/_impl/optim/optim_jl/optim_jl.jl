@@ -7,8 +7,9 @@ export Self, set_initial_guess
 using Optim
 
 GENERAL_OPTIONS_NAMES = [
-        "x_abstol", "x_reltol",
-        "f_abstol", "f_reltol", "g_abstol", "f_calls_limit", "g_calls_limit", "h_calls_limit", "allow_f_increases", "successive_f_tol", "iterations", "time_limit", "callback"]
+        :x_abstol, :x_reltol,
+        :f_abstol, :f_reltol,
+        :g_abstol, :f_calls_limit, :g_calls_limit, :h_calls_limit, :allow_f_increases, :successive_f_tol, :iterations, :time_limit, :callback]
 
 
 mutable struct Self
