@@ -6,7 +6,7 @@ using OpenInterfaces.Interfaces.Optim
 
 # -----------------------------------------------------------------------------
 # Checking what implementations are available.
-POTENTIAL_IMPLEMENTATIONS = ["scipy_optimize", "ipopt_jl"]
+POTENTIAL_IMPLEMENTATIONS = ["scipy_optimize", "ipopt_jl", "optim_jl"]
 IMPLEMENTATIONS = []
 for impl in POTENTIAL_IMPLEMENTATIONS
     implh = load_impl("optim", impl, 1, 0)
@@ -56,6 +56,8 @@ end
         end
     end
 
+    # -------------------------------------------------------------------------
+    # General tests that do not depend on an implementation.
     @testset "test__simple_convex_problem__converges" begin
         test() do self
             x0 = [0.5, 0.6, 0.7]
@@ -104,6 +106,16 @@ end
             @test status == 0
             @test length(x) == length(x0)
             @test all(abs.(x .- user_data) .< 1e-6)
+        end
+    end
+
+    @testset "test__set_method_with__wrong_method_params__are_not_accepted" begin
+        test() do self
+            @test_throws ErrorException Optim.set_method(
+                self,
+                "BFGS",
+                Dict("wrong_param" => 42),
+            )
         end
     end
 
@@ -162,14 +174,38 @@ end
     end
     # -------------------------------------------------------------------------
 
-    @testset "test__set_method_with__wrong_method_params__are_not_accepted" begin
-        test() do self
-            @test_throws ErrorException Optim.set_method(
-                self,
-                "nelder-mead",
-                Dict("wrong_param" => 42),
-            )
+    # -------------------------------------------------------------------------
+    if "optim_jl" in IMPLEMENTATIONS
+        @testset "optim_jl__rosenbrock_fn__converges_better_with_tighter_tol" begin
+            # The implementation of the Nelder-Mead algorithm in Optim.jl
+            # uses a criterion from the original paper [1, p. 309]
+            # which estimates a biased variance of the function values
+            # on the current simplex vertices and stops the optimization
+            # procedure when it is smaller than the tolerance given
+            # by the parameter `g_abstol`.
+            # [1] Nelder, Mead. 1965. A simplex method for function minimization.
+            self = Optim.Self("optim_jl")
+            x0 = [0.5, 0.6, 0.7]
+            x_expected = [1.0, 1.0, 1.0]
+            user_data = (10, -1)
+
+            Optim.set_initial_guess(self, x0)
+            Optim.set_user_data(self, user_data)
+            Optim.set_objective_fn(self, rosenbrock_objective_fn)
+
+            Optim.set_method(self, "NelderMead", Dict("g_abstol" => 1e-4))
+            status, message = Optim.minimize(self)
+            x_1 = copy(self.x)
+
+            Optim.set_method(self, "NelderMead", Dict("g_abstol" => 1e-8))
+            status, message = Optim.minimize(self)
+            x_2 = copy(self.x)
+
+            @test norm(x_2 .- x_expected) < norm(x_1 .- x_expected)
         end
+    else
+        @test_skip println("Implementation 'optim_jl' not available. Skipping the test")
     end
+    # -------------------------------------------------------------------------
 
 end
