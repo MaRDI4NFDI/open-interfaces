@@ -6,7 +6,7 @@ function deserialize(sd::Ptr, len::Csize_t)::Dict
     # We get unsigned bytes and it is important to keep them this way
     # to get correct conversion.
     sd_str = unsafe_string(Ptr{UInt8}(sd))
-    sd_bytes = unsafe_wrap(Array, Ptr{UInt8}(sd), len; own=false);
+    sd_bytes = unsafe_wrap(Array, Ptr{UInt8}(sd), len; own = false);
     io = IOBuffer(sd_bytes)
 
     data = []

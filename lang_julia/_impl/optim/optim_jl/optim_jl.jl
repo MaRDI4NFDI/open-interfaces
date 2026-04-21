@@ -7,9 +7,20 @@ export Self, set_initial_guess
 using Optim
 
 GENERAL_OPTIONS_NAMES = [
-        :x_abstol, :x_reltol,
-        :f_abstol, :f_reltol,
-        :g_abstol, :f_calls_limit, :g_calls_limit, :h_calls_limit, :allow_f_increases, :successive_f_tol, :iterations, :time_limit, :callback]
+    :x_abstol,
+    :x_reltol,
+    :f_abstol,
+    :f_reltol,
+    :g_abstol,
+    :f_calls_limit,
+    :g_calls_limit,
+    :h_calls_limit,
+    :allow_f_increases,
+    :successive_f_tol,
+    :iterations,
+    :time_limit,
+    :callback,
+]
 
 
 mutable struct Self
@@ -41,7 +52,7 @@ end
 function set_method(self, method_name, method_params)
     println(
         "[optim::optim_jl] To check available configuration options, " *
-        "see https://julianlsolvers.github.io/Optim.jl/stable/user/config/"
+        "see https://julianlsolvers.github.io/Optim.jl/stable/user/config/",
     )
     general_options = Dict()
     method_options = Dict()
@@ -72,7 +83,8 @@ function minimize(self::Self, out_x)::Tuple{Int,String}
 
     wrapper(x) = self.objective_fn(x, self.user_data)
 
-    result::Optim.MultivariateOptimizationResults = optimize(wrapper, self.x0, self.method, Optim.Options(; self.general_options...))
+    result::Optim.MultivariateOptimizationResults =
+        optimize(wrapper, self.x0, self.method, Optim.Options(; self.general_options...))
     out_x[:] = copy(Optim.minimizer(result))
 
     println("res = ", result)
@@ -86,8 +98,7 @@ function minimize(self::Self, out_x)::Tuple{Int,String}
     if Optim.converged(result) == true
         message = "The algorithm has converged"
     else
-        message =
-            "The algorithm has not converged"
+        message = "The algorithm has not converged"
     end
 
     return (status, message)
