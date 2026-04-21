@@ -34,7 +34,7 @@ end
 function set_method(self, method_name, method_params)
     println(
         "[ivp::ipopt_jl::set_method] Parameter `method_name` is not supported " *
-        "by this implementation"
+        "by this implementation",
     )
 
     # To check that we have valid parameters,
