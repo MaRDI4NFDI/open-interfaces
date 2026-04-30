@@ -6,18 +6,18 @@ using OpenInterfaces
 function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restype)::Function
     c_argtypes = Tuple(
         map(argtype -> begin
-            if argtype == OIF_TYPE_I32
-                Cint
-            elseif argtype == OIF_TYPE_F64
-                Cdouble
-            elseif argtype == OIF_TYPE_ARRAY_F64
-                Ptr{OIFArrayF64}
-            elseif argtype == OIF_USER_DATA
-                Ptr{Cvoid}
-            else
-                error("Unsupported argument type: $argtype")
-            end
-        end, oif_argtypes)
+                if argtype == OIF_TYPE_I32
+                    Cint
+                elseif argtype == OIF_TYPE_F64
+                    Cdouble
+                elseif argtype == OIF_TYPE_ARRAY_F64
+                    Ptr{OIFArrayF64}
+                elseif argtype == OIF_USER_DATA
+                    Ptr{Cvoid}
+                else
+                    error("Unsupported argument type: $argtype")
+                end
+            end, oif_argtypes)
     )
 
     # Build a concrete Tuple type e.g. Tuple{Cdouble,Cdouble}.
@@ -37,7 +37,21 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restyp
         end
 
     function wrapper(args::Tuple)
-        return call_c(fn_c, c_argtypes_type, c_restype, args)
+        c_args_from_jl_args = Tuple(
+            map((argtype, argvalue) -> begin
+                    if argtype == OIF_TYPE_I32
+                        argvalue
+                    elseif argtype == OIF_TYPE_F64
+                        argvalue
+                    elseif argtype == OIF_TYPE_ARRAY_F64
+                        Ref(OIFArrayF64(argvalue))
+                    else
+                        error("Unsupported argument type: $argtype")
+                    end
+                end, oif_argtypes, args)
+        )
+
+        return call_c(fn_c, c_argtypes_type, c_restype, c_args_from_jl_args)
     end
 
     return wrapper
