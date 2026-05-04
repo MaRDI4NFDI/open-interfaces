@@ -203,10 +203,86 @@ cleanup:
     return tuple;
 }
 
+/**
+ * Build a Julia tuple from an `int32_t *` array.
+ *
+ * @param vals Array with elements of type int (32-bit integers)
+ * @param n Number of the elements in the array
+ * @return Julia tuple on success, `NULL` otherwise
+ */
+jl_value_t *
+build_julia_tuple_from_oifargtype_array(OIFArgType *vals, size_t n)
+{
+    char *tuple_string = malloc(sizeof(char) * 1024);
+    char *cursor = tuple_string;
+    char *right_bound = &tuple_string[1024 - 1];
+    intptr_t diff = right_bound - cursor;
+    snprintf(tuple_string, diff, "%s", "(");
+    cursor++;
+    char buffer[BUFFER_SIZE_];
+    int chars_written;
+    jl_value_t *tuple = NULL;
+
+    for (size_t i = 0; i < n; ++i) {
+        chars_written = snprintf(buffer, BUFFER_SIZE_, "%d", vals[i]);
+        assert(chars_written >= 1);
+        if (chars_written >= BUFFER_SIZE_) {
+            goto report_too_long;
+        }
+        diff = right_bound - cursor;
+        chars_written = snprintf(cursor, diff, "%s", buffer);
+        assert(chars_written >= 1);
+        if (chars_written >= diff) {
+            goto report_too_long;
+        }
+        cursor += chars_written;
+        diff = right_bound - cursor;
+        if (i < n - 1 || n == 1) {
+            chars_written = snprintf(cursor, diff, "%s", ",");
+            assert(chars_written >= 1);
+            if (chars_written >= diff) {
+                goto report_too_long;
+            }
+            cursor++;
+        }
+    }
+    diff = right_bound - cursor;
+    chars_written = snprintf(cursor, diff, "%s", ")");
+    if (chars_written >= diff) {
+        fprintf(stderr, "ERROR: the string to copy is too long\n");
+        exit(1);
+    }
+
+    printf("=== debug === tuple_string is %s\n", tuple_string);
+    tuple = jl_eval_string(tuple_string);
+    if (jl_exception_occurred()) {
+        const char *p = jl_string_ptr(
+            jl_eval_string("sprint(showerror, ccall(:jl_exception_occurred, Any, ()))"));
+        fprintf(stderr, "%s\n", p);
+    }
+    goto cleanup;
+
+report_too_long:
+    fprintf(stderr,
+            "[build_julia_tuple_from_int32_t_array] The string representation of the julia "
+            "tuple does not fit in the buffer\n");
+
+cleanup:
+    free(tuple_string);
+
+    return tuple;
+}
+
 static jl_value_t *
 make_wrapper_over_c_callback(OIFCallback *p)
 {
     jl_value_t *wrapper = NULL;
+
+    jl_value_t *fn_p_c_wrapped = NULL;
+    jl_value_t *oif_argtypes = NULL;
+    jl_value_t *oif_restype = NULL;
+    JL_GC_PUSH3(&fn_p_c_wrapped, &oif_argtypes, &oif_restype);  // NOLINT
+
     if (CALLBACK_MODULE_ == NULL) {
         jl_eval_string("using OpenInterfacesImpl.CallbackWrapper");
         if (jl_exception_occurred()) {
@@ -224,10 +300,14 @@ make_wrapper_over_c_callback(OIFCallback *p)
         jl_get_function(CALLBACK_MODULE_, "make_wrapper_over_c_callback");
     assert(fn_callback != NULL);
     assert(p->fn_p_c != NULL);
-    jl_value_t *fn_p_c_wrapped = jl_box_voidpointer(p->fn_p_c);
-    wrapper = jl_call1(fn_callback, fn_p_c_wrapped);
+    fn_p_c_wrapped = jl_box_voidpointer(p->fn_p_c);
+    oif_argtypes = build_julia_tuple_from_oifargtype_array(p->arg_types, p->nargs);
+    oif_restype = jl_box_int32(p->restype);
+
+    wrapper = jl_call3(fn_callback, fn_p_c_wrapped, oif_argtypes, oif_restype);
 
 cleanup:
+    JL_GC_POP();
     return wrapper;
 }
 
