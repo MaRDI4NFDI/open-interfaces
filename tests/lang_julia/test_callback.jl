@@ -4,12 +4,20 @@ using OpenInterfaces
 using OpenInterfacesImpl.CallbackWrapper
 using Libdl
 
+
+mutable struct Context
+    p1::Int32
+    p2::Float64
+end
+
 @testset "check that callback wrapper can be dynamic" begin
     lib = Libdl.dlopen("liboif_aux_funcs.so")
     add_two_ints_fn = Libdl.dlsym(lib, :add_two_ints)
     add_two_doubles_fn = Libdl.dlsym(lib, :add_two_doubles)
     add_i32_f64__ret_i32_fn = Libdl.dlsym(lib, :add_i32_f64__ret_i32)
     add_i32_f64__ret_f64_fn = Libdl.dlsym(lib, :add_i32_f64__ret_f64)
+    axpy_f64_arrf64_arrf64__ret_i32_fn = Libdl.dlsym(lib, :axpy_f64_arrf64_arrf64__ret_i32)
+    axpy_with_context_f64_arrf64_arrf64__ret_i32_fn = Libdl.dlsym(lib, :axpy_with_context_f64_arrf64_arrf64__ret_i32)
 
     w_f64_f64__ret_f64 = make_wrapper_over_c_callback(add_two_doubles_fn, (OIF_TYPE_F64, OIF_TYPE_F64), OIF_TYPE_F64)
     @test w_f64_f64__ret_f64((1.4, 2.7)) ≈ 4.1
@@ -26,4 +34,23 @@ using Libdl
         add_i32_f64__ret_i32_fn, (OIF_TYPE_I32, OIF_TYPE_F64), OIF_TYPE_F64
     )
     @test add_i32_f64__ret_f64_wrapper((12, 3.14)) ≈ 15.14
+
+    axpy_f64_arrf64_arrf64__ret_i32_wrapper = make_wrapper_over_c_callback(
+        axpy_f64_arrf64_arrf64__ret_i32_fn, (OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_ARRAY_F64), OIF_TYPE_I32
+    )
+    alpha = 2.3
+    x = [1.2, 3.4, 5.6]
+    y = [27.25, 91.50, 16.16]
+    axpy_f64_arrf64_arrf64__ret_i32_wrapper((alpha, x, y))
+    @test y ≈ [30.01, 99.32, 29.04]
+
+    axpy_with_context_f64_arrf64_arrf64__ret_i32_wrapper = make_wrapper_over_c_callback(
+        axpy_with_context_f64_arrf64_arrf64__ret_i32_fn, (OIF_TYPE_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_USER_DATA), OIF_TYPE_I32
+    )
+    alpha = 2.3
+    x = [1.2, 3.4, 5.6]
+    y = [27.25, 91.50, 16.16]
+    context = Context(42, 3.14)
+    axpy_with_context_f64_arrf64_arrf64__ret_i32_wrapper((alpha, x, y, context))
+    @test y ≈ [262.258, 338.476, 275.104]
 end
