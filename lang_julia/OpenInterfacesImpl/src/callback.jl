@@ -36,7 +36,7 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restyp
             )
         end
 
-    function wrapper(args::Tuple)
+    function wrapper(args...)
         c_args_from_jl_args = Tuple(
             map((argtype, argvalue) -> begin
                     if argtype == OIF_TYPE_I32
