@@ -12,7 +12,7 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restyp
                     Cdouble
                 elseif argtype == OIF_TYPE_ARRAY_F64
                     Ptr{OIFArrayF64}
-                elseif argtype == OIF_USER_DATA
+                elseif argtype == OIF_TYPE_USER_DATA
                     Ptr{Cvoid}
                 else
                     error("Unsupported argument type: $argtype")
@@ -45,6 +45,8 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restyp
                         argvalue
                     elseif argtype == OIF_TYPE_ARRAY_F64
                         Ref(OIFArrayF64(argvalue))
+                    elseif argtype == OIF_TYPE_USER_DATA
+                        Ref(argvalue)
                     else
                         error("Unsupported argument type: $argtype")
                     end
