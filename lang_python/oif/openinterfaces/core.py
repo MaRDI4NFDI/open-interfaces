@@ -139,6 +139,10 @@ class OIFCallback(ctypes.Structure):
         ("fn_p_c", ctypes.c_void_p),
         ("fn_p_jl", ctypes.c_void_p),
         ("fn_p_py", ctypes.c_void_p),
+        ("nargs", ctypes.c_uint32),
+        ("arg_types", ctypes.POINTER(OIFArgType)),
+        ("restype", OIFArgType),
+        ("hidden", ctypes.c_void_p),
     ]
 
 
@@ -197,7 +201,15 @@ def make_oif_callback(
 
     fn_p_c = ctypes.cast(c_wrapper_fn, ctypes.c_void_p)
     assert fn_p_c.value is not None
-    oifcallback = OIFCallback(OIF_LANG_PYTHON, fn_p_c, None, fn_p_py)
+
+    nargs = len(argtypes)
+    oif_arg_types = ctypes.cast(
+        (ctypes.c_int * nargs)(*argtypes), ctypes.POINTER(OIFArgType)
+    )
+
+    oifcallback = OIFCallback(
+        OIF_LANG_PYTHON, fn_p_c, None, fn_p_py, nargs, oif_arg_types, restype, None
+    )
     return oifcallback
 
 
