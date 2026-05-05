@@ -2,6 +2,21 @@ import numpy as np
 import pytest
 from openinterfaces.interfaces.optim import Optim
 
+# -----------------------------------------------------------------------------
+# Finding implementations.
+# POSSIBLE_IMPLEMENTATIONS = ["scipy_optimize", "ipopt_jl", "optim_jl"]
+POSSIBLE_IMPLEMENTATIONS = ["scipy_optimize", "optim_jl"]
+IMPLEMENTATIONS = []
+
+for impl in POSSIBLE_IMPLEMENTATIONS:
+    try:
+        Optim(impl)
+        IMPLEMENTATIONS.append(impl)
+    except ValueError as e:
+        print(f"WARNING: {str(e)}")
+        print(f"WARNING: Skipping tests with implementation {impl}")
+# -----------------------------------------------------------------------------
+
 
 # -----------------------------------------------------------------------------
 # Problems
@@ -19,13 +34,13 @@ def rosenbrock_objective_fn(x, __):
     return sum(a * (x[1:] - x[:-1] ** 2.0) ** 2.0 + (1 - x[:-1]) ** 2.0) + b
 
 
-@pytest.fixture(params=["scipy_optimize"])
+@pytest.fixture(params=IMPLEMENTATIONS)
 def s(request):
     return Optim(request.param)
 
 
 # -----------------------------------------------------------------------------
-# Tests
+# General tests
 def test__simple_convex_problem__converges(s):
     x0 = np.array([0.5, 0.6, 0.7])
 
@@ -71,25 +86,32 @@ def test__parameterized_convex_problem__converges(s):
     assert np.all(np.abs(x - user_data) < 1e-6)
 
 
-def test__parameterized_convex_problem__converges_better_with_tigher_tolerance(s):
-    x0 = np.array([0.5, 0.6, 0.7])
-    user_data = np.array([2.0, 7.0, -1.0])
-
-    s.set_initial_guess(x0)
-    s.set_user_data(user_data)
-    s.set_objective_fn(convex_objective_with_args_fn)
-
-    s.set_method("nelder-mead", {"xatol": 1e-6})
-    status, message = s.minimize()
-    x_1 = s.x.copy()
-
-    s.set_method("nelder-mead", {"xatol": 1e-8})
-    status, message = s.minimize()
-    x_2 = s.x.copy()
-
-    assert np.linalg.norm(x_2 - user_data) < np.linalg.norm(x_1 - user_data)
-
-
 def test__set_method_with__wrong_method_params__are_not_accepted(s):
     with pytest.raises(RuntimeError):
-        s.set_method("nelder-mead", {"wrong_param": 42})
+        s.set_method("BFGS", {"wrong_param": 42})
+
+
+# END General tests
+# -----------------------------------------------------------------------------
+
+
+if "scipy_optimize" in IMPLEMENTATIONS:
+
+    def test__parameterized_convex_problem__converges_better_with_tigher_tolerance():
+        x0 = np.array([0.5, 0.6, 0.7])
+        user_data = np.array([2.0, 7.0, -1.0])
+
+        s = Optim("scipy_optimize")
+        s.set_initial_guess(x0)
+        s.set_user_data(user_data)
+        s.set_objective_fn(convex_objective_with_args_fn)
+
+        s.set_method("nelder-mead", {"xatol": 1e-6})
+        status, message = s.minimize()
+        x_1 = s.x.copy()
+
+        s.set_method("nelder-mead", {"xatol": 1e-8})
+        status, message = s.minimize()
+        x_2 = s.x.copy()
+
+        assert np.linalg.norm(x_2 - user_data) < np.linalg.norm(x_1 - user_data)
