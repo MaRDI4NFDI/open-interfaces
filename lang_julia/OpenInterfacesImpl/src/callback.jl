@@ -46,14 +46,14 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restyp
                     elseif argtype == OIF_TYPE_ARRAY_F64
                         Ref(OIFArrayF64(argvalue))
                     elseif argtype == OIF_TYPE_USER_DATA
-                        Ref(argvalue)
+                        argvalue === nothing ? C_NULL : argvalue
                     else
                         error("Unsupported argument type: $argtype")
                     end
                 end, oif_argtypes, args)
         )
 
-        return call_c(fn_c, c_argtypes_type, c_restype, c_args_from_jl_args)
+        return @GC.preserve args call_c(fn_c, c_argtypes_type, c_restype, c_args_from_jl_args)
     end
 
     return wrapper
