@@ -25,3 +25,4 @@ endif()
 include(GoogleTest)
 
 add_subdirectory(lang_c)
+add_subdirectory(lang_julia)

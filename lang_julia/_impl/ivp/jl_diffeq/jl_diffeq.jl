@@ -3,6 +3,7 @@ export Self,
     set_initial_value, set_rhs_fn, set_tolerances, integrate, set_user_data, set_integrator
 
 using OrdinaryDiffEq
+import SciMLBase
 
 mutable struct Self
     t0::Float64
@@ -79,6 +80,10 @@ function _rhs_wrapper(rhs)
     # Note that the `p` argument will always be in the function signature
     # regardless of if the problem is defined with parameters!
     function wrapper(du, u, p, t)
+        if typeof(p) == SciMLBase.NullParameters
+            return rhs(t, u, du, nothing)
+        end
+
         return rhs(t, u, du, p)
     end
     return wrapper

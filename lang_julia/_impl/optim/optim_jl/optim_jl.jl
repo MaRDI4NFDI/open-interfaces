@@ -47,6 +47,7 @@ end
 
 function set_objective_fn(self::Self, objective_fn)
     self.objective_fn = objective_fn
+    self.objective_fn(self.x0, self.user_data)
 end
 
 function set_method(self, method_name, method_params)

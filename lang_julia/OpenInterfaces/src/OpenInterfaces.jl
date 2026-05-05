@@ -10,6 +10,7 @@ export OIF_TYPE_INT,
     OIF_TYPE_STRING,
     OIF_TYPE_CALLBACK,
     OIF_USER_DATA,
+    OIF_TYPE_USER_DATA,
     OIF_TYPE_CONFIG_DICT
 
 # Language ids
@@ -98,6 +99,7 @@ mutable struct OIFArrayF64
     dimensions::Ptr{Cssize_t}
     data::Ptr{Float64}
     flags::Int32
+    _dims::Vector{Cssize_t}
 
     function OIFArrayF64(arr::AbstractArray{Float64})
         dims = collect(Cssize_t, size(arr))
@@ -112,9 +114,10 @@ mutable struct OIFArrayF64
             Base.unsafe_convert(Ptr{Cssize_t}, dims),
             Base.unsafe_convert(Ptr{Float64}, arr),
             flags,
+            dims,
         )
 
-        return GC.@preserve dims self
+        return self
     end
 end
 
