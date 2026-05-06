@@ -114,6 +114,14 @@ class Optim:
         )
         self._binding.call("set_objective_fn", (self.wrapper,), ())
 
+    def set_grad_fn(self, grad_fn):
+        self.grad_wrapper = make_oif_callback(
+            grad_fn,
+            (OIF_TYPE_ARRAY_F64, OIF_TYPE_ARRAY_F64, OIF_USER_DATA),
+            OIF_TYPE_INT,
+        )
+        self._binding.call("set_grad_fn", (self.grad_wrapper,), ())
+
     def set_user_data(self, user_data: object):
         """Specify additional data that will be used for right-hand side function."""
         self.user_data = user_data
