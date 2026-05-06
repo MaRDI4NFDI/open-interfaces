@@ -17,10 +17,12 @@ class ScipyOptimize(OptimInterface):
         self.N = 0  # Problem dimension.
         self.x0: np.ndarray | None = None
         self.objective_fn: Callable | None = None
+        self.grad_fn: Callable | None = None
         self.user_data: object | None = None
         self.with_user_data = False
         self.method_name: str | None = None
         self.method_params: str | None = None
+        self.grad_values: np.ndarray | None = None
 
     def set_initial_guess(self, x0: np.ndarray):
         self.x0 = x0
@@ -41,6 +43,10 @@ class ScipyOptimize(OptimInterface):
             float,
             np.float64,
         ], msg
+
+    def set_grad_fn(self, grad_fn):
+        self.grad_fn = grad_fn
+        self.grad_values = np.empty((self.N,))
 
     def set_method(self, method_name, method_params):
         available_options = optimize.show_options(
@@ -75,10 +81,13 @@ class ScipyOptimize(OptimInterface):
                 "Shapes of the output array and the initial-guess array differ"
             )
 
+        grad_fn = None if self.grad_fn is None else self.grad_wrapper
+
         result = optimize.minimize(
             self.objective_fn,
             self.x0,
-            args=self.user_data,
+            args=(self.user_data,),
+            jac=grad_fn,  # I wonder, why the gradient in scipy.optimize is `jac`?
             method=self.method_name,
             options=self.method_params,
         )
@@ -86,6 +95,12 @@ class ScipyOptimize(OptimInterface):
         out_x[:] = result.x
         print(result)
         return (result.status, result.message)
+
+    def grad_wrapper(self, x, __):
+        grad_values = np.empty_like(x)
+        # grad_values = self.grad_values
+        self.grad_fn(x, grad_values, self.user_data)
+        return grad_values
 
     # def print_stats(self):
     #     print("WARNING: `scipy_ode` does not provide statistics")

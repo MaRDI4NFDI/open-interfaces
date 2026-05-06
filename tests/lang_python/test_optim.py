@@ -34,6 +34,26 @@ def rosenbrock_objective_fn(x, __):
     return sum(a * (x[1:] - x[:-1] ** 2.0) ** 2.0 + (1 - x[:-1]) ** 2.0) + b
 
 
+def rosenbrock_objective_fn_with_user_data(x, user_data):
+    """The Rosenbrock function with additional arguments"""
+    a, b = user_data
+    return sum(a * (x[1:] - x[:-1] ** 2.0) ** 2.0 + (1 - x[:-1]) ** 2.0) + b
+
+
+def rosenbrock_grad_fn(x, grad_f, user_data):
+    """Gradient of the Rosenbrock function"""
+    a, __ = user_data
+    grad_f[-1] = 0.0
+    grad_f[:-1] = -4.0 * a * x[:-1] * (x[1:] - x[:-1] ** 2.0) - 2.0 * (1.0 - x[:-1])
+    grad_f[1:] += 2.0 * a * (x[1:] - x[:-1] ** 2.0)
+
+
+def rosenbrock_grad_fn_wrapper(x, user_data):
+    grad_values = np.empty_like(x)
+    rosenbrock_grad_fn(x, grad_values, user_data)
+    return grad_values
+
+
 @pytest.fixture(params=IMPLEMENTATIONS)
 def s(request):
     return Optim(request.param)
@@ -84,6 +104,43 @@ def test__parameterized_convex_problem__converges(s):
     assert status == 0
     assert len(x) == len(x0)
     assert np.all(np.abs(x - user_data) < 1e-6)
+
+
+def test__parameterized_convex_problem__converges_better_with_tigher_tolerance(s):
+    x0 = np.array([0.5, 0.6, 0.7])
+    user_data = np.array([2.0, 7.0, -1.0])
+
+    s.set_initial_guess(x0)
+    s.set_user_data(user_data)
+    s.set_objective_fn(convex_objective_with_args_fn)
+
+    s.set_method("nelder-mead", {"xatol": 1e-6})
+    status, message = s.minimize()
+    x_1 = s.x.copy()
+
+    s.set_method("nelder-mead", {"xatol": 1e-8})
+    status, message = s.minimize()
+    x_2 = s.x.copy()
+
+    assert np.linalg.norm(x_2 - user_data) < np.linalg.norm(x_1 - user_data)
+
+
+def test__rosenbrok_with_grad__converges(s):
+    x0 = np.array([3.14, 2.72, 42.0, 9.81, 8.31])
+    user_data = (0.5, 1.0)
+
+    s.set_initial_guess(x0)
+    s.set_user_data(user_data)
+    s.set_objective_fn(rosenbrock_objective_fn_with_user_data)
+    s.set_grad_fn(rosenbrock_grad_fn)
+    s.set_method("BFGS")
+
+    status, message = s.minimize()
+    x = s.x
+
+    assert status == 0
+    assert len(x) == len(x0)
+    assert np.all(np.abs(x - 1.0) < 1e-5)  # The solution is [1, 1, ..., 1].
 
 
 def test__set_method_with__wrong_method_params__are_not_accepted(s):
