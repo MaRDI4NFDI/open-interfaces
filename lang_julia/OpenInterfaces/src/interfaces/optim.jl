@@ -30,6 +30,7 @@ mutable struct Self
     x0::Vector{Float64}
     x::Vector{Float64}
     objective_fn_wrapper::Any
+    grad_fn_wrapper::Any
     user_data::Ref{Any}
     oif_user_data::Any
     function Self(impl::String)
@@ -37,7 +38,7 @@ mutable struct Self
         if implh < OIF_IMPL_STARTING_NUMBER
             error("Could not load implementation '`$impl`' of the `optim` interface")
         end
-        self = new(ImplHandle(implh), 0, Float64[], Float64[], Nothing, Nothing, Nothing)
+        self = new(ImplHandle(implh), 0, Float64[], Float64[], Nothing, Nothing, Nothing, Nothing)
         finalizer(finalizing, self)
     end
 
@@ -65,6 +66,16 @@ function set_objective_fn(self::Self, objective_fn::Function)
         OIF_TYPE_F64,
     )
     call_impl(self.implh, "set_objective_fn", (self.objective_fn_wrapper,), ())
+end
+
+function set_grad_fn(self::Self, grad_fn::Function)
+    """Specify right-hand side function f."""
+    self.grad_fn_wrapper = make_oif_callback(
+        grad_fn,
+        (OIF_TYPE_ARRAY_F64, OIF_TYPE_USER_DATA),
+        OIF_TYPE_I32,
+    )
+    call_impl(self.implh, "set_grad_fn", (self.grad_fn_wrapper,), ())
 end
 
 # function set_tolerances(self::Self, rtol::Float64, atol::Float64)
