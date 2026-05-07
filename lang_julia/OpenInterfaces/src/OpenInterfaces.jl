@@ -569,7 +569,7 @@ end
 # otherwise, the will be crashes or something like that
 # as Julia's garbage collector is pretty fast to remove reference
 # that it thinks are unused.
-function make_oif_user_data(data::Ref{Any})::OIFUserData
+function make_oif_user_data(data)::OIFUserData
     data_ptr = Base.unsafe_convert(Ptr{Cvoid}, data)
     OIFUserData(OIF_LANG_JULIA, C_NULL, data_ptr, C_NULL)
 end
