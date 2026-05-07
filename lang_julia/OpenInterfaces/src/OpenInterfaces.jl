@@ -99,9 +99,9 @@ mutable struct OIFArrayF64
     dimensions::Ptr{Cssize_t}
     data::Ptr{Float64}
     flags::Int32
-    _dims::Vector{Cssize_t}
 
     function OIFArrayF64(arr::AbstractArray{Float64})
+        nd = ndims(arr)
         dims = collect(Cssize_t, size(arr))
         flags = OIF_ARRAY_F_CONTIGUOUS
 
@@ -109,15 +109,23 @@ mutable struct OIFArrayF64
             flags = OIF_ARRAY_C_CONTIGUOUS | OIF_ARRAY_F_CONTIGUOUS
         end
 
+        dimensions = Ptr{Cssize_t}(Libc.malloc(nd * sizeof(Cssize_t)))
+        unsafe_copyto!(dimensions, pointer(dims), nd)
+
         self = new(
-            ndims(arr),
-            Base.unsafe_convert(Ptr{Cssize_t}, dims),
+            nd,
+            dimensions,
             Base.unsafe_convert(Ptr{Float64}, arr),
             flags,
-            dims,
         )
 
+        finalizer(finalizing, self)
+
         return self
+    end
+
+    function finalizing(self)
+        Libc.free(self.dimensions)
     end
 end
 
