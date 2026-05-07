@@ -112,12 +112,7 @@ mutable struct OIFArrayF64
         dimensions = Ptr{Cssize_t}(Libc.malloc(nd * sizeof(Cssize_t)))
         unsafe_copyto!(dimensions, pointer(dims), nd)
 
-        self = new(
-            nd,
-            dimensions,
-            Base.unsafe_convert(Ptr{Float64}, arr),
-            flags,
-        )
+        self = new(nd, dimensions, Base.unsafe_convert(Ptr{Float64}, arr), flags)
 
         finalizer(finalizing, self)
 
