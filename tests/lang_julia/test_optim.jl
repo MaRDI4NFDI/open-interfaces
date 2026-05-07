@@ -44,6 +44,25 @@ function rosenbrock_objective_fn(x, __)
     a, b = (0.5, 1.0)
     return sum(a * (x[2:end] - x[1:(end-1)] .^ 2.0) .^ 2.0 + (1 .- x[1:(end-1)]) .^ 2.0) + b
 end
+
+function rosenbrock_objective_fn_with_user_data(x, user_data)
+    """The Rosenbrock function with additional arguments"""
+    a, b = user_data
+    return sum(a * (x[2:end] - x[1:(end-1)] .^ 2.0) .^ 2.0 + (1 .- x[1:(end-1)]) .^ 2.0) + b
+end
+
+function rosenbrock_grad_fn(x, grad_f, user_data)
+    """Gradient of the Rosenbrock function"""
+    a, _ = user_data
+
+    # `xi` is x[i], `xip1` is x[i+1]
+    xi   = @view x[1:end-1]
+    xip1 = @view x[2:end]
+
+    grad_f[1:end-1] .= -4.0 .* a .* xi .* (xip1 .- xi.^2.0) .- 2.0 .* (1.0 .- xi)
+        + 2.0 .* a .* (xip1 .- xi.^2.0)
+    grad_f[end] = 2.0 * a * (x[end] - x[end-1]^2)
+end
 # -----------------------------------------------------------------------------
 
 
@@ -106,6 +125,26 @@ end
             @test status == 0
             @test length(x) == length(x0)
             @test all(abs.(x .- user_data) .< 1e-6)
+        end
+    end
+
+    @testset "test__rosenbrok_with_grad__converges" begin
+        test() do self
+            x0 = [3.14, 2.72, 42.0, 9.81, 8.31]
+            user_data = (0.5, 1.0)
+
+            Optim.set_initial_guess(self, x0)
+            Optim.set_user_data(self, user_data)
+            Optim.set_objective_fn(self, rosenbrock_objective_fn_with_user_data)
+            Optim.set_grad_fn(self, rosenbrock_grad_fn)
+            Optim.set_method(self, "BFGS", Dict())
+
+            status, message = Optim.minimize(self)
+            x = s.x
+
+            @test status == 0
+            @test length(x) == length(x0)
+            @test all(abs.(x .- 1.0) .< 1e-5)  # The solution is [1, 1, ..., 1].
         end
     end
 
