@@ -101,11 +101,3 @@ class ScipyOptimize(OptimInterface):
         # grad_values = self.grad_values
         self.grad_fn(x, grad_values, self.user_data)
         return grad_values
-
-    # def print_stats(self):
-    #     print("WARNING: `scipy_ode` does not provide statistics")
-
-    # def _rhs_fn_wrapper(self, t, y):
-    #     """Callback that satisfies signature expected by Open Interfaces."""
-    #     self.rhs(t, y, self.ydot, self.user_data)
-    #     return self.ydot
