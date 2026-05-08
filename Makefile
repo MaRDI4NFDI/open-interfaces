@@ -32,7 +32,7 @@ help:
 .PHONY : test
 test :
 	@echo "=== C tests ==="
-	cd build && ctest --output-on-failure
+	cd build && ctest --verbose --output-on-failure
 	@echo "=== Julia tests ==="
 	julia tests/lang_julia/runtests.jl
 	@echo "=== Python tests ==="
