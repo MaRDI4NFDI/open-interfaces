@@ -84,6 +84,7 @@ class ScipyOptimize(OptimInterface):
         )
 
         out_x[:] = result.x
+        print(result)
         return (result.status, result.message)
 
     # def print_stats(self):
