@@ -11,7 +11,7 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restyp
                 elseif argtype == OIF_TYPE_F64
                     Cdouble
                 elseif argtype == OIF_TYPE_ARRAY_F64
-                    Ptr{OIFArrayF64}
+                    Ref{OIFArrayF64}
                 elseif argtype == OIF_TYPE_USER_DATA
                     Ptr{Cvoid}
                 else
@@ -44,7 +44,7 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restyp
                     elseif argtype == OIF_TYPE_F64
                         argvalue
                     elseif argtype == OIF_TYPE_ARRAY_F64
-                        Ref(OIFArrayF64(argvalue))
+                        OIFArrayF64(argvalue)
                     elseif argtype == OIF_TYPE_USER_DATA
                         argvalue === nothing ? C_NULL : argvalue
                     else
@@ -56,7 +56,7 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restyp
             ),
         )
 
-        return GC.@preserve c_args_from_jl_args call_c(
+        return GC.@preserve args c_args_from_jl_args call_c(
             fn_c,
             c_argtypes_type,
             c_restype,
