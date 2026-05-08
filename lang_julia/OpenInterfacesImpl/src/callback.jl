@@ -56,7 +56,7 @@ function make_wrapper_over_c_callback(fn_c::Ptr{Cvoid}, oif_argtypes, oif_restyp
             ),
         )
 
-        return GC.@preserve args call_c(
+        return GC.@preserve c_args_from_jl_args call_c(
             fn_c,
             c_argtypes_type,
             c_restype,
