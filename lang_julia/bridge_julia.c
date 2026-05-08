@@ -253,7 +253,6 @@ build_julia_tuple_from_oifargtype_array(OIFArgType *vals, size_t n)
         exit(1);
     }
 
-    printf("=== debug === tuple_string is %s\n", tuple_string);
     tuple = jl_eval_string(tuple_string);
     if (jl_exception_occurred()) {
         const char *p = jl_string_ptr(
