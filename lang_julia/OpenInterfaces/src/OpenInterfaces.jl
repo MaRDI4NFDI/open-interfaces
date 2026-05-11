@@ -529,21 +529,36 @@ function _make_c_func_wrapper_over_jl_fn(
         # Call the Julia function with the converted arguments.
         result = fn(jl_args...)
 
-        if result == nothing
-            return Int32(0)
-        elseif typeof(result) == Int32
-            return result
-        elseif typeof(result) == Int64
-            try
-                return Int32(result)
-            catch InexactError
-                throw(
-                    "Return type of the callback is Int64 with value `result = $(result)` " *
-                    "and cannot be converted to 32-bit integer due to truncation",
+        if restype == OIF_TYPE_INT
+            if result == nothing
+                return Int32(0)
+            elseif typeof(result) == Int32
+                return result
+            elseif typeof(result) == Int64
+                try
+                    return Int32(result)
+                catch InexactError
+                    throw(
+                        "Return type of the callback is Int64 with value `result = $(result)` " *
+                        "and cannot be converted to 32-bit integer due to truncation",
+                    )
+                end
+            elseif typeof(result) == Float64
+                error(
+                    "[OpenInterfaces.jl] Expected callback return type is " *
+                    "OIF_TYPE_I32, but instead got Float64. " *
+                    "Did you forget to add `return 0` to the end of the callback?",
                 )
             end
-        elseif typeof(result) == Float64
-            return result
+        elseif restype == OIF_TYPE_F64
+            if typeof(result) == Float64
+                return result
+            else
+                error(
+                    "[OpenInterfaces.jl] Expected callback return type is " *
+                    "OIF_TYPE_F64, got `$(typeof(result))` instead",
+                )
+            end
         else
             error(
                 "Unsupported type `$(typeof(result))`, where `result = $(result)` " *
