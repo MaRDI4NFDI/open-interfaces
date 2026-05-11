@@ -26,13 +26,15 @@ GENERAL_OPTIONS_NAMES = [
 mutable struct Self
     x0::Vector{Float64}
     objective_fn::Union{Function,Nothing}
+    grad_fn::Union{Function,Nothing}
     user_data::Any
     method_name::String
     method_params::Dict
     method::Any
     general_options::Dict
+    grad_values::Any
     function Self()
-        return new([], nothing, nothing, "BFGS", Dict(), BFGS(), Dict())
+        return new([], nothing, nothing, nothing, "BFGS", Dict(), BFGS(), Dict(), nothing)
     end
 end
 
@@ -48,6 +50,11 @@ end
 function set_objective_fn(self::Self, objective_fn)
     self.objective_fn = objective_fn
     self.objective_fn(self.x0, self.user_data)
+end
+
+function set_grad_fn(self::Self, grad_fn)
+    self.grad_fn = grad_fn
+    self.grad_values = zeros(length(self.x0))
 end
 
 function set_method(self, method_name, method_params)
@@ -72,7 +79,7 @@ function set_method(self, method_name, method_params)
     end
     self.method_name = method_name
     self.method_params = merge(self.method_params, method_params)
-    self.method = getfield(Optim, method_symbol)(; method_options)
+    self.method = getfield(Optim, method_symbol)(; method_options...)
     self.general_options = general_options
 end
 
@@ -84,8 +91,14 @@ function minimize(self::Self, out_x)::Tuple{Int,String}
 
     wrapper(x) = self.objective_fn(x, self.user_data)
 
-    result::Optim.MultivariateOptimizationResults =
-        optimize(wrapper, self.x0, self.method, Optim.Options(; self.general_options...))
+    result::Optim.MultivariateOptimizationResults = begin
+        if isnothing(self.grad_fn)
+            optimize(wrapper, self.x0, self.method, Optim.Options(; self.general_options...))
+        else
+            g_wrapper(grad_values, x) = self.grad_fn(x, grad_values, self.user_data)
+            optimize(wrapper, g_wrapper, self.x0, self.method, Optim.Options(; self.general_options...))
+        end
+    end
     out_x[:] = copy(Optim.minimizer(result))
 
     println("res = ", result)
