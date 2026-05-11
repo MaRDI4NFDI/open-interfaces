@@ -25,28 +25,28 @@ end
         (OIF_TYPE_F64, OIF_TYPE_F64),
         OIF_TYPE_F64,
     )
-    @test w_f64_f64__ret_f64((1.4, 2.7)) ≈ 4.1
+    @test w_f64_f64__ret_f64(1.4, 2.7) ≈ 4.1
 
     w_i32_i32__ret_i32 = make_wrapper_over_c_callback(
         add_two_ints_fn,
         (OIF_TYPE_I32, OIF_TYPE_I32),
         OIF_TYPE_I32,
     )
-    @test w_i32_i32__ret_i32((42, 69)) == 111
+    @test w_i32_i32__ret_i32(42, 69) == 111
 
     add_i32_f64__ret_i32_wrapper = make_wrapper_over_c_callback(
         add_i32_f64__ret_i32_fn,
         (OIF_TYPE_I32, OIF_TYPE_F64),
         OIF_TYPE_I32,
     )
-    @test add_i32_f64__ret_i32_wrapper((12, 3.14)) == 15
+    @test add_i32_f64__ret_i32_wrapper(12, 3.14) == 15
 
     add_i32_f64__ret_f64_wrapper = make_wrapper_over_c_callback(
         add_i32_f64__ret_i32_fn,
         (OIF_TYPE_I32, OIF_TYPE_F64),
         OIF_TYPE_F64,
     )
-    @test add_i32_f64__ret_f64_wrapper((12, 3.14)) ≈ 15.14
+    @test add_i32_f64__ret_f64_wrapper(12, 3.14) ≈ 15.14
 
     axpy_f64_arrf64_arrf64__ret_i32_wrapper = make_wrapper_over_c_callback(
         axpy_f64_arrf64_arrf64__ret_i32_fn,
@@ -56,7 +56,7 @@ end
     alpha = 2.3
     x = [1.2, 3.4, 5.6]
     y = [27.25, 91.50, 16.16]
-    axpy_f64_arrf64_arrf64__ret_i32_wrapper((alpha, x, y))
+    axpy_f64_arrf64_arrf64__ret_i32_wrapper(alpha, x, y)
     @test y ≈ [30.01, 99.32, 29.04]
 
     axpy_with_context_f64_arrf64_arrf64__ret_i32_wrapper = make_wrapper_over_c_callback(
@@ -68,6 +68,7 @@ end
     x = [1.2, 3.4, 5.6]
     y = [27.25, 91.50, 16.16]
     context = Context(42, 3.14)
-    axpy_with_context_f64_arrf64_arrf64__ret_i32_wrapper((alpha, x, y, context))
+    context_ref = Ref(context)
+    axpy_with_context_f64_arrf64_arrf64__ret_i32_wrapper(alpha, x, y, context_ref)
     @test y ≈ [262.258, 338.476, 275.104]
 end
