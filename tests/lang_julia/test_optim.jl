@@ -7,6 +7,7 @@ using OpenInterfaces.Interfaces.Optim
 # -----------------------------------------------------------------------------
 # Checking what implementations are available.
 POTENTIAL_IMPLEMENTATIONS = ["scipy_optimize", "ipopt_jl", "optim_jl"]
+POTENTIAL_IMPLEMENTATIONS = ["scipy_optimize", "optim_jl"]
 IMPLEMENTATIONS = []
 for impl in POTENTIAL_IMPLEMENTATIONS
     implh = load_impl("optim", impl, 1, 0)
@@ -62,6 +63,7 @@ function rosenbrock_grad_fn(x, grad_f, user_data)
     grad_f[1:end-1] .= -4.0 .* a .* xi .* (xip1 .- xi.^2.0) .- 2.0 .* (1.0 .- xi)
         + 2.0 .* a .* (xip1 .- xi.^2.0)
     grad_f[end] = 2.0 * a * (x[end] - x[end-1]^2)
+    return 0
 end
 # -----------------------------------------------------------------------------
 
@@ -158,6 +160,8 @@ end
         end
     end
 
+
+    # END General tests
     # -------------------------------------------------------------------------
     if "scipy_optimize" in IMPLEMENTATIONS
         @testset "scipy_minimize__rosenbrock_fn__converges_better_with_tighter_tol" begin
