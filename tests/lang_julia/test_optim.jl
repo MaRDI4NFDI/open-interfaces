@@ -140,7 +140,7 @@ end
             Optim.set_method(self, "BFGS", Dict())
 
             status, message = Optim.minimize(self)
-            x = s.x
+            x = self.x
 
             @test status == 0
             @test length(x) == length(x0)
