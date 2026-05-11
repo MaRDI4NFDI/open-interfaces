@@ -38,7 +38,16 @@ mutable struct Self
         if implh < OIF_IMPL_STARTING_NUMBER
             error("Could not load implementation '`$impl`' of the `optim` interface")
         end
-        self = new(ImplHandle(implh), 0, Float64[], Float64[], Nothing, Nothing, Nothing, Nothing)
+        self = new(
+            ImplHandle(implh),
+            0,
+            Float64[],
+            Float64[],
+            Nothing,
+            Nothing,
+            Nothing,
+            Nothing,
+        )
         finalizer(finalizing, self)
     end
 

@@ -96,7 +96,13 @@ function minimize(self::Self, out_x)::Tuple{Int,String}
             optimize(wrapper, self.x0, self.method, Optim.Options(; self.general_options...))
         else
             g_wrapper(grad_values, x) = self.grad_fn(x, grad_values, self.user_data)
-            optimize(wrapper, g_wrapper, self.x0, self.method, Optim.Options(; self.general_options...))
+            optimize(
+                wrapper,
+                g_wrapper,
+                self.x0,
+                self.method,
+                Optim.Options(; self.general_options...),
+            )
         end
     end
     out_x[:] = copy(Optim.minimizer(result))

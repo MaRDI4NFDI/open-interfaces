@@ -57,11 +57,11 @@ function rosenbrock_grad_fn(x, grad_f, user_data)
     a, _ = user_data
 
     # `xi` is x[i], `xip1` is x[i+1]
-    xi   = @view x[1:end-1]
+    xi = @view x[1:(end-1)]
     xip1 = @view x[2:end]
 
-    grad_f[1:end-1] .= -4.0 .* a .* xi .* (xip1 .- xi.^2.0) .- 2.0 .* (1.0 .- xi)
-        + 2.0 .* a .* (xip1 .- xi.^2.0)
+    grad_f[1:(end-1)] .= -4.0 .* a .* xi .* (xip1 .- xi .^ 2.0) .- 2.0 .* (1.0 .- xi)
+    + 2.0 .* a .* (xip1 .- xi .^ 2.0)
     grad_f[end] = 2.0 * a * (x[end] - x[end-1]^2)
     return 0
 end
