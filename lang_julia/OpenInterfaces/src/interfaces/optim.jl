@@ -72,7 +72,7 @@ function set_grad_fn(self::Self, grad_fn::Function)
     """Specify right-hand side function f."""
     self.grad_fn_wrapper = make_oif_callback(
         grad_fn,
-        (OIF_TYPE_ARRAY_F64, OIF_TYPE_USER_DATA),
+        (OIF_TYPE_ARRAY_F64, OIF_TYPE_ARRAY_F64, OIF_TYPE_USER_DATA),
         OIF_TYPE_I32,
     )
     call_impl(self.implh, "set_grad_fn", (self.grad_fn_wrapper,), ())
