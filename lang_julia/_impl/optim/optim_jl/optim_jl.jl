@@ -32,9 +32,8 @@ mutable struct Self
     method_params::Dict
     method::Any
     general_options::Dict
-    grad_values::Any
     function Self()
-        return new([], nothing, nothing, nothing, "BFGS", Dict(), BFGS(), Dict(), nothing)
+        return new([], nothing, nothing, nothing, "BFGS", Dict(), BFGS(), Dict())
     end
 end
 
@@ -54,7 +53,6 @@ end
 
 function set_grad_fn(self::Self, grad_fn)
     self.grad_fn = grad_fn
-    self.grad_values = zeros(length(self.x0))
 end
 
 function set_method(self, method_name, method_params)
