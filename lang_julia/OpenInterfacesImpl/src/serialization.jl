@@ -22,6 +22,8 @@ function deserialize(sd::Ptr, len::Csize_t)::Dict
         # deliberately to wider integer type.
         if typeof(elem) == UInt8
             elem = Int64(elem)
+        elseif typeof(elem) == UInt16
+            elem = Int64(elem)
         end
         if i % 2 == 1
             push!(data, Symbol(elem))
