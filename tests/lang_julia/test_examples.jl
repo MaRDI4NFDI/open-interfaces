@@ -6,6 +6,7 @@ const CALL_LINSOLVE = joinpath(EXAMPLES_PATH, "call_linsolve.jl")
 const CALL_IVP = joinpath(EXAMPLES_PATH, "call_ivp.jl")
 const CALL_IVP_BURGERS = joinpath(EXAMPLES_PATH, "call_ivp_burgers_eq.jl")
 const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
+const CALL_OPTIM_ROSENBROCK = joinpath(EXAMPLES_PATH, "call_optim_rosenbrock.jl")
 
 @testset "Testing Julia examples" begin
     @testset "Testing QEQ example with all implementations" begin
@@ -137,5 +138,29 @@ const CALL_IVP_VDP = joinpath(EXAMPLES_PATH, "call_ivp_vdp.jl")
         end
     end
     # END Van der Pol equation: unsuccessful and successful runs.
+    # --------------------------------------------------------------------------
+
+    # --------------------------------------------------------------------------
+    # BEGIN Optimization example with the Rosenbrock function.
+    @testset "Testing Optim Rosenbrock example with all implementations" begin
+        for impl in ["scipy_optimize", "optim_jl"]
+            for method in ["NelderMead", "BFGS"]
+                @testset "call_optim_rosenbrock.jl $impl fails due to numerics" begin
+                    io_err = IOBuffer()
+                    process = try
+                        run(pipeline(`julia $CALL_OPTIM_ROSENBROCK $impl`, stderr = io_err))
+                    catch e
+                    end
+                    captured_stderr = String(take!(io_err))
+                    println("Captured stderr:")
+                    println("--- BEGIN")
+                    println(captured_stderr)
+                    println("--- END")
+                    @test process.exitcode == 0
+                end
+            end
+        end
+    end
+    # END Optimization example with the Rosenbrock function.
     # --------------------------------------------------------------------------
 end
