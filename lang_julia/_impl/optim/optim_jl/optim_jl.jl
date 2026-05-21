@@ -4,6 +4,7 @@ module OptimJl
 export Self, set_initial_guess
 
 
+using LineSearches
 using Optim
 
 GENERAL_OPTIONS_NAMES = [
@@ -32,7 +33,7 @@ mutable struct Self
     grad_fn::Union{Function,Nothing}
     user_data::Any
     method_name::String
-    method_params::Dict
+    method_options::Dict
     method::Any
     general_options::Dict
     function Self()
@@ -66,6 +67,12 @@ function set_method(self, method_name, method_params)
     general_options = Dict()
     method_options = Dict()
 
+    if haskey(method_params, :linesearch)
+        method_options[:linesearch] =
+            getfield(LineSearches, Symbol(method_params[:linesearch]))()
+        delete!(method_params, :linesearch)
+    end
+
     for (k, v) in method_params
         if k in GENERAL_OPTIONS_NAMES
             general_options[k] = v
@@ -79,9 +86,11 @@ function set_method(self, method_name, method_params)
         error("Unknown or unsupported method '$method_name'")
     end
     self.method_name = method_name
-    self.method_params = merge(self.method_params, method_params)
+    self.method_options = merge(self.method_options, method_options)
     self.method = getfield(Optim, method_symbol)(; method_options...)
     self.general_options = general_options
+    println("method_options = ", method_options)
+    println("general_options = ", general_options)
 end
 
 function minimize(self::Self, out_x)::Tuple{Int,String}
