@@ -57,6 +57,7 @@ end
 
 function set_grad_fn(self::Self, grad_fn)
     self.grad_fn = grad_fn
+    self.grad_fn(self.x0, zeros(length(self.x0)), self.user_data)
 end
 
 function set_method(self, method_name, method_params)
