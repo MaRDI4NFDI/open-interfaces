@@ -94,6 +94,8 @@ class ScipyOptimize(OptimInterface):
 
         out_x[:] = result.x
         print(result)
+        if hasattr(result, "jac"):
+            print("|∇f(x*)|_∞ = ", np.linalg.norm(result.jac, np.inf))
         return (result.status, result.message)
 
     def grad_wrapper(self, x, __):
