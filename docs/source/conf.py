@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "MaRDI Open Interfaces"
-copyright = "2023--2025 MaRDI Open Interfaces authors"
-release = "0.6.3"
+copyright = "2023--2026 MaRDI Open Interfaces authors"
+release = "0.7.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
