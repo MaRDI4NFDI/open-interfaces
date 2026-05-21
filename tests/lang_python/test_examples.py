@@ -92,3 +92,30 @@ def test_call_ivp_from_python_vdp__with_successful_impl_succeeds(successful_impl
         text=True,
     )
     assert p.returncode == 0
+
+
+# -----------------------------------------------------------------------------
+# Examples of optimization with the Rosenbrock function.
+@pytest.fixture(params=["NelderMead", "BFGS"])
+def optim_method(request):
+    return request.param
+
+
+@pytest.fixture(params=["scipy_optimize", "optim_jl"])
+def optim_impl(request):
+    return request.param
+
+
+def test_call_optim_rosenbrock_from_python__exit_success(
+    optim_impl: str, optim_method: str
+):
+    p = subprocess.run(
+        [
+            "python",
+            "examples/lang_python/call_optim_rosenbrock.py",
+            optim_impl,
+            optim_method,
+        ]
+    )
+
+    assert p.returncode == 0
