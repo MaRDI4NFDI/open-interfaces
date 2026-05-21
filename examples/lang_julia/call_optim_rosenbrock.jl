@@ -97,6 +97,8 @@ function main(args)
     println("x = ", x)
     if all(abs.(x .- 1.0) .< 1e-5)  # The solution is [1, 1, ..., 1].
         println("\033[1;32mSUCCESS\033[0m Found solution is close to the exact one")
+    else
+        println("\033[1;31mFAIL\033[0m Found solution is NOT close to the exact one")
     end
 end
 
