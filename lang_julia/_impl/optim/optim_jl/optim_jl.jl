@@ -9,9 +9,12 @@ using Optim
 GENERAL_OPTIONS_NAMES = [
     :x_abstol,
     :x_reltol,
+    :x_tol,  # Deprecated, keep to be user-friendly
     :f_abstol,
     :f_reltol,
+    :f_tol,  # Deprecated, keep to be user-friendly
     :g_abstol,
+    :g_tol,  # Deprecated, keep to be user-friendly
     :f_calls_limit,
     :g_calls_limit,
     :h_calls_limit,
