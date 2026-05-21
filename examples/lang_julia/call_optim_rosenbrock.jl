@@ -79,7 +79,11 @@ function main(args)
         if method == "NelderMead"
             Optim.set_method(s, "NelderMead", Dict("g_abstol" => 1e-11))
         elseif method == "BFGS"
-            Optim.set_method(s, "BFGS", Dict("g_abstol" => 1e-8, "linesearch" => linesearch))
+            Optim.set_method(
+                s,
+                "BFGS",
+                Dict("g_abstol" => 1e-8, "linesearch" => linesearch),
+            )
         else
             error("Unsupported method '$(method)'")
         end
