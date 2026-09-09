@@ -6,8 +6,6 @@ MaRDI Open Interfaces
 [![QA](https://github.com/MaRDI4NFDI/open-interfaces/actions/workflows/qa.yaml/badge.svg)](https://github.com/MaRDI4NFDI/open-interfaces/actions/workflows/qa.yaml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13753666.svg)](https://doi.org/10.5281/zenodo.13753666)
 
-**The project is not active currently (August 2026)**
-
 _MaRDI Open Interfaces_ is a project aiming to improve interoperability
 in scientific computing by removing two hurdles that computational scientists
 usually face in their daily work.
